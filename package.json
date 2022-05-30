@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "scripts": {
+    "changelog": "standard-version --skip.tag --skip.commit --skip.bump",
+    "release": "standard-version --skip.commit --skip.bump"
+  },
+  "dependencies": {
+    "standard-version": "^9.5.0"
+  }
+}
