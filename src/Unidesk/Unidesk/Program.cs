@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
+using Unidesk.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -9,6 +10,7 @@ var configuration = builder.Configuration
     .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
     .Build();
 
+services.AddScoped<UserProvider>();
 
 services.AddDbContext<UnideskDbContext>(options =>
     {
