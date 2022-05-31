@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Unidesk.Db.Models;
+using Unidesk.Db.Seeding;
 
 namespace Unidesk.Db;
 
@@ -41,5 +42,23 @@ public class UnideskDbContext : DbContext
         // UserInTeam basically handles m-n relation and we must specify the keys here
         modelBuilder.Entity<UserInTeam>()
             .HasKey(j => new { j.UserId, j.TeamId });
+    }
+
+    public async Task SeedDbAsync()
+    {
+        var info = InitialSeed.Seed(this);
+
+        if (info.TotalRows > 0)
+        {
+            await SaveChangesAsync();
+        }
+    }
+}
+
+public static class DbSetExtensions {
+    public static IEnumerable<T> AddRangeEnumerable<T>(this DbSet<T> dbSet, IEnumerable<T> items) where T: class
+    {
+        dbSet.AddRange(items);
+        return items;
     }
 }
