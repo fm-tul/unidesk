@@ -5,20 +5,24 @@ namespace Unidesk.Db.Models;
 
 public class SchoolYear : TrackedEntity
 {
-    public DateTime Start { get; set; }
-    public DateTime End { get; set; }
+
+    [Column("Start")]
+    internal DateTime _start { get; set; }
+    [Column("End")]
+
+    internal DateTime _end { get; set; }
 
     [NotMapped]
     public DateOnly StartDateOnly
     {
-        get => DateOnly.FromDateTime(Start);
-        set => Start = value.ToDateTime(TimeOnly.MinValue);
+        get => DateOnly.FromDateTime(_start);
+        set => _start = value.ToDateTime(TimeOnly.MinValue);
     }
 
     [NotMapped]
     public DateOnly EndDateOnly
     {
-        get => DateOnly.FromDateTime(End);
-        set => End = value.ToDateTime(TimeOnly.MinValue);
+        get => DateOnly.FromDateTime(_end);
+        set => _end = value.ToDateTime(TimeOnly.MinValue);
     }
 }

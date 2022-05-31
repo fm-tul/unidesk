@@ -31,6 +31,13 @@ public class UnideskDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // backing fields
+        modelBuilder.Entity<SchoolYear>().Property(e => e._start);
+        modelBuilder.Entity<SchoolYear>().Property(e => e._end);
+
+        modelBuilder.Entity<UserRole>()
+            .Property(e => e._grants);
+
         // UserInTeam basically handles m-n relation and we must specify the keys here
         modelBuilder.Entity<UserInTeam>()
             .HasKey(j => new { j.UserId, j.TeamId });

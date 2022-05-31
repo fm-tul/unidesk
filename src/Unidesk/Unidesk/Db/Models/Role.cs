@@ -8,12 +8,14 @@ public class UserRole : TrackedEntity
     public string Name { get; set; }
 
     public string Description { get; set; }
-    public string GrantsSerialized { get; set; } = "";
+    
+    [Column("Grants")]
+    internal string _grants { get; set; } = "";
 
     [NotMapped]
     public List<Grant> Grants
     {
-        get => GrantsSerialized
+        get => _grants
                 .Split(',')
                 .Select(Guid.Parse)
                 .Select(i => UserGrants.All.FirstOrDefault(j => i == j.Id))
@@ -21,7 +23,7 @@ public class UserRole : TrackedEntity
                 .Cast<Grant>()
                 .ToList();
         
-        set => GrantsSerialized = string.Join(",", value.Select(i => i.Id));
+        set => _grants = string.Join(",", value.Select(i => i.Id));
     }
 }
 
