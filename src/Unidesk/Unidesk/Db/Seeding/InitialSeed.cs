@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Unidesk.Db.Models;
 using Unidesk.Utils;
 
@@ -119,5 +120,15 @@ public static class InitialSeed
 
         var msg = info.DebugMessage();
         return info;
+    }
+}
+
+
+public static class DbSetExtensions
+{
+    public static IEnumerable<T> AddRangeEnumerable<T>(this DbSet<T> dbSet, IEnumerable<T> items) where T : class
+    {
+        dbSet.AddRange(items);
+        return items;
     }
 }

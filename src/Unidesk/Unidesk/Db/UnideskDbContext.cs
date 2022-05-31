@@ -1,14 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Db.Seeding;
+using Unidesk.Services;
+using Unidesk.Utils;
 
 namespace Unidesk.Db;
 
 public class UnideskDbContext : DbContext
 {
-    public UnideskDbContext(DbContextOptions<UnideskDbContext> options)
+    private readonly UserProvider _userProvider;
+    
+    public UnideskDbContext(DbContextOptions<UnideskDbContext> options, UserProvider userProvider)
         : base(options)
     {
+        _userProvider = userProvider;
     }
 
     public DbSet<SchoolYear> SchoolYears { get; set; }
@@ -29,6 +35,8 @@ public class UnideskDbContext : DbContext
 
     public DbSet<Team> Teams { get; set; }
     public DbSet<UserInTeam> UserInTeams { get; set; }
+    
+    public DbSet<ChangeLog> ChangeLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,12 +61,45 @@ public class UnideskDbContext : DbContext
             await SaveChangesAsync();
         }
     }
-}
 
-public static class DbSetExtensions {
-    public static IEnumerable<T> AddRangeEnumerable<T>(this DbSet<T> dbSet, IEnumerable<T> items) where T: class
+    public OperationInfo HandleInterceptors()
     {
-        dbSet.AddRange(items);
-        return items;
+        var info = new OperationInfo();
+        var items = ChangeTracker
+            .Entries()
+            .Where(i => i.Entity is TrackedEntity)
+            .ToList();
+
+        // update Modified, ModifiedBy, Created and CreatedBy
+        info += items.Where(i => i.State == EntityState.Added || i.State == EntityState.Modified)
+            .ForEach(i =>
+            {
+                if (i.Entity is TrackedEntity entity)
+                {
+                    entity.Modified = DateTime.Now;
+                    entity.ModifiedBy = _userProvider.CurrentUser?.Email;
+                    ChangeLogs.Add(ChangeLog.Create(i, _userProvider.CurrentUser?.Email));
+
+                    if (i.State == EntityState.Added)
+                    {
+                        entity.Created = DateTime.Now;
+                        entity.CreatedBy = _userProvider.CurrentUser?.Email;
+                    }
+                }
+            }).ToList();
+
+        return info;
+    }
+
+    public override int SaveChanges()
+    {
+        HandleInterceptors();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    {
+        HandleInterceptors();
+        return base.SaveChangesAsync(cancellationToken);
     }
 }
