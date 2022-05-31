@@ -6,7 +6,7 @@ var services = builder.Services;
 
 // optionally add appsettings.secret.{username}.json which is ignored
 var configuration = builder.Configuration
-    .AddJsonFile($"appsettings.{Environment.UserName}.json", true)
+    .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
     .Build();
 
 
