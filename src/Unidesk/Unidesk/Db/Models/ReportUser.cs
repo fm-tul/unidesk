@@ -2,7 +2,7 @@
 
 namespace Unidesk.Db.Models;
 
-public class ReportUser : IdEntity
+public class ReportUser : TrackedEntity
 {
     public Guid? UserId { get; set; }
     public User User { get; set; }

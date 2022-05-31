@@ -2,7 +2,7 @@
 
 namespace Unidesk.Db.Models;
 
-public class Keyword : IdEntity
+public class Keyword : TrackedEntity
 {
     public string Value { get; set; }
     public string Locale { get; set; }
