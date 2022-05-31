@@ -13,14 +13,14 @@ public class SchoolYear : TrackedEntity
     internal DateTime _end { get; set; }
 
     [NotMapped]
-    public DateOnly StartDateOnly
+    public DateOnly Start
     {
         get => DateOnly.FromDateTime(_start);
         set => _start = value.ToDateTime(TimeOnly.MinValue);
     }
 
     [NotMapped]
-    public DateOnly EndDateOnly
+    public DateOnly End
     {
         get => DateOnly.FromDateTime(_end);
         set => _end = value.ToDateTime(TimeOnly.MinValue);

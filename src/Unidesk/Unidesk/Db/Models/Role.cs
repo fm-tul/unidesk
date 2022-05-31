@@ -7,7 +7,7 @@ public class UserRole : TrackedEntity
 {
     public string Name { get; set; }
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
     
     [Column("Grants")]
     internal string _grants { get; set; } = "";
