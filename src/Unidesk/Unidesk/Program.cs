@@ -38,6 +38,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<UnideskDbContext>();
     await context.Database.MigrateAsync();
+    await context.SeedDbAsync();
 }
 
 app.UseHttpsRedirection();
