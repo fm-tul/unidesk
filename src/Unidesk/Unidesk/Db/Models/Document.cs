@@ -2,7 +2,7 @@
 
 namespace Unidesk.Db.Models;
 
-public class Document : IdEntity
+public class Document : TrackedEntity
 {
     public string Name { get; set; }
     public string Description { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Unidesk.Db.Models;
 
-public class Thesis : IdEntity
+public class Thesis : TrackedEntity
 {
     public long Adipidno { get; set; }
     public bool NeedsReview { get; set; }

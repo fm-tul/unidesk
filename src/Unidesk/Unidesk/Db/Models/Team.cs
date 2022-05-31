@@ -2,7 +2,7 @@
 
 namespace Unidesk.Db.Models;
 
-public class Team : IdEntity
+public class Team : TrackedEntity
 {
     public List<UserInTeam> UserInTeams { get; set; }
 

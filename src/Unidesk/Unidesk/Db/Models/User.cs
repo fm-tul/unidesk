@@ -2,7 +2,7 @@
 
 namespace Unidesk.Db.Models;
 
-public class User : IdEntity
+public class User : TrackedEntity
 {
     public string FirstName { get; set; }
     public string LastName { get; set; }

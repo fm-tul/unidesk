@@ -3,7 +3,7 @@ using Unidesk.Db.Core;
 
 namespace Unidesk.Db.Models;
 
-public class DocumentContent : IdEntity
+public class DocumentContent : TrackedEntity
 {
     public Guid DocumentId { get; set; }
 

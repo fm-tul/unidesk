@@ -2,7 +2,7 @@
 
 namespace Unidesk.Db.Models;
 
-public class ThesisReport : IdEntity
+public class ThesisReport : TrackedEntity
 {
     public Guid ThesisId { get; set; }
     public Thesis Thesis { get; set; }

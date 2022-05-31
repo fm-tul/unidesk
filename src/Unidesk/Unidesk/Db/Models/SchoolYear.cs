@@ -3,7 +3,7 @@ using Unidesk.Db.Core;
 
 namespace Unidesk.Db.Models;
 
-public class SchoolYear : IdEntity
+public class SchoolYear : TrackedEntity
 {
     public DateTime Start { get; set; }
     public DateTime End { get; set; }
