@@ -70,7 +70,12 @@ public class OperationInfo
         var type = items.GetType().GetGenericArguments().LastOrDefault()
                     ?? items.GetType().GetElementType();
 
-        if (type != null && items is ICollection collection)
+        if (type == null)
+        {
+            return items;
+        }
+
+        if (items is ICollection collection)
         {
             this.Add(type, collection.Count);
         }

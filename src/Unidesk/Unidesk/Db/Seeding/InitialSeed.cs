@@ -126,9 +126,10 @@ public static class InitialSeed
 
 public static class DbSetExtensions
 {
-    public static IEnumerable<T> AddRangeEnumerable<T>(this DbSet<T> dbSet, IEnumerable<T> items) where T : class
+    public static List<T> AddRangeEnumerable<T>(this DbSet<T> dbSet, IEnumerable<T> items) where T : class
     {
-        dbSet.AddRange(items);
-        return items;
+        var addRangeEnumerable = items.ToList();
+        dbSet.AddRange(addRangeEnumerable);
+        return addRangeEnumerable;
     }
 }
