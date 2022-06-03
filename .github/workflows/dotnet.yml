@@ -20,15 +20,13 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Restore dependencies
-      run: cd src/Unidesk && dotnet restore
+      run: dotnet restore src/Unidesk/Unidesk.sln
 
     - name: Build
-      working-directory: src/Unidesk
-      run: cd src/Unidesk && dotnet build --no-restore
+      run: dotnet build --no-restore src/Unidesk/Unidesk.sln
 
     - name: Test
-      working-directory: src/Unidesk
-      run: cd src/Unidesk && dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
+      run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov src/Unidesk/Unidesk.UnitTests/Unidesk.UnitTests.csproj
       
       
     - name: Coveralls GitHub Action
