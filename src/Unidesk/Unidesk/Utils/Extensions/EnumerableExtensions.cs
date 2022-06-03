@@ -1,4 +1,4 @@
-﻿namespace Unidesk.Utils;
+﻿namespace Unidesk.Utils.Extensions;
 
 public static class EnumerableExtensions
 {
