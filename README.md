@@ -1,4 +1,4 @@
-# Unidesk
+# Unidesk &middot; [![Coverage Status](https://img.shields.io/coveralls/github/fm-tul/unidesk?logo=coveralls&style=flat-square)](https://coveralls.io/github/fm-tul/unidesk?branch=master)
 
 Application for managing univeristy bachelor/master/dissertation theses.
 
