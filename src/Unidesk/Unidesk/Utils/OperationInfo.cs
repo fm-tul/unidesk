@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics;
 
 namespace Unidesk.Utils;
@@ -54,25 +55,29 @@ public class OperationInfo
         return DebugMessage();
     }
 
-    public static OperationInfo operator +(OperationInfo info, IEnumerable<object> items)
+    public static OperationInfo operator +(OperationInfo info, object items)
     {
         if (items == null)
         {
             return info;
         }
-
         info.Record(items);
         return info;
     }
 
 
-    public IEnumerable<T> Record<T>(IEnumerable<T> items) {
+    public T Record<T>(T items) {
         var type = items.GetType().GetGenericArguments().LastOrDefault()
                     ?? items.GetType().GetElementType();
 
-        if (type != null)
+        if (type == null)
         {
-            this.Add(type, items.Count());
+            return items;
+        }
+
+        if (items is ICollection collection)
+        {
+            this.Add(type, collection.Count);
         }
         return items;
     }

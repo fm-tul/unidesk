@@ -4,6 +4,7 @@ using Unidesk.Db.Models;
 using Unidesk.Db.Seeding;
 using Unidesk.Services;
 using Unidesk.Utils;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Db;
 

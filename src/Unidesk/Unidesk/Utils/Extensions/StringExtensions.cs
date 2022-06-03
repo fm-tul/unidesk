@@ -1,4 +1,4 @@
-﻿namespace Unidesk.Extensions;
+﻿namespace Unidesk.Utils.Extensions;
 
 public static class StringExtensions
 {
