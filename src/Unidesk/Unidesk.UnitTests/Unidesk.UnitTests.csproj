@@ -32,4 +32,16 @@
       <ProjectReference Include="..\Unidesk\Unidesk.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="TestResults\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="TestResults\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="TestResults\**" />
+    </ItemGroup>
+
 </Project>
