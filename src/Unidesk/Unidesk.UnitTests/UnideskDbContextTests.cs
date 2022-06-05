@@ -112,6 +112,11 @@ public class UnideskDbContextTests
         var thesisOutcome = db.ThesisOutcomes.First();
         var thesisType = db.ThesisTypes.First();
         var userRole = db.UserRoles.First(i => i.Name == "Teacher");
+        userRole.Grants = new List<Grant>()
+        {
+            UserGrants.User_Admin,
+            UserGrants.User_Student,
+        };
 
         var userA = new User { Email = "userA@unidesk.com" };
         var userB = new User { Email = "userB@unidesk.com" };
