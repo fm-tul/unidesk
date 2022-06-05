@@ -162,6 +162,7 @@ public class UnideskDbContextTests
         };
         
         // TODO: add to db
+        db.SaveChanges();
 
     }
 }
