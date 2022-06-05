@@ -26,4 +26,24 @@ public class User : TrackedEntity, ISimpleUser
     public List<UserRole> Roles { get; set; }
 
     public List<UserInTeam> UserInTeams { get; set; }
+
+    public static readonly User Guest = new User
+    {
+        Id = Guid.Empty,
+        Username = "Guest",
+        FirstName = "Guest",
+        LastName = "Guest",
+        MiddleName = "Guest",
+        Email = "guest@unidesk.com",
+        Roles = new List<UserRole>()
+        {
+            new UserRole()
+            {
+                Grants = new List<Grant>()
+                {
+                    UserGrants.User_SuperAdmin
+                }
+            }
+        }
+    };
 }
