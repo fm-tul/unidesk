@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
+using Unidesk.Server;
 using Unidesk.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,44 +11,28 @@ var configuration = builder.Configuration
     .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
     .Build();
 
-services.AddScoped<IUserProvider, UserProvider>();
+services.AddControllers();
+services.AddDevCors();
 
-services.AddDbContext<UnideskDbContext>(options =>
-    {
-        var config = configuration.GetConnectionString(nameof(UnideskDbContext));
-        options.UseSqlServer(config);
-    }
-);
+services.AddScoped<IUserProvider, UserProvider>();
+services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(configuration.GetConnectionString(nameof(UnideskDbContext))));
 
 services.AddDatabaseDeveloperPageExceptionFilter();
 
 
 var app = builder.Build();
-var env = app.Environment;
 
-if (!env.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
-}
-else
-{
-    app.UseDeveloperExceptionPage();
-    app.UseMigrationsEndPoint();
-}
+app.UseExceptionHandler();
+await app.MigrateDbAsync();
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<UnideskDbContext>();
-    await context.Database.MigrateAsync();
-    await context.SeedDbAsync();
-}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.MapGet("/", () => "Hello World!");
+app.UseCors();
+
+app.MapControllers();
 
 app.Run();
