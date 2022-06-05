@@ -5,7 +5,7 @@ appsettings.secret.*.json
 node_modules/
 
 # js files (we'll keep ts and tsx)
-src/**/*.js
+/src/Unidesk/Unidesk.Client/src/**/*.js
 
 # Logs
 logs
