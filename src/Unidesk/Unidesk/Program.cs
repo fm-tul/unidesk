@@ -10,7 +10,7 @@ var configuration = builder.Configuration
     .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
     .Build();
 
-services.AddScoped<UserProvider>();
+services.AddScoped<IUserProvider, UserProvider>();
 
 services.AddDbContext<UnideskDbContext>(options =>
     {

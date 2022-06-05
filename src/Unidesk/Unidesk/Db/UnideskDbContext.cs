@@ -10,9 +10,9 @@ namespace Unidesk.Db;
 
 public class UnideskDbContext : DbContext
 {
-    private readonly UserProvider _userProvider;
+    private readonly IUserProvider _userProvider;
     
-    public UnideskDbContext(DbContextOptions<UnideskDbContext> options, UserProvider userProvider)
+    public UnideskDbContext(DbContextOptions<UnideskDbContext> options, IUserProvider userProvider)
         : base(options)
     {
         _userProvider = userProvider;
@@ -38,6 +38,8 @@ public class UnideskDbContext : DbContext
     public DbSet<UserInTeam> UserInTeams { get; set; }
     
     public DbSet<ChangeLog> ChangeLogs { get; set; }
+    
+    private bool _iterceptorsEnabled = true;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -65,7 +67,12 @@ public class UnideskDbContext : DbContext
 
     public OperationInfo HandleInterceptors()
     {
-        var info = new OperationInfo();
+        if (!_iterceptorsEnabled)
+        {
+            return new OperationInfo("Interceptors: disabled");
+        }
+        
+        var info = new OperationInfo("Interceptors");
         var items = ChangeTracker
             .Entries()
             .Where(i => i.Entity is TrackedEntity)
@@ -102,5 +109,17 @@ public class UnideskDbContext : DbContext
     {
         HandleInterceptors();
         return base.SaveChangesAsync(cancellationToken);
+    }
+    
+    public UnideskDbContext DisableInterceptors()
+    {
+        _iterceptorsEnabled = false;
+        return this;
+    }
+    
+    public UnideskDbContext EnableInterceptors()
+    {
+        _iterceptorsEnabled = true;
+        return this;
     }
 }
