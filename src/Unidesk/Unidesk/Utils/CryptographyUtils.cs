@@ -8,7 +8,12 @@ public static class CryptographyUtils
 {
     public static string Hash(User user)
     {
-        return Hash(user.Id.ToString(), $"{user.Created:O}");
+        return Hash(user.Id, user.Created);
+    }
+
+    public static string Hash(Guid userId, DateTime userCreated)
+    {
+        return Hash(userId.ToString(), $"{userCreated:O}");
     }
     
     public static string Hash(string userId, string created)
