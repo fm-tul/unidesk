@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Unidesk.Configurations;
 using Unidesk.Db;
-using Unidesk.Db.Models;
 using Unidesk.Server;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
+using Unidesk.Utils;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -13,6 +15,10 @@ var services = builder.Services;
 var configuration = builder.Configuration
     .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
     .Build();
+
+services.AddScoped<CryptographyUtils>();
+var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>();
+services.AddSingleton(appOptions);
 
 services.AddControllers(options =>
 {
@@ -24,23 +30,11 @@ services.AddHttpContextAccessor();
 services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.Events.OnValidatePrincipal = async (context) =>
-        {
-            var userProvider = context.HttpContext.RequestServices.GetService<IUserProvider>()!;
-            var loginService = context.HttpContext.RequestServices.GetService<LoginService>()!;
-            var user = userProvider.GetUserFromCookie(context, loginService);
-            userProvider.CurrentUser = user ?? User.Guest;
-            
-            // to disable guest user
-            // if (userProvider.CurrentUser == User.Guest)
-            // {
-            //     context.RejectPrincipal();
-            // }
-        };
+        options.Events.OnValidatePrincipal = CookieAuthentication.OnValidatePrincipal;
     });
 
 services.AddScoped<IUserProvider, UserProvider>();
-services.AddScoped<LoginService>();
+services.AddScoped<UserService>();
 services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(configuration.GetConnectionString(nameof(UnideskDbContext))));
 
 services.AddDatabaseDeveloperPageExceptionFilter();
