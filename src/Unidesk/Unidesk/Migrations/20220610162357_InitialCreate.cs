@@ -30,8 +30,11 @@ namespace Unidesk.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DescriptionEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -68,8 +71,11 @@ namespace Unidesk.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DescriptionEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -78,6 +84,23 @@ namespace Unidesk.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Faculties", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Keywords",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Locale = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Keywords", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -102,8 +125,11 @@ namespace Unidesk.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -147,8 +173,8 @@ namespace Unidesk.Migrations
                     Reviewed = table.Column<bool>(type: "bit", nullable: false),
                     NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AbstractEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AbstractCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AbstractEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AbstractCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SchoolYearId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FacultyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -190,26 +216,28 @@ namespace Unidesk.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Keyword",
+                name: "KeywordThesis",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Locale = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    KeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Keyword", x => x.Id);
+                    table.PrimaryKey("PK_KeywordThesis", x => new { x.KeywordId, x.ThesisId });
                     table.ForeignKey(
-                        name: "FK_Keyword_Theses_ThesisId",
+                        name: "FK_KeywordThesis_Keywords_KeywordId",
+                        column: x => x.KeywordId,
+                        principalTable: "Keywords",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_KeywordThesis_Theses_ThesisId",
                         column: x => x.ThesisId,
                         principalTable: "Theses",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -265,6 +293,7 @@ namespace Unidesk.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StagId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -305,6 +334,7 @@ namespace Unidesk.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StagId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -419,8 +449,8 @@ namespace Unidesk.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Keyword_ThesisId",
-                table: "Keyword",
+                name: "IX_KeywordThesis_ThesisId",
+                table: "KeywordThesis",
                 column: "ThesisId");
 
             migrationBuilder.CreateIndex(
@@ -498,7 +528,7 @@ namespace Unidesk.Migrations
                 name: "DocumentContents");
 
             migrationBuilder.DropTable(
-                name: "Keyword");
+                name: "KeywordThesis");
 
             migrationBuilder.DropTable(
                 name: "ThesisOutcomes");
@@ -511,6 +541,9 @@ namespace Unidesk.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserRoles");
+
+            migrationBuilder.DropTable(
+                name: "Keywords");
 
             migrationBuilder.DropTable(
                 name: "ReportUsers");

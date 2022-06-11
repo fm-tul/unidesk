@@ -12,7 +12,7 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    [Migration("20220603173524_InitialCreate")]
+    [Migration("20220610162357_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,13 +57,20 @@ namespace Unidesk.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("DescriptionCze")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DescriptionEng")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Modified")
@@ -72,7 +79,11 @@ namespace Unidesk.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameCze")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NameEng")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -165,13 +176,20 @@ namespace Unidesk.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("DescriptionCze")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DescriptionEng")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Modified")
@@ -180,7 +198,11 @@ namespace Unidesk.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameCze")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NameEng")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -211,18 +233,31 @@ namespace Unidesk.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ThesisId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.ToTable("Keywords");
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.KeywordThesis", b =>
+                {
+                    b.Property<Guid>("KeywordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ThesisId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("KeywordId", "ThesisId");
+
                     b.HasIndex("ThesisId");
 
-                    b.ToTable("Keyword");
+                    b.ToTable("KeywordThesis");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.ReportUser", b =>
@@ -265,6 +300,9 @@ namespace Unidesk.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Position")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StagId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TitleAfter")
@@ -365,11 +403,9 @@ namespace Unidesk.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AbstractCze")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AbstractEng")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("Adipidno")
@@ -513,13 +549,19 @@ namespace Unidesk.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("DescriptionCze")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DescriptionEng")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Modified")
@@ -528,7 +570,11 @@ namespace Unidesk.Migrations
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameCze")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NameEng")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -580,6 +626,9 @@ namespace Unidesk.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Position")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StagId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ThesisId")
@@ -685,11 +734,23 @@ namespace Unidesk.Migrations
                     b.Navigation("Document");
                 });
 
-            modelBuilder.Entity("Unidesk.Db.Models.Keyword", b =>
+            modelBuilder.Entity("Unidesk.Db.Models.KeywordThesis", b =>
                 {
-                    b.HasOne("Unidesk.Db.Models.Thesis", null)
-                        .WithMany("Keywords")
-                        .HasForeignKey("ThesisId");
+                    b.HasOne("Unidesk.Db.Models.Keyword", "Keyword")
+                        .WithMany("KeywordThesis")
+                        .HasForeignKey("KeywordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
+                        .WithMany("KeywordThesis")
+                        .HasForeignKey("ThesisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Keyword");
+
+                    b.Navigation("Thesis");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.ReportUser", b =>
@@ -814,6 +875,11 @@ namespace Unidesk.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Unidesk.Db.Models.Keyword", b =>
+                {
+                    b.Navigation("KeywordThesis");
+                });
+
             modelBuilder.Entity("Unidesk.Db.Models.Team", b =>
                 {
                     b.Navigation("UserInTeams");
@@ -821,7 +887,7 @@ namespace Unidesk.Migrations
 
             modelBuilder.Entity("Unidesk.Db.Models.Thesis", b =>
                 {
-                    b.Navigation("Keywords");
+                    b.Navigation("KeywordThesis");
 
                     b.Navigation("Outcomes");
 
