@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
+using Unidesk.ServiceFilters;
 
 namespace Unidesk.Server;
 
@@ -18,6 +20,27 @@ public static class ServiceCollectionExtensions
                         .AllowCredentials()
                         .Build();
                 });
+        });
+
+        return services;
+    }
+    
+    public static IServiceCollection AddCookieAuthentication(this IServiceCollection services)
+    {
+        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.Events.OnValidatePrincipal = CookieAuthentication.OnValidatePrincipal;
+            });
+
+        return services;
+    }
+    
+    public static IServiceCollection AddControllersWithFilters(this IServiceCollection services)
+    {
+        services.AddControllers(options =>
+        {
+            options.Filters.AddService<RequireGrantFilter>();
         });
 
         return services;

@@ -48,29 +48,29 @@ public static class InitialSeed
         {
             var names = new[]
             {
-                "Faculty of Mechanical Engineering",
-                "Faculty of Textile Engineering",
-                "Faculty of Science - Humanities and Education",
-                "Faculty of Economics",
-                "Faculty of Arts and Architecture",
-                "Faculty of Mechatronics Informatics and Interdisciplinary Studies",
-                "Faculty of Health Studies",
-                "Institute for Nanomaterials, Advanced Technologies and Innovation"
+                ("Faculty of Mechanical Engineering", "Fakulta strojní", "FS"),
+                ("Faculty of Textile Engineering", "Fakulta textilní", "FT"),
+                ("Faculty of Science - Humanities and Education", "Fakulta přírodovědně-humanitní a pedagogická", "FP"),
+                ("Faculty of Economics", "Ekonomická fakulta", "EF"),
+                ("Faculty of Arts and Architecture", "Fakulta umění a architektury", "FUA"),
+                ("Faculty of Mechatronics Informatics and Interdisciplinary Studies", "Fakulta mechatroniky, informatiky a mezioborových studií", "FM"),
+                ("Faculty of Health Studies", "Fakulta zdravotnických studií", "FZS"),
+                ("Institute for Nanomaterials, Advanced Technologies and Innovation", "Ústav pro nanomateriály, pokročilé technologie a inovace", "CXI"),
             };
 
-            info += db.Faculties.AddRangeEnumerable(names.Select(name => new Faculty { Name = name }));
+            info += db.Faculties.AddRangeEnumerable(names.Select(name => new Faculty { NameEng = name.Item1, NameCze = name.Item2, Code = name.Item3 }));
         }
 
         if (!db.Departments.Any())
         {
             var names = new[]
             {
-                "Institute of Information Technology and Electronics",
-                "Institute of Mechatronics and Computer Engineering",
-                "Institute of New Technologies and Applied Informatics",
+                ("Institute of Information Technology and Electronics", "Ústav informačních technologií a elektroniky", "ITE"),
+                ("Institute of Mechatronics and Computer Engineering", "Ústav mechatroniky a technické informatiky ", "MTI"),
+                ("Institute of New Technologies and Applied Informatics", "Ústav nových technologií a aplikované informatiky", "NTI"),
             };
 
-            info += db.Departments.AddRangeEnumerable(names.Select(name => new Department { Name = name }));
+            info += db.Departments.AddRangeEnumerable(names.Select(name => new Department { NameEng = name.Item1, NameCze = name.Item2, Code = name.Item3 }));
         }
 
         if (!db.ThesisOutcomes.Any())
@@ -95,14 +95,15 @@ public static class InitialSeed
         {
             var names = new[]
             {
-                "Bachelor's thesis",
-                "Bachelor's project",
-                "Master's thesis",
-                "Master's project",
-                "Doctoral dissertation",
+                ("Bachelor's thesis", "Bakalářská práce", "bakalářská"),
+                ("Bachelor's project", "Bakalářský projekt", null),
+                ("Master's thesis", "Magisterská práce", "diplomová"),
+                ("Master's project", "Magisterský projekt", null),
+                ("Doctoral dissertation", "Disertační práce", "disertační"),
+                ("Rigorous Thesis", "Rigorózní práce", "rigorózní"),
             };
 
-            info += db.ThesisTypes.AddRangeEnumerable(names.Select(name => new ThesisType { Name = name }));
+            info += db.ThesisTypes.AddRangeEnumerable(names.Select(name => new ThesisType { NameEng = name.Item1, NameCze = name.Item2, Code = name.Item3 }));
         }
 
         if (!db.UserRoles.Any())

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Db.Seeding;
@@ -29,6 +30,8 @@ public class UnideskDbContext : DbContext
     public DbSet<ThesisOutcome> ThesisOutcomes { get; set; }
     public DbSet<ThesisReport> ThesisReports { get; set; }
     public DbSet<ThesisType> ThesisTypes { get; set; }
+    public DbSet<Keyword> Keywords { get; set; }
+    public DbSet<KeywordThesis> KeywordThesis { get; set; }
 
     public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
@@ -36,6 +39,7 @@ public class UnideskDbContext : DbContext
 
     public DbSet<Team> Teams { get; set; }
     public DbSet<UserInTeam> UserInTeams { get; set; }
+    
     
     public DbSet<ChangeLog> ChangeLogs { get; set; }
     
@@ -46,23 +50,33 @@ public class UnideskDbContext : DbContext
         // backing fields
         modelBuilder.Entity<SchoolYear>().Property(e => e._start);
         modelBuilder.Entity<SchoolYear>().Property(e => e._end);
-
-        modelBuilder.Entity<UserRole>()
-            .Property(e => e._grants);
+        
+        modelBuilder.Entity<UserRole>().Property(e => e._grants);
 
         // UserInTeam basically handles m-n relation and we must specify the keys here
         modelBuilder.Entity<UserInTeam>()
             .HasKey(j => new { j.UserId, j.TeamId });
+        
+        modelBuilder.Entity<KeywordThesis>()
+            .HasKey(j => new { j.KeywordId, j.ThesisId });
     }
+    
 
     public async Task SeedDbAsync()
     {
+        _userProvider.CurrentUser = _userProvider.CurrentUser ?? User.InitialSeedUser;
         var info = InitialSeed.Seed(this);
 
         if (info.TotalRows > 0)
         {
             await SaveChangesAsync();
         }
+    }
+
+    public ChangeTrackedStats GetStats()
+    {
+        ChangeTracker.DetectChanges();
+        return new ChangeTrackedStats(ChangeTracker.Entries());
     }
 
     public OperationInfo HandleInterceptors()
@@ -76,10 +90,12 @@ public class UnideskDbContext : DbContext
         var items = ChangeTracker
             .Entries()
             .Where(i => i.Entity is TrackedEntity)
+            .Where(i => i.State == EntityState.Added || i.State == EntityState.Modified)
             .ToList();
 
         // update Modified, ModifiedBy, Created and CreatedBy
-        info += items.Where(i => i.State == EntityState.Added || i.State == EntityState.Modified)
+        info += items
+            .AsEnumerable()
             .ForEach(i =>
             {
                 if (i.Entity is TrackedEntity entity)
@@ -121,5 +137,28 @@ public class UnideskDbContext : DbContext
     {
         _iterceptorsEnabled = true;
         return this;
+    }
+}
+
+
+public class ChangeTrackedStats
+{
+    public readonly int AddedCount;
+    public readonly int ModifiedCount;
+    public readonly int DeletedCount;
+    public readonly int UnchangedCount;
+
+    public ChangeTrackedStats(IEnumerable<EntityEntry> items)
+    {
+        var grouped = items.GroupBy(i => i.State).ToDictionary(i => i.Key, i => i.Count());
+        AddedCount = grouped.GetValueOrDefault(EntityState.Added, 0);
+        ModifiedCount = grouped.GetValueOrDefault(EntityState.Modified, 0);
+        DeletedCount = grouped.GetValueOrDefault(EntityState.Deleted, 0);
+        UnchangedCount = grouped.GetValueOrDefault(EntityState.Unchanged, 0);
+    }
+
+    public override string ToString()
+    {
+        return $"Added: {AddedCount}, Modified: {ModifiedCount}, Deleted: {DeletedCount}, Unchanged: {UnchangedCount}";
     }
 }

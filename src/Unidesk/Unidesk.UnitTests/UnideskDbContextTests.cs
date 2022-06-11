@@ -142,7 +142,7 @@ public class UnideskDbContextTests
             Grade = 5,
             Users = new List<User> { userC },
             Teams = new List<Team> { team },
-            Keywords = new List<Keyword>(),
+            KeywordThesis = new List<KeywordThesis>(),
 
             Status = ThesisStatus.Draft,
             AbstractEng = "Test abstract",

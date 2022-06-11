@@ -1,10 +1,15 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Unidesk.Configurations;
 using Unidesk.Db;
+using Unidesk.Db.Core;
 using Unidesk.Db.Models;
+using Unidesk.Dtos;
 using Unidesk.Server;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
+using Unidesk.Services.Stag;
+using Unidesk.Utils;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -14,35 +19,35 @@ var configuration = builder.Configuration
     .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
     .Build();
 
-services.AddControllers(options =>
-{
-    options.Filters.AddService<RequireGrantFilter>();
-});
+
+// scoped
+services.AddScoped<CryptographyUtils>();
+services.AddScoped<StagService>();
+services.AddScoped<ImportService>();
 services.AddScoped<RequireGrantFilter>();
+services.AddScoped<IUserProvider, UserProvider>();
+services.AddScoped<UserService>();
+services.AddAutoMapper(options =>
+{
+    options.CreateMap<IdEntity, IdEntityDto>();
+    options.CreateMap<TrackedEntity, TrackedEntityDto>();
+    options.CreateMap<Keyword, KeywordDto>()
+        .ForMember(i => i.Used, opt => opt.MapFrom(i => i.KeywordThesis.Count));
+
+}, typeof(Program));
+
+
+// singleton
+services.AddSingleton(configuration.GetSection(nameof(AppOptions)).Get<AppOptions>());
+
+
+// extra
+services.AddControllersWithFilters();
 services.AddDevCors();
 services.AddHttpContextAccessor();
-services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.Events.OnValidatePrincipal = async (context) =>
-        {
-            var userProvider = context.HttpContext.RequestServices.GetService<IUserProvider>()!;
-            var loginService = context.HttpContext.RequestServices.GetService<LoginService>()!;
-            var user = userProvider.GetUserFromCookie(context, loginService);
-            userProvider.CurrentUser = user ?? User.Guest;
-            
-            // to disable guest user
-            // if (userProvider.CurrentUser == User.Guest)
-            // {
-            //     context.RejectPrincipal();
-            // }
-        };
-    });
-
-services.AddScoped<IUserProvider, UserProvider>();
-services.AddScoped<LoginService>();
+services.AddCookieAuthentication();
 services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(configuration.GetConnectionString(nameof(UnideskDbContext))));
-
+services.AddScoped<CachedDbContext>();
 services.AddDatabaseDeveloperPageExceptionFilter();
 
 

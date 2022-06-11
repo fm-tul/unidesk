@@ -5,6 +5,7 @@ namespace Unidesk.Db.Models;
 public class User : TrackedEntity, ISimpleUser
 {
     public string Username { get; set; }
+    public string? StagId { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? MiddleName { get; set; }
@@ -35,6 +36,46 @@ public class User : TrackedEntity, ISimpleUser
         LastName = "Guest",
         MiddleName = "Guest",
         Email = "guest@unidesk.com",
+        Roles = new List<UserRole>()
+        {
+            new UserRole()
+            {
+                Grants = new List<Grant>()
+                {
+                    UserGrants.User_SuperAdmin
+                }
+            }
+        }
+    };
+    
+    public static readonly User ImportUser = new User
+    {
+        Id = Guid.Empty,
+        Username = "Import",
+        FirstName = "Import",
+        LastName = "Import",
+        MiddleName = "Import",
+        Email = "import-user@unidesk.com",
+        Roles = new List<UserRole>()
+        {
+            new UserRole()
+            {
+                Grants = new List<Grant>()
+                {
+                    UserGrants.User_SuperAdmin
+                }
+            }
+        }
+    };
+    
+    public static readonly User InitialSeedUser = new User
+    {
+        Id = Guid.Empty,
+        Username = "InitialSeed",
+        FirstName = "InitialSeed",
+        LastName = "InitialSeed",
+        MiddleName = "InitialSeed",
+        Email = "seed@unidesk.com",
         Roles = new List<UserRole>()
         {
             new UserRole()

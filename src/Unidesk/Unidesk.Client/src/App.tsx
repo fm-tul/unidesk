@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { API_URL } from './core/config'
 import axios from 'axios'
+import { StagImport } from './components/StagImport'
 
 
 function App() {
@@ -24,23 +25,7 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <p></p>
-        <h1 className="text-3xl font-bold underline bg-lime-300">
-          Hello Vite + React + Tailwindcss!
-        </h1>
-        <p className="flex flex-col">
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-          <button type="button" onClick={authUser}>
-            authUser
-          </button>
-          <button type="button" onClick={testUser}>
-            testUser
-          </button>
-        </p>
-      </header>
+      <StagImport />
     </div>
   )
 }
