@@ -11,10 +11,10 @@ public class Thesis : TrackedEntity
     public string NameEng { get; set; }
     public string NameCze { get; set; }
 
-    public string AbstractEng { get; set; }
-    public string AbstractCze { get; set; }
+    public string? AbstractEng { get; set; }
+    public string? AbstractCze { get; set; }
 
-    public List<Keyword> Keywords { get; set; }
+    public List<KeywordThesis> KeywordThesis { get; set; } = new List<KeywordThesis>();
 
     // public string Image { get; set; }
 
@@ -22,12 +22,15 @@ public class Thesis : TrackedEntity
 
     public Guid SchoolYearId { get; set; }
     public SchoolYear SchoolYear { get; set; }
+    
 
     public Guid DepartmentId { get; set; }
     public Department Department { get; set; }
+    
 
     public Guid FacultyId { get; set; }
     public Faculty Faculty { get; set; }
+    
 
     public Guid ThesisTypeId { get; set; }
     public ThesisType ThesisType { get; set; }
@@ -57,5 +60,6 @@ public enum ThesisStatus
     Reserved,
     Assigned,
     Submitted,
-    Finished
+    Finished,
+    Unknown = 666
 }
