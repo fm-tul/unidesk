@@ -8,8 +8,4 @@ public class AppOptions
     // Security
     public string AesKey { get; set; } = null!;
     public string AesIV { get; set; } = null!;
-    
-    // stag 
-    public string StagUsername { get; set; } = null!;
-    public string StagPassword { get; set; } = null!;
 }
