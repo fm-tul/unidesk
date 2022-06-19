@@ -94,7 +94,7 @@ public static class CachedDbSetExtensions
         await cachedDbSet.LoadCacheAsync();
         var collection = entities.ToList();
         cachedDbSet._cache.AddRange(collection);
-        await cachedDbSet.DbSet.AddRangeAsync(collection);
+        cachedDbSet.DbSet.AddRange(collection);
     }
     
     

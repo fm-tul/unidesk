@@ -12,11 +12,14 @@ namespace Unidesk.Db;
 public class UnideskDbContext : DbContext
 {
     private readonly IUserProvider _userProvider;
-    
-    public UnideskDbContext(DbContextOptions<UnideskDbContext> options, IUserProvider userProvider)
+    private readonly ILogger<UnideskDbContext> _logger;
+
+    public UnideskDbContext(DbContextOptions<UnideskDbContext> options, IUserProvider userProvider, ILogger<UnideskDbContext> logger)
         : base(options)
     {
         _userProvider = userProvider;
+        _logger = logger;
+        _logger.LogInformation("UnideskDbContext created");
     }
 
     public DbSet<SchoolYear> SchoolYears { get; set; }

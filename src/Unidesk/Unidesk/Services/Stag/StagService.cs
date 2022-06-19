@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
 using Unidesk.Configurations;
 using Unidesk.Db;
+using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Services.Stag.Models;
 
@@ -17,14 +18,12 @@ public class StagService
         "https://stag-ws.tul.cz/ws/services/rest2/kvalifikacniprace/getKvalifikacniPrace?rokZadani={0}&katedra={1}&outputFormat=json";
 
     private readonly AppOptions _appOptions;
-    private readonly UnideskDbContext _db;
     private readonly ImportService _import;
     private readonly ILogger<StagService> _logger;
 
-    public StagService(AppOptions appOptions, UnideskDbContext db, ImportService importService, ILogger<StagService> logger)
+    public StagService(AppOptions appOptions, ImportService importService, ILogger<StagService> logger)
     {
         _appOptions = appOptions;
-        _db = db;
         _import = importService;
         _logger = logger;
     }
@@ -56,10 +55,13 @@ public class StagService
         _logger.LogInformation("Stag import downloaded {Count} items in {Elapsed}", items.Count, sw.Elapsed);
         sw.Restart();
 
+        // we build the KeywordThesis m-n table cache in order to find the relations between Keywords and Thesis
+        await _import.Db.KeywordThesis.LoadCacheAsync();
+        
         foreach (var item in items)
         {
-            var dbItem = await _db.Theses.FirstOrDefaultAsync(i => i.Adipidno == item.Adipidno)
-                         ?? _db.Theses.AddAndReturn(
+            var dbItem = await _import.Db.Theses.FirstOrDefaultAsync(i => i.Adipidno == item.Adipidno)
+                         ?? _import.Db.Theses.AddAndReturn(
                              new Thesis
                              {
                                  Adipidno = item.Adipidno,
@@ -84,10 +86,10 @@ public class StagService
             imported.Add(dbItem);
         }
 
-        var stats = _db.GetStats();
+        var stats = _import.Db._db.GetStats();
         _logger.LogInformation("Import from Stag completed in {Elapsed} [{Stats}]", sw.Elapsed, stats.ToString());
-        
-        await _db.SaveChangesAsync();
+
+        await _import.Db._db.SaveChangesAsync();
         _logger.LogInformation("Save changes completed in {Elapsed}", sw.Elapsed);
         
         sw.Stop();

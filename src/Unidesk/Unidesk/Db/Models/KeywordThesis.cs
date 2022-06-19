@@ -10,6 +10,26 @@ public class KeywordThesis
     public Keyword Keyword { get; set; }
     
     public KeywordThesisStatus Status { get; set; }
+    
+    
+
+    protected bool Equals(KeywordThesis other)
+    {
+        return ThesisId.Equals(other.ThesisId) && KeywordId.Equals(other.KeywordId);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((KeywordThesis)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(ThesisId, KeywordId);
+    }
 }
 
 public enum KeywordThesisStatus

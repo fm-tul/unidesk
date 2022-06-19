@@ -52,7 +52,7 @@ public class ImportService
             .Select(i => new KeywordThesis { KeywordId = i.Id, ThesisId = thesis.Id })
             .ToList();
         
-        await Db.KeywordThesis.AddRangeAsync(newKeywordThesis);
+        thesis.KeywordThesis.AddRange(newKeywordThesis);
         
         return newKeywordThesis;
     }
@@ -77,14 +77,6 @@ public class ImportService
 
         var keywords = thesis.KeywordThesis;
         
-        var matchedKeywordsCze = Db.Keywords
-            .Where(i =>keywordsCze.Contains(i.Value) && i.Locale == "cze")
-            .ToList();
-        
-        var matchedKeywordsEng = Db.Keywords
-            .Where(i =>keywordsCze.Contains(i.Value) && i.Locale == "cze")
-            .ToList();
-
         return keywords;
     }
 

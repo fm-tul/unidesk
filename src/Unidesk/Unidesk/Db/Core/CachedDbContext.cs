@@ -4,7 +4,7 @@ namespace Unidesk.Db.Core;
 
 public class CachedDbContext
 {
-    private readonly UnideskDbContext _db;
+    public readonly UnideskDbContext _db;
     public readonly CachedDbSet<SchoolYear> SchoolYears;
     public readonly CachedDbSet<Faculty> Faculties;
     public readonly CachedDbSet<Department> Departments;
