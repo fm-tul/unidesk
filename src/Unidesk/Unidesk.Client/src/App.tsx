@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { API_URL } from './core/config'
 import axios from 'axios'
-import { StagImport } from './components/StagImport'
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import { links } from './config/links'
 
 
 function App() {
@@ -24,8 +25,14 @@ function App() {
 
 
   return (
-    <div className="App">
-      <StagImport />
+    <div>
+      <div className='flex flex-col'>
+        {links.map(link => <Link key={link.path} to={link.path}>{link.title}</Link>)}
+      </div>
+
+      <Routes>
+        {links.map(i => <Route key={i.path} {...i} />)}
+      </Routes>
     </div>
   )
 }

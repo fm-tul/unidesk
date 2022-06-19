@@ -4,7 +4,7 @@ import { API_URL } from "../core/config";
 
 export const StagImport = () => {
 
-    const years = [2019, 2020, 2021, 2022];
+    const years = [2021, 2019, 2020, 2022];
     const departments = ["NTI", "MTI", "ITE"];
 
     const [year, setYear] = useState(years[0]);
@@ -53,3 +53,5 @@ export const StagImport = () => {
         </div>
     )
 }
+
+export default StagImport;

@@ -1,0 +1,48 @@
+.btn {
+  @apply cursor-pointer px-2 py-1 transition rounded-sm inline-flex items-center gap-1 text-base shadow-md
+  disabled:cursor-not-allowed disabled:opacity-70
+}
+.btn-small {
+  @apply cursor-pointer p-1 transition rounded-sm inline-flex items-center gap-1 text-sm shadow-md;
+}
+
+.btn-bar {
+  @apply flex gap-1;
+}
+.btn-group {
+  @apply flex gap-0;
+}
+.btn-group .btn {
+  @apply rounded-none border-x border-y-2;
+}
+.btn-group .btn:first-child {
+  @apply rounded-l-md border-2 border-r;
+}
+.btn-group .btn:last-child {
+  @apply rounded-r-md border-2 border-l;
+}
+
+.btn-info {
+  @apply bg-blue-500 text-white border-blue-700 border-2 shadow-blue-500/20
+        hover:enabled:bg-blue-700;
+}
+.btn-success {
+  @apply bg-green-500 text-white border-green-600 border-2 shadow-green-500/20
+        hover:enabled:bg-green-600;
+}
+.btn-warning {
+  @apply bg-yellow-500 text-black border-yellow-700 border-2 shadow-yellow-500/20
+        hover:enabled:bg-yellow-700 hover:text-white;
+}
+.btn-warning:hover > .spinner {
+  --color-spinner-a: #fff;
+  --color-spinner-b: #ffffff4e;
+}
+.btn-danger {
+  @apply bg-red-500 text-white border-red-700 border-2 shadow-red-500/20
+        hover:enabled:bg-red-700;
+}
+.btn-text {
+  @apply bg-gray-200 text-gray-700 border-gray-300 border-2 shadow-gray-200/20
+        hover:enabled:bg-gray-300;
+}

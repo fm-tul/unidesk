@@ -1,3 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+
+@import "tailwindcss/components";
+
+@import "./styles/buttons.css";
+@import "./styles/spinners.css";
+@import "tailwindcss/utilities";
