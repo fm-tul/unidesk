@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Security.Claims;
 using FluentAssertions;
 using Unidesk.Configurations;
 using Unidesk.Db.Models;
@@ -13,17 +16,33 @@ public class CryptographyUtilsTests
     [Fact]
     public void Test_Hash_Verify_Hash()
     {
-        var guid1 = Guid.NewGuid();
-        var date1 = DateTime.Now;
-        var hash1 = CryptographyUtils.Hash(guid1, date1);
-        var hash1a = CryptographyUtils.Hash(new User { Id = guid1, Created = date1 });
+        var now = DateTime.Now;
+        var guid = Guid.NewGuid();
+        var props1 = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, guid.ToString()),
+            new KeyValuePair<string, string>(ClaimTypes.DateOfBirth, now.ToString(CultureInfo.InvariantCulture)),
+        };
+        
+        var props2 = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, guid.ToString()),
+            new KeyValuePair<string, string>(ClaimTypes.DateOfBirth, now.AddDays(1).ToString(CultureInfo.InvariantCulture)),
+        };
+        
+        var props3 = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, guid.ToString()),
+            new KeyValuePair<string, string>(ClaimTypes.DateOfBirth, now.AddHours(24).ToString(CultureInfo.InvariantCulture)),
+        };
 
-        var guid2 = Guid.NewGuid();
-        var date2 = DateTime.Now.AddDays(1);
-        var hash2 = CryptographyUtils.Hash(guid2, date2);
+        var hash1 = CryptographyUtils.Hash(props1);
+        var hash2 = CryptographyUtils.Hash(props2);
+        var hash3 = CryptographyUtils.Hash(props3);
 
-        hash1.Should().NotBeEquivalentTo(hash2);
-        hash1.Should().BeEquivalentTo(hash1a);
+        hash1.Should().NotBe(hash2);
+        hash1.Should().NotBe(hash3);
+        hash2.Should().Be(hash3);
     }
 
     [Theory]
