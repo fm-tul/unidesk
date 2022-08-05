@@ -4,10 +4,8 @@ interface ImportMetaEnv {
     readonly VITE_API_URL: string
 }
 
-interface ImportMeta {
-    readonly env: ImportMetaEnv
-}
+const env = import.meta.env as unknown as ImportMetaEnv;
 
-export const API_URL = import.meta.env.VITE_API_URL
-    ? import.meta.env.VITE_API_URL as string
+export const API_URL = env.VITE_API_URL
+    ? env.VITE_API_URL as string
     : "";
