@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Unidesk.Dtos;
 using Unidesk.Services;
 using Unidesk.Services.Stag;
 
@@ -11,12 +13,14 @@ public class ImportController : ControllerBase
     
     private readonly StagService _stagService;
     private readonly IUserProvider _userProvider;
+    private IMapper _mapper;
 
 
-    public ImportController(StagService stagService, IUserProvider userProvider)
+    public ImportController(StagService stagService, IUserProvider userProvider, IMapper mapper)
     {
         _stagService = stagService;
         _userProvider = userProvider;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -25,6 +29,7 @@ public class ImportController : ControllerBase
     {
         _userProvider.CurrentUser = _userProvider.CurrentUser ?? Db.Models.User.ImportUser;
         var items = await _stagService.ImportFromStagAsync(year, department);
-        return Ok(items.Select(i => new { i.NameEng, i.Department, i.SchoolYear.Start.Year}));
+        var dtos = _mapper.Map<List<ThesisDto>>(items);
+        return Ok(dtos);
     }
 }

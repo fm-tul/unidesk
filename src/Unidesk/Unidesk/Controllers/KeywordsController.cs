@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
@@ -9,7 +9,7 @@ using Unidesk.Dtos.Requests;
 namespace Unidesk.Controllers;
 
 [ApiController]
-[Authorize]
+// [Authorize]
 [Route("api/[controller]")]
 public class KeywordsController : ControllerBase
 {
@@ -23,9 +23,10 @@ public class KeywordsController : ControllerBase
     }
     
     
-    [HttpGet]
-    [Route("all")]
-    public async Task<IActionResult> GetAllKeywords([FromQuery] PagedQuery? query = null)
+    [HttpGet, Route("all")]
+    [SwaggerOperation(OperationId = nameof(GetAll))]
+    [ProducesResponseType(typeof(List<KeywordDto>), 200)]
+    public async Task<IActionResult> GetAll([FromQuery] PagedQuery? query = null)
     {
         var keywords = await _db.Keywords
             .Include(i => i.KeywordThesis)

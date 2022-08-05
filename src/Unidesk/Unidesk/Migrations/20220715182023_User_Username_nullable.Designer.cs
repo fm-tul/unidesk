@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unidesk.Db;
 
@@ -11,9 +12,10 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    partial class UnideskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220715182023_User_Username_nullable")]
+    partial class User_Username_nullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -641,12 +643,15 @@ namespace Unidesk.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Work")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WorkAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WorkPosition")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

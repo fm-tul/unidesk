@@ -2,7 +2,7 @@
 
 public interface ISimpleUser
 {
-    public string Username { get; set; }
+    public string? Username { get; set; }
     
     public string? StagId { get; set; }
     public string? FirstName { get; set; }

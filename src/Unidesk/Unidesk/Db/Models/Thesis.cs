@@ -1,4 +1,5 @@
-﻿using Unidesk.Db.Core;
+﻿using System.Text.Json.Serialization;
+using Unidesk.Db.Core;
 
 namespace Unidesk.Db.Models;
 
@@ -35,31 +36,33 @@ public class Thesis : TrackedEntity
     public Guid ThesisTypeId { get; set; }
     public ThesisType ThesisType { get; set; }
 
-    public List<ThesisOutcome> Outcomes { get; set; }
+    public List<ThesisOutcome> Outcomes { get; set; } = new List<ThesisOutcome>();
 
     public ThesisStatus Status { get; set; }
 
     public int? Grade { get; set; }
 
-    public List<User> Users { get; set; }
+    public List<User> Users { get; set; } = new List<User>();
 
-    public List<Team> Teams { get; set; }
+    public List<Team> Teams { get; set; } = new List<Team>();
     // public List<Review> Reviews { get; set; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ThesisReportRelation
 {
-    Supervisor,
-    Opponent
+    Supervisor = 0,
+    Opponent = 1,
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ThesisStatus
 {
-    Draft,
-    New,
-    Reserved,
-    Assigned,
-    Submitted,
-    Finished,
+    Draft = 0,
+    New = 1,
+    Reserved = 2,
+    Assigned= 3,
+    Submitted = 4,
+    Finished = 5,
     Unknown = 666
 }

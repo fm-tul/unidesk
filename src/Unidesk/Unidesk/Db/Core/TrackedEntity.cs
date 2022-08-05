@@ -8,6 +8,6 @@ public class TrackedEntity : IdEntity
     public DateTime Modified { get; set; } = DateTime.Now;
     public string? ModifiedBy { get; set; }
 
-    public bool IsNew => DateOnly.FromDateTime(Created) == DateOnly.FromDateTime(Modified)
-        && (TimeOnly.FromDateTime(Created) - TimeOnly.FromDateTime(Modified)) < TimeSpan.FromMilliseconds(1);
+    public bool IsNew => DateOnly.FromDateTime(Created) == DateOnly.FromDateTime(DateTime.Now)
+                         && (TimeOnly.FromDateTime(Created) - TimeOnly.FromDateTime(DateTime.Now)) < TimeSpan.FromMilliseconds(1);
 }

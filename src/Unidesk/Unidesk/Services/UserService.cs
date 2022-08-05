@@ -19,23 +19,34 @@ public class UserService
     {
         _db = db;
     }
-    
+
     public Task<User?> FindUserAsync(ILoginRequest request)
     {
         return _db.Users.FirstOrDefaultAsync(x => x.Username == request.Username);
     }
-    
+
     public Task<User?> FindUserAsync(Guid id)
     {
         return _db.Users.FirstOrDefaultAsync(x => x.Id == id);
     }
     
+    public IEnumerable<KeyValuePair<string, string>> GetUserClaimableProperties(User user)
+    {
+        yield return new KeyValuePair<string, string> (ClaimTypes.Name, user.Username ?? string.Empty);
+        yield return new KeyValuePair<string, string> (ClaimTypes.NameIdentifier, user.Id.ToString());
+        yield return new KeyValuePair<string, string> ("Grants", string.Join(",", user.Roles.SelectMany(i => i.Grants.Select(j => j.Id))));
+        yield return new KeyValuePair<string, string> ("Created", $"{user.Created:O}");
+    }
+
     public IEnumerable<Claim> GetClaims(User user)
     {
-        yield return new Claim(ClaimTypes.Name, user.Username);
-        yield return new Claim(ClaimTypes.NameIdentifier, user.Id.ToString());
-        yield return new Claim("Created", $"{user.Created:O}");
-        yield return new Claim("Fingerprint", CryptographyUtils.Hash(user));
+        var props = GetUserClaimableProperties(user).ToList();
+        foreach (var property in props)
+        {
+            yield return new Claim(property.Key, property.Value);
+        }
+
+        yield return new Claim("Fingerprint", CryptographyUtils.Hash(props));
     }
 
     public bool IsPrincipalValid(ClaimsPrincipal? principal)
@@ -45,12 +56,15 @@ public class UserService
         {
             return false;
         }
-            
-        var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
-        var created = principal.FindFirstValue("Created");
-        var fingerprint = principal.FindFirstValue("Fingerprint");
+
+        var props = principal.Claims
+            .ToList()
+            .ToDictionary(i => i.Type, i => i.Value)
+            .ToList();
         
-        var computedFingerprint = CryptographyUtils.Hash(userId, created);
+        var fingerprint = principal.FindFirstValue("Fingerprint");
+
+        var computedFingerprint = CryptographyUtils.Hash(props);
         return fingerprint == computedFingerprint;
     }
 
@@ -60,9 +74,17 @@ public class UserService
         {
             Id = claims.NameIdentifier,
             Username = claims.Name,
-            Email = claims.Name.Contains("@") 
+            Email = claims.Name.Contains("@")
                 ? claims.Name
                 : $"{claims.Name}@unidesk.tul",
+            Roles = new List<UserRole>
+            {
+                new UserRole
+                {
+                    Name = "Debug",
+                    Grants = claims.Grants
+                }
+            }
         };
     }
 
@@ -82,10 +104,25 @@ public class UserService
 
     public User FromLoginRequest(ILoginRequest request)
     {
-        return new User
+        var user = new User
         {
             Username = request.Username,
             Email = $"{request.Username}@unidesk.tul",
         };
+
+        if (request.Username.Contains("admin"))
+        {
+            user.Roles = new List<UserRole>
+            {
+                new UserRole { Name = "Admin", Grants = UserGrants.All.ToList() }
+            };
+        }
+
+        return user;
+    }
+
+    public async Task SignOutAsync(HttpContext httpContext)
+    {
+        await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     }
 }

@@ -21,6 +21,12 @@ var configuration = builder.Configuration
 
 
 // scoped
+services.AddSwaggerGen(options =>
+{
+    options.UseAllOfForInheritance();
+    options.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
+    // options.UseOneOfForPolymorphism();
+});
 services.AddScoped<CryptographyUtils>();
 services.AddScoped<StagService>();
 services.AddScoped<ImportService>();
@@ -31,6 +37,17 @@ services.AddAutoMapper(options =>
 {
     options.CreateMap<IdEntity, IdEntityDto>();
     options.CreateMap<TrackedEntity, TrackedEntityDto>();
+    options.CreateMap<User, UserDto>()
+        .ForMember(i => i.Grants, i => i.MapFrom(j => j.Roles.SelectMany(k => k.Grants)));
+    
+    options.CreateMap<KeywordThesis, KeywordThesisDto>()
+        .ForMember(i => i.Keyword, i => i.MapFrom(j => j.Keyword.Value))
+        .ForMember(i => i.Locale, i => i.MapFrom(j => j.Keyword.Locale));
+    
+    options.CreateMap<Thesis, ThesisDto>()
+        .ForMember(i => i.KeywordThesis, i => i.MapFrom(j => j.KeywordThesis));
+    
+    
     options.CreateMap<Keyword, KeywordDto>()
         .ForMember(i => i.Used, opt => opt.MapFrom(i => i.KeywordThesis.Count));
 
@@ -52,6 +69,12 @@ services.AddDatabaseDeveloperPageExceptionFilter();
 
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseExceptionHandler();
 await app.MigrateDbAsync();

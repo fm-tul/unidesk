@@ -81,6 +81,11 @@ public class StagService
             dbItem.ThesisType = await _import.GetOrCreateThesisType(item.TypPrace);
 
             dbItem.Status = _import.ParseThesisStatus(item.StavPrace);
+            var student = await _import.GetOrCreateUser(item.Student);
+            if (student != null)
+            {
+                dbItem.Users = _import.UpdateUsersList(dbItem.Users, new List<User> { student });
+            }
 
             dbItem.KeywordThesis = await _import.GetOrCreateKeywords(dbItem, item.KlicSlova, item.KlicSlovaAn);
             imported.Add(dbItem);

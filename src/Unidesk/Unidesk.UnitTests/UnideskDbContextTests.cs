@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Unidesk.Db;
 using Unidesk.Db.Models;
@@ -24,7 +25,8 @@ public class UnideskDbContextTests
             .ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
 
-        var db = new UnideskDbContext(contextOptions, new UserProvider());
+        var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
+        var db = new UnideskDbContext(contextOptions, new UserProvider(), loggerSubstitute);
         db.Departments.Should().BeEmpty();
         db.Faculties.Should().BeEmpty();
         db.Documents.Should().BeEmpty();
@@ -53,7 +55,8 @@ public class UnideskDbContextTests
         });
 
         // initially empty
-        var db = new UnideskDbContext(contextOptions, userProviderSubstitute);
+        var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
+        var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute);
         db.Departments.Should().BeEmpty();
         db.Faculties.Should().BeEmpty();
         db.Documents.Should().BeEmpty();
@@ -103,7 +106,8 @@ public class UnideskDbContextTests
         {
             Email = "example@unittest.com"
         });
-        var db = new UnideskDbContext(contextOptions, userProviderSubstitute);
+        var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
+        var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute);
         await db.SeedDbAsync();
 
         var schoolYear = db.SchoolYears.First();

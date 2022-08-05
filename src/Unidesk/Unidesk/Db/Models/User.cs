@@ -4,7 +4,7 @@ namespace Unidesk.Db.Models;
 
 public class User : TrackedEntity, ISimpleUser
 {
-    public string Username { get; set; }
+    public string? Username { get; set; }
     public string? StagId { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
@@ -19,14 +19,14 @@ public class User : TrackedEntity, ISimpleUser
     public string? Position { get; set; }
     
     public Guid? AvatarId { get; set; }
-    public Document Avatar { get; set; }
+    public Document? Avatar { get; set; }
     
-    public string Work { get; set; }
-    public string WorkAddress { get; set; }
-    public string WorkPosition { get; set; }
-    public List<UserRole> Roles { get; set; }
+    public string? Work { get; set; }
+    public string? WorkAddress { get; set; }
+    public string? WorkPosition { get; set; }
+    public List<UserRole> Roles { get; set; } = new List<UserRole>();
 
-    public List<UserInTeam> UserInTeams { get; set; }
+    public List<UserInTeam> UserInTeams { get; set; } = new List<UserInTeam>();
 
     public static readonly User Guest = new User
     {

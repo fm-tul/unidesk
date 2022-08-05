@@ -8,4 +8,19 @@ public static class StringExtensions
             ? null
             : value.Trim();
     }
+
+    public static string? ValidEmailOrDefault(this string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return null;
+        }
+
+        if (email.StartsWith("@") || !email.Contains("@"))
+        {
+            return null;
+        }
+        
+        return email.Value();
+    }
 }

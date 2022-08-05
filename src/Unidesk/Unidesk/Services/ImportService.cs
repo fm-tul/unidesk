@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
+using Unidesk.Services.Stag.Models;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Services;
 
@@ -30,7 +32,7 @@ public class ImportService
 
         await Db.Keywords
             .AddRangeAsync(newKeywords);
-        
+
         return newKeywords;
     }
 
@@ -51,12 +53,12 @@ public class ImportService
         var newKeywordThesis = newKeywords
             .Select(i => new KeywordThesis { KeywordId = i.Id, ThesisId = thesis.Id })
             .ToList();
-        
+
         thesis.KeywordThesis.AddRange(newKeywordThesis);
-        
+
         return newKeywordThesis;
     }
-    
+
     public async Task<List<KeywordThesis>> GetOrCreateKeywords(Thesis thesis, string? keywordsCzeStr, string? keywordsEngStr)
     {
         // example: aaa,bbb, ccc, ddd,    eee
@@ -76,7 +78,7 @@ public class ImportService
         await GetOrCreateKeywordsLocale(thesis, "eng", keywordsEng);
 
         var keywords = thesis.KeywordThesis;
-        
+
         return keywords;
     }
 
@@ -167,6 +169,45 @@ public class ImportService
             "OPUNO" => ThesisStatus.Finished,
             _ => ThesisStatus.Unknown
         };
+    }
+
+    public async Task<User?> GetOrCreateUser(Student student)
+    {
+        if (string.IsNullOrWhiteSpace(student.StagId))
+        {
+            // skip of now
+            return null;
+        }
+
+        return await Db.Users.FirstOrDefaultAsync(i => i.StagId == student.StagId)
+               ?? Db.Users.AddAndReturn(new User()
+               {
+                   StagId = student.StagId,
+                   Username = student.Username,
+                   Email = student.Email.ValidEmailOrDefault(),
+                   FirstName = student.FirstName,
+                   LastName = student.LastName,
+                   TitleBefore = student.TitleBefore,
+                   TitleAfter = student.TitleAfter,
+               });
+    }
+
+    public List<User> UpdateUsersList(List<User> currentList, List<User> newList)
+    {
+        if (currentList.Count != newList.Count)
+        {
+            return newList;
+        }
+
+        for (int i = 0; i < currentList.Count; i++)
+        {
+            if (currentList[i].Id != newList[i].Id)
+            {
+                currentList[i] = newList[i];
+            }
+        }
+
+        return currentList;
     }
 }
 
