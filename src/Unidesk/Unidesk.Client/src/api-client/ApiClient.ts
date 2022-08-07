@@ -5,6 +5,7 @@ import type { BaseHttpRequest } from './core/BaseHttpRequest';
 import type { OpenAPIConfig } from './core/OpenAPI';
 import { AxiosHttpRequest } from './core/AxiosHttpRequest';
 
+import { EnumsService } from './services/EnumsService';
 import { HelloWorldService } from './services/HelloWorldService';
 import { ImportService } from './services/ImportService';
 import { KeywordsService } from './services/KeywordsService';
@@ -15,6 +16,7 @@ type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 
 export class ApiClient {
 
+    public readonly enums: EnumsService;
     public readonly helloWorld: HelloWorldService;
     public readonly import: ImportService;
     public readonly keywords: KeywordsService;
@@ -36,6 +38,7 @@ export class ApiClient {
             ENCODE_PATH: config?.ENCODE_PATH,
         });
 
+        this.enums = new EnumsService(this.request);
         this.helloWorld = new HelloWorldService(this.request);
         this.import = new ImportService(this.request);
         this.keywords = new KeywordsService(this.request);
