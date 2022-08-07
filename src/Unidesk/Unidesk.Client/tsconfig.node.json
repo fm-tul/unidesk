@@ -2,7 +2,27 @@
   "compilerOptions": {
     "composite": true,
     "module": "esnext",
-    "moduleResolution": "node"
+    "moduleResolution": "Node",
+    "baseUrl": "src/",
+    "paths": {
+      "@models/*": [
+        "api-client/models/*"
+      ],
+      "@api-client/*": [
+        "api-client/*"
+      ],
+      "@api-client": [
+        "api-client"
+      ],
+      "@locales/*": [
+        "locales/*"
+      ],
+      "@core/*": [
+        "core/*"
+      ],
+    }
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "vite.config.ts"
+  ]
 }
