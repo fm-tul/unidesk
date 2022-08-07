@@ -77,18 +77,18 @@ public static class InitialSeed
         {
             var names = new[]
             {
-                "HW product",
-                "SW product",
-                "FW product",
-                "Research",
-                "Modelling",
-                "Simulation",
-                "Measurements",
-                "Experimental product",
-                "External work"
+                ("HW product", "HW řešení"),
+                ("SW product", "SW řešení"),
+                ("FW product", "FW řešení"),
+                ("Research", "Rešerše, teoretické řešení"),
+                ("Modelling", "Modelování"),
+                ("Simulation", "Simulace"),
+                ("Measurements", "Meření"),
+                ("Experimental product", "Experimentální řešení"),
+                ("External work", "Ve spolupráci s firmou"),
             };
 
-            info += db.ThesisOutcomes.AddRangeEnumerable(names.Select(name => new ThesisOutcome { Name = name }));
+            info += db.ThesisOutcomes.AddRangeEnumerable(names.Select(name => new ThesisOutcome { NameEng = name.Item1, NameCze = name.Item2 }));
         }
 
         if (!db.ThesisTypes.Any())
@@ -104,6 +104,19 @@ public static class InitialSeed
             };
 
             info += db.ThesisTypes.AddRangeEnumerable(names.Select(name => new ThesisType { NameEng = name.Item1, NameCze = name.Item2, Code = name.Item3 }));
+        }
+
+        if (!db.StudyProgrammes.Any())
+        {
+            var names = new[]
+            {
+                ("IT", "Information Technology", "Informační technologie"),
+                ("M", "Mechatronics", "Mechatronika"),
+                ("N", "Nanotechnology", "Nanotechnologie"),
+                ("A", "Applied Sciences in Engineering", "Aplikované vědy v inženýrství"),
+            };
+            
+            info += db.StudyProgrammes.AddRangeEnumerable(names.Select(name => new StudyProgramme { Code = name.Item1, NameEng = name.Item2, NameCze = name.Item3 }));
         }
 
         if (!db.UserRoles.Any())

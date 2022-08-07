@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Unidesk.Configurations;
 using Unidesk.Db.Models;
+using Unidesk.Security;
 using Unidesk.Services;
 using Unidesk.Utils;
 

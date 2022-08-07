@@ -152,9 +152,12 @@ public class ImportService
         /* From stag docs:
             R. rozpracovanan prace
             DBPOO. Dodělaná práce zatím bez pokusu o obhajobu.
+            
             DBUO. Dodělaná práce, ale neúspěšná obhajoba.
             DUO. Dodělaná práce s úspěšnou obhajobou.
+            
             ND. Práce nebyla dokončena
+            
             OPUBPOO. Práce byla odevzdána a bez pokusu o obhajobu byla ukončena
             OPUNO. Práce byla odevzdána, neuspěla u obhajoby a byla ukončena
          */
@@ -163,10 +166,14 @@ public class ImportService
         {
             "R" => ThesisStatus.Assigned,
             "DBPOO" => ThesisStatus.Submitted,
-            "DUO" => ThesisStatus.Submitted,
-            "ND" => ThesisStatus.Finished,
+            
+            "DBUO" => ThesisStatus.Finished_Unsuccessfully,
+            "DUO" => ThesisStatus.Finished_Susccessfully,
+            "ND" => ThesisStatus.Abandoned,
+            
             "OPUBPOO" => ThesisStatus.Finished,
             "OPUNO" => ThesisStatus.Finished,
+            
             _ => ThesisStatus.Unknown
         };
     }

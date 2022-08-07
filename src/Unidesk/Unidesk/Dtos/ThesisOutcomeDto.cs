@@ -1,8 +1,6 @@
-﻿using Unidesk.Db.Core;
+﻿namespace Unidesk.Dtos;
 
-namespace Unidesk.Db.Models;
-
-public class ThesisOutcome : TrackedEntity
+public class ThesisOutcomeDto : TrackedEntityDto
 {
     public string NameEng { get; set; }
     public string NameCze { get; set; }

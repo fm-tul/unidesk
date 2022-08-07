@@ -8,6 +8,7 @@ public class CachedDbContext
     public readonly CachedDbSet<SchoolYear> SchoolYears;
     public readonly CachedDbSet<Faculty> Faculties;
     public readonly CachedDbSet<Department> Departments;
+    public readonly CachedDbSet<StudyProgramme> StudyProgrammes;
 
     public readonly CachedDbSet<Document> Documents;
     public readonly CachedDbSet<DocumentContent> DocumentContents;
@@ -34,6 +35,7 @@ public class CachedDbContext
         SchoolYears = new CachedDbSet<SchoolYear>(_db.SchoolYears);
         Faculties = new CachedDbSet<Faculty>(_db.Faculties);
         Departments = new CachedDbSet<Department>(_db.Departments);
+        StudyProgrammes = new CachedDbSet<StudyProgramme>(_db.StudyProgrammes);
         
         Documents = new CachedDbSet<Document>(_db.Documents);
         DocumentContents = new CachedDbSet<DocumentContent>(_db.DocumentContents);

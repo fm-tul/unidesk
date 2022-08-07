@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unidesk.Db;
 
@@ -11,9 +12,10 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    partial class UnideskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220806130320_ThesisOutcome_add_props")]
+    partial class ThesisOutcome_add_props
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -353,46 +355,6 @@ namespace Unidesk.Migrations
                     b.ToTable("SchoolYears");
                 });
 
-            modelBuilder.Entity("Unidesk.Db.Models.StudyProgramme", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DescriptionCze")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DescriptionEng")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Modified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NameCze")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NameEng")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StudyProgrammes");
-                });
-
             modelBuilder.Entity("Unidesk.Db.Models.Team", b =>
                 {
                     b.Property<Guid>("Id")
@@ -463,12 +425,6 @@ namespace Unidesk.Migrations
                     b.Property<int?>("Grade")
                         .HasColumnType("int");
 
-                    b.Property<string>("Guidelines")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Literature")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("Modified")
                         .HasColumnType("datetime2");
 
@@ -495,9 +451,6 @@ namespace Unidesk.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("StudyProgrammeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("ThesisTypeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -508,8 +461,6 @@ namespace Unidesk.Migrations
                     b.HasIndex("FacultyId");
 
                     b.HasIndex("SchoolYearId");
-
-                    b.HasIndex("StudyProgrammeId");
 
                     b.HasIndex("ThesisTypeId");
 
@@ -845,10 +796,6 @@ namespace Unidesk.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Unidesk.Db.Models.StudyProgramme", "StudyProgramme")
-                        .WithMany()
-                        .HasForeignKey("StudyProgrammeId");
-
                     b.HasOne("Unidesk.Db.Models.ThesisType", "ThesisType")
                         .WithMany()
                         .HasForeignKey("ThesisTypeId");
@@ -858,8 +805,6 @@ namespace Unidesk.Migrations
                     b.Navigation("Faculty");
 
                     b.Navigation("SchoolYear");
-
-                    b.Navigation("StudyProgramme");
 
                     b.Navigation("ThesisType");
                 });

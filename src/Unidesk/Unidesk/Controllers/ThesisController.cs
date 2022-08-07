@@ -54,6 +54,8 @@ public class ThesisController : Controller
         }
         
         var items = await query
+            .OrderBy(i => i.Status)
+                .ThenBy(i => i.Created)
             .ApplyPaging(filter)
             .ToListAsync();
         

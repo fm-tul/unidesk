@@ -6,6 +6,7 @@ using Unidesk.Controllers;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Security;
 using Unidesk.Server;
 using Unidesk.Utils;
 

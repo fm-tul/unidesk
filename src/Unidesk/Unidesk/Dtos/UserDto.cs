@@ -15,5 +15,5 @@ public class UserDto : TrackedEntityDto
     public string? TitleAfter { get; set; }
     
     [Required]
-    public List<Grant> Grants { get; set; } = new List<Grant>();
+    public List<Guid> Grants { get; set; } = new List<Guid>();
 }

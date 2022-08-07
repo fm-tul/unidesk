@@ -10,6 +10,7 @@ using NSubstitute;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Db.Seeding;
+using Unidesk.Security;
 using Unidesk.Services;
 using Xunit;
 

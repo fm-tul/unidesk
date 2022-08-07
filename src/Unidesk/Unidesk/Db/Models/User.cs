@@ -1,4 +1,5 @@
 ﻿using Unidesk.Db.Core;
+using Unidesk.Security;
 
 namespace Unidesk.Db.Models;
 

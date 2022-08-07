@@ -25,6 +25,7 @@ public class UnideskDbContext : DbContext
     public DbSet<SchoolYear> SchoolYears { get; set; }
     public DbSet<Faculty> Faculties { get; set; }
     public DbSet<Department> Departments { get; set; }
+    public DbSet<StudyProgramme> StudyProgrammes { get; set; }
 
     public DbSet<Document> Documents { get; set; }
     public DbSet<DocumentContent> DocumentContents { get; set; }

@@ -1,4 +1,5 @@
 ﻿using Unidesk.Db.Models;
+using Unidesk.Security;
 
 namespace Unidesk.ServiceFilters;
 
