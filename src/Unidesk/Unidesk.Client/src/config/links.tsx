@@ -1,106 +1,71 @@
-import { lazy, Suspense } from "react";
 import { PathRouteProps } from "react-router-dom";
+import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
+import { PageUserDetailComponent, PageUserListComponent } from "./links.pageUser";
+import { PageStagImportComponent } from "./links.pageStagImport";
+import { PageThesisListComponent } from "./links.pageThesis";
+import { PageStylesComponent } from "./links.pageStyles";
+import { PageHomeComponent } from "./links.pageHome";
+import { User_Admin } from "@api-client/constants/UserGrants_Grants";
 
-const Styles = lazy(() => import("../demo/Styles"));
-const PageHome = lazy(() => import("../pages/home/PageHome"));
-
-const PageStagImport = lazy(() => import("../pages/stag-import/PageStagImport"));
-const PageUserDetail = lazy(() => import("../pages/user/PageUserDetail"));
-const PageUserList = lazy(() => import("../pages/user/PageUserList"));
-
-const PageKeywordDetail = lazy(() => import("../pages/keyword/PageKeywordDetail"));
-const PageKeywordList = lazy(() => import("../pages/keyword/PageKeywordList"));
-
-const PageThesisList = lazy(() => import("../pages/thesis/PageThesisList"));
-interface ExtraRouteProps extends PathRouteProps {
+export interface ExtraRouteProps extends PathRouteProps {
   title: string;
   visible?: boolean;
+  requiredGrants?: string[];
 }
 
 export const link_stagImport: ExtraRouteProps = {
   title: "import",
   path: "/stag-import",
   visible: true,
-  element: (
-    <Suspense>
-      <PageStagImport />
-    </Suspense>
-  ),
+  element: PageStagImportComponent,
+  requiredGrants: [User_Admin.id],
 };
 
 export const link_pageHome: ExtraRouteProps = {
   title: "Go Home",
   path: "/",
   visible: false,
-  element: (
-    <Suspense>
-      <PageHome />
-    </Suspense>
-  ),
-};
-
-export const link_pageUserDetail: ExtraRouteProps = {
-  title: "User",
-  path: "/users/:userId",
-  visible: false,
-  element: (
-    <Suspense>
-      <PageUserDetail />
-    </Suspense>
-  ),
-};
-
-export const link_pageUserList: ExtraRouteProps = {
-  title: "User List",
-  path: "/users",
-  visible: true,
-  element: (
-    <Suspense>
-      <PageUserList />
-    </Suspense>
-  ),
-};
-
-export const link_pageKeywordDetail: ExtraRouteProps = {
-  title: "Keyword",
-  path: "/keywords/:keywordId",
-  visible: false,
-  element: (
-    <Suspense>
-      <PageKeywordDetail />
-    </Suspense>
-  ),
-};
-
-export const link_pageKeywordList: ExtraRouteProps = {
-  title: "Keywords",
-  path: "/keywords",
-  element: (
-    <Suspense>
-      <PageKeywordList />
-    </Suspense>
-  ),
+  element: PageHomeComponent,
 };
 
 export const link_pageThesisList: ExtraRouteProps = {
   title: "Theses",
   path: "/theses",
-  element: (
-    <Suspense>
-      <PageThesisList />
-    </Suspense>
-  ),
+  element: PageThesisListComponent,
 };
 
 export const link_styles: ExtraRouteProps = {
   title: "styles",
   visible: false,
   path: "/styles",
-  element: (
-    <Suspense>
-      <Styles />
-    </Suspense>
-  ),
+  element: PageStylesComponent,
+};
+
+export const link_pageKeywordDetail: ExtraRouteProps = {
+  title: "Keyword",
+  path: "/keywords/:keywordId",
+  visible: false,
+  element: PageKeywordDetailComponent,
+};
+
+export const link_pageKeywordList: ExtraRouteProps = {
+  title: "Keywords",
+  path: "/keywords",
+  element: PageKeywordListComponent,
+};
+
+export const link_pageUserDetail: ExtraRouteProps = {
+  title: "User",
+  path: "/users/:userId",
+  visible: false,
+  element: PageUserDetailComponent,
+};
+
+export const link_pageUserList: ExtraRouteProps = {
+  title: "User List",
+  path: "/users",
+  visible: true,
+  element: PageUserListComponent,
 };
 
 export const links = [
