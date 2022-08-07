@@ -1,6 +1,6 @@
 import { FaSync } from "react-icons/fa";
 import StagImport from "../../components/StagImport";
-import { R, Translate } from "../../locales/R";
+import { R, Translate } from "@locales/R";
 
 export const PageStagImport = () => {
   return (

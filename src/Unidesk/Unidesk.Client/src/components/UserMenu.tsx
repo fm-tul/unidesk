@@ -1,8 +1,8 @@
 import { useContext } from "react";
-import { R } from "../locales/R";
+import { R } from "@locales/R";
 import { Button } from "@mui/material";
 import { UserContext } from "../user/UserContext";
-import { httpClient } from "../core/init";
+import { httpClient } from "@core/init";
 
 export function UserMenu() {
   const { user, setUser, resetUser } = useContext(UserContext);

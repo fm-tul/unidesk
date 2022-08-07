@@ -24,6 +24,7 @@ export const en = {
   yes: "Yes",
   no: "No",
   "has-keywords": "Has keywords",
+  "restore-work": "Restore work",
 
   // history
   created: "Created",
@@ -33,6 +34,22 @@ export const en = {
   "created-by-user-at-time": (user: string, time: string) => `Created by ${user} (${time})`,
   "modified-by-user-at-time": (user: string, time: string) => `Modified by ${user} (${time})`,
   at: "at",
+
+  // thesis
+  "thesis-type": "Thesis type",
+  name: "Name",
+  "name-lang": (lang: string) => `Name (${lang})`,
+  "multiple-types": "Multiple types",
+  abstract: "Abstract",
+  "abstract-lang": (lang: string) => `Abstract (${lang})`,
+  "school-year": "School year",
+  department: "Department",
+  outcomes: "Expected Outcomes",
+  "study-programme": "Study programme",
+
+  // errors
+  required: "Required",
+  "min-3": "Select at least 3 values",
 };
 
 export default en;

@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { ThesisDto } from "../api-client";
-import { LanguageContext } from "../locales/LanguageContext";
-import { Translate } from "../locales/R";
+import { ThesisDto } from "@api-client";
+import { LanguageContext } from "@locales/LanguageContext";
+import { Translate } from "@locales/R";
 import { DualLanguage } from "./DualLanguage";
 import { HistoryInfoIcon } from "./HistoryInfo";
 

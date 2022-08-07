@@ -1,11 +1,7 @@
 /// <reference types="vite/client" />
 
-interface ImportMetaEnv {
-    readonly VITE_API_URL: string
-}
-
-const env = import.meta.env as unknown as ImportMetaEnv;
-
-export const API_URL = env.VITE_API_URL
-    ? env.VITE_API_URL as string
-    : "";
+const env = import.meta.env;
+export const API_URL = env.VITE_API_URL ? (env.VITE_API_URL as string) : "";
+export const IS_PROD = env.PROD === true;
+export const IS_DEV = env.DEV === true;
+export const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";

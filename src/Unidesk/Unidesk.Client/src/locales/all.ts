@@ -8,3 +8,4 @@ export type ILocale = {
 } & { id: string; flag: string; language: string };
 
 export const languages = [en, cs];
+export type LanguagesId = "eng" | "cze";

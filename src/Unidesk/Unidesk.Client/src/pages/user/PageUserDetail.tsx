@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { HistoryInfoIcon } from "../../components/HistoryInfo";
 import { ThesisSimpleView } from "../../components/ThesisSimpleView";
-import { API_URL } from "../../core/config";
-import { httpClient } from "../../core/init";
+import { API_URL } from "@core/config";
+import { httpClient } from "@core/init";
 import { useFetch } from "../../hooks/useFetch";
-import { Translate } from "../../locales/R";
+import { Translate } from "@locales/R";
 
 export const PageUserDetail = () => {
   const { userId } = useParams();

@@ -1,9 +1,13 @@
 import { createContext } from "react";
-import { languages } from "./all";
+import { languages, LanguagesId } from "./all";
 
+interface ILanguageContext {
+  language: LanguagesId;
+  setLanguage: (language: LanguagesId) => void;
+}
 const defaultContext = {
   language: languages[0].id,
-  setLanguage: (language: string) => {},
-};
+  setLanguage: (language: LanguagesId) => {},
+} as ILanguageContext;
 
 export const LanguageContext = createContext(defaultContext);

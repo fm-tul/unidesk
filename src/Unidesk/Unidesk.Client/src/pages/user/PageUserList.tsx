@@ -1,8 +1,8 @@
 import { Button, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom";
-import { httpClient } from "../../core/init";
+import { httpClient } from "@core/init";
 import { useFetch } from "../../hooks/useFetch";
-import { Translate } from "../../locales/R";
+import { Translate } from "@locales/R";
 
 export const PageUserList = () => {
   const { error, isLoading, data: users } = useFetch(() => httpClient.users.getAll({ pageSize: 100 * 2 }));

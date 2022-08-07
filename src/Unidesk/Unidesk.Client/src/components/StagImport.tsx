@@ -1,13 +1,13 @@
-import {} from "@mui/material";
+import { LinearProgress } from "@mui/material";
 import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import axios from "axios";
 import { useContext, useState } from "react";
-import { API_URL } from "../core/config";
-import { httpClient } from "../core/init";
-import { LanguageContext } from "../locales/LanguageContext";
-import { Translate } from "../locales/R";
+import { API_URL } from "@core/config";
+import { httpClient } from "@core/init";
+import { LanguageContext } from "@locales/LanguageContext";
+import { Translate } from "@locales/R";
 import { FilterBar } from "./FilterBar";
 import { ThesisSimpleView } from "./ThesisSimpleView";
 
@@ -20,9 +20,10 @@ export const StagImport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [resposeData, setResponseData] = useState<any[]>();
   const [error, setError] = useState<string>("");
-  const { language } = useContext(LanguageContext);
+  const [batchIndex, setBatchIndex] = useState(0);
+  const totalBatches = years.length * departments.length;
 
-  const importFromStag = async () => {
+  const importOneFromStag = async (year: number, department: string) => {
     setIsLoading(true);
     setError("");
 
@@ -39,6 +40,29 @@ export const StagImport = () => {
 
     setResponseData(response);
     setIsLoading(false);
+    return response;
+  };
+
+  const importFromStag = async () => {
+    await importOneFromStag(year, department);
+  };
+
+  const importAllFromStag = async () => {
+    setIsLoading(true);
+    let index = 1;
+    let items = [] as any[];
+    for (const year of years) {
+      for (const department of departments) {
+        setBatchIndex(index);
+        const batchItems = await importOneFromStag(year, department);
+        items = [...items, ...batchItems];
+        // await new Promise((resolve) => setTimeout(resolve, 1000));
+        index++;
+      }
+    }
+    setIsLoading(false);
+    setBatchIndex(0);
+    setResponseData(items);
   };
 
   return (
@@ -60,12 +84,27 @@ export const StagImport = () => {
           ))}
         </Select>
 
+        {/* import one */}
         <Button className="ml-auto" color={error ? "error" : "primary"} variant="contained" onClick={importFromStag}>
           Import
           {isLoading && <span className="spinner white"></span>}
         </Button>
-      </FilterBar>
 
+        {/* import all */}
+        <div className="flex flex-col">
+          <Button
+            className="ml-auto h-full"
+            color="primary"
+            variant="contained"
+            onClick={importAllFromStag}
+            sx={batchIndex > 0 ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : {}}
+          >
+            Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}
+            {isLoading && <span className="spinner white"></span>}
+          </Button>
+          {batchIndex > 0 && <LinearProgress variant="determinate" value={(batchIndex / totalBatches) * 100} />}
+        </div>
+      </FilterBar>
       {error && (
         <div className="text-red-500">
           <Translate value="error-occurred" />: {error}

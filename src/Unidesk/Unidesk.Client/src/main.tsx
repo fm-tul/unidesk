@@ -1,20 +1,21 @@
+import { languages, LanguagesId } from "@locales/all";
+import { LanguageContext } from "@locales/LanguageContext";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { useLocalStorage } from "./hooks/useLocalStorage";
-import { languages } from "./locales/all";
 import { App } from "./App";
-import { LanguageContext } from "./locales/LanguageContext";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { UserContext, userGuest } from "./user/UserContext";
 
-import "./index.css";
+import { IS_PROD } from "@core/config";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
-import { UserContext, userGuest } from "./user/UserContext";
+import "./index.css";
 
 const AppWithProviders = () => {
-  const [language, setLanguage] = useLocalStorage("locale", languages[0].id);
+  const [language, setLanguage] = useLocalStorage<LanguagesId>("locale", languages[0].id as LanguagesId);
   const [user, setUser] = useLocalStorage("user", userGuest);
   const resetUser = () => setUser(userGuest);
 
@@ -29,8 +30,12 @@ const AppWithProviders = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <AppWithProviders />
-  </React.StrictMode>
-);
+if (IS_PROD) {
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <AppWithProviders />
+    </React.StrictMode>
+  );
+} else {
+  ReactDOM.createRoot(document.getElementById("root")!).render(<AppWithProviders />);
+}

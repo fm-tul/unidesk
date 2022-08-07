@@ -1,19 +1,25 @@
-import { R, Translate } from "../locales/R";
+import { R, Translate } from "@locales/R";
 import moment from "moment-with-locales-es6";
 import { FaCalendar } from "react-icons/fa";
 import { useContext } from "react";
-import { LanguageContext } from "../locales/LanguageContext";
+import { LanguageContext } from "@locales/LanguageContext";
 import { Tooltip } from "@mui/material";
-import { TrackedEntityDto } from "../api-client";
+import { TrackedEntityDto } from "@api-client";
 
 interface IHistoryInfoProps {
   item: TrackedEntityDto;
 }
 
-export const Moment = (props: { date: string; fromNow?: boolean }) => {
+const languageLocaleMapping = {
+  cze: "cs",
+  eng: "en",
+} as const;
+
+export const Moment = (props: { date: string | number; fromNow?: boolean }) => {
   const { language } = useContext(LanguageContext);
-  const { date, fromNow } = props;
-  const dateMoment = moment(date).locale(language);
+  const locale = languageLocaleMapping[language];
+  const { date, fromNow = true } = props;
+  const dateMoment = moment(date).locale(locale);
   const dateString = dateMoment.format("YYYY-MM-DD HH:mm:ss");
 
   if (fromNow) {
@@ -25,7 +31,8 @@ export const Moment = (props: { date: string; fromNow?: boolean }) => {
 
 const momentFromNow = (date: string) => {
   const { language } = useContext(LanguageContext);
-  const dateMoment = moment(date).locale(language);
+  const locale = languageLocaleMapping[language];
+  const dateMoment = moment(date).locale(locale);
   return dateMoment.fromNow();
 };
 
