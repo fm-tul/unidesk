@@ -27,7 +27,7 @@ public class UnideskDbContextTests
             .Options;
 
         var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
-        var db = new UnideskDbContext(contextOptions, new UserProvider(), loggerSubstitute);
+        var db = new UnideskDbContext(contextOptions, new UserProvider(), loggerSubstitute, new DefaultDateTimeService());
         db.Departments.Should().BeEmpty();
         db.Faculties.Should().BeEmpty();
         db.Documents.Should().BeEmpty();
@@ -57,7 +57,7 @@ public class UnideskDbContextTests
 
         // initially empty
         var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
-        var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute);
+        var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute, new DefaultDateTimeService());
         db.Departments.Should().BeEmpty();
         db.Faculties.Should().BeEmpty();
         db.Documents.Should().BeEmpty();
@@ -108,7 +108,7 @@ public class UnideskDbContextTests
             Email = "example@unittest.com"
         });
         var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
-        var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute);
+        var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute, new DefaultDateTimeService());
         await db.SeedDbAsync();
 
         var schoolYear = db.SchoolYears.First();

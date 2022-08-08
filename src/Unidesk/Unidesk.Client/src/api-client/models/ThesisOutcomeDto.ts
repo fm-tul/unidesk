@@ -5,8 +5,8 @@
 import type { TrackedEntityDto } from './TrackedEntityDto';
 
 export type ThesisOutcomeDto = (TrackedEntityDto & {
-nameEng?: string | null;
-nameCze?: string | null;
+nameEng: string;
+nameCze: string;
 descriptionEng?: string | null;
 descriptionCze?: string | null;
 });

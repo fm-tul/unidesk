@@ -13,12 +13,14 @@ public class UnideskDbContext : DbContext
 {
     private readonly IUserProvider _userProvider;
     private readonly ILogger<UnideskDbContext> _logger;
+    private readonly IDateTimeService _dateTimeService;
 
-    public UnideskDbContext(DbContextOptions<UnideskDbContext> options, IUserProvider userProvider, ILogger<UnideskDbContext> logger)
+    public UnideskDbContext(DbContextOptions<UnideskDbContext> options, IUserProvider userProvider, ILogger<UnideskDbContext> logger, IDateTimeService dateTimeService)
         : base(options)
     {
         _userProvider = userProvider;
         _logger = logger;
+        _dateTimeService = dateTimeService;
         _logger.LogInformation("UnideskDbContext created");
     }
 
@@ -104,13 +106,13 @@ public class UnideskDbContext : DbContext
             {
                 if (i.Entity is TrackedEntity entity)
                 {
-                    entity.Modified = DateTime.Now;
+                    entity.Modified = _dateTimeService.Now;
                     entity.ModifiedBy = _userProvider.CurrentUser?.Email;
                     ChangeLogs.Add(ChangeLog.Create(i, _userProvider.CurrentUser?.Email));
 
                     if (i.State == EntityState.Added)
                     {
-                        entity.Created = DateTime.Now;
+                        entity.Created = _dateTimeService.Now;
                         entity.CreatedBy = _userProvider.CurrentUser?.Email;
                     }
                 }

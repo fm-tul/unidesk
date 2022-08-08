@@ -26,7 +26,7 @@ schoolYear?: SchoolYearDto;
 schoolYearId?: string;
 department?: DepartmentDto;
 departmentId?: string;
-facultyDto?: Faculty;
+faculty?: Faculty;
 facultyId?: string;
 studyProgramme?: StudyProgrammeDto;
 studyProgrammeId?: string | null;

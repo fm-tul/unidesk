@@ -25,7 +25,7 @@ export const DepartmentEditor = () => {
   const { language } = useContext(LanguageContext);
   const [showEditor, setShowEditor] = useState(false);
   const [itemId, setItemId] = useState<string>("");
-  const { data, isLoading, error } = useFetch(() => httpClient.enums.department());
+  const { data, isLoading, error } = useFetch(() => httpClient.enums.departmentGetAll());
   const dataKV = useMemo(
     () => (data ?? []).map(i => ({ key: i.id, value: `${i.code} - ${language === "cze" ? i.nameCze : i.nameEng}` })),
     [data, language]
@@ -69,7 +69,7 @@ export const DepartmentEditor = () => {
 
   const handleSave = async () => {
     const item = formik.values as DepartmentDto;
-    const ok = await httpClient.enums.departmentEdit({ requestBody: item });
+    const ok = await httpClient.enums.departmentCreateOrUpdate({ requestBody: item });
   };
 
   return (

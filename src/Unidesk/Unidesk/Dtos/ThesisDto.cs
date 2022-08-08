@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Unidesk.Db.Models;
+using Unidesk.Server;
 
 namespace Unidesk.Dtos;
 
@@ -34,7 +35,7 @@ public class ThesisDto : TrackedEntityDto
     /// <summary>
     /// Faculty of the thesis (e.g. FM, or maybe other faculties)
     /// </summary>
-    public Faculty FacultyDto { get; set; }
+    public Faculty Faculty { get; set; }
     public Guid FacultyId { get; set; }
     
     /// <summary>
@@ -61,12 +62,16 @@ public class ThesisDto : TrackedEntityDto
     /// after the thesis is accepted, this can be ignored, and the selected type is used instead <see cref="ThesisType"/>
     /// </summary>
     public List<ThesisType> ThesisTypeCandidates { get; set; } = new List<ThesisType>();
+    
+    [IgnoreMapping]
     public List<Guid> ThesisTypeCandidateIds { get; set; } = new List<Guid>();
     
     /// <summary>
     /// List of possible outcomes for the thesis (e.g. HW solution, SW solution, Modelling, etc.)
     /// </summary>
     public List<ThesisOutcome> Outcomes { get; set; } = new List<ThesisOutcome>();
+    
+    [IgnoreMapping]
     public List<Guid> OutcomeIds { get; set; } = new List<Guid>();
     
     /// <summary>

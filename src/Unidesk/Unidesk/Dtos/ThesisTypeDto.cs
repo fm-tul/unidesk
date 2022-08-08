@@ -1,8 +1,13 @@
-﻿namespace Unidesk.Dtos;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Unidesk.Dtos;
 
 public class ThesisTypeDto : TrackedEntityDto
 {
+    [Required]
     public string NameEng { get; set; }
+    
+    [Required]
     public string NameCze { get; set; }
     
     public string? Code { get; set; }

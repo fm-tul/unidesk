@@ -49,44 +49,44 @@ public class Thesis : TrackedEntity
 
     // public ??? Attachments { get; set; }
 
-    public Guid SchoolYearId { get; set; }
 
     /// <summary>
     /// Schoold year of the thesis
     /// </summary>
     public SchoolYear SchoolYear { get; set; }
+    public Guid SchoolYearId { get; set; }
 
 
-    public Guid DepartmentId { get; set; }
 
     /// <summary>
     /// Department of the thesis (e.g. NTI, ITE, MTI)
     /// </summary>
     public Department Department { get; set; }
+    public Guid DepartmentId { get; set; }
 
 
-    public Guid FacultyId { get; set; }
 
     /// <summary>
     /// Faculty of the thesis (e.g. FM, or maybe other faculties)
     /// </summary>
     public Faculty Faculty { get; set; }
+    public Guid FacultyId { get; set; }
     
     
-    public Guid? StudyProgrammeId { get; set; }
     /// <summary>
     /// Study Programme of the thesis (e.g. Information Technology, Applied Sciences in Engineering)
     /// </summary>
     public StudyProgramme StudyProgramme { get; set; }
+    public Guid? StudyProgrammeId { get; set; }
 
 
-    public Guid? ThesisTypeId { get; set; }
 
     /// <summary>
     /// Selected type of the thesis (e.g. bachelor, master, PhD)
     /// before the thesis is accepted, this can be null, and possible candidates are used instead <see cref="ThesisTypeCandidates"/>
     /// </summary>
     public ThesisType? ThesisType { get; set; }
+    public Guid? ThesisTypeId { get; set; }
 
     /// <summary>
     /// types, which are possible candidates for the thesis type

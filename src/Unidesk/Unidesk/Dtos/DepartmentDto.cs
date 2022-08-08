@@ -10,8 +10,7 @@ public class DepartmentDto : TrackedEntityDto
     [Required]
     public string NameCze { get; set; }
     
-    [Required]
-    public string Code { get; set; }
+    public string? Code { get; set; }
     
     public string? DescriptionEng { get; set; }
     public string? DescriptionCze { get; set; }

@@ -1,13 +1,18 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Department } from '../models/Department';
 import type { DepartmentDto } from '../models/DepartmentDto';
 import type { EnumsDto } from '../models/EnumsDto';
 import type { Faculty } from '../models/Faculty';
+import type { FacultyDto } from '../models/FacultyDto';
+import type { SchoolYear } from '../models/SchoolYear';
 import type { SchoolYearDto } from '../models/SchoolYearDto';
-import type { StudyProgrammeDto } from '../models/StudyProgrammeDto';
+import type { StudyProgramme } from '../models/StudyProgramme';
+import type { ThesisOutcome } from '../models/ThesisOutcome';
 import type { ThesisOutcomeDto } from '../models/ThesisOutcomeDto';
 import type { ThesisType } from '../models/ThesisType';
+import type { ThesisTypeDto } from '../models/ThesisTypeDto';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -20,7 +25,7 @@ export class EnumsService {
      * @returns Faculty Success
      * @throws ApiError
      */
-    public faculty(): CancelablePromise<Array<Faculty>> {
+    public facultyGetAll(): CancelablePromise<Array<Faculty>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/Faculty/list',
@@ -28,10 +33,27 @@ export class EnumsService {
     }
 
     /**
-     * @returns DepartmentDto Success
+     * @returns FacultyDto Success
      * @throws ApiError
      */
-    public department(): CancelablePromise<Array<DepartmentDto>> {
+    public facultyCreateOrUpdate({
+requestBody,
+}: {
+requestBody: FacultyDto,
+}): CancelablePromise<FacultyDto> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/enums/Faculty/list',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @returns Department Success
+     * @throws ApiError
+     */
+    public departmentGetAll(): CancelablePromise<Array<Department>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/Department/list',
@@ -42,24 +64,24 @@ export class EnumsService {
      * @returns DepartmentDto Success
      * @throws ApiError
      */
-    public departmentEdit({
+    public departmentCreateOrUpdate({
 requestBody,
 }: {
 requestBody: DepartmentDto,
 }): CancelablePromise<DepartmentDto> {
         return this.httpRequest.request({
             method: 'POST',
-            url: '/api/enums/Department/edit',
+            url: '/api/enums/Department/list',
             body: requestBody,
             mediaType: 'application/json',
         });
     }
 
     /**
-     * @returns SchoolYearDto Success
+     * @returns SchoolYear Success
      * @throws ApiError
      */
-    public schoolYear(): CancelablePromise<Array<SchoolYearDto>> {
+    public schoolYearGetAll(): CancelablePromise<Array<SchoolYear>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/SchoolYear/list',
@@ -67,10 +89,27 @@ requestBody: DepartmentDto,
     }
 
     /**
-     * @returns ThesisOutcomeDto Success
+     * @returns SchoolYearDto Success
      * @throws ApiError
      */
-    public thesisOutcome(): CancelablePromise<Array<ThesisOutcomeDto>> {
+    public schoolYearCreateOrUpdate({
+requestBody,
+}: {
+requestBody: SchoolYearDto,
+}): CancelablePromise<SchoolYearDto> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/enums/SchoolYear/list',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @returns ThesisOutcome Success
+     * @throws ApiError
+     */
+    public thesisOutcomeGetAll(): CancelablePromise<Array<ThesisOutcome>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/ThesisOutcome/list',
@@ -78,10 +117,27 @@ requestBody: DepartmentDto,
     }
 
     /**
+     * @returns ThesisOutcomeDto Success
+     * @throws ApiError
+     */
+    public thesisOutcomeCreateOrUpdate({
+requestBody,
+}: {
+requestBody: ThesisOutcomeDto,
+}): CancelablePromise<ThesisOutcomeDto> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/enums/ThesisOutcome/list',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
      * @returns ThesisType Success
      * @throws ApiError
      */
-    public thesisType(): CancelablePromise<Array<ThesisType>> {
+    public thesisTypeGetAll(): CancelablePromise<Array<ThesisType>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/ThesisType/list',
@@ -89,10 +145,27 @@ requestBody: DepartmentDto,
     }
 
     /**
-     * @returns StudyProgrammeDto Success
+     * @returns ThesisTypeDto Success
      * @throws ApiError
      */
-    public studyProgramme(): CancelablePromise<Array<StudyProgrammeDto>> {
+    public thesisTypeCreateOrUpdate({
+requestBody,
+}: {
+requestBody: ThesisTypeDto,
+}): CancelablePromise<ThesisTypeDto> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/enums/ThesisType/list',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @returns StudyProgramme Success
+     * @throws ApiError
+     */
+    public studyProgrammeGetAll(): CancelablePromise<Array<StudyProgramme>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/StudyProgramme/list',
