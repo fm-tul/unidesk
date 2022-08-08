@@ -1,8 +1,7 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
-using Unidesk;
 using Unidesk.Client;
 using Unidesk.Configurations;
 using Unidesk.Db;
@@ -50,11 +49,12 @@ services.AddAutoMapper(options =>
     options.CreateMap<TrackedEntity, TrackedEntityDto>();
 
     options.CreateMap<Department, DepartmentDto>();
+    options.CreateMap<DepartmentDto, Department>();
     options.CreateMap<Faculty, FacultyDto>();
     options.CreateMap<ThesisType, ThesisTypeDto>();
     options.CreateMap<ThesisOutcome, ThesisOutcomeDto>();
     options.CreateMap<StudyProgramme, StudyProgrammeDto>();
-    
+
     options.CreateMap<SchoolYear, SchoolYearDto>()
         .ForMember(i => i.Start, i => i.MapFrom(j => j._start))
         .ForMember(i => i.End, i => i.MapFrom(j => j._end));
@@ -75,18 +75,23 @@ services.AddAutoMapper(options =>
         .ForMember(i => i.Used, opt => opt.MapFrom(i => i.KeywordThesis.Count));
 }, typeof(Program));
 
-// singleton
-services.AddSingleton(configuration.GetSection(nameof(AppOptions)).Get<AppOptions>());
 
+// configs
+var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>()!;
+var connectionString = configuration.GetConnectionString(nameof(UnideskDbContext))!;
+
+// singleton
+services.AddSingleton(appOptions);
 
 // extra
 services.AddControllersWithFilters();
 services.AddDevCors();
 services.AddHttpContextAccessor();
 services.AddCookieAuthentication();
-services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(configuration.GetConnectionString(nameof(UnideskDbContext))));
+services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(connectionString));
 services.AddScoped<CachedDbContext>();
 services.AddDatabaseDeveloperPageExceptionFilter();
+services.AddOutputCache();
 
 
 var app = builder.Build();
@@ -111,74 +116,80 @@ app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseMiddleware<RequireGrantFilter>();
 
-
+app.UseOutputCache();
 app.MapControllers();
+
 
 // Faculty
 app.MapGet("/api/enums/Faculty/list",
         [RequireGrant(UserGrants.User_Guest_Id)]
         ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => db.Faculties.ToList())
-    .WithTags(new[] { "Enums" })
-    .WithName(nameof(Faculty))
-    .Produces<List<Faculty>>();
+    .UseEnumsCachedEndpoint<List<Faculty>>(nameof(Faculty));
 
 // Department
 app.MapGet("/api/enums/Department/list",
         ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => mapper.Map<List<DepartmentDto>>(db.Departments.ToList()))
-    .WithTags(new[] { "Enums" })
-    .WithName(nameof(Department))
-    .Produces<List<DepartmentDto>>();
+    .UseEnumsCachedEndpoint<List<DepartmentDto>>(nameof(Department));
+app.MapPost("/api/enums/Department/edit", async ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper, [FromServices] IOutputCacheStore cache, [FromBody] DepartmentDto dto, CancellationToken ct) =>
+        {
+            var isInew = dto.Id == Guid.Empty;
+            Department entity;
+            if (isInew)
+            {
+                entity = mapper.Map<Department>(dto);
+                entity.Id = Guid.NewGuid();
+                db.Departments.Add(entity);
+            }
+            else
+            {
+                entity = await db.Departments.FindAsync(dto.Id)
+                    ?? throw new Exception($"Department with id {dto.Id} not found");
+                mapper.Map(dto, entity);
+            }
+
+            await db.SaveChangesAsync(ct);
+            await cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
+            return mapper.Map<DepartmentDto>(entity);
+        })
+    .UseEnumsCachedEndpoint<DepartmentDto>($"{nameof(Department)}Edit");
 
 // SchoolYear
 app.MapGet("/api/enums/SchoolYear/list",
         ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => mapper.Map<List<SchoolYearDto>>(db.SchoolYears.ToList()))
-    .WithTags(new[] { "Enums" })
-    .WithName(nameof(SchoolYear))
-    .Produces<List<SchoolYearDto>>();
+    .UseEnumsCachedEndpoint<List<SchoolYearDto>>(nameof(SchoolYear));
 
 // ThesisOutcome
 app.MapGet("api/enums/ThesisOutcome/list",
         ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => mapper.Map<List<ThesisOutcomeDto>>(db.ThesisOutcomes.ToList()))
-    .WithTags(new[] { "Enums" })
-    .WithName(nameof(ThesisOutcome))
-    .Produces<List<ThesisOutcomeDto>>();
+    .UseEnumsCachedEndpoint<List<ThesisOutcomeDto>>(nameof(ThesisOutcome));
 
 // ThesisType
 app.MapGet("api/enums/ThesisType/list", ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => db.ThesisTypes.ToList())
-    .WithTags(new[] { "Enums" })
-    .WithName(nameof(ThesisType))
-    .Produces<List<ThesisType>>();
+    .UseEnumsCachedEndpoint<List<ThesisType>>(nameof(ThesisType));
 
 // StudyProgramme
 app.MapGet("api/enums/StudyProgramme/list",
         ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => mapper.Map<List<StudyProgrammeDto>>(db.StudyProgrammes.ToList()))
-    .WithTags(new[] { "Enums" })
-    .WithName(nameof(StudyProgramme))
-    .Produces<List<StudyProgrammeDto>>();
+    .UseEnumsCachedEndpoint<List<StudyProgrammeDto>>(nameof(StudyProgramme));
 
 // all enums
-app.MapGet("api/enum/All/list", ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) =>
+app.MapGet("api/enum/All/list", ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => new EnumsDto
     {
-        var departments = mapper.Map<List<DepartmentDto>>(db.Departments.ToList());
-        var faculties = mapper.Map<List<FacultyDto>>(db.Faculties.ToList());
-        var schoolYears = mapper.Map<List<SchoolYearDto>>(db.SchoolYears.ToList());
-        var thesisOutcomes = mapper.Map<List<ThesisOutcomeDto>>(db.ThesisOutcomes.ToList());
-        var thesisTypes = mapper.Map<List<ThesisTypeDto>>(db.ThesisTypes.ToList());
-        var studyProgrammes = mapper.Map<List<StudyProgrammeDto>>(db.StudyProgrammes.ToList());
-        return new EnumsDto
-        {
-            Departments = departments,
-            Faculties = faculties,
-            SchoolYears = schoolYears,
-            ThesisOutcomes = thesisOutcomes,
-            ThesisTypes = thesisTypes,
-            StudyProgrammes = studyProgrammes
-        };
+        Departments = mapper.Map<List<DepartmentDto>>(db.Departments.ToList()),
+        Faculties = mapper.Map<List<FacultyDto>>(db.Faculties.ToList()),
+        SchoolYears = mapper.Map<List<SchoolYearDto>>(db.SchoolYears.ToList()),
+        ThesisOutcomes = mapper.Map<List<ThesisOutcomeDto>>(db.ThesisOutcomes.ToList()),
+        ThesisTypes = mapper.Map<List<ThesisTypeDto>>(db.ThesisTypes.ToList()),
+        StudyProgrammes = mapper.Map<List<StudyProgrammeDto>>(db.StudyProgrammes.ToList())
     })
-    .WithTags(new[] { "Enums" })
-    .WithName("AllEnums")
-    .Produces<EnumsDto>();
+    .UseEnumsCachedEndpoint<EnumsDto>("AllEnums");
+
+
+app.MapGet("api/enum/Cache/reset", async ([FromServices] IOutputCacheStore cache, CancellationToken ct) =>
+    {
+        await cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
+        return new { Success = true };
+    });
 
 app.Run();

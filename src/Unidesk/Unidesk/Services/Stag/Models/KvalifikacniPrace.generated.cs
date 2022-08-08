@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Unidesk.Db.Core;
 using Newtonsoft.Json;
+#pragma warning disable CS8669
 
 namespace Unidesk.Services.Stag.Models;
 

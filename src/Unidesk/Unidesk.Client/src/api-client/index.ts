@@ -9,6 +9,7 @@ export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
 export type { OpenAPIConfig } from './core/OpenAPI';
 
+export type { Boolean_f__AnonymousType18 } from './models/Boolean_f__AnonymousType18';
 export type { DepartmentDto } from './models/DepartmentDto';
 export type { EnumsDto } from './models/EnumsDto';
 export type { Faculty } from './models/Faculty';
@@ -33,4 +34,5 @@ export { HelloWorldService } from './services/HelloWorldService';
 export { ImportService } from './services/ImportService';
 export { KeywordsService } from './services/KeywordsService';
 export { ThesisService } from './services/ThesisService';
+export { UnideskService } from './services/UnideskService';
 export { UsersService } from './services/UsersService';

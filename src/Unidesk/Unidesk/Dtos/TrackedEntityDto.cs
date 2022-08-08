@@ -6,6 +6,11 @@ namespace Unidesk.Dtos;
 
 [SwaggerSubType(typeof(KeywordDto))]
 [SwaggerSubType(typeof(ThesisDto))]
+[SwaggerSubType(typeof(DepartmentDto))]
+[SwaggerSubType(typeof(SchoolYearDto))]
+[SwaggerSubType(typeof(FacultyDto))]
+[SwaggerSubType(typeof(ThesisOutcomeDto))]
+[SwaggerSubType(typeof(StudyProgrammeDto))]
 public class TrackedEntityDto : IdEntityDto
 {
     [Required]

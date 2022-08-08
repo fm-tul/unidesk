@@ -1,5 +1,5 @@
 import { EMPTY_GUID } from "@core/config";
-import { httpClient } from "@core/init";
+import { guestHttpClient, httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { R } from "@locales/R";
 import { ThesisDto } from "@models/ThesisDto";
@@ -32,7 +32,7 @@ export const PageThesisNew = () => {
   });
 
   const persistentObject = getPersistedObject<Partial<ThesisDto>>(PERSISTED_OBJECT_KEY);
-  const { data: enums } = useFetch(() => httpClient.enums.allEnums());
+  const { data: enums } = useFetch(() => guestHttpClient.enums.allEnums());
   const { departments, schoolYears, thesisOutcomes, thesisTypes, studyProgrammes } = enums ?? {};
 
   const thesisTypesKV = useMemo(() => toKV(language, thesisTypes), [thesisTypes, language]);

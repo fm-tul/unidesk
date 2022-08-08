@@ -1,8 +1,6 @@
 import { EMPTY_GUID } from "@core/config";
-import { R } from "@locales/R";
 import { ThesisDto } from "@models/ThesisDto";
 import { ThesisStatus } from "@models/ThesisStatus";
-import { FormikConfig } from "formik";
 import * as Yup from "yup";
 
 const REQUIRED = "required";

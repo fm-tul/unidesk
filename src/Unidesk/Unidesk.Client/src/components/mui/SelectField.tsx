@@ -10,16 +10,17 @@ interface SelectFieldProps {
   props: SelectProps & TextFieldProps;
   items: KeyValueItem[];
   emptyItem?: KeyValueItem;
-  label: string;
+  label?: string;
   renderValue?: ((value: unknown) => React.ReactNode) | undefined;
+  fullWidth?: boolean;
 }
 export const SelectField = (props: SelectFieldProps) => {
-  const { props: selectProps, items, emptyItem, label, renderValue } = props;
+  const { props: selectProps, items, emptyItem, label, renderValue, fullWidth = true } = props;
   const { helperText, ...selectPropsSafe } = selectProps;
 
   return (
-    <FormControl variant="outlined" className="w-full" size="small" error={selectProps.error}>
-      <InputLabel>{label}</InputLabel>
+    <FormControl variant="outlined" size="small" error={selectProps.error} fullWidth={fullWidth}>
+      {!!label && <InputLabel>{label}</InputLabel>}
       <Select {...selectPropsSafe} label={label} renderValue={renderValue}>
         {!!emptyItem && <MenuItem value={emptyItem.key}>{emptyItem.value}</MenuItem>}
         {items.map(item => (

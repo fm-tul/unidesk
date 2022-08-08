@@ -39,6 +39,23 @@ export class EnumsService {
     }
 
     /**
+     * @returns DepartmentDto Success
+     * @throws ApiError
+     */
+    public departmentEdit({
+requestBody,
+}: {
+requestBody: DepartmentDto,
+}): CancelablePromise<DepartmentDto> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/enums/Department/edit',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
      * @returns SchoolYearDto Success
      * @throws ApiError
      */

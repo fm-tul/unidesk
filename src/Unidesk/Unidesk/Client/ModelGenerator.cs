@@ -1,11 +1,16 @@
 ﻿using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Unidesk.Client;
 
 public class ModelGenerator
 {
+    
+    // regex mathing GENERATED ON 2022-08-07 18:15:21
+    private static readonly Regex _generatedOnRegex = new Regex(@"GENERATED ON (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", RegexOptions.Multiline);
+    
     public static void Generate(Type root, string outputDir)
     {
         // looking for GenerateModelAttribute
@@ -24,7 +29,7 @@ public class ModelGenerator
             var attrs = cls.GetCustomAttributes(typeof(GenerateModelAttribute), false)
                 .OfType<GenerateModelAttribute>()
                 .ToList();
-            
+
             foreach (var attr in attrs)
             {
                 var output = new StringBuilder();
@@ -33,12 +38,12 @@ public class ModelGenerator
                 output.AppendLine($"/* GENERATED ON {DateTime.Now:yyyy-MM-dd HH:mm:ss} */");
                 output.AppendLine();
                 var outputFile = Path.Combine(outputDir, $"{attr.Name}_{attr.ForType.Name}s.ts");
-                
+
                 // look for public static fields or certain type
                 var fields = cls.GetFields(BindingFlags.Static | BindingFlags.Public)
                     .Where(i => i.FieldType == attr.ForType)
                     .ToList();
-                
+
                 foreach (var field in fields)
                 {
                     var value = field.GetValue(null);
@@ -54,13 +59,25 @@ public class ModelGenerator
                     {
                         output.AppendLine($"    {field.Name},");
                     }
+
                     output.AppendLine($"];");
+                }
+
+                if (File.Exists(outputFile))
+                {
+                    var existing = File.ReadAllText(outputFile);
+                    var existingCleared = _generatedOnRegex.Replace(existing, string.Empty);
+                    var outputCleared = _generatedOnRegex.Replace(output.ToString(), string.Empty);
+                    if (existingCleared == outputCleared)
+                    {
+                        Console.WriteLine($"{outputFile} is up to date");
+                        continue;
+                    }
                 }
                 
                 File.WriteAllText(outputFile, output.ToString());
             }
         }
-
     }
 }
 

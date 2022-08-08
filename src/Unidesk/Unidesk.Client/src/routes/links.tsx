@@ -1,4 +1,3 @@
-import { PathRouteProps } from "react-router-dom";
 import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
 import { PageUserDetailComponent, PageUserListComponent } from "./links.pageUser";
 import { PageStagImportComponent } from "./links.pageStagImport";
@@ -6,12 +5,8 @@ import { PageThesisListComponent } from "./links.pageThesis";
 import { PageStylesComponent } from "./links.pageStyles";
 import { PageHomeComponent } from "./links.pageHome";
 import { User_Admin } from "@api-client/constants/UserGrants_Grants";
-
-export interface ExtraRouteProps extends PathRouteProps {
-  title: string;
-  visible?: boolean;
-  requiredGrants?: string[];
-}
+import { ExtraRouteProps } from "./core";
+import { link_admin, link_adminManageEnum } from "./admin/links";
 
 export const link_stagImport: ExtraRouteProps = {
   title: "import",
@@ -81,4 +76,7 @@ export const links = [
   link_pageThesisList,
 
   link_styles,
+
+  link_admin,
+  link_adminManageEnum,
 ];

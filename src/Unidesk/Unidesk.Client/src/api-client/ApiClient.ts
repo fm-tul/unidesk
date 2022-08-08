@@ -10,6 +10,7 @@ import { HelloWorldService } from './services/HelloWorldService';
 import { ImportService } from './services/ImportService';
 import { KeywordsService } from './services/KeywordsService';
 import { ThesisService } from './services/ThesisService';
+import { UnideskService } from './services/UnideskService';
 import { UsersService } from './services/UsersService';
 
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
@@ -21,6 +22,7 @@ export class ApiClient {
     public readonly import: ImportService;
     public readonly keywords: KeywordsService;
     public readonly thesis: ThesisService;
+    public readonly unidesk: UnideskService;
     public readonly users: UsersService;
 
     public readonly request: BaseHttpRequest;
@@ -43,6 +45,7 @@ export class ApiClient {
         this.import = new ImportService(this.request);
         this.keywords = new KeywordsService(this.request);
         this.thesis = new ThesisService(this.request);
+        this.unidesk = new UnideskService(this.request);
         this.users = new UsersService(this.request);
     }
 }

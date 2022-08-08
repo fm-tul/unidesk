@@ -1,5 +1,6 @@
 import { Link, Route, Routes } from "react-router-dom";
-import { ExtraRouteProps, links, link_pageHome } from "./config/links";
+import { links, link_pageHome } from "./routes/links";
+import { ExtraRouteProps } from "./routes/core";
 import { EnKeys } from "@locales/all";
 import { LanguageSelector } from "./components/LanguageSelector";
 import { UserMenu } from "./components/UserMenu";
@@ -11,7 +12,7 @@ import { UserDto } from "@api-client";
 
 export const App = () => {
   const { user } = useContext(UserContext);
-  const available_links = links.filter((i) => has_access(i, user));
+  const available_links = links.filter(i => has_access(i, user));
 
   // min-w-max
   return (
@@ -26,10 +27,10 @@ export const App = () => {
         {/* links */}
         <div className="flex gap-3">
           {available_links
-            .filter((i) => i.visible !== false)
-            .map((link) => (
-              <Link key={link.path} to={link.path}>
-                <Button>{R(link.title as EnKeys)}</Button>
+            .filter(i => i.visible !== false)
+            .map(i => (
+              <Link key={i.path} to={i.path}>
+                <Button>{R(i.title as EnKeys)}</Button>
               </Link>
             ))}
         </div>
@@ -47,7 +48,7 @@ export const App = () => {
       {/* content */}
       <div className="rounded-sm bg-slate-100 p-4 shadow">
         <Routes>
-          {available_links.map((i) => (
+          {available_links.map(i => (
             <Route key={i.path} {...i} />
           ))}
         </Routes>
@@ -63,6 +64,6 @@ function has_access(i: ExtraRouteProps, user: UserDto): boolean {
     return true;
   }
   const { grants } = user;
-  const has_access = i.requiredGrants.every((grant) => grants.includes(grant));
+  const has_access = i.requiredGrants.every(grant => grants.includes(grant));
   return has_access;
 }
