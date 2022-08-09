@@ -12,32 +12,32 @@ public static class MinimalApiExtensions
         // Faculty
         app.MapGet("/api/enums/Faculty/list",
                 ([FromServices] SimpleEnumService s) => s.GetAll<Faculty, FacultyDto>())
-            .UseEnumsCachedEndpoint<List<Faculty>>($"{nameof(Faculty)}GetAll");
+            .UseEnumsCachedEndpoint<List<FacultyDto>>($"{nameof(Faculty)}GetAll");
 
         // Department
         app.MapGet("/api/enums/Department/list",
                 ([FromServices] SimpleEnumService s) => s.GetAll<Department, DepartmentDto>())
-            .UseEnumsCachedEndpoint<List<Department>>($"{nameof(Department)}GetAll");
+            .UseEnumsCachedEndpoint<List<DepartmentDto>>($"{nameof(Department)}GetAll");
 
         // SchoolYear
         app.MapGet("/api/enums/SchoolYear/list",
                 ([FromServices] SimpleEnumService s) => s.GetAll<SchoolYear, SchoolYearDto>())
-            .UseEnumsCachedEndpoint<List<SchoolYear>>($"{nameof(SchoolYear)}GetAll");
+            .UseEnumsCachedEndpoint<List<SchoolYearDto>>($"{nameof(SchoolYear)}GetAll");
 
         // ThesisOutcome
         app.MapGet("api/enums/ThesisOutcome/list",
                 ([FromServices] SimpleEnumService s) => s.GetAll<ThesisOutcome, ThesisOutcomeDto>())
-            .UseEnumsCachedEndpoint<List<ThesisOutcome>>($"{nameof(ThesisOutcome)}GetAll");
+            .UseEnumsCachedEndpoint<List<ThesisOutcomeDto>>($"{nameof(ThesisOutcome)}GetAll");
 
         // ThesisType
         app.MapGet("api/enums/ThesisType/list",
                 ([FromServices] SimpleEnumService s) => s.GetAll<ThesisType, ThesisTypeDto>())
-            .UseEnumsCachedEndpoint<List<ThesisType>>($"{nameof(ThesisType)}GetAll");
+            .UseEnumsCachedEndpoint<List<ThesisTypeDto>>($"{nameof(ThesisType)}GetAll");
 
         // StudyProgramme
         app.MapGet("api/enums/StudyProgramme/list",
                 ([FromServices] SimpleEnumService s) => s.GetAll<StudyProgramme, StudyProgrammeDto>())
-            .UseEnumsCachedEndpoint<List<StudyProgramme>>($"{nameof(StudyProgramme)}GetAll");
+            .UseEnumsCachedEndpoint<List<StudyProgrammeDto>>($"{nameof(StudyProgramme)}GetAll");
 
         return app;
     }
@@ -68,6 +68,11 @@ public static class MinimalApiExtensions
         app.MapPost("api/enums/ThesisType/list",
             ([FromServices] SimpleEnumService s, [FromBody] ThesisTypeDto dto, CancellationToken ct) => s.CreateOrUpdate<ThesisType, ThesisTypeDto>(dto, ct))
             .UseEnumsEndpoint<ThesisTypeDto>($"{nameof(ThesisType)}CreateOrUpdate");
+        
+        // StudyProgramme
+        app.MapPost("api/enums/StudyProgramme/list",
+            ([FromServices] SimpleEnumService s, [FromBody] StudyProgrammeDto dto, CancellationToken ct) => s.CreateOrUpdate<StudyProgramme, StudyProgrammeDto>(dto, ct))
+            .UseEnumsEndpoint<StudyProgrammeDto>($"{nameof(StudyProgramme)}CreateOrUpdate");
         
         return app;
     }

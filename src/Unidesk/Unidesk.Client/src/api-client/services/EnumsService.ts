@@ -1,17 +1,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Department } from '../models/Department';
 import type { DepartmentDto } from '../models/DepartmentDto';
 import type { EnumsDto } from '../models/EnumsDto';
-import type { Faculty } from '../models/Faculty';
 import type { FacultyDto } from '../models/FacultyDto';
-import type { SchoolYear } from '../models/SchoolYear';
 import type { SchoolYearDto } from '../models/SchoolYearDto';
-import type { StudyProgramme } from '../models/StudyProgramme';
-import type { ThesisOutcome } from '../models/ThesisOutcome';
+import type { StudyProgrammeDto } from '../models/StudyProgrammeDto';
 import type { ThesisOutcomeDto } from '../models/ThesisOutcomeDto';
-import type { ThesisType } from '../models/ThesisType';
 import type { ThesisTypeDto } from '../models/ThesisTypeDto';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -22,10 +17,10 @@ export class EnumsService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
 
     /**
-     * @returns Faculty Success
+     * @returns FacultyDto Success
      * @throws ApiError
      */
-    public facultyGetAll(): CancelablePromise<Array<Faculty>> {
+    public facultyGetAll(): CancelablePromise<Array<FacultyDto>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/Faculty/list',
@@ -50,10 +45,10 @@ requestBody: FacultyDto,
     }
 
     /**
-     * @returns Department Success
+     * @returns DepartmentDto Success
      * @throws ApiError
      */
-    public departmentGetAll(): CancelablePromise<Array<Department>> {
+    public departmentGetAll(): CancelablePromise<Array<DepartmentDto>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/Department/list',
@@ -78,10 +73,10 @@ requestBody: DepartmentDto,
     }
 
     /**
-     * @returns SchoolYear Success
+     * @returns SchoolYearDto Success
      * @throws ApiError
      */
-    public schoolYearGetAll(): CancelablePromise<Array<SchoolYear>> {
+    public schoolYearGetAll(): CancelablePromise<Array<SchoolYearDto>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/SchoolYear/list',
@@ -106,10 +101,10 @@ requestBody: SchoolYearDto,
     }
 
     /**
-     * @returns ThesisOutcome Success
+     * @returns ThesisOutcomeDto Success
      * @throws ApiError
      */
-    public thesisOutcomeGetAll(): CancelablePromise<Array<ThesisOutcome>> {
+    public thesisOutcomeGetAll(): CancelablePromise<Array<ThesisOutcomeDto>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/ThesisOutcome/list',
@@ -134,10 +129,10 @@ requestBody: ThesisOutcomeDto,
     }
 
     /**
-     * @returns ThesisType Success
+     * @returns ThesisTypeDto Success
      * @throws ApiError
      */
-    public thesisTypeGetAll(): CancelablePromise<Array<ThesisType>> {
+    public thesisTypeGetAll(): CancelablePromise<Array<ThesisTypeDto>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/ThesisType/list',
@@ -162,13 +157,30 @@ requestBody: ThesisTypeDto,
     }
 
     /**
-     * @returns StudyProgramme Success
+     * @returns StudyProgrammeDto Success
      * @throws ApiError
      */
-    public studyProgrammeGetAll(): CancelablePromise<Array<StudyProgramme>> {
+    public studyProgrammeGetAll(): CancelablePromise<Array<StudyProgrammeDto>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/enums/StudyProgramme/list',
+        });
+    }
+
+    /**
+     * @returns StudyProgrammeDto Success
+     * @throws ApiError
+     */
+    public studyProgrammeCreateOrUpdate({
+requestBody,
+}: {
+requestBody: StudyProgrammeDto,
+}): CancelablePromise<StudyProgrammeDto> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/enums/StudyProgramme/list',
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
