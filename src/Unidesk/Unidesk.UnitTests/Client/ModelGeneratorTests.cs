@@ -14,7 +14,10 @@ public class ModelGeneratorTests
     public void Test_Should_Generate_Client_Model()
     {
         var splitByLine = new Regex(@"\r\n|\r|\n");
-        Directory.Delete("./tmp", true);
+        if (Directory.Exists("./tmp"))
+        {
+            Directory.Delete("./tmp", true);
+        }
         var items = ModelGenerator.Generate(typeof(ModelGeneratorTests), "./tmp").ToList();
         items.Should().HaveCount(2);
         // is order of attributes preserved?
