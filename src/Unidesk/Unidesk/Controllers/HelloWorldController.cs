@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Unidesk.Db.Models;
 using Unidesk.Security;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;

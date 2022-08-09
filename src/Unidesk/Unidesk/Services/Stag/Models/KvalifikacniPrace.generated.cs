@@ -1,17 +1,20 @@
 ﻿using System.Globalization;
 using Unidesk.Db.Core;
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 #pragma warning disable CS8669
 
 namespace Unidesk.Services.Stag.Models;
 
 
+[ExcludeFromCodeCoverage]
 public class KvalifikacniPraceList
 {
     [JsonProperty("kvalifikacniPrace")]
     public List<KvalifikacniPrace> KvalifikacniPrace { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class KvalifikacniPrace
 {
     [JsonProperty("student")]
@@ -220,6 +223,7 @@ public class KvalifikacniPrace
     public string PoslatDoKnihovny { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class DateOnlyConverter : JsonConverter
 {
     class ValueType
@@ -253,6 +257,7 @@ public class DateOnlyConverter : JsonConverter
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class DateTimeConverter : JsonConverter
 {
     class ValueType
@@ -286,6 +291,7 @@ public class DateTimeConverter : JsonConverter
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class Student : ISimpleUser
 {
     [JsonProperty("osCislo")]

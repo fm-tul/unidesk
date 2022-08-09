@@ -11,7 +11,7 @@ public class ModelGenerator
     // regex mathing GENERATED ON 2022-08-07 18:15:21
     private static readonly Regex _generatedOnRegex = new Regex(@"GENERATED ON (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", RegexOptions.Multiline);
     
-    public static void Generate(Type root, string outputDir)
+    public static IEnumerable<string> Generate(Type root, string outputDir)
     {
         // looking for GenerateModelAttribute
         var classes = root.Assembly
@@ -74,8 +74,11 @@ public class ModelGenerator
                         continue;
                     }
                 }
-                
-                File.WriteAllText(outputFile, output.ToString());
+
+                Directory.CreateDirectory(outputDir);
+                var result = output.ToString();
+                File.WriteAllText(outputFile, result);
+                yield return result;
             }
         }
     }
@@ -85,6 +88,6 @@ public static class ModelGeneratorExtensions
 {
     public static void GenerateModels<T>(this IApplicationBuilder app, string output)
     {
-        ModelGenerator.Generate(typeof(T), output);
+        ModelGenerator.Generate(typeof(T), output).ToList();
     }
 }

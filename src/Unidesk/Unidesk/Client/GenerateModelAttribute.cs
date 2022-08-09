@@ -9,9 +9,3 @@ public class GenerateModelAttribute : Attribute
 
     public bool GenerateAggreation { get; set; }
 }
-
-[AttributeUsage(AttributeTargets.Class)]
-public class GenerateFieldAttribute : Attribute
-{
-    public Type Serializer { get; set; }
-}

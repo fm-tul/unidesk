@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Services.Stag.Models;
@@ -6,6 +7,7 @@ using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Services;
 
+[ExcludeFromCodeCoverage]
 public class ImportService
 {
     public readonly CachedDbContext Db;
