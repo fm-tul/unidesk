@@ -41,9 +41,10 @@ public class User : TrackedEntity, ISimpleUser
         {
             new UserRole()
             {
+                Name = "Guest",
                 Grants = new List<Grant>()
                 {
-                    UserGrants.User_SuperAdmin
+                    UserGrants.User_Guest,
                 }
             }
         }
@@ -61,6 +62,7 @@ public class User : TrackedEntity, ISimpleUser
         {
             new UserRole()
             {
+                Name = "Import",
                 Grants = new List<Grant>()
                 {
                     UserGrants.User_SuperAdmin
@@ -81,6 +83,7 @@ public class User : TrackedEntity, ISimpleUser
         {
             new UserRole()
             {
+                Name = "InitialSeed",
                 Grants = new List<Grant>()
                 {
                     UserGrants.User_SuperAdmin

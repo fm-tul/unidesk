@@ -22,7 +22,7 @@ namespace Unidesk.UnitTests.Server;
 
 public class SimpleEnumServiceTests : IDisposable
 {
-    private readonly UserProvider _userService;
+    private readonly UserProvider _userProvider;
     private readonly UnideskDbContext _db;
     private readonly IMapper _mapper;
     private readonly IDateTimeService _dateTimeService;
@@ -36,8 +36,8 @@ public class SimpleEnumServiceTests : IDisposable
 
         var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
         _dateTimeService = Substitute.For<IDateTimeService>();
-        _userService = new UserProvider();
-        _db = new UnideskDbContext(contextOptions, _userService, loggerSubstitute, _dateTimeService);
+        _userProvider = new UserProvider();
+        _db = new UnideskDbContext(contextOptions, _userProvider, loggerSubstitute, _dateTimeService);
 
         var configuration = new MapperConfiguration(options => options.CreateMappingConfiguration());
         _mapper = configuration.CreateMapper();
@@ -89,7 +89,7 @@ public class SimpleEnumServiceTests : IDisposable
         var IOutputCacheStoreSub = Substitute.For<IOutputCacheStore>();
         var service = new SimpleEnumService(_db, _mapper, IOutputCacheStoreSub);
         var frozenDT = new DateTime(2012, 3, 4);
-        _userService.CurrentUser = User.ImportUser;
+        _userProvider.CurrentUser = User.ImportUser;
         _dateTimeService.Now.Returns(frozenDT);
 
         var initalDtos = new[]
@@ -133,7 +133,7 @@ public class SimpleEnumServiceTests : IDisposable
         var IOutputCacheStoreSub = Substitute.For<IOutputCacheStore>();
         var service = new SimpleEnumService(_db, _mapper, IOutputCacheStoreSub);
         var frozenDT = new DateTime(2012, 3, 4);
-        _userService.CurrentUser = User.ImportUser;
+        _userProvider.CurrentUser = User.ImportUser;
         _dateTimeService.Now.Returns(frozenDT);
 
         var initalDtos = new[]
