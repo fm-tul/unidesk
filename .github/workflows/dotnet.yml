@@ -38,3 +38,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: src/Unidesk/Unidesk.UnitTests/TestResults/coverage.info
+          
+      - name: Codacy Coverage Reporter
+        # https://github.com/codacy/codacy-coverage-reporter-action
+        uses: codacy/codacy-coverage-reporter-action@v1.3
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: src/Unidesk/Unidesk.UnitTests/TestResults/coverage.info
