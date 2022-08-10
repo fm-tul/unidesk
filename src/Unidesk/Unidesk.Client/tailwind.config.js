@@ -9,6 +9,7 @@ module.exports = {
   },
   plugins: [
     require('prettier-plugin-tailwindcss'),
+    require("tailwindcss-animate"),
   ],
   corePlugins: {
     // preflight: false,
