@@ -5,9 +5,9 @@
 import type { TrackedEntityDto } from './TrackedEntityDto';
 
 export type StudyProgrammeDto = (TrackedEntityDto & {
-nameEng?: string | null;
-nameCze?: string | null;
-code?: string | null;
-descriptionEng?: string | null;
-descriptionCze?: string | null;
+nameEng: string;
+nameCze: string;
+code: string;
+descriptionEng: string;
+descriptionCze: string;
 });

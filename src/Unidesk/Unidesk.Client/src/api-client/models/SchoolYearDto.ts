@@ -5,7 +5,7 @@
 import type { TrackedEntityDto } from './TrackedEntityDto';
 
 export type SchoolYearDto = (TrackedEntityDto & {
-start?: string;
-end?: string;
+start: string;
+end: string;
 readonly name?: string | null;
 });

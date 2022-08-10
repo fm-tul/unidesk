@@ -18,6 +18,7 @@ export type { KeywordThesisDto } from './models/KeywordThesisDto';
 export type { LoginRequest } from './models/LoginRequest';
 export type { LoginResponse } from './models/LoginResponse';
 export type { SchoolYearDto } from './models/SchoolYearDto';
+export type { SimpleJsonResponse } from './models/SimpleJsonResponse';
 export type { StudyProgrammeDto } from './models/StudyProgrammeDto';
 export type { ThesisDto } from './models/ThesisDto';
 export type { ThesisOutcome } from './models/ThesisOutcome';
