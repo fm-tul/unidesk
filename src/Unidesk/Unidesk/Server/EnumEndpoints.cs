@@ -15,6 +15,7 @@ public static class EnumsCachedEndpoint
             {
                 policyBuilder.Expire(TimeSpan.FromMinutes(15));
                 policyBuilder.Tag(EnumsCacheTag);
+                policyBuilder.AddPolicy(typeof(OutputCachingPolicy));
             });
     }
 

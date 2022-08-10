@@ -47,8 +47,10 @@ public static class AutoMapperConfigurationExtensions
 
     public static IMapperConfigurationExpression CreateMapBetween<TSource, TDestination>(this IMapperConfigurationExpression options)
     {
-        options.CreateMap<TSource, TDestination>();
-        options.CreateMap<TDestination, TSource>();
+        options.CreateMap<TSource, TDestination>()
+            .AddTransform<string?>(i => i == null ? null : string.IsNullOrEmpty(i.Trim()) ? null : i);
+        options.CreateMap<TDestination, TSource>()
+            .AddTransform<string?>(i => i == null ? null : string.IsNullOrEmpty(i.Trim()) ? null : i);
         return options;
     }
 

@@ -10,6 +10,7 @@ namespace Unidesk.Dtos;
 [SwaggerSubType(typeof(SchoolYearDto))]
 [SwaggerSubType(typeof(FacultyDto))]
 [SwaggerSubType(typeof(ThesisOutcomeDto))]
+[SwaggerSubType(typeof(ThesisTypeDto))]
 [SwaggerSubType(typeof(StudyProgrammeDto))]
 public class TrackedEntityDto : IdEntityDto
 {

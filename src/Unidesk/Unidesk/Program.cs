@@ -1,4 +1,7 @@
+using System.Data.Common;
+using System.Net.Mime;
 using AutoMapper;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
@@ -6,10 +9,7 @@ using Unidesk.Client;
 using Unidesk.Configurations;
 using Unidesk.Db;
 using Unidesk.Db.Core;
-using Unidesk.Db.Models;
 using Unidesk.Dtos;
-using Unidesk.Dtos.Resolvers;
-using Unidesk.Security;
 using Unidesk.Server;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
@@ -32,7 +32,6 @@ services.AddSwaggerGen(options =>
 {
     options.UseAllOfForInheritance();
     options.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
-    // options.UseOneOfForPolymorphism();
 });
 
 // scoped
@@ -56,6 +55,7 @@ var connectionString = configuration.GetConnectionString(nameof(UnideskDbContext
 services.AddSingleton(appOptions);
 
 // extra
+services.AddOutputCache();
 services.AddControllersWithFilters();
 services.AddDevCors();
 services.AddHttpContextAccessor();
@@ -63,7 +63,6 @@ services.AddCookieAuthentication();
 services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(connectionString));
 services.AddScoped<CachedDbContext>();
 services.AddDatabaseDeveloperPageExceptionFilter();
-services.AddOutputCache();
 
 
 var app = builder.Build();
@@ -92,10 +91,47 @@ app.UseAuthorization();
 app.UseOutputCache();
 app.MapControllers();
 
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = MediaTypeNames.Application.Json;
+        var exception = context.Features.Get<IExceptionHandlerPathFeature>();
+        var errorMessage = exception?.Error?.InnerException?.Message ?? exception?.Error?.Message ?? "An error occurred";
+        var data = new SimpleJsonResponse
+        {
+            Success = false,
+            Message = errorMessage,
+            StackTrace = exception?.Error?.StackTrace?.Split('\n') ?? Enumerable.Empty<string>(),
+            DebugMessage = errorMessage
+        };
+
+        if (exception?.Error is DbUpdateException)
+        {
+            data.Message = "Database Exception";
+            data.DebugMessage = exception.Error.InnerException?.Message ?? exception.Error.Message;
+        }
+        else if (exception?.Error is FluentValidation.ValidationException)
+        {
+            data.Message = exception.Error.Message ?? "Invalid Data";
+            data.DebugMessage = exception.Error.Message;
+        }
+        else
+        {
+            // else
+        }
+
+        await context.Response.WriteAsJsonAsync(data);
+    });
+});
+
 // add all minimal api routes for listing the basic enum-like types
 app.AddMinimalApiGetters();
 // add all minimal api routes for creating or updating the basic enum-like types
 app.AddMinimalApiSetters();
+// add all minimal api routes for deleting the basic enum-like types
+app.AddMinimalApiDeleters();
 
 // all enums
 app.MapGet("api/enum/All/list", ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => new EnumsDto
@@ -113,7 +149,7 @@ app.MapGet("api/enum/All/list", ([FromServices] UnideskDbContext db, [FromServic
 app.MapGet("api/enum/Cache/reset", async ([FromServices] IOutputCacheStore cache, CancellationToken ct) =>
 {
     await cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
-    return new { Success = true };
-}).Produces<object>();
+    return new SimpleJsonResponse { Success = true, Message = "Ok" };
+}).Produces<SimpleJsonResponse>();
 
 app.Run();

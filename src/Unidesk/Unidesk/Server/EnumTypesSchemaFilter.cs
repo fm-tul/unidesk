@@ -19,7 +19,10 @@ public class EnumTypesSchemaFilter : ISchemaFilter
 
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
-        if (_xmlComments == null) return;
+        if (_xmlComments == null)
+        {
+            return;
+        }
 
         if (schema.Enum != null && schema.Enum.Count > 0 &&
             context.Type != null && context.Type.IsEnum)
@@ -40,7 +43,10 @@ public class EnumTypesSchemaFilter : ISchemaFilter
 
                 var summary = enumMemberComments.Descendants("summary").FirstOrDefault();
 
-                if (summary == null) continue;
+                if (summary == null)
+                {
+                    continue;
+                }
 
                 schema.Description += $"<li><i>{enumMemberName}</i> - {summary.Value.Trim()}</li>";
             }

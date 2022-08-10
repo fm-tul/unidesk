@@ -1,5 +1,6 @@
 ﻿using System.Data.Entity;
 using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.OutputCaching;
 using Unidesk.Db;
 using Unidesk.Db.Core;
@@ -20,7 +21,7 @@ public class SimpleEnumService
         _mapper = mapper;
         _cache = cache;
     }
-    
+
     // this GET method is used to get all the enum values for a given enum type
     public List<TDto> GetAll<TItem, TDto>() where TItem : class
     {
@@ -29,17 +30,48 @@ public class SimpleEnumService
         var dtos = _mapper.Map<List<TDto>>(items);
         return dtos;
     }
-    
+
     // this POST method is used to create a new enum value for a given enum type or update an existing one
     // TItem : TrackedEntity, TDto : TrackedEntityDto
     public async Task<TItem> CreateOrUpdate<TItem, TDto>(TDto dto, CancellationToken ct)
-        where TItem: TrackedEntity 
+        where TItem : TrackedEntity
+        where TDto : TrackedEntityDto
+    {
+        return await CreateOrUpdateImpl<TItem, TDto>(dto, ct);
+    }
+
+    // this POST method is used to create a new enum value for a given enum type or update an existing one
+    // TItem : TrackedEntity, TDto : TrackedEntityDto
+    public async Task<TItem> CreateOrUpdate<TItem, TDto, TValidator>(TDto dto, CancellationToken ct)
+        where TItem : TrackedEntity
+        where TDto : TrackedEntityDto
+        where TValidator : AbstractValidator<TDto>, new()
+    {
+        var validator = new TValidator();
+        validator.ValidateAndThrow(dto);
+        return await CreateOrUpdateImpl<TItem, TDto>(dto, ct);
+    }
+
+    public async Task<SimpleJsonResponse> Delete<TItem>(Guid id, CancellationToken ct) where TItem : TrackedEntity
+    {
+        var dbSet = _db.Set<TItem>();
+        var item = dbSet.Find(id)
+                   ?? throw new Exception($"Item of type {typeof(TItem)} with id {id} not found");
+        dbSet.Remove(item);
+        await _db.SaveChangesAsync(ct);
+        await _cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
+        return new SimpleJsonResponse { Success = true, Message = "Ok" };
+    }
+
+
+    private async Task<TItem> CreateOrUpdateImpl<TItem, TDto>(TDto dto, CancellationToken ct)
+        where TItem : TrackedEntity
         where TDto : TrackedEntityDto
     {
         var dbSet = _db.Set<TItem>();
         var dtoIsNew = dto.Id == Guid.Empty;
         TItem item;
-        
+
         // if the dto is new, create a new entity
         if (dtoIsNew)
         {
@@ -54,10 +86,10 @@ public class SimpleEnumService
                    ?? throw new Exception($"Item of type {typeof(TItem)} with id {dto.Id} not found");
             _mapper.Map(dto, item);
         }
-        
+
         //evict the cache for enums
-         await _db.SaveChangesAsync(ct);
-         await _cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
-         return _mapper.Map<TItem>(item);
+        await _db.SaveChangesAsync(ct);
+        await _cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
+        return _mapper.Map<TItem>(item);
     }
 }

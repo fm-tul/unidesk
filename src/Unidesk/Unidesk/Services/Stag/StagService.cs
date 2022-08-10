@@ -67,7 +67,6 @@ public class StagService
                                  Adipidno = item.Adipidno,
                              });
 
-
             dbItem.Department = await _import.GetOrCreateDepartment(item.Katedra);
             dbItem.Faculty = await _import.GetOrCreateFaculty(item.Fakulta);
 
@@ -91,10 +90,10 @@ public class StagService
             imported.Add(dbItem);
         }
 
-        var stats = _import.Db._db.GetStats();
+        var stats = _import.Db.GetStats();
         _logger.LogInformation("Import from Stag completed in {Elapsed} [{Stats}]", sw.Elapsed, stats.ToString());
 
-        await _import.Db._db.SaveChangesAsync();
+        await _import.Db.SaveChangesAsync();
         _logger.LogInformation("Save changes completed in {Elapsed}", sw.Elapsed);
         
         sw.Stop();
