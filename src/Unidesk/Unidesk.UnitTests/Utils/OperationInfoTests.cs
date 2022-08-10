@@ -18,13 +18,13 @@ public class OperationInfoTests
         var msg = info.ToString();
 
         info.TotalRows.Should().Be(2);
-        
+
         msg.Should().StartWith("Foo");
         msg.Should().Contain("2 total rows");
         msg.Should().Contain("2 String in ");
     }
-    
-    
+
+
     [Fact]
     public void OperationInfo_Should_Determine_Generic_Short_Form()
     {
@@ -38,18 +38,18 @@ public class OperationInfoTests
 
         msg.Should().NotBeEmpty();
         msg.Should().Contain("String=[2 in");
-    }    
-    
-    
+    }
+
+
     [Fact]
     public void OperationInfo_Should_Sum()
     {
         var info = new OperationInfo();
-        var intArray = new int[1] { 0 };
+        var intArray = new[] { 0 };
         info += new List<string> { "a", "b" };
         info += intArray;
         info += new List<bool>();
-        
+
         info.Add<float>(0);
 
         var msg = info.ToString();

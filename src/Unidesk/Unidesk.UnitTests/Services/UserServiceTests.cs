@@ -89,8 +89,6 @@ public class UserServiceTests
     public async Task Test_Should_Reconstruct_User_From_Claims()
     {
         var userService = new UserService(_db);
-        var claims = userService.GetClaims(User.ImportUser).ToList();
-
         var importUser = userService.FromClaims(new ClaimsObject
         {
             NameIdentifier = User.ImportUser.Id,

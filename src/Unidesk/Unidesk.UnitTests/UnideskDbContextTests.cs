@@ -50,7 +50,7 @@ public class UnideskDbContextTests
             .Options;
 
         var userProviderSubstitute = Substitute.For<IUserProvider>();
-        userProviderSubstitute.CurrentUser.Returns(new User()
+        userProviderSubstitute.CurrentUser.Returns(new User
         {
             Email = "example@unittest.com"
         });
