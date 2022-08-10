@@ -52,7 +52,10 @@ public class RequireGrantFilter : IActionFilter
         return (granted, null, StatusCodes.Status200OK);
     }
 
-    public void OnActionExecuted(ActionExecutedContext context) { }
+    public void OnActionExecuted(ActionExecutedContext context)
+    {
+        // not applicable
+    }
 
     /// <summary>
     /// Invokes the middleware performing authorization.

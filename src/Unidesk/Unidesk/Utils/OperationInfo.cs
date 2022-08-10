@@ -29,7 +29,7 @@ public class OperationInfo
     public TimeSpan TotalDuration => _entries.Aggregate(TimeSpan.Zero, (acc, x) => acc + x.Duration);
 
     private readonly string _separator = "  + ";
-    private Stopwatch _stopwatch = Stopwatch.StartNew();
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
 
     public OperationInfo(string operationName = "")
     {

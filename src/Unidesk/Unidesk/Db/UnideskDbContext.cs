@@ -127,7 +127,7 @@ public class UnideskDbContext : DbContext
         return base.SaveChanges();
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
     {
         HandleInterceptors();
         return base.SaveChangesAsync(cancellationToken);
@@ -147,7 +147,7 @@ public class UnideskDbContext : DbContext
 }
 
 
-public class ChangeTrackedStats
+public struct ChangeTrackedStats
 {
     public readonly int AddedCount;
     public readonly int ModifiedCount;

@@ -5,7 +5,7 @@ namespace Unidesk.ServiceFilters;
 
 public class RequireGrantAttribute : Attribute
 {
-    public readonly Grant Grant;
+    public Grant Grant { get; }
 
     public RequireGrantAttribute(string grant)
     {

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Unidesk.Client;
 
-public class ModelGenerator
+public static class ModelGenerator
 {
     
     // regex mathing GENERATED ON 2022-08-07 18:15:21

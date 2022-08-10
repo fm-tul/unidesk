@@ -39,7 +39,10 @@ public class EnumTypesSchemaFilter : ISchemaFilter
                     .FirstOrDefault(m => m.Attribute("name").Value.Equals
                         (fullEnumMemberName, StringComparison.OrdinalIgnoreCase));
 
-                if (enumMemberComments == null) continue;
+                if (enumMemberComments == null)
+                {
+                    continue;
+                }
 
                 var summary = enumMemberComments.Descendants("summary").FirstOrDefault();
 

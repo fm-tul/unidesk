@@ -10,7 +10,7 @@ namespace Unidesk.Services;
 [ExcludeFromCodeCoverage]
 public class ImportService
 {
-    public readonly CachedDbContext Db;
+    public CachedDbContext Db { get; }
 
     public ImportService(CachedDbContext db)
     {
