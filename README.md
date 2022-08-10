@@ -10,25 +10,25 @@ Application for managing univeristy bachelor/master/dissertation theses.
 
 Use `dotnet ef` command ([dotnet-ef](https://docs.microsoft.com/en-us/ef/core/cli/dotnet) tool).
 
-- To create new migration use
+  - To create new migration use
 
   ```bash
   dotnet ef migrations add  --project Unidesk <name>
   ```
 
-- To apply migration use
+  - To apply migration use
 
   ```bash
   dotnet ef database update --project Unidesk
   ```
 
-- To revert migration use
+  - To revert migration use
 
   ```bash
   dotnet ef database update --project Unidesk --migration <name>
   ```
 
-- To delete migration use
+  - To delete migration use
   ```bash
   dotnet ef migrations remove --project Unidesk
   ```

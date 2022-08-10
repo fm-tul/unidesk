@@ -5,13 +5,13 @@ for adding human and machine readable meaning to commit messages.
 
 Each message start with a type, which _can_ be one of the following:
 
-- `feat:` - we are adding a new feature
-- `fix:` - we are fixing a bug
-- `docs:` - we are adding/updating documentation
-- `test:` - we are adding/updating tests
-- `ci:` - we are adding/updating CI configuration
-- `chore:` - we are changing other files other than sources/tests.
-- `refactor:` - we are neither fixing a bug nor adding a feature, but rather refactoring code (which also includes removing code)
+  - `feat:` - we are adding a new feature
+  - `fix:` - we are fixing a bug
+  - `docs:` - we are adding/updating documentation
+  - `test:` - we are adding/updating tests
+  - `ci:` - we are adding/updating CI configuration
+  - `chore:` - we are changing other files other than sources/tests.
+  - `refactor:` - we are neither fixing a bug nor adding a feature, but rather refactoring code (which also includes removing code)
 
 There are other [types](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type), but not widely used.
 
@@ -56,5 +56,5 @@ BREAKING CHANGE: This commit changes the behavior of the compiler.
 
 ## IDE Extensions
 
-- [conventional-commits for VSCode](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits)
-- [conventional-commit for Rider](https://plugins.jetbrains.com/plugin/13389-conventional-commit)
+  - [conventional-commits for VSCode](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits)
+  - [conventional-commit for Rider](https://plugins.jetbrains.com/plugin/13389-conventional-commit)
