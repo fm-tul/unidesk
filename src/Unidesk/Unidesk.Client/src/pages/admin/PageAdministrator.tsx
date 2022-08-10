@@ -1,77 +1,71 @@
 import { httpClient } from "@core/init";
-import { DepartmentDto } from "@models/DepartmentDto";
-import { FacultyDto } from "@models/FacultyDto";
-import { SchoolYearDto } from "@models/SchoolYearDto";
-import { StudyProgrammeDto } from "@models/StudyProgrammeDto";
-import { ThesisOutcomeDto } from "@models/ThesisOutcomeDto";
-import { ThesisTypeDto } from "@models/ThesisTypeDto";
 import { Button } from "@mui/material";
+import { DepartmentDto, FacultyDto, SchoolYearDto, ThesisOutcomeDto, ThesisTypeDto, StudyProgrammeDto } from "@api-client";
+import {
+  propertiesDepartmentDto,
+  propertiesFacultyDto,
+  propertiesThesisOutcomeDto,
+  propertiesSchoolYearDto,
+  propertiesThesisTypeDto,
+  propertiesStudyProgrammeDto,
+} from "models/dtos";
 import { Link, useParams } from "react-router-dom";
 import { toKV, toKVWithCode } from "utils/transformUtils";
-import { DepartmentEditor } from "./DepartmentEditor";
-import { SchoolYearEditor } from "./SchoolYearEditor";
-import { SimpleEntityEditor } from "./SimpleEntityEditor";
+import { SimpleEntityEditor2 } from "./SimpleEntityEditor";
 
 export const PageAdministrator = () => {
   const { enumName } = useParams();
   // departments, faculties, schoolYears, thesisOutcomes, thesisTypes, studyProgrammes
   const enumsList = [
     {
-      name: "Department",
+      name: "Departments",
       path: "departments",
       component: (
-        <SimpleEntityEditor
-          title="Department"
-          humanReadableName="department"
+        <SimpleEntityEditor2
+          schema={propertiesDepartmentDto}
           getAll={() => httpClient.enums.departmentGetAll()}
-          createOrUpdate={i => httpClient.enums.departmentCreateOrUpdate({ requestBody: i as DepartmentDto })}
+          upsertOne={i => httpClient.enums.departmentCreateOrUpdate({ requestBody: i as DepartmentDto })}
+          deleteOne={id => httpClient.enums.departmentDelete({ id })}
           toKV={toKVWithCode}
-          hasCodeProperty
         />
       ),
     },
-
     {
-      name: "Faculty",
+      name: "Faculties",
       path: "faculties",
       component: (
-        <SimpleEntityEditor
-          title="Faculty"
-          humanReadableName="faculty"
+        <SimpleEntityEditor2
+          schema={propertiesFacultyDto}
           getAll={() => httpClient.enums.facultyGetAll()}
-          createOrUpdate={i => httpClient.enums.facultyCreateOrUpdate({ requestBody: i as FacultyDto })}
+          upsertOne={i => httpClient.enums.facultyCreateOrUpdate({ requestBody: i as FacultyDto })}
+          deleteOne={id => httpClient.enums.facultyDelete({ id })}
           toKV={toKVWithCode}
-          hasCodeProperty
         />
       ),
     },
-
     {
       name: "School Years",
       path: "school-years",
       component: (
-        <SimpleEntityEditor
-          title="School Years"
-          humanReadableName="school year"
+        <SimpleEntityEditor2
+          schema={propertiesSchoolYearDto}
           getAll={() => httpClient.enums.schoolYearGetAll()}
-          createOrUpdate={i => httpClient.enums.schoolYearCreateOrUpdate({ requestBody: i as SchoolYearDto })}
-          toKV={toKV}
-          hasCodeProperty={false}
+          upsertOne={i => httpClient.enums.schoolYearCreateOrUpdate({ requestBody: i as SchoolYearDto })}
+          deleteOne={id => httpClient.enums.schoolYearDelete({ id })}
+          toKV={(i, j) => toKV(i, j, false)}
         />
       ),
     },
-
     {
       name: "Thesis Outcomes",
       path: "thesis-outcomes",
       component: (
-        <SimpleEntityEditor
-          title="Thesis Outcomes"
-          humanReadableName="thesis outcome"
+        <SimpleEntityEditor2
+          schema={propertiesThesisOutcomeDto}
           getAll={() => httpClient.enums.thesisOutcomeGetAll()}
-          createOrUpdate={i => httpClient.enums.thesisOutcomeCreateOrUpdate({ requestBody: i as ThesisOutcomeDto })}
+          upsertOne={i => httpClient.enums.thesisOutcomeCreateOrUpdate({ requestBody: i as ThesisOutcomeDto })}
+          deleteOne={id => httpClient.enums.thesisOutcomeDelete({ id })}
           toKV={toKV}
-          hasCodeProperty={false}
         />
       ),
     },
@@ -79,13 +73,12 @@ export const PageAdministrator = () => {
       name: "Thesis Types",
       path: "thesis-types",
       component: (
-        <SimpleEntityEditor
-          title="Thesis Types"
-          humanReadableName="thesis type"
+        <SimpleEntityEditor2
+          schema={propertiesThesisTypeDto}
           getAll={() => httpClient.enums.thesisTypeGetAll()}
-          createOrUpdate={i => httpClient.enums.thesisTypeCreateOrUpdate({ requestBody: i as ThesisTypeDto })}
+          upsertOne={i => httpClient.enums.thesisTypeCreateOrUpdate({ requestBody: i as ThesisTypeDto })}
+          deleteOne={id => httpClient.enums.thesisTypeDelete({ id })}
           toKV={toKV}
-          hasCodeProperty={true}
         />
       ),
     },
@@ -93,13 +86,12 @@ export const PageAdministrator = () => {
       name: "Study Programmes",
       path: "study-programmes",
       component: (
-        <SimpleEntityEditor
-          title="Study Programmes"
-          humanReadableName="study programme"
+        <SimpleEntityEditor2
+          schema={propertiesStudyProgrammeDto}
           getAll={() => httpClient.enums.studyProgrammeGetAll()}
-          createOrUpdate={i => httpClient.enums.studyProgrammeCreateOrUpdate({ requestBody: i as StudyProgrammeDto })}
+          upsertOne={i => httpClient.enums.studyProgrammeCreateOrUpdate({ requestBody: i as StudyProgrammeDto })}
+          deleteOne={id => httpClient.enums.studyProgrammeDelete({ id })}
           toKV={toKV}
-          hasCodeProperty={true}
         />
       ),
     },

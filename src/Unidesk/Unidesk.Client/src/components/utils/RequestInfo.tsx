@@ -1,4 +1,4 @@
-import { ApiError } from "@api-client";
+import { ApiError, SimpleJsonResponse } from "@api-client";
 import { Translate } from "@locales/R";
 
 interface RequestInfoProps {
@@ -13,13 +13,19 @@ export function RequestInfo(props: RequestInfoProps) {
   }
 
   // try to extract error message from error object
-  const errorMessage = extractErrorMessage(error);
+  const errorDto = extractErrorMessage(error);
+  const errorMessage = errorDto?.message;
+  if (errorDto) {
+    console.debug(errorDto);
+  }
 
   return (
     <div>
       {errorMessage && (
         <span className="text-red-500">
-          <Translate value="error-occurred" />: {errorMessage}
+          <code className="text-md break-words">
+            <Translate value="error-occurred" />: {errorMessage}
+          </code>
         </span>
       )}
 
@@ -31,17 +37,25 @@ export function RequestInfo(props: RequestInfoProps) {
 const extractErrorMessage = (error: unknown) => {
   if (error) {
     console.debug(error);
+  } else {
+    return null;
   }
 
   if (error instanceof ApiError) {
-    return `${error.name} - ${error.message}, while loading ${error.request.url}`;
-  } else if (error instanceof Error) {
-    return `${error.name} - ${error.message}`;
-  } else if (typeof error === "string") {
-    return error;
-  } else if (error) {
-    return `${error}`;
+    return error.body as SimpleJsonResponse;
   }
 
-  return null;
+  const errorDto: SimpleJsonResponse = {
+    success: false,
+  };
+
+  if (error instanceof Error) {
+    errorDto.message = `${error.name} - ${error.message}`;
+  } else if (typeof error === "string") {
+    errorDto.message = error;
+  } else if (error) {
+    errorDto.message = `${error}`;
+  }
+
+  return errorDto;
 };

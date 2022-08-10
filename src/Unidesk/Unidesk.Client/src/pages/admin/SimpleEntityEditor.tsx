@@ -1,167 +1,139 @@
 import {
-  CancelablePromise,
   DepartmentDto,
   FacultyDto,
   SchoolYearDto,
+  SimpleJsonResponse,
   StudyProgrammeDto,
   ThesisOutcomeDto,
   ThesisTypeDto,
 } from "@api-client";
-import * as Yup from "yup";
 import { useFormik } from "formik";
-import { getFormikProps as inputProps, getFormikPropsSelect as selectProps } from "hooks/getFormikProps";
+import { getFormikProps as inputProps } from "hooks/getFormikProps";
 import { Button, TextField } from "@mui/material";
 import { useContext, useMemo, useState } from "react";
-import { useFetch } from "hooks/useFetch";
-import { httpClient } from "@core/init";
+import { useGetSetDeleteFetch } from "hooks/useFetch";
 import { RequestInfo } from "components/utils/RequestInfo";
 import { SelectField } from "components/mui/SelectField";
 import { LanguageContext } from "@locales/LanguageContext";
 import { EMPTY_GUID } from "@core/config";
-import { mergeModels } from "utils/mergeModels";
 import { KeyValue } from "utils/KeyValue";
-import { toKVWithCode } from "utils/transformUtils";
 import { LanguagesId } from "@locales/all";
+import { EditorPropertiesOf, extractInitialValues, extractYupSchema } from "models/typing";
 
 type TItem = DepartmentDto | FacultyDto | ThesisOutcomeDto | SchoolYearDto | ThesisTypeDto | StudyProgrammeDto;
 
-const initialValues = <T extends TItem>() =>
-  ({
-    id: EMPTY_GUID,
-    nameEng: "",
-    nameCze: "",
-    code: "",
-    descriptionEng: "",
-    descriptionCze: "",
-  } as unknown as Partial<T>);
-
-interface SimpleEntityEditorProps<T> {
-  title: string;
-  humanReadableName: string;
-  hasCodeProperty: boolean;
+interface SimpleEntityEditor2Props<T> {
+  schema: EditorPropertiesOf<T>;
   getAll: () => Promise<T[]>;
-  createOrUpdate: (item: T) => Promise<T>;
+  upsertOne: (item: T) => Promise<T>;
+  deleteOne: (id: string) => Promise<SimpleJsonResponse>;
   toKV: (language?: LanguagesId, items?: T[]) => KeyValue[];
 }
-
-export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditorProps<T>) => {
-  const { title, hasCodeProperty, humanReadableName, getAll, createOrUpdate, toKV } = props;
+export const SimpleEntityEditor2 = <T extends TItem>(props: SimpleEntityEditor2Props<T>) => {
+  const { schema, getAll, upsertOne: createOrUpdate, toKV, deleteOne } = props;
   const { language } = useContext(LanguageContext);
-  const [showEditor, setShowEditor] = useState(false);
-  const [itemId, setItemId] = useState<string>("");
-  const { data, isLoading, error } = useFetch(() => getAll());
-  const dataKV = useMemo(() => toKV(language, data), [data, language]);
 
   const formik = useFormik({
-    initialValues: initialValues<T>(),
-    validationSchema: Yup.object({
-      id: Yup.string().required(),
-      nameEng: Yup.string().required("required"),
-      nameCze: Yup.string().required("required"),
-      code: hasCodeProperty ? Yup.string().required("required") : Yup.string(),
-      descriptionEng: Yup.string(),
-      descriptionCze: Yup.string(),
-    }),
+    initialValues: extractInitialValues(schema) as T,
+    validationSchema: extractYupSchema(schema),
     onSubmit: values => {
       console.log(values);
     },
   });
 
+  const { data, savedData, isLoading, isSaving, isDeleting, error, saveItem, deleteItem, loadData } = useGetSetDeleteFetch(
+    () => getAll(),
+    () => createOrUpdate(formik.values),
+    () => deleteOne(formik.values.id)
+  );
+  const dataKV = useMemo(() => toKV(language, data), [data, language]);
+  const [itemId, setItemId] = useState<string>("");
+
+  const handleSaveClick = async () => {
+    await saveItem();
+    await loadData();
+  };
+
+  const handleDeleteClick = async () => {
+    await deleteItem();
+    await loadData();
+  };
+
   const setItemToEdit = (id: string) => {
-    // can fetch or use local data
     setItemId(id);
-    if (!data || data.length === 0) {
-      return;
-    }
-
-    const item = data.find(i => i.id === id);
-    if (!item) {
-      return;
-    }
-    const merged = mergeModels(initialValues<T>(), item);
-    formik.setValues(merged);
-    setShowEditor(true);
+    const item = (data ?? []).find(i => i.id === id) ?? (extractInitialValues(schema) as T);
+    formik.setValues(item);
   };
 
-  const startCreateNew = () => {
-    setShowEditor(true);
-    setItemId(EMPTY_GUID);
-    formik.setValues({ ...initialValues<T>() });
-  };
-
-  const handleSave = async () => {
-    const item = formik.values as T;
-    const ok = await createOrUpdate(item);
-  };
-
+  console.log(formik.values, formik.errors);
   return (
     <div className="flex flex-col gap-4">
       <RequestInfo isLoading={isLoading} error={error} />
-
-      {!!data && (
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-4">
-            <span>Select {humanReadableName}:</span>
-            <div className="flex flex-col gap-4">
-              <SelectField
-                items={dataKV}
-                props={{
-                  value: itemId,
-                  variant: "standard",
-                  className: "min-w-[220px]",
-                  onChange: (e: any) => setItemToEdit(e.target.value),
-                }}
-              />
-            </div>
+      {dataKV.length > 0 && (
+        <div className="flex gap-4">
+          <div className="grow">
+            <SelectField
+              items={dataKV}
+              props={{
+                value: itemId,
+                variant: "standard",
+                className: "min-w-[220px]",
+                onChange: (e: any) => setItemToEdit(e.target.value),
+              }}
+            />
           </div>
-
-          <div className="flex gap-4">
-            <span>or</span>
-            <Button variant="contained" color="primary" size="small" onClick={startCreateNew}>
-              Add new
-            </Button>
-          </div>
+          or
+          <Button variant="contained" color="primary" onClick={() => setItemToEdit(EMPTY_GUID)}>
+            Add new
+          </Button>
         </div>
       )}
 
-      {showEditor && (
-        <div className="flex flex-col gap-4">
-          <hr></hr>
-          {hasCodeProperty && (
-            <div className="flex gap-4">
-              <TextField label="Code" name="code" {...inputProps<DepartmentDto>(formik, "code", "medium", false)} />
+      {itemId !== "" && (
+        <>
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-4">
+            {Object.entries(schema)
+              .filter(([key, prop]) => prop.hidden !== true)
+              .map(([key, prop]) => {
+                const { colspan = 2, size = "small", breakAfter = false } = prop;
+                // col-span-1 col-span-2 col-span-3 col-span-4
+                const colSpanClass = `col-span-${colspan}`;
+                return (
+                  <>
+                    <TextField className={colSpanClass} key={key} label={key} name={key} {...inputProps<T>(formik, key as keyof T, size)} />
+                    {breakAfter && <span className="hidden md:block" />}
+                  </>
+                );
+              })}
+          </div>
+          <div className="flex justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="contained" color="primary" onClick={handleSaveClick} disabled={isSaving} sx={{ minWidth: 120 }}>
+                {isSaving ? (
+                  <>
+                    <span className="spinner"></span>Saving
+                  </>
+                ) : (
+                  <>Save</>
+                )}
+              </Button>
+              {savedData && <span className="text-sm text-green-600 animate-in fade-in">Saved</span>}
             </div>
-          )}
-          <div className="flex gap-4">
-            <TextField label="Name (Eng)" name="nameEng" {...inputProps<DepartmentDto>(formik, "nameEng")} />
-            <TextField label="Name (Cze)" name="nameCze" {...inputProps<DepartmentDto>(formik, "nameCze")} />
+            {itemId !== EMPTY_GUID && (
+              <div>
+                <Button variant="outlined" color="error" onClick={handleDeleteClick} disabled={isDeleting} sx={{ minWidth: 120 }}>
+                  {isDeleting ? (
+                    <>
+                      <span className="spinner"></span>Deleting
+                    </>
+                  ) : (
+                    <>Delete</>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
-          <div className="flex gap-4">
-            <TextField
-              label="Description (Eng)"
-              name="descriptionEng"
-              {...inputProps<DepartmentDto>(formik, "descriptionEng")}
-              multiline
-              rows={3}
-            />
-            <TextField
-              label="Description (Cze)"
-              name="descriptionCze"
-              {...inputProps<DepartmentDto>(formik, "descriptionCze")}
-              multiline
-              rows={3}
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <Button variant="contained" color="primary" onClick={handleSave}>
-              Save
-            </Button>
-            <Button type="submit" variant="text" color="secondary">
-              Reset
-            </Button>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
