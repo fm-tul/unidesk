@@ -25,6 +25,10 @@ public static class AutoMapperConfigurationExtensions
         options.CreateMap<SchoolYear, SchoolYearDto>()
             .ForMember(i => i.Start, i => i.MapFrom(j => j._start))
             .ForMember(i => i.End, i => i.MapFrom(j => j._end));
+        
+        options.CreateMap<SchoolYearDto, SchoolYear>()
+            .ForMember(i => i.Start, i => i.MapFrom(j => DateOnly.FromDateTime(j.Start)))
+            .ForMember(i => i.End, i => i.MapFrom(j => DateOnly.FromDateTime(j.End)));
 
         options.CreateMap<User, UserDto>()
             .ForMember(i => i.Grants, i => i.MapFrom(j => j.Roles.SelectMany(k => k.Grants).Select(k => k.Id)));

@@ -5,4 +5,5 @@ export interface EditorProperty {
   hidden?: boolean;
   size?: "small" | "medium";
   breakAfter?: boolean;
+  type?: "string" | "date";
 }

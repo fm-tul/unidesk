@@ -5,3 +5,20 @@
 @import "./styles/buttons.css";
 @import "./styles/spinners.css";
 @import "tailwindcss/utilities";
+
+
+.no-pagination .MuiDataGrid-footerContainer {
+    display: none ;
+}
+.MuiDataGrid-root.data-grid .MuiDataGrid-row {
+    cursor: pointer;
+}
+.MuiDataGrid-root.data-grid .MuiDataGrid-row .MuiDataGrid-cell {
+    outline: none;
+}
+.MuiDataGrid-root.data-grid .MuiDataGrid-row.Mui-selected {
+    background-color: #3276d549;
+}
+.MuiDataGrid-root.data-grid .MuiDataGrid-row.Mui-selected:hover {
+        background-color: #329fd561;
+}

@@ -1,5 +1,5 @@
 import { httpClient } from "@core/init";
-import { Button } from "@mui/material";
+import { Breadcrumbs, Button, Typography } from "@mui/material";
 import { DepartmentDto, FacultyDto, SchoolYearDto, ThesisOutcomeDto, ThesisTypeDto, StudyProgrammeDto } from "@api-client";
 import {
   propertiesDepartmentDto,
@@ -11,7 +11,9 @@ import {
 } from "models/dtos";
 import { Link, useParams } from "react-router-dom";
 import { toKV, toKVWithCode } from "utils/transformUtils";
-import { SimpleEntityEditor2 } from "./SimpleEntityEditor";
+import { SimpleEntityEditor } from "./SimpleEntityEditor";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { link_admin } from "routes/admin/links";
 
 export const PageAdministrator = () => {
   const { enumName } = useParams();
@@ -21,7 +23,7 @@ export const PageAdministrator = () => {
       name: "Departments",
       path: "departments",
       component: (
-        <SimpleEntityEditor2
+        <SimpleEntityEditor
           schema={propertiesDepartmentDto}
           getAll={() => httpClient.enums.departmentGetAll()}
           upsertOne={i => httpClient.enums.departmentCreateOrUpdate({ requestBody: i as DepartmentDto })}
@@ -34,7 +36,7 @@ export const PageAdministrator = () => {
       name: "Faculties",
       path: "faculties",
       component: (
-        <SimpleEntityEditor2
+        <SimpleEntityEditor
           schema={propertiesFacultyDto}
           getAll={() => httpClient.enums.facultyGetAll()}
           upsertOne={i => httpClient.enums.facultyCreateOrUpdate({ requestBody: i as FacultyDto })}
@@ -47,7 +49,7 @@ export const PageAdministrator = () => {
       name: "School Years",
       path: "school-years",
       component: (
-        <SimpleEntityEditor2
+        <SimpleEntityEditor
           schema={propertiesSchoolYearDto}
           getAll={() => httpClient.enums.schoolYearGetAll()}
           upsertOne={i => httpClient.enums.schoolYearCreateOrUpdate({ requestBody: i as SchoolYearDto })}
@@ -60,7 +62,7 @@ export const PageAdministrator = () => {
       name: "Thesis Outcomes",
       path: "thesis-outcomes",
       component: (
-        <SimpleEntityEditor2
+        <SimpleEntityEditor
           schema={propertiesThesisOutcomeDto}
           getAll={() => httpClient.enums.thesisOutcomeGetAll()}
           upsertOne={i => httpClient.enums.thesisOutcomeCreateOrUpdate({ requestBody: i as ThesisOutcomeDto })}
@@ -73,7 +75,7 @@ export const PageAdministrator = () => {
       name: "Thesis Types",
       path: "thesis-types",
       component: (
-        <SimpleEntityEditor2
+        <SimpleEntityEditor
           schema={propertiesThesisTypeDto}
           getAll={() => httpClient.enums.thesisTypeGetAll()}
           upsertOne={i => httpClient.enums.thesisTypeCreateOrUpdate({ requestBody: i as ThesisTypeDto })}
@@ -86,7 +88,7 @@ export const PageAdministrator = () => {
       name: "Study Programmes",
       path: "study-programmes",
       component: (
-        <SimpleEntityEditor2
+        <SimpleEntityEditor
           schema={propertiesStudyProgrammeDto}
           getAll={() => httpClient.enums.studyProgrammeGetAll()}
           upsertOne={i => httpClient.enums.studyProgrammeCreateOrUpdate({ requestBody: i as StudyProgrammeDto })}
@@ -101,13 +103,17 @@ export const PageAdministrator = () => {
 
   return (
     <div>
-      <h1>{validEnum ? `Manage ${validEnum.name}` : "Administration"}</h1>
-      <div className="flex flex-col">
+      <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
+        <Link to={link_admin.path}>Administration</Link>
+        {validEnum && <Typography>{validEnum.name}</Typography>}
+      </Breadcrumbs>
+      {/* <h1>{validEnum ? `Manage ${validEnum.name}` : "Administration"}</h1> */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
         {!validEnum &&
           enumsList.map(i => (
             <div key={i.name}>
-              <Button component={Link} to={`/admin/manage/${i.path}`}>
-                {i.name}
+              <Button size="large" variant="outlined" component={Link} to={`/admin/manage/${i.path}`} fullWidth>
+                <div className="px-4 py-3">{i.name}</div>
               </Button>
             </div>
           ))}

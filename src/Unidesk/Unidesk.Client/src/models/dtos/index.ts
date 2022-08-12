@@ -37,13 +37,13 @@ export const propertiesThesisOutcomeDto: EditorPropertiesOf<ThesisOutcomeDto> = 
 export const propertiesSchoolYearDto: EditorPropertiesOf<SchoolYearDto> = {
   id: { value: EMPTY_GUID, required: true, hidden: true },
 
-  start: { value: "", required: true },
-  end: { value: "", required: true },
+  start: { value: "", required: true, type: "date" },
+  end: { value: "", required: true, type: "date" },
 };
 
 export const propertiesThesisTypeDto: EditorPropertiesOf<ThesisTypeDto> = {
   id: { value: EMPTY_GUID, required: true, hidden: true },
-  code: { value: "", required: true, colspan: 2, size: "medium", breakAfter: true },
+  code: { value: "", colspan: 2, size: "medium", breakAfter: true },
 
   nameCze: { value: "", required: true },
   nameEng: { value: "", required: true },

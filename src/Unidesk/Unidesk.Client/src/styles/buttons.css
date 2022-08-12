@@ -46,7 +46,3 @@
   @apply border-2 border-gray-300 bg-gray-200 text-gray-700 shadow-gray-200/20
         hover:enabled:bg-gray-300;
 }
-
-.MuiButton-root {
-  @apply inline-flex gap-2;
-}

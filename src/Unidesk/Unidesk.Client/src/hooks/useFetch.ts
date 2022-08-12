@@ -116,7 +116,7 @@ export const useGetSetDeleteFetch = <T>(
           reject(i);
         })
         .finally(() => setIsSaving(false));
-    });
+    }) as Promise<T>;
   };
 
   return {
