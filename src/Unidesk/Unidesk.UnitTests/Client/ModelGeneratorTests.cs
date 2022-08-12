@@ -31,6 +31,10 @@ public class ModelGeneratorTests
         model2.Should().Contain("export const CC = {");
         model2.Should().Contain("\"baz\":true");
         model2.Should().Contain("\"bar\":2");
+        
+        // seconds call should not generate anything
+        ModelGenerator.Generate(typeof(ModelGeneratorTests), "./tmp").ToList()
+            .Should().HaveCount(0);
     }
 }
 

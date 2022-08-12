@@ -28,4 +28,17 @@ public class StringExtensionsTests
         "\tFoo ".Value().Should().Be("Foo");
         "\tFoo \nBar\n".Value().Should().Be("Foo \nBar");
     }
+
+    [Fact]
+    public void Value_Is_Valid_Email()
+    {
+        var validEmail = "foo.bar@foobar.com";
+        validEmail.ValidEmailOrDefault().Should().Be(validEmail);
+        
+        var invalidEmail = "@tul.cz";
+        invalidEmail.ValidEmailOrDefault().Should().BeNull();
+        
+        string? alsoInvalidEmail = null;
+        alsoInvalidEmail.ValidEmailOrDefault().Should().BeNull();
+    }
 }
