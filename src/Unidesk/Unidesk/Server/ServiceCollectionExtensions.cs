@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
+using Unidesk.Server.ServiceFilters;
 using Unidesk.ServiceFilters;
 
 namespace Unidesk.Server;
 
+[ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDevCors(this IServiceCollection services)

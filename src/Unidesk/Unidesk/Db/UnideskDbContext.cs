@@ -68,7 +68,7 @@ public class UnideskDbContext : DbContext
     }
     
 
-    public async Task SeedDbAsync()
+    public async Task<OperationInfo> SeedDbAsync()
     {
         _userProvider.CurrentUser = _userProvider.CurrentUser ?? User.InitialSeedUser;
         var info = InitialSeed.Seed(this);
@@ -77,6 +77,8 @@ public class UnideskDbContext : DbContext
         {
             await SaveChangesAsync();
         }
+
+        return info;
     }
 
     public ChangeTrackedStats GetStats()

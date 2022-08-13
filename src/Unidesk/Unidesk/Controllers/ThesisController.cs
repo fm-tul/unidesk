@@ -5,6 +5,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
+using Unidesk.Server;
 
 namespace Unidesk.Controllers;
 
@@ -21,7 +22,7 @@ public class ThesisController : Controller
     }
 
     [HttpGet, Route("list")]
-    [SwaggerOperation(OperationId = nameof(GetAll))]
+    [SwaggerOperation(OperationId = ApiConfig.GET_ALL)]
     [ProducesResponseType(typeof(List<ThesisDto>), 200)]
     public async Task<IActionResult> GetAll([FromQuery] ThesisFilter filter)
     {

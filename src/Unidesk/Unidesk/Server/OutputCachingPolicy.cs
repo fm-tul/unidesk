@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.OutputCaching;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Primitives;
 
 namespace Unidesk.Server;
 
+[ExcludeFromCodeCoverage]
 public class OutputCachingPolicy : IOutputCachePolicy 
 {
     /// <inheritdoc />

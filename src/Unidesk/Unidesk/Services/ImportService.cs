@@ -1,13 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
-using Unidesk.Db.Core;
+﻿using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Services.Stag.Models;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Services;
 
-[ExcludeFromCodeCoverage]
 public class ImportService
 {
     public CachedDbContext Db { get; }
@@ -82,18 +79,6 @@ public class ImportService
         var keywords = thesis.KeywordThesis;
 
         return keywords;
-    }
-
-    public async Task<Keyword> GetOrCreateKeyword(string word, string locale)
-    {
-        return await Db.Keywords
-                   .FirstOrDefaultAsync(i => i.Value == word && i.Locale == locale)
-               ?? Db.Keywords
-                   .AddAndReturn(new Keyword
-                   {
-                       Value = word,
-                       Locale = locale
-                   });
     }
 
     public async Task<Department> GetOrCreateDepartment(string departmentCode)
@@ -217,14 +202,5 @@ public class ImportService
         }
 
         return currentList;
-    }
-}
-
-public static class DbSetExtensions
-{
-    public static T AddAndReturn<T>(this DbSet<T> dbSet, T entity) where T : class
-    {
-        dbSet.Add(entity);
-        return entity;
     }
 }

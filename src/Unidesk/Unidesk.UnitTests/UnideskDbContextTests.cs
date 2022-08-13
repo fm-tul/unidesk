@@ -8,10 +8,12 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Unidesk.Db;
+using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Db.Seeding;
 using Unidesk.Security;
 using Unidesk.Services;
+using Unidesk.Services.Stag.Models;
 using Xunit;
 
 namespace Unidesk.UnitTests;
@@ -125,8 +127,8 @@ public class UnideskDbContextTests
 
         var userA = new User { Email = "userA@unidesk.com" };
         var userB = new User { Email = "userB@unidesk.com" };
-        var userC = new User { Email = "userC@unidesk.com", Roles = new List<UserRole>{ userRole }};
-        var team = new Team { Name = "Team A" };
+        var userC = new User { Email = "userC@unidesk.com", Roles = new List<UserRole> { userRole } };
+        var team = new Team { Name = "Team A", Avatar = string.Empty, Description = string.Empty };
         var userInTeamA = new UserInTeam { User = userA, Team = team, Status = UserInTeamStatus.Accepted };
         var userInTeamB = new UserInTeam { User = userB, Team = team, Status = UserInTeamStatus.Accepted };
 
@@ -165,9 +167,81 @@ public class UnideskDbContextTests
             Thesis = thesis,
             ReportUser = reportUser,
         };
-        
+
         // TODO: add to db
+        var changes = db.GetStats();
+        changes.UnchangedCount.Should().BeGreaterThan(0);
+        changes.DeletedCount.Should().Be(0);
+
+        db.Theses.Add(thesis);
+
+        changes = db.GetStats();
+        changes.AddedCount.Should().BeGreaterThan(1);
+        changes.DeletedCount.Should().Be(0);
+
         db.SaveChanges();
 
+        var theThesis = db.Theses.First();
+        theThesis.Should().NotBeNull();
+        thesis.KeywordThesis.Should().BeEmpty();
+
+        var cachedDbContext = new CachedDbContext(db);
+        var importService = new ImportService(cachedDbContext);
+        theThesis.KeywordThesis = await importService.GetOrCreateKeywords(theThesis, "foo, bar, baz", "foo, bař, baž");
+        theThesis.KeywordThesis.Count.Should().Be(3 + 3);
+
+        // no change seconds time
+        theThesis.KeywordThesis = await importService.GetOrCreateKeywords(theThesis, "foo, bar, baz", "foo, bař, baž");
+        theThesis.KeywordThesis.Count.Should().Be(3 + 3);
+
+        // ignore existing
+        theThesis.KeywordThesis = await importService.GetOrCreateKeywords(theThesis, "aaa, bbb,foo", "aaa, bbb,bař");
+        theThesis.KeywordThesis.Count.Should().Be(3 + 3 + 2 + 2);
+
+
+        theThesis.Department = null;
+        theThesis.Department = await importService.GetOrCreateDepartment("Test department");
+        theThesis.Department.Should().NotBeNull();
+        
+        theThesis.Faculty = null;
+        theThesis.Faculty = await importService.GetOrCreateFaculty("Test faculty");
+        theThesis.Faculty.Should().NotBeNull();
+        
+        theThesis.SchoolYear = null;
+        theThesis.SchoolYear = await importService.GetOrCreateSchoolYear(2020);
+        theThesis.SchoolYear.Should().NotBeNull();
+        
+        theThesis.ThesisType = null;
+        theThesis.ThesisType = await importService.GetOrCreateThesisType("Test thesis type");
+        theThesis.ThesisType.Should().NotBeNull();
+        
+        theThesis.Status = ThesisStatus.Draft;
+        theThesis.Status = importService.ParseThesisStatus("DUO");
+        theThesis.Status.Should().Be(ThesisStatus.Finished_Susccessfully);
+        theThesis.Status = importService.ParseThesisStatus("Foo");
+        theThesis.Status.Should().Be(ThesisStatus.Unknown);
+
+        theThesis.Users.Count.Should().Be(1);
+        theThesis.Users.Add(
+            (await importService.GetOrCreateUser(new Student
+            {
+                StagId = "123456",
+                Email = "foo@tul.cz",
+                FirstName = "Foo",
+                LastName = "Bar",
+                Username = "foo.bar",
+            }))!
+        );
+        theThesis.Users.Count.Should().Be(2);
+        importService.GetOrCreateUser(new Student()).Result.Should().BeNull();
+
+        theThesis.Users = importService.UpdateUsersList(theThesis.Users, new List<User>{ userA, userB });
+        theThesis.Users.Count.Should().Be(2);
+        theThesis.Users.First().Id.Should().Be(userA.Id);
+        theThesis.Users.Last().Id.Should().Be(userB.Id);
+        
+        theThesis.Users = importService.UpdateUsersList(theThesis.Users, new List<User>{ userA });
+        theThesis.Users.Count.Should().Be(1);
+        theThesis.Users.First().Id.Should().Be(userA.Id);
     }
 }

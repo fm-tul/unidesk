@@ -1,10 +1,12 @@
-﻿using System.Xml.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Xml.Linq;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Unidesk.Server;
 
+[ExcludeFromCodeCoverage]
 public class EnumTypesSchemaFilter : ISchemaFilter
 {
     private readonly XDocument? _xmlComments;

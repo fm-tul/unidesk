@@ -11,6 +11,7 @@ using Unidesk.Db;
 using Unidesk.Db.Core;
 using Unidesk.Dtos;
 using Unidesk.Server;
+using Unidesk.Server.ServiceFilters;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
 using Unidesk.Services.Enums;
