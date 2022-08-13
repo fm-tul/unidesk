@@ -1,18 +1,19 @@
 import { useContext } from "react";
 import { LanguageContext } from "@locales/LanguageContext";
-import { MenuItem, Select } from "@mui/material";
 import { languages, LanguagesId } from "@locales/all";
+import { Select } from "ui/Select";
 
 export function LanguageSelector() {
   const { language, setLanguage } = useContext(LanguageContext);
 
   return (
-    <Select size="small" value={language} onChange={e => setLanguage(e.target.value as LanguagesId)}>
-      {languages.map(lang => (
-        <MenuItem key={lang.id} value={lang.id}>
-          {lang.flag}
-        </MenuItem>
-      ))}
-    </Select>
+    <Select
+      options={languages}
+      sm
+      value={language}
+      keyGetter={i => i.id}
+      valueGetter={i => i.flag}
+      onChange={i => setLanguage(i.id as LanguagesId)}
+    />
   );
 }

@@ -476,6 +476,13 @@
   resolved "https://registry.npmjs.org/@jsdevtools/ono/-/ono-7.1.3.tgz"
   integrity sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==
 
+"@mertasan/tailwindcss-variables@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@mertasan/tailwindcss-variables/-/tailwindcss-variables-2.4.0.tgz#ba03908d9e17d38aef98634b01f3a39a6e337f6f"
+  integrity sha512-elqgcnCPKydzkoTwjlYjgf2Jw0nhc/4t4mYYf+KPUZh/hmgIH7cCEvlCpt1TOkx2hyFWtFeUW8M0pE6Wrf527w==
+  dependencies:
+    lodash "^4.17.21"
+
 "@mui/base@5.0.0-alpha.92":
   version "5.0.0-alpha.92"
   resolved "https://registry.npmjs.org/@mui/base/-/base-5.0.0-alpha.92.tgz"
@@ -2889,7 +2896,7 @@ react-fast-compare@^2.0.1:
 
 react-icons@^4.4.0:
   version "4.4.0"
-  resolved "https://registry.npmjs.org/react-icons/-/react-icons-4.4.0.tgz"
+  resolved "https://registry.yarnpkg.com/react-icons/-/react-icons-4.4.0.tgz#a13a8a20c254854e1ec9aecef28a95cdf24ef703"
   integrity sha512-fSbvHeVYo/B5/L4VhB7sBA1i2tS8MkT0Hb9t2H1AVPkwGfVHLJCqyr2Py9dKMxsyM63Eng1GkdZfbWj+Fmv8Rg==
 
 react-is@^16.13.1, react-is@^16.7.0:

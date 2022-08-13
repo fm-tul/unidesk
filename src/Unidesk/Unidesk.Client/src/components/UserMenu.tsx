@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { R } from "@locales/R";
-import { Button } from "@mui/material";
 import { UserContext } from "../user/UserContext";
 import { httpClient } from "@core/init";
+import { Button } from "ui/Button";
 
 export function UserMenu() {
   const { user, setUser, resetUser } = useContext(UserContext);
@@ -23,7 +23,7 @@ export function UserMenu() {
   };
 
   const logoutUser = async () => {
-    const response = await httpClient.users.logout().catch((error) => {
+    const response = await httpClient.users.logout().catch(error => {
       console.log(error);
     });
     resetUser();
@@ -39,10 +39,18 @@ export function UserMenu() {
       {user.username}
 
       {/* not logged in */}
-      {user.grants.length == 0 && <Button onClick={authUser}>{R("login")}</Button>}
+      {user.grants.length == 0 && (
+        <Button sm text onClick={authUser}>
+          {R("login")}
+        </Button>
+      )}
 
       {/* logged in */}
-      {user.grants.length > 0 && <Button onClick={logoutUser}>{R("logout")}</Button>}
+      {user.grants.length > 0 && (
+        <Button sm text onClick={logoutUser}>
+          {R("logout")}
+        </Button>
+      )}
     </div>
   );
 }

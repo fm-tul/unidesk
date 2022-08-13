@@ -3,7 +3,7 @@ export interface EditorProperty {
   required?: boolean;
   colspan?: number;
   hidden?: boolean;
-  size?: "small" | "medium";
+  size?: "sm" | "md" | "lg";
   breakAfter?: boolean;
   type?: "string" | "date";
 }

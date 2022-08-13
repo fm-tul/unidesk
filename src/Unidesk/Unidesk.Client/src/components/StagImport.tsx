@@ -1,15 +1,11 @@
 import { LinearProgress } from "@mui/material";
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import axios from "axios";
-import { useContext, useState } from "react";
-import { API_URL } from "@core/config";
+import { useState } from "react";
 import { httpClient } from "@core/init";
-import { LanguageContext } from "@locales/LanguageContext";
 import { Translate } from "@locales/R";
 import { FilterBar } from "./FilterBar";
 import { ThesisSimpleView } from "./ThesisSimpleView";
+import { Button } from "ui/Button";
+import { Select } from "ui/Select";
 
 export const StagImport = () => {
   const years = [2021, 2019, 2020, 2022];
@@ -32,7 +28,7 @@ export const StagImport = () => {
         year,
         department,
       })
-      .catch((error) => {
+      .catch(error => {
         setError(error.message);
         setIsLoading(false);
         return { data: [] };
@@ -68,24 +64,11 @@ export const StagImport = () => {
   return (
     <div>
       <FilterBar disabled={isLoading}>
-        <Select size="small" value={year} onChange={(e) => setYear(e.target.value as any)}>
-          {years.map((year) => (
-            <MenuItem key={year} value={year}>
-              {year}
-            </MenuItem>
-          ))}
-        </Select>
-
-        <Select size="small" value={department} onChange={(e) => setDepartment(e.target.value as any)}>
-          {departments.map((department) => (
-            <MenuItem key={department} value={department}>
-              {department}
-            </MenuItem>
-          ))}
-        </Select>
+        <Select sm outlined options={years} value={year} onChange={e => setYear(e as any)} />
+        <Select sm outlined options={departments} value={department} onChange={e => setDepartment(e)} />
 
         {/* import one */}
-        <Button className="ml-auto" color={error ? "error" : "primary"} variant="contained" onClick={importFromStag}>
+        <Button className="ml-auto" error={!!error} onClick={importFromStag}>
           Import
           {isLoading && <span className="spinner white"></span>}
         </Button>
@@ -94,10 +77,8 @@ export const StagImport = () => {
         <div className="flex flex-col">
           <Button
             className="ml-auto h-full"
-            color="primary"
-            variant="contained"
             onClick={importAllFromStag}
-            sx={batchIndex > 0 ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : {}}
+            // sx={batchIndex > 0 ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : {}}
           >
             Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}
             {isLoading && <span className="spinner white"></span>}
@@ -126,7 +107,7 @@ export const StagImport = () => {
           <div className="flex flex-col gap-1 text-sm">
             {resposeData
               .sort((a, b) => Number(b.isNew) - Number(a.isNew))
-              .map((thesis) => (
+              .map(thesis => (
                 <ThesisSimpleView thesis={thesis} key={thesis.id} />
               ))}
           </div>

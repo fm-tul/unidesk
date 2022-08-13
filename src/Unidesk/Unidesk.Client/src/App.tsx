@@ -5,10 +5,10 @@ import { EnKeys } from "@locales/all";
 import { LanguageSelector } from "./components/LanguageSelector";
 import { UserMenu } from "./components/UserMenu";
 import { R } from "@locales/R";
-import { Button } from "@mui/material";
 import { useContext } from "react";
 import { UserContext } from "./user/UserContext";
 import { UserDto } from "@api-client";
+import { Button } from "ui/Button";
 
 export const App = () => {
   const { user } = useContext(UserContext);
@@ -29,9 +29,9 @@ export const App = () => {
           {available_links
             .filter(i => i.visible !== false)
             .map(i => (
-              <Link key={i.path} to={i.path}>
-                <Button>{R(i.title as EnKeys)}</Button>
-              </Link>
+              <Button text key={i.path} to={i.path} component={Link}>
+                {R(i.title as EnKeys)}
+              </Button>
             ))}
         </div>
 

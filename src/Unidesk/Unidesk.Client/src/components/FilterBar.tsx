@@ -17,9 +17,5 @@ export const FilterBar: React.FC<ToolbarProps> = (props) => {
         React.cloneElement(child as any, { disabled })
     ));
 
-    return (
-        <ButtonGroup disabled={disabled} className={`${variant} ${className}`}>
-            {clonedChildren}
-        </ButtonGroup>
-    );
+    return <div className={`${variant} ${className}`}>{clonedChildren}</div>;
 }

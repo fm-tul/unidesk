@@ -1,4 +1,4 @@
-export const getFormikProps = <T>(formik: any, prop: keyof T, size = "small", fullWidth = true) => {
+export const getFormikProps = <T>(formik: any, prop: keyof T, size = "sm", fullWidth = true) => {
   const error = !!formik.errors[prop] && !!formik.touched[prop];
   const helperText = error ? formik.errors[prop] : null;
   const restProps = formik.getFieldProps(prop);

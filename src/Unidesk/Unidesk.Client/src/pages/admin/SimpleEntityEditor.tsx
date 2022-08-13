@@ -9,8 +9,7 @@ import {
 } from "@api-client";
 import { useFormik } from "formik";
 import { getFormikProps as inputProps } from "hooks/getFormikProps";
-import { Button, TextField } from "@mui/material";
-import { useContext, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { useGetSetDeleteFetch } from "hooks/useFetch";
 import { RequestInfo } from "components/utils/RequestInfo";
 import { LanguageContext } from "@locales/LanguageContext";
@@ -18,14 +17,10 @@ import { EMPTY_GUID } from "@core/config";
 import { KeyValue } from "utils/KeyValue";
 import { LanguagesId } from "@locales/all";
 import { EditorPropertiesOf, extractInitialValues, extractYupSchema, extractColDefinition } from "models/typing";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SaveIcon from "@mui/icons-material/Save";
-import AddIcon from "@mui/icons-material/Add";
-import { UButton } from "components/mui/UButton";
 import { DataGrid } from "@mui/x-data-grid";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import { TextField } from "ui/TextField";
+import { Button } from "ui/Button";
+import { MdAdd, MdSave, MdDelete } from "react-icons/md";
 
 type TItem = DepartmentDto | FacultyDto | ThesisOutcomeDto | SchoolYearDto | ThesisTypeDto | StudyProgrammeDto;
 
@@ -89,8 +84,8 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
             autoHeight
           />
           <div className="flex justify-end">
-            <Button variant="contained" startIcon={<AddIcon />} color="primary" size="small" onClick={() => setItemToEdit(EMPTY_GUID)}>
-              Add new
+            <Button sm onClick={() => setItemToEdit(EMPTY_GUID)}>
+              Add new <MdAdd className="text-base" />
             </Button>
           </div>
         </div>
@@ -102,58 +97,49 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
             {Object.entries(schema)
               .filter(([key, prop]) => prop.hidden !== true)
               .map(([key, prop]) => {
-                const { colspan = 2, size = "small", breakAfter = false, type = "string" } = prop;
+                const { colspan = 2, size = "sm", breakAfter = false, type = "string" } = prop;
                 // col-span-1 col-span-2 col-span-3 col-span-4
                 const colSpanClass = `col-span-${colspan}`;
                 if (type === "string") {
                   return (
-                    <>
-                      <TextField
-                        className={colSpanClass}
-                        key={key}
-                        label={key}
-                        name={key}
-                        {...inputProps<T>(formik, key as keyof T, size)}
-                      />
+                    <React.Fragment key={key}>
+                      <TextField className={colSpanClass} label={key} name={key} {...inputProps<T>(formik, key as keyof T, size)} />
                       {breakAfter && <span className="hidden md:block" />}
-                    </>
+                    </React.Fragment>
                   );
                 }
 
                 if (type === "date") {
                   return (
-                    <LocalizationProvider key={key} dateAdapter={AdapterMoment}>
-                      <DatePicker
-                        key={key}
-                        label="Basic example"
-                        value={(formik.values as any)[key] as string}
-                        onChange={v => {
-                          formik.setFieldValue(key, v);
-                        }}
-                        renderInput={params => <TextField {...params} />}
+                    <React.Fragment key={key}>
+                      <TextField
+                        type="datetime-local"
+                        className={colSpanClass}
+                        label={key}
+                        name={key}
+                        {...inputProps<T>(formik, key as keyof T, size)}
                       />
-                    </LocalizationProvider>
+                      {breakAfter && <span className="hidden md:block" />}
+                    </React.Fragment>
                   );
                 }
+
+                // not implemented yet
                 return null;
               })}
           </div>
           <div className="flex justify-between">
             <div className="flex items-center gap-4">
-              <UButton position="end" label="Save" icon={<SaveIcon />} onClick={handleSaveClick} loading={isSaving} />
+              <Button className="peer" onClick={handleSaveClick} loading={isSaving}>
+                Save <MdSave className="text-base peer-loading:hidden" />
+              </Button>
               {savedData && <span className="text-sm text-green-600 animate-in fade-in">Saved</span>}
             </div>
             {itemId !== EMPTY_GUID && (
               <div>
-                <UButton
-                  outlined
-                  error
-                  icon={<DeleteIcon />}
-                  position="end"
-                  onClick={handleDeleteClick}
-                  loading={isDeleting}
-                  label="Delete"
-                />
+                <Button outlined error className="peer" onClick={handleDeleteClick} loading={isDeleting}>
+                  Delete <MdDelete className="text-base peer-loading:hidden" />
+                </Button>
               </div>
             )}
           </div>

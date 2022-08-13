@@ -1,10 +1,95 @@
 .btn {
-  @apply inline-flex cursor-pointer items-center gap-1 rounded-sm px-2 py-1 text-base shadow-md transition
-  disabled:cursor-not-allowed disabled:opacity-70;
+  @apply inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 transition font-roboto uppercase font-medium
+   shadow-md shadow-black/20 hover:shadow-black/40 justify-center min-w-[60px] select-none
 }
-.btn-small {
-  @apply inline-flex cursor-pointer items-center gap-1 rounded-sm p-1 text-sm shadow-md transition;
+
+/* btn-info | btn-success | btn-warning | btn-error */
+.btn-info {
+  @apply bg-info-600 text-white hover:bg-info-700
 }
+.btn-success {
+  @apply bg-success-700 text-white hover:bg-success-800
+}
+.btn-warning {
+  @apply bg-warning-600 text-white hover:bg-warning-700
+}
+.btn-error {
+  @apply bg-error-600 text-white hover:bg-error-700
+}
+
+/* btn-sm | btn-md | btn-lg */
+.btn-sm {
+  @apply px-2 py-2 text-xs;
+  --size: 16px;
+  --border: 3px;
+}
+.btn-md {
+  @apply px-4 py-2 text-sm;
+  --size: 20px;
+  --border: 4px;
+}
+.btn-lg {
+  @apply px-5 py-3 text-sm;
+  --size: 24px;
+  --border: 4px;
+}
+
+
+/* btn-outlined | btn-text */
+.btn-outlined {
+  @apply border border-solid bg-transparent shadow-none hover:shadow-none
+}
+
+.btn-outlined.btn-info {
+  @apply border-info-500 text-info-600 hover:border-info-600 hover:text-info-800 hover:bg-info-100 active:bg-info-200;
+  --color-spinner-a: var(--color-info-600-rgb);
+}
+.btn-outlined.btn-success {
+  @apply border-success-500 text-success-600 hover:border-success-600 hover:text-success-800 hover:bg-success-100 active:bg-success-200;
+  --color-spinner-a: var(--color-success-500-rgb);
+}
+.btn-outlined.btn-warning {
+  @apply border-warning-500 text-warning-600 hover:border-warning-600 hover:text-warning-800 hover:bg-warning-100 active:bg-warning-200;
+  --color-spinner-a: var(--color-warning-600-rgb);
+}
+.btn-outlined.btn-error {
+  @apply border-error-500 text-error-600 hover:border-error-600 hover:text-error-800 hover:bg-error-100 active:bg-error-200;
+  --color-spinner-a: var(--color-error-500-rgb);
+}
+
+.btn-text {
+  @apply bg-transparent shadow-none hover:shadow-none
+}
+.btn-text.btn-info {
+  @apply text-info-600 hover:text-info-800 hover:bg-info-100 active:bg-info-200 selected:bg-info-600/40 selected:text-black;
+  --color-spinner-a: var(--color-info-500-rgb);
+}
+.btn-text.btn-success {
+  @apply text-success-600 hover:text-success-800 hover:bg-success-100 active:bg-success-200 selected:bg-success-600/40 selected:text-black;
+  --color-spinner-a: var(--color-success-700-rgb);
+}
+.btn-text.btn-warning {
+  @apply text-warning-600 hover:text-warning-800 hover:bg-warning-100 active:bg-warning-200 selected:bg-warning-600/40 selected:text-black;
+  --color-spinner-a: var(--color-warning-600-rgb);
+}
+.btn-text.btn-error {
+  @apply text-error-600 hover:text-error-800 hover:bg-error-100 active:bg-error-200 selected:bg-error-600/40 selected:text-black;
+  --color-spinner-a: var(--color-error-500-rgb);
+}
+
+
+/* spinner options */
+.btn-contained {
+  --color-spinner-a: var(--color-white-rgb);
+}
+
+
+
+.btn.disabled {
+  @apply cursor-not-allowed opacity-80 bg-neutral-300 text-neutral-400 border-neutral-400 pointer-events-none;
+  --color-spinner-a: var(--color-neutral-400-rgb);
+}
+
 
 .btn-bar {
   @apply flex items-stretch gap-1;
@@ -22,27 +107,69 @@
   @apply rounded-r-md border-2 border-l;
 }
 
-.btn-info {
-  @apply border-2 border-blue-700 bg-blue-500 text-white shadow-blue-500/20
-        hover:enabled:bg-blue-700;
+
+
+.select {
+  @apply flex max-h-xs w-max min-w-[50px] flex-col overflow-auto rounded bg-white p-1 shadow-lg shadow-black/30 has-backdrop:bg-white/80 has-backdrop:backdrop-blur;
 }
-.btn-success {
-  @apply border-2 border-green-600 bg-green-500 text-white shadow-green-500/20
-        hover:enabled:bg-green-600;
+
+.select-item {
+  @apply justify-start;
 }
-.btn-warning {
-  @apply border-2 border-yellow-700 bg-yellow-500 text-black shadow-yellow-500/20
-        hover:text-white hover:enabled:bg-yellow-700;
+
+.select::-webkit-scrollbar {
+  width: 6px;
 }
-.btn-warning:hover > .spinner {
-  --color-spinner-a: #fff;
-  --color-spinner-b: #ffffff4e;
+
+/* Track */
+.select::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
 }
-.btn-danger {
-  @apply border-2 border-red-700 bg-red-500 text-white shadow-red-500/20
-        hover:enabled:bg-red-700;
+
+/* Handle */
+.select::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
 }
-.btn-text {
-  @apply border-2 border-gray-300 bg-gray-200 text-gray-700 shadow-gray-200/20
-        hover:enabled:bg-gray-300;
+
+/* Handle on hover */
+.select::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 
+
+
+.tf {
+  @apply outline-none rounded border border-neutral-300 border-solid focus:border-info-500 focus:ring-1 focus:ring-info-500
+}
+.tf.error {
+  @apply border-error-500 focus:ring-error-500
+}
+.tf-sm {
+  @apply px-3 py-2 text-xs;
+  --size: 16px;
+  --border: 3px;
+}
+.tf-md {
+  @apply px-4 py-2 text-sm;
+  --size: 20px;
+  --border: 4px;
+}
+.tf-lg {
+  @apply px-5 py-3 text-sm;
+  --size: 24px;
+  --border: 4px;
+}
+.tf-label {
+  @apply absolute select-none peer-focus:opacity-100 transition-all top-0 rounded-sm text-neutral-400 pointer-events-none;
+  @apply peer-focus:text-xxs peer-focus:top-[-7px] peer-focus:left-2 peer-focus:bg-info-500 peer-focus:px-1 peer-focus:py-0 peer-focus:text-white ;
+}
+.tf-label.locked {
+  @apply text-xxs top-[-7px] bg-neutral-200 px-1 py-0 text-gray-800 left-2;
+}
+.tf-label.error {
+  @apply peer-focus:bg-error-500;
+}
+.tf-label.locked.error {
+  @apply bg-error-500;
 }

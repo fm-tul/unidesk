@@ -1,5 +1,5 @@
 import { httpClient } from "@core/init";
-import { Breadcrumbs, Button, Typography } from "@mui/material";
+import { Breadcrumbs, Typography } from "@mui/material";
 import { DepartmentDto, FacultyDto, SchoolYearDto, ThesisOutcomeDto, ThesisTypeDto, StudyProgrammeDto } from "@api-client";
 import {
   propertiesDepartmentDto,
@@ -14,6 +14,7 @@ import { toKV, toKVWithCode } from "utils/transformUtils";
 import { SimpleEntityEditor } from "./SimpleEntityEditor";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { link_admin } from "routes/admin/links";
+import { Button } from "ui/Button";
 
 export const PageAdministrator = () => {
   const { enumName } = useParams();
@@ -112,8 +113,8 @@ export const PageAdministrator = () => {
         {!validEnum &&
           enumsList.map(i => (
             <div key={i.name}>
-              <Button size="large" variant="outlined" component={Link} to={`/admin/manage/${i.path}`} fullWidth>
-                <div className="px-4 py-3">{i.name}</div>
+              <Button lg outlined component={Link} to={`/admin/manage/${i.path}`} fullWidth>
+                <span className="px-4 py-3">{i.name}</span>
               </Button>
             </div>
           ))}
