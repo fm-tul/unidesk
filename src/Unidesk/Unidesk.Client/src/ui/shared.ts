@@ -1,13 +1,18 @@
-type sizes = "sm" | "md" | "lg";
-type colors = "info" | "success" | "warning" | "error";
-type variants = "contained" | "outlined" | "text";
+export type UiSizes = "sm" | "md" | "lg";
+export type UiColors = "info" | "success" | "warning" | "error";
+export type UiVariants = "contained" | "outlined" | "text";
+
+export interface HelperProps {
+  helperText?: string;
+  herlperColor?: UiColors | boolean;
+}
 
 export interface SizeProps {
   // sizes, default medium
   md?: boolean;
   sm?: boolean;
   lg?: boolean;
-  size?: sizes;
+  size?: UiSizes;
 }
 
 export interface ColorProps {
@@ -16,7 +21,7 @@ export interface ColorProps {
   success?: boolean;
   warning?: boolean;
   error?: boolean;
-  color?: colors;
+  color?: UiColors;
 }
 
 export interface VariantProps {
@@ -24,7 +29,7 @@ export interface VariantProps {
   contained?: boolean;
   outlined?: boolean;
   text?: boolean;
-  variant?: variants;
+  variant?: UiVariants;
 }
 
 export interface SimpleComponentProps extends SizeProps {
@@ -41,7 +46,7 @@ export interface ComplexComponentProps extends SizeProps, ColorProps, VariantPro
   fullWidth?: boolean;
 }
 
-export const getSize = (props: SimpleComponentProps, def: sizes = "md") => {
+export const getSize = (props: SimpleComponentProps, def: UiSizes = "md") => {
   if (props.size) {
     return props.size;
   }
@@ -54,7 +59,7 @@ export const getSize = (props: SimpleComponentProps, def: sizes = "md") => {
   return def;
 };
 
-export const getColor = (props: ComplexComponentProps, def: colors = "info") => {
+export const getColor = (props: ComplexComponentProps, def: UiColors = "info") => {
   if (props.color) {
     return props.color;
   }
@@ -70,7 +75,7 @@ export const getColor = (props: ComplexComponentProps, def: colors = "info") => 
   return def;
 };
 
-export const getVariant = (props: ComplexComponentProps, def: variants = "contained") => {
+export const getVariant = (props: ComplexComponentProps, def: UiVariants = "contained") => {
   if (props.variant) {
     return props.variant;
   }
@@ -85,3 +90,19 @@ export const getVariant = (props: ComplexComponentProps, def: variants = "contai
   }
   return def;
 };
+
+export const getStyleProps = (
+  props: ComplexComponentProps,
+  defaultVariant: UiVariants = "contained",
+  defaultColor: UiColors = "info",
+  defaultSize: UiSizes = "md"
+) => ({
+  color: getColor(props, defaultColor),
+  variant: getVariant(props, defaultVariant),
+  size: getSize(props, defaultSize),
+});
+
+export const getHelperProps = (props: HelperProps) => ({
+  helperText: props.helperText,
+  helperColorCss: props.herlperColor === true || props.herlperColor === "error" ? "text-error-600" : "",
+});

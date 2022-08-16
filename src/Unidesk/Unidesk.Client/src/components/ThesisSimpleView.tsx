@@ -26,7 +26,7 @@ export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
           )}
           <span className="rounded-md border border-orange-400 bg-orange-200 px-1 text-xs">{status}</span>
           <span className="font-bold">
-            <DualLanguage eng={thesis.nameEng!} cze={thesis.nameCze!} />
+            <DualLanguage eng={thesis.nameEng!} cze={thesis.nameCze!} language={language} />
           </span>
           {thesis.users.length > 0 && (
             <span className="italic">

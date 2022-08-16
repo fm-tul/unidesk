@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { LanguageContext } from "@locales/LanguageContext";
-import { languages, LanguagesId } from "@locales/all";
+import { languages } from "@locales/all";
 import { Select } from "ui/Select";
 
 export function LanguageSelector() {
@@ -10,10 +10,11 @@ export function LanguageSelector() {
     <Select
       options={languages}
       sm
+      fullWidth={false}
       value={language}
       keyGetter={i => i.id}
       valueGetter={i => i.flag}
-      onChange={i => setLanguage(i.id as LanguagesId)}
+      onChange={i => setLanguage((i as any).id)}
     />
   );
 }

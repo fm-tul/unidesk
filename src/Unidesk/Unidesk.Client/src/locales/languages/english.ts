@@ -50,6 +50,7 @@ export const en = {
   // errors
   required: "Required",
   "min-3": "Select at least 3 values",
+  "basic-information": "Basic information",
 };
 
 export default en;

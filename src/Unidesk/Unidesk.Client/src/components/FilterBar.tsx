@@ -1,6 +1,5 @@
 // takes a list of items and renders them as a toolbar
 
-import { ButtonGroup } from "@mui/material";
 import React from "react";
 
 interface ToolbarProps {

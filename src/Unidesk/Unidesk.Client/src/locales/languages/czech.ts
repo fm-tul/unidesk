@@ -17,4 +17,6 @@ export const cs: ILocale = {
   // general
   error: "chyba",
   "error-occurred": "Nastala chyba",
+  required: "Povinná položka",
+  "min-3": "Vyberte alespoň 3 položky",
 };

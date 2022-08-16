@@ -1,5 +1,4 @@
 import { httpClient } from "@core/init";
-import { Breadcrumbs, Typography } from "@mui/material";
 import { DepartmentDto, FacultyDto, SchoolYearDto, ThesisOutcomeDto, ThesisTypeDto, StudyProgrammeDto } from "@api-client";
 import {
   propertiesDepartmentDto,
@@ -12,8 +11,6 @@ import {
 import { Link, useParams } from "react-router-dom";
 import { toKV, toKVWithCode } from "utils/transformUtils";
 import { SimpleEntityEditor } from "./SimpleEntityEditor";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { link_admin } from "routes/admin/links";
 import { Button } from "ui/Button";
 
 export const PageAdministrator = () => {
@@ -104,11 +101,7 @@ export const PageAdministrator = () => {
 
   return (
     <div>
-      <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
-        <Link to={link_admin.path}>Administration</Link>
-        {validEnum && <Typography>{validEnum.name}</Typography>}
-      </Breadcrumbs>
-      {/* <h1>{validEnum ? `Manage ${validEnum.name}` : "Administration"}</h1> */}
+      <h1>{validEnum ? `Manage ${validEnum.name}` : "Administration"}</h1>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
         {!validEnum &&
           enumsList.map(i => (

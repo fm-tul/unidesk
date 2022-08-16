@@ -17,7 +17,6 @@ import { EMPTY_GUID } from "@core/config";
 import { KeyValue } from "utils/KeyValue";
 import { LanguagesId } from "@locales/all";
 import { EditorPropertiesOf, extractInitialValues, extractYupSchema, extractColDefinition } from "models/typing";
-import { DataGrid } from "@mui/x-data-grid";
 import { TextField } from "ui/TextField";
 import { Button } from "ui/Button";
 import { MdAdd, MdSave, MdDelete } from "react-icons/md";
@@ -75,14 +74,14 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
       <RequestInfo isLoading={isLoading} error={error} />
       {dataKV.length > 0 && (
         <div className="flex flex-col gap-4 ">
-          <DataGrid
+          {/* <DataGrid
             className="no-pagination data-grid"
             selectionModel={itemId}
             rows={data!}
             columns={extractColDefinition(schema)}
             onRowClick={i => setItemToEdit(i.row.id)}
             autoHeight
-          />
+          /> */}
           <div className="flex justify-end">
             <Button sm onClick={() => setItemToEdit(EMPTY_GUID)}>
               Add new <MdAdd className="text-base" />

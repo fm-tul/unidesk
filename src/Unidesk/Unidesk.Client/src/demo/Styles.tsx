@@ -1,8 +1,10 @@
-import { Button as ButtonMui, MenuItem, Select as SelectMui, TextField as TextFieldMui } from "@mui/material";
-import { useState } from "react";
+import { Key, useState } from "react";
 import { Button } from "ui/Button";
 import { Select } from "ui/Select";
+import { SimpleSelect } from "ui/SimpleSelect";
+import { Step, Stepper } from "ui/Stepper";
 import { TextField } from "ui/TextField";
+import { UiColors, UiSizes, UiVariants } from "ui/shared";
 import { product } from "../utils/product";
 
 const Buttons = () => {
@@ -50,9 +52,9 @@ const Buttons = () => {
               {" "}
               {color[0]} {size[0]} {variant[0]}{" "}
             </Button>
-            <ButtonMui key={++i} color={color[1] as any} size={size[1] as any} variant={variant[1] as any} disabled={disabled[1] as any}>
+            {/* <ButtonMui key={++i} color={color[1] as any} size={size[1] as any} variant={variant[1] as any} disabled={disabled[1] as any}>
               {color[0]} {size[0]} {variant[0]}
-            </ButtonMui>
+            </ButtonMui> */}
           </>
         ))}
       </div>
@@ -67,17 +69,32 @@ const Selects = () => {
     { key: 3, value: "Long Cocktail" },
   ];
   let longItems = Array.from({ length: 100 }, (_, i) => ({ key: i, value: `Item ${i}` }));
+  const [value, setValue] = useState<Key>();
+  const [values, setValues] = useState<Key[]>([items[0].key]);
+
+  const colors = "info success warning error".split(" ");
+  const variants = "contained outlined text".split(" ");
+  const sizes = "sm md lg".split(" ");
+  const disabled = [false, true] as any;
+  const combinations = [...product([colors, sizes, variants, disabled])] as [UiColors, UiSizes, UiVariants, boolean][];
 
   return (
-    <div className="flex">
-      <Select options={items} onChange={console.log} success />
-      <SelectMui className="min-w-xs" label="cascsa" title="cascsa" variant="filled" value={"2"}>
-        {items.map(item => (
-          <MenuItem key={item.key} value={item.key}>
-            {item.value}
-          </MenuItem>
-        ))}
-      </SelectMui>
+    <div className="flex flex-wrap gap-2">
+      {combinations.map(([color, size, variant, disabled]) => (
+        <>
+          <SimpleSelect
+            options={items}
+            value={values}
+            multiple
+            onValue={setValues}
+            color={color}
+            variant={variant}
+            size={size}
+            disabled={disabled}
+          />
+          <SimpleSelect options={items} value={value} onValue={setValue} color={color} variant={variant} size={size} disabled={disabled} />
+        </>
+      ))}
     </div>
   );
 };
@@ -87,19 +104,31 @@ const TextFields = () => {
   const setValue2 = (e: any) => setValue(e.target.value);
   return (
     <div className="flex flex-col gap-4">
-      <TextField label="Label" value={value} onChange={setValue2} />
+      <TextField loading label="Label" value={value} onChange={setValue2} />
       <TextField label="Label" value={"ascas"} />
-      <TextField label="Label" error helperText="debile" value={value} onChange={setValue2} />
-      <TextFieldMui label="Label" size="small" />
+      <TextField label="Label" helperColor helperText="debile" value={value} onChange={setValue2} />
+      {/* <TextFieldMui label="Label" size="small" /> */}
     </div>
   );
 };
+
+const Steppers = () => {
+  return (
+    <Stepper step={1}>
+      <Step label="cascsa">Step 1</Step>
+      <h1>Step 2</h1>
+      <div>Complex Step 3</div>
+    </Stepper>
+  );
+};
+
 export const Styles = () => {
   return (
     <div className="flex flex-col">
       {/* <Selects /> */}
-      <TextFields />
-      {/* <Buttons /> */}
+      {/* <TextFields />
+      <Buttons />
+      <Steppers />  */}
     </div>
   );
 };

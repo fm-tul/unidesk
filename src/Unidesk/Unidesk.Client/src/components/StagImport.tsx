@@ -1,4 +1,3 @@
-import { LinearProgress } from "@mui/material";
 import { useState } from "react";
 import { httpClient } from "@core/init";
 import { Translate } from "@locales/R";
@@ -6,6 +5,7 @@ import { FilterBar } from "./FilterBar";
 import { ThesisSimpleView } from "./ThesisSimpleView";
 import { Button } from "ui/Button";
 import { Select } from "ui/Select";
+import { LinearProgress } from "ui/LinearProgress";
 
 export const StagImport = () => {
   const years = [2021, 2019, 2020, 2022];
@@ -65,7 +65,7 @@ export const StagImport = () => {
     <div>
       <FilterBar disabled={isLoading}>
         <Select sm outlined options={years} value={year} onChange={e => setYear(e as any)} />
-        <Select sm outlined options={departments} value={department} onChange={e => setDepartment(e)} />
+        <Select sm outlined options={departments} value={department} onChange={e => setDepartment(e as string)} />
 
         {/* import one */}
         <Button className="ml-auto" error={!!error} onClick={importFromStag}>
@@ -76,14 +76,14 @@ export const StagImport = () => {
         {/* import all */}
         <div className="flex flex-col">
           <Button
+            loading={isLoading}
             className="ml-auto h-full"
             onClick={importAllFromStag}
             // sx={batchIndex > 0 ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : {}}
           >
             Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}
-            {isLoading && <span className="spinner white"></span>}
           </Button>
-          {batchIndex > 0 && <LinearProgress variant="determinate" value={(batchIndex / totalBatches) * 100} />}
+          {batchIndex > 0 && <LinearProgress value={(batchIndex / totalBatches) * 100} />}
         </div>
       </FilterBar>
       {error && (

@@ -8,9 +8,11 @@ interface ButtonProps extends ComplexComponentProps {
 
   to?: string;
   component?: React.ElementType;
+  tabIndex?: number;
+  title?: string;
 }
 export const Button = (props: PropsWithChildren<ButtonProps>) => {
-  const { loading, disabled, fullWidth = false, component, to } = props;
+  const { loading, disabled, fullWidth = false, component, to, tabIndex, title } = props;
   const { children, onClick, className: classNameOverride } = props;
 
   const size = getSize(props);
@@ -27,11 +29,11 @@ export const Button = (props: PropsWithChildren<ButtonProps>) => {
   const className = `btn ${colorCss} ${sizeCss} ${variantCss} ${disabledCss} ${fullWidthCss} ${classNameOverride} ${loadingCss}`;
 
   if (component) {
-    return createElement(component, { className, to }, children);
+    return createElement(component, { className, to, title }, children);
   }
 
   return (
-    <button className={className} onClick={onClick}>
+    <button className={className} onClick={onClick} tabIndex={tabIndex} disabled={disabled} title={title}>
       {children}
       {loading && <span className="spinner2"></span>}
     </button>

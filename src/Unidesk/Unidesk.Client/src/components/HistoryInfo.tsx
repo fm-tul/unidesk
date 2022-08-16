@@ -1,10 +1,11 @@
 import { R, Translate } from "@locales/R";
-import moment from "moment-with-locales-es6";
 import { FaCalendar } from "react-icons/fa";
 import { useContext } from "react";
 import { LanguageContext } from "@locales/LanguageContext";
-import { Tooltip } from "@mui/material";
 import { TrackedEntityDto } from "@api-client";
+import moment from "moment";
+import "moment/dist/locale/en-gb";
+import "moment/dist/locale/cs";
 
 interface IHistoryInfoProps {
   item: TrackedEntityDto;
@@ -68,25 +69,9 @@ export const HistoryInfoIcon = (props: IHistoryInfoProps) => {
 
   return (
     <div className="inline-flex items-center gap-1 text-gray-300">
-      <Tooltip
-        title={
-          <span>
-            {titleCreated}
-            <br />
-            {titleModified}
-          </span>
-        }
-      >
-        <time className="flex items-center gap-1">
-          <FaCalendar />
-        </time>
-      </Tooltip>
-
-      {/* <Tooltip title={`${R("modified")}: ${modifiedBy}, ${modifiedFromNow}`}>
-        <time className="flex items-center gap-1">
-          <FaCalendar />
-        </time>
-      </Tooltip> */}
+      <time className="flex items-center gap-1" title={`${titleCreated}, ${titleModified}`}>
+        <FaCalendar />
+      </time>
     </div>
   );
 };

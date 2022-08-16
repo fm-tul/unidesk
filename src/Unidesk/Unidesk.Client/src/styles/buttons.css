@@ -19,7 +19,7 @@
 
 /* btn-sm | btn-md | btn-lg */
 .btn-sm {
-  @apply px-2 py-2 text-xs;
+  @apply px-2 py-2 text-xs min-w-[24px];
   --size: 16px;
   --border: 3px;
 }
@@ -110,11 +110,12 @@
 
 
 .select {
-  @apply flex max-h-xs w-max min-w-[50px] flex-col overflow-auto rounded bg-white p-1 shadow-lg shadow-black/30 has-backdrop:bg-white/80 has-backdrop:backdrop-blur;
+  @apply flex max-h-xs w-max flex-col overflow-auto rounded bg-white p-1 shadow-lg min-w-full absolute z-20 flex-nowrap
+   shadow-black/30 has-backdrop:bg-white/80 has-backdrop:backdrop-blur;
 }
 
 .select-item {
-  @apply justify-start;
+  @apply justify-start normal-case;
 }
 
 .select::-webkit-scrollbar {
@@ -172,4 +173,22 @@
 }
 .tf-label.locked.error {
   @apply bg-error-500;
+}
+
+
+.pill {
+  @apply text-sm text-neutral-700 border border-solid rounded-full px-2 whitespace-nowrap;
+}
+
+.pill.info {
+  @apply bg-info-200 text-info-700 border-info-300;
+}
+.pill.success {
+  @apply bg-success-200 text-success-700 border-success-300;
+}
+.pill.warning {
+  @apply bg-warning-100 text-warning-700 border-warning-300;
+}
+.pill.error {
+  @apply bg-error-200 text-error-700 border-error-300;
 }

@@ -1,7 +1,6 @@
 import { TrackedEntityDto } from "@models/TrackedEntityDto";
 import { EditorProperty } from "./EditorProperty";
 import * as Yup from "yup";
-import { GridColDef } from "@mui/x-data-grid/models";
 import { IdRenderer } from "./cellRenderers/IdRenderer";
 import { DateOnlyRendererFor } from "./cellRenderers/DateOnlyRenderer";
 
@@ -35,7 +34,7 @@ export const extractYupSchema = <T>(schema: EditorPropertiesOf<T>) => {
 };
 
 export const extractColDefinition = <T>(schema: EditorPropertiesOf<T>) => {
-  const cols: GridColDef[] = [
+  const cols: any[] = [
     {
       field: "id",
       headerName: "ID",
