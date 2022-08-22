@@ -21,3 +21,15 @@
 .MuiDataGrid-root.data-grid .MuiDataGrid-row.Mui-selected:hover {
         background-color: #329fd561;
 }
+
+:root {
+    --toastify-color-progress-light: linear-gradient(
+    to right,
+    #007aff,
+    #34aadc
+  );
+}
+
+.Toastify__progress-bar {
+    height: 4px;
+}

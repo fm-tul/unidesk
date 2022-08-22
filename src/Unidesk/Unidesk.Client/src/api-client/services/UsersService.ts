@@ -59,17 +59,6 @@ path: string,
     }
 
     /**
-     * @returns LoginResponse Success
-     * @throws ApiError
-     */
-    public test(): CancelablePromise<LoginResponse> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/Users/test',
-        });
-    }
-
-    /**
      * @returns any Success
      * @throws ApiError
      */
@@ -110,6 +99,24 @@ orderAscending?: boolean,
                 'PageSize': pageSize,
                 'OrderBy': orderBy,
                 'OrderAscending': orderAscending,
+            },
+        });
+    }
+
+    /**
+     * @returns UserDto Success
+     * @throws ApiError
+     */
+    public find({
+keyword,
+}: {
+keyword?: string,
+}): CancelablePromise<Array<UserDto>> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/Users/find',
+            query: {
+                'keyword': keyword,
             },
         });
     }

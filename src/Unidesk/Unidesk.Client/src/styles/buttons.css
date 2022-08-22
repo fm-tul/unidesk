@@ -1,6 +1,6 @@
 .btn {
-  @apply inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 transition font-roboto uppercase font-medium
-   shadow-md shadow-black/20 hover:shadow-black/40 justify-center min-w-[60px] select-none
+  @apply cursor-pointer rounded px-2 py-1 transition font-roboto uppercase font-medium
+   shadow-md shadow-black/20 hover:shadow-black/40  min-w-[60px] select-none
 }
 
 /* btn-info | btn-success | btn-warning | btn-error */
@@ -19,7 +19,7 @@
 
 /* btn-sm | btn-md | btn-lg */
 .btn-sm {
-  @apply px-2 py-2 text-xs min-w-[24px];
+  @apply px-2 py-1 text-xs min-w-[24px];
   --size: 16px;
   --border: 3px;
 }
@@ -85,6 +85,10 @@
 
 
 
+.i-disabled {
+  @apply cursor-not-allowed pointer-events-none;
+}
+
 .btn.disabled {
   @apply cursor-not-allowed opacity-80 bg-neutral-300 text-neutral-400 border-neutral-400 pointer-events-none;
   --color-spinner-a: var(--color-neutral-400-rgb);
@@ -107,10 +111,17 @@
   @apply rounded-r-md border-2 border-l;
 }
 
+.btn.with-progress {
+  @apply content-[_] before:block relative before:absolute before:h-full before:inset-0;
+}
+.btn.with-progress::before {
+  width: var(--progress);
+}
+
 
 
 .select {
-  @apply flex max-h-xs w-max flex-col overflow-auto rounded bg-white p-1 shadow-lg min-w-full absolute z-20 flex-nowrap
+  @apply flex max-h-sm w-max flex-col overflow-auto rounded bg-white p-1 shadow-lg min-w-full absolute z-20 flex-nowrap
    shadow-black/30 has-backdrop:bg-white/80 has-backdrop:backdrop-blur;
 }
 
@@ -177,18 +188,69 @@
 
 
 .pill {
-  @apply text-sm text-neutral-700 border border-solid rounded-full px-2 whitespace-nowrap;
+  @apply text-sm text-neutral-700 border border-solid rounded-full px-2 whitespace-nowrap transition;
+}
+.pill.clickable {
+  @apply cursor-pointer hover:bg-opacity-100
 }
 
 .pill.info {
-  @apply bg-info-200 text-info-700 border-info-300;
+  @apply bg-opacity-50 bg-info-200 text-info-700 border-info-300;
 }
 .pill.success {
-  @apply bg-success-200 text-success-700 border-success-300;
+  @apply bg-opacity-50 bg-success-200 text-success-700 border-success-300;
 }
 .pill.warning {
-  @apply bg-warning-100 text-warning-700 border-warning-300;
+  @apply bg-opacity-50 bg-warning-100 text-warning-700 border-warning-300;
 }
 .pill.error {
-  @apply bg-error-200 text-error-700 border-error-300;
+  @apply bg-opacity-50 bg-error-200 text-error-700 border-error-300;
 }
+
+
+.table th {
+  @apply transition text-sm text-neutral-500 font-bold cursor-pointer hover:text-neutral-600 hover:bg-neutral-200 select-none;
+}
+.table th, .table td {
+  @apply px-3 py-2 text-sm
+}
+.table.dense th, .table.dense td {
+  @apply px-2 py-1;
+}
+
+.table tr.table-header {
+  @apply border-b border-solid border-black/10;
+}
+
+.table.h-borders tr {
+  @apply border-b border-solid border-black/10;
+}
+.table.v-borders td {
+  @apply border-x border-solid border-black/10;
+}
+
+.table tr.table-body {
+  @apply transition hover:bg-info-200/30 cursor-pointer
+}
+
+
+.pretty-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+.pretty-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+/* Handle */
+.pretty-scrollbar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+.pretty-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} 

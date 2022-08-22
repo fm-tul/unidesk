@@ -1,11 +1,8 @@
-import moment from "moment";
+import { LanguagesId } from "@locales/all";
+import { formatDate } from "utils/dateUtils";
 
-export const DateOnlyRendererFor = (key: string) => {
-  const DateOnlyRenderer = (params: any) => {
-    const value = params.row[key];
-    const dt = moment(value).format("DD/MM-YYYY");
-    return <span>{dt}</span>;
-  };
-
-  return DateOnlyRenderer;
+export const DateOnlyRenderer = (params: any, key: string, language: LanguagesId) => {
+  const value = params[key];
+  const dt = formatDate(value, "long");
+  return <span>{dt}</span>;
 };

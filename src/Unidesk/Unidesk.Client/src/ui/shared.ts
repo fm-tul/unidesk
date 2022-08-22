@@ -4,7 +4,7 @@ export type UiVariants = "contained" | "outlined" | "text";
 
 export interface HelperProps {
   helperText?: string;
-  herlperColor?: UiColors | boolean;
+  helperColor?: UiColors | boolean;
 }
 
 export interface SizeProps {
@@ -36,6 +36,7 @@ export interface SimpleComponentProps extends SizeProps {
   // extra
   loading?: boolean;
   disabled?: boolean;
+  disableClass?: string;
   fullWidth?: boolean;
 }
 
@@ -43,10 +44,11 @@ export interface ComplexComponentProps extends SizeProps, ColorProps, VariantPro
   // extra
   loading?: boolean;
   disabled?: boolean;
+  disableClass?: string;
   fullWidth?: boolean;
 }
 
-export const getSize = (props: SimpleComponentProps, def: UiSizes = "md") => {
+export const getSize = (props: SizeProps, def: UiSizes = "md") => {
   if (props.size) {
     return props.size;
   }
@@ -104,5 +106,17 @@ export const getStyleProps = (
 
 export const getHelperProps = (props: HelperProps) => ({
   helperText: props.helperText,
-  helperColorCss: props.herlperColor === true || props.herlperColor === "error" ? "text-error-600" : "",
+  helperColorCss: props.helperColor === true || props.helperColor === "error" ? "text-error-600" : "",
 });
+
+export const getHelperColor = (props: HelperProps) => ({
+  helperText: props.helperText,
+  helperColor: (typeof props.helperColor === "boolean" ? (props.helperColor === true ? "error" : "") : props.helperColor) as
+    | UiColors
+    | undefined,
+});
+
+export const classnames = (...args: any[]) => {
+  const classes = args.filter(Boolean).join(" ");
+  return classes.length ? classes : undefined;
+};

@@ -2,7 +2,11 @@ import { TrackedEntityDto } from "@models/TrackedEntityDto";
 import { EditorProperty } from "./EditorProperty";
 import * as Yup from "yup";
 import { IdRenderer } from "./cellRenderers/IdRenderer";
-import { DateOnlyRendererFor } from "./cellRenderers/DateOnlyRenderer";
+import { DateOnlyRenderer } from "./cellRenderers/DateOnlyRenderer";
+import { ColumnDefinition, TId } from "ui/Table";
+import { MdCalendarToday } from "react-icons/md";
+import { MetadataRenderer } from "./cellRenderers/MetadataRenderer";
+import { LanguagesId } from "@locales/all";
 
 export type FilterFlags<Base, T> = {
   [K in keyof Base]: Base[K] extends T ? K : never;
@@ -15,7 +19,7 @@ export type EditorPropertiesOf<T> = {
   id: EditorProperty;
 };
 
-export const extractInitialValues = <T>(schema: EditorPropertiesOf<T>) => {
+export const extractInitialValues = <T,>(schema: EditorPropertiesOf<T>) => {
   const result: any = {};
   Object.keys(schema).forEach(key => {
     const propSchema = (schema as any)[key] as EditorProperty;
@@ -24,7 +28,7 @@ export const extractInitialValues = <T>(schema: EditorPropertiesOf<T>) => {
   return result as { [K in keyof typeof schema]: string };
 };
 
-export const extractYupSchema = <T>(schema: EditorPropertiesOf<T>) => {
+export const extractYupSchema = <T,>(schema: EditorPropertiesOf<T>) => {
   const result: any = {};
   Object.keys(schema).forEach(key => {
     const propSchema = (schema as any)[key] as EditorProperty;
@@ -33,26 +37,37 @@ export const extractYupSchema = <T>(schema: EditorPropertiesOf<T>) => {
   return Yup.object({ ...result });
 };
 
-export const extractColDefinition = <T>(schema: EditorPropertiesOf<T>) => {
-  const cols: any[] = [
+export const extractColDefinition = <T extends TId>(schema: EditorPropertiesOf<T>, language: LanguagesId) => {
+  // add ID
+  const cols: ColumnDefinition<T>[] = [
     {
-      field: "id",
+      id: "id",
+      field: IdRenderer,
       headerName: "ID",
-      width: 90,
-      renderCell: IdRenderer,
+      style: { width: 90 },
+      className: "",
     },
   ];
 
-  Object.keys(schema)
-    .filter(i => i !== "id")
-    .forEach(key => {
-      const propSchema = (schema as any)[key] as EditorProperty;
+  // add other columns
+  Object.entries(schema)
+    .filter(([key, _]) => key !== "id")
+    .forEach(([key, propSchema]) => {
       cols.push({
-        field: key,
-        flex: 1,
-        renderCell: propSchema.type === "date" ? DateOnlyRendererFor(key) : undefined,
+        id: key as keyof T,
+        field: propSchema.type === "date" ? v => DateOnlyRenderer(v, key, language) : (key as keyof T),
+        headerName: key,
       });
     });
+
+  // add metadata column
+  cols.push({
+    id: "created" as keyof T,
+    field: v => MetadataRenderer(v as unknown as TrackedEntityDto, language),
+    headerName: <MdCalendarToday />,
+    style: { width: 90 },
+    className: "",
+  });
 
   return cols;
 };

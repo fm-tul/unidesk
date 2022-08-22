@@ -6,6 +6,8 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { UserContext, userGuest } from "./user/UserContext";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { IS_PROD } from "@core/config";
 import "@fontsource/roboto/300.css";
@@ -24,6 +26,16 @@ const AppWithProviders = () => {
       <UserContext.Provider value={{ user, setUser, resetUser }}>
         <BrowserRouter>
           <App />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnFocusLoss
+            draggable={false}
+            pauseOnHover
+          />
         </BrowserRouter>
       </UserContext.Provider>
     </LanguageContext.Provider>

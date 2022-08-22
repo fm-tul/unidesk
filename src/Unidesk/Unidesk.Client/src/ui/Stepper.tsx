@@ -31,7 +31,7 @@ export const Stepper = (props: PropsWithChildren<StepperProps>) => {
               {label}
             </div>
 
-            <div className="ml-4 w-full border-l border-solid border-black pl-5">{j === step && i}</div>
+            <div className="ml-4 w-[calc(100%-16px)] border-l border-solid border-black pl-5">{j === step && i}</div>
           </div>
         );
       })}

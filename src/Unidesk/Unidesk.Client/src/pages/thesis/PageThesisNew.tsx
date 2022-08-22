@@ -5,181 +5,31 @@ import { LanguageContext } from "@locales/LanguageContext";
 import { R } from "@locales/R";
 import { ThesisDto } from "@models/ThesisDto";
 import { ThesisStatus } from "@models/ThesisStatus";
+import { useContext, useEffect, useState } from "react";
+import { MdChecklist } from "react-icons/md";
+import { debounce } from "throttle-debounce";
+import * as Yup from "yup";
+
 import { Moment } from "components/HistoryInfo";
 import { ArrayField } from "components/mui/ArrayField";
-import { useFormik } from "formik";
-import { getFormikProps as inputProps, getFormikPropsSelect as selectProps, getFormikPropsSelect2 } from "hooks/getFormikProps";
 import { useFetch } from "hooks/useFetch";
+import { useOpenClose } from "hooks/useOpenClose";
 import { useStepper } from "hooks/useStepper";
-import { extractInitialValues } from "models/typing";
-import { Key, useContext, useEffect, useMemo, useState } from "react";
 import { Button } from "ui/Button";
-import { Select, Select2MultipleProps, Select2SingleProps } from "ui/Select";
+import { Menu } from "ui/Menu";
+import { Modal } from "ui/Modal";
+import { SimpleSelect, SimpleSelectProps } from "ui/SimpleSelect";
 import { Step, Stepper } from "ui/Stepper";
 import { TextField } from "ui/TextField";
-import { KeyValue } from "utils/KeyValue";
 import { getPersistedObject, persistObject } from "utils/persistentUtils";
-import { sortBy } from "utils/sorting";
-import { toKV } from "utils/transformUtils";
-import * as Yup from "yup";
-import { thesisInitialValues, thesisValidationSchema as schema } from "./thesisSchema";
-import { debounce } from "throttle-debounce";
+
+import { ClipboardFromBpDp } from "./plugins/ClipboardFromBpDp";
+import { thesisValidationSchema as schema, thesisInitialValues } from "./thesisSchema";
+import { KeywordSelector } from "components/KeywordSelector";
+import { KeywordDto } from "@models/KeywordDto";
 
 type T = ThesisDto;
 const PERSISTED_OBJECT_KEY = `thesis.new.${EMPTY_GUID}`;
-// export const PageThesisNew2 = () => {
-//   const { language } = useContext(LanguageContext);
-//   const { step, nextStep, prevStep, hasNextStep, hasPrevStep } = useStepper(2);
-
-//   const formik = useFormik<Partial<ThesisDto>>({
-//     initialValues: thesisInitialValues,
-//     validationSchema: thesisValidationSchema,
-//     onSubmit: values => console.log(values),
-//   });
-
-//   const persistentObject = getPersistedObject<Partial<ThesisDto>>(PERSISTED_OBJECT_KEY);
-//   const { data: enums } = useFetch(() => guestHttpClient.enums.allEnums());
-//   const { departments, schoolYears, thesisOutcomes, thesisTypes, studyProgrammes } = enums ?? {};
-
-//   const thesisTypesKV = useMemo(() => toKV(language, thesisTypes), [thesisTypes, language]);
-//   const schoolYearsKV = useMemo(() => sortBy(toKV(language, schoolYears, false), i => i.value), [schoolYears, language]);
-//   const departmentsKV = useMemo(
-//     () => (departments ?? []).map(i => ({ key: i.id, value: `${i.code} - ${language === "cze" ? i.nameCze : i.nameEng}` })),
-//     [departments, language]
-//   );
-//   const outcomesKV = useMemo(() => toKV(language, thesisOutcomes), [thesisOutcomes, language]);
-//   const studyProgrammesKV = useMemo(() => toKV(language, studyProgrammes), [studyProgrammes, language]);
-//   const statuses = [ThesisStatus.DRAFT, ThesisStatus.NEW].map(i => ({ key: i, value: i }));
-
-//   const schoolYearProps = getFormikPropsSelect2<T>(formik, "schoolYearId") as any;
-//   const departmentProps = getFormikPropsSelect2<T>(formik, "departmentId") as any;
-//   const studyProgrammeProps = getFormikPropsSelect2<T>(formik, "studyProgrammeId") as any;
-
-//   const thesisTypeCandidatesProps = getFormikPropsSelect2<T>(formik, "thesisTypeCandidateIds") as any;
-//   const outcomeIdsProps = getFormikPropsSelect2<T>(formik, "outcomeIds") as any;
-//   const statusProps = getFormikPropsSelect2<T>(formik, "status") as any;
-
-//   useEffect(() => {
-//     // NOTE: this causes an weird behavior when editing only ArrayFields as they are note marked as touched
-//     if (Object.keys(formik.touched).length) {
-//       persistObject(PERSISTED_OBJECT_KEY, formik.values);
-//     }
-//   }, [formik.values]);
-
-//   try {
-//     a.validate({}, { abortEarly: false }).catch((e: Yup.ValidationError) => {
-//       debugger;
-//       console.log(e);
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-//   const BasicInfo = (
-//     <div className="mt-4 flex flex-col gap-4">
-//       {/* row 1 - names */}
-//       <div className="flex w-full gap-4">
-//         <TextField label={R("name-lang", "CZE")} {...inputProps<T>(formik, "nameCze", "md")} />
-//         <TextField label={R("name-lang", "ENG")} {...inputProps<T>(formik, "nameEng", "md")} />
-//       </div>
-
-//       {/* row 2 - abstracts */}
-//       <div className="flex w-full gap-4">
-//         <TextField rows={3} label={R("abstract-lang", "CZE")} {...inputProps<T>(formik, "abstractCze", "md")} />
-//         <TextField rows={3} label={R("abstract-lang", "ENG")} {...inputProps<T>(formik, "abstractEng", "md")} />
-//       </div>
-
-//       {/* row 3 - school year, department, status */}
-//       <div className="flex w-full gap-4">
-//         <Select
-//           label={R("school-year")}
-//           options={schoolYearsKV.map(i => i.key)}
-//           {...schoolYearProps}
-//           valueGetter={i => schoolYearsKV.find(j => j.key === i)?.value}
-//         />
-//         <Select
-//           label={R("department")}
-//           {...departmentProps}
-//           options={departmentsKV.map(i => i.key)}
-//           valueGetter={i => departmentsKV.find(j => j.key === i)?.value}
-//         />
-//         <Select
-//           label={R("study-programme")}
-//           {...studyProgrammeProps}
-//           options={studyProgrammesKV.map(i => i.key)}
-//           valueGetter={i => studyProgrammesKV.find(j => j.key === i)?.value}
-//         />
-//       </div>
-
-//       {/* row 4 - thesis type, outcome, study programme */}
-//       <div className="flex w-full gap-4">
-//         <Select<string>
-//           multiple
-//           label={R("thesis-type")}
-//           {...thesisTypeCandidatesProps}
-//           options={thesisTypesKV.map(i => i.key)}
-//           valueGetter={i => thesisTypesKV.find(j => j.key === i)?.value}
-//         />
-//         <Select<string>
-//           options={outcomesKV.map(i => i.key)}
-//           label={R("outcomes")}
-//           {...outcomeIdsProps}
-//           multiple
-//           valueGetter={i => outcomesKV.find(j => j.key === i)?.value}
-//         />
-//         <Select
-//           label={R("status")}
-//           {...statusProps}
-//           options={statuses.map(i => i.key)}
-//           valueGetter={i => statuses.find(j => j.key === i)?.value}
-//         />
-//       </div>
-//     </div>
-//   );
-
-//   return (
-//     <div className="my-5 bg-black/5 p-4">
-//       <div className="flex justify-between">
-//         <h1>New Thesis</h1>
-//         {!!persistentObject && (
-//           <div className="flex flex-col items-end">
-//             <Button onClick={() => formik.setValues(persistentObject.item)} sm text success>
-//               {R("restore-work")}
-//             </Button>
-//             <span className="text-xs italic">
-//               <Moment date={persistentObject.date} />
-//             </span>
-//           </div>
-//         )}
-//       </div>
-//       <Stepper step={step}>
-//         <Step label="Basic Information">{BasicInfo}</Step>
-//         <Step label="Guidlines &amp; Literature">
-//           <div className="mt-4 flex gap-4">
-//             <ArrayField label="Guidlines" value={formik.values.guidelines ?? []} setValue={v => formik.setFieldValue("guidelines", v)} />
-//             <ArrayField label="Literature" value={formik.values.literature ?? []} setValue={v => formik.setFieldValue("literature", v)} />
-//           </div>
-//         </Step>
-//       </Stepper>
-
-//       <Button onClick={prevStep} disabled={!hasPrevStep} text>
-//         Prev
-//       </Button>
-
-//       <Button onClick={nextStep} disabled={!hasNextStep} text>
-//         Next
-//       </Button>
-
-//       {step === 2 && <Button onClick={formik.submitForm}>Create</Button>}
-
-//       <pre>
-//         <code>{JSON.stringify(formik.values, null, 2)}</code>
-//       </pre>
-//       <pre>
-//         <code>{JSON.stringify(formik.errors, null, 2)}</code>
-//       </pre>
-//     </div>
-//   );
-// };
 type thesisProps = keyof ThesisDto;
 type thesisErrorObject = { [k in thesisProps]?: string };
 type thesisTouchedObject = { [k in thesisProps]?: boolean };
@@ -187,12 +37,13 @@ type thesisTouchedObject = { [k in thesisProps]?: boolean };
 const allowedStatuses = [ThesisStatus.DRAFT, ThesisStatus.NEW].map(i => ({ id: i, value: i }));
 export const PageThesisNew = () => {
   const { language } = useContext(LanguageContext);
+  const persistentObject = getPersistedObject<ThesisDto>(PERSISTED_OBJECT_KEY);
+
   const [dto, _setDto] = useState<ThesisDto>(thesisInitialValues as ThesisDto);
   const [errors, setErrors] = useState<thesisErrorObject>({});
   const [touched, setTouched] = useState<thesisTouchedObject>({});
   const { step, nextStep, prevStep, hasNextStep, hasPrevStep } = useStepper(2);
-
-  const persistentObject = getPersistedObject<ThesisDto>(PERSISTED_OBJECT_KEY);
+  const { open, close, isOpen } = useOpenClose(false);
 
   const { data: enums } = useFetch(() => guestHttpClient.enums.allEnums());
   const departments = generateName(enums?.departments, language);
@@ -200,6 +51,10 @@ export const PageThesisNew = () => {
   const studyProgrammes = generateName(enums?.studyProgrammes, language);
   const thesisOutcomes = generateName(enums?.thesisOutcomes, language);
   const thesisTypes = generateName(enums?.thesisTypes, language);
+
+  const updateKeywords = (keywords: KeywordDto[]) => {
+    setDto({ ...dto, keywords });
+  }
 
   const step0Invalid =
     errors.nameCze ||
@@ -261,20 +116,24 @@ export const PageThesisNew = () => {
   };
 
   return (
-    <div>
-      <div>
-        {!!persistentObject && (
-          <div className="flex flex-col items-end">
-            <Button onClick={() => setDto(persistentObject.item)} sm text success>
-              {R("restore-work")}
+    <>
+      <Menu className="absolute top-0 right-0" icon="menu">
+        <>
+          {!!persistentObject && (
+            <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-start">
+              <div className="flex flex-col">
+                {R("restore-work")}
+                <span className="text-xxs normal-case italic text-neutral-600">
+                  <Moment date={persistentObject.date} />
+                </span>
+              </div>
             </Button>
-            <span className="text-xs italic">
-              <Moment date={persistentObject.date} />
-            </span>
-          </div>
-        )}
-      </div>
-
+          )}
+        </>
+        <Button sm text onClick={open} justify="justify-start">
+          Paste from clipboard
+        </Button>
+      </Menu>
       <Stepper step={step}>
         <Step label={R("basic-information")} error={step0Invalid !== undefined}>
           <div className="grid grid-cols-2 gap-4">
@@ -283,21 +142,26 @@ export const PageThesisNew = () => {
             <TextField required {...getProps(form, "nameEng")} />
 
             {/* row 2 - abstracts */}
-            <TextField maxRows={5} rows={3} {...getProps(form, "abstractCze")} />
-            <TextField maxRows={5} rows={3} {...getProps(form, "abstractEng")} />
+            <TextField maxRows={7} rows={7} {...getProps(form, "abstractCze")} />
+            <TextField maxRows={7} rows={7} {...getProps(form, "abstractEng")} />
 
             {/* row 3 - school year, department, study programme */}
             <div className="col-span-2 grid grid-cols-3 gap-4">
-              <Select {...getPropsS(form, "schoolYearId", schoolYears)} />
-              <Select {...getPropsS(form, "departmentId", departments)} />
-              <Select {...getPropsS(form, "studyProgrammeId", studyProgrammes)} />
+              <SimpleSelect {...getPropsS(form, "schoolYearId", schoolYears)} />
+              <SimpleSelect {...getPropsS(form, "departmentId", departments)} />
+              <SimpleSelect {...getPropsS(form, "studyProgrammeId", studyProgrammes)} />
             </div>
 
             {/* row 4 - thesis type, outcome, status */}
             <div className="col-span-2 grid grid-cols-3 gap-4">
-              <Select {...getPropsM(form, "thesisTypeCandidateIds", thesisTypes)} />
-              <Select {...getPropsM(form, "outcomeIds", thesisOutcomes)} />
-              <Select {...getPropsS(form, "status", allowedStatuses)} />
+              <SimpleSelect {...getPropsM(form, "thesisTypeCandidateIds", thesisTypes)} />
+              <SimpleSelect {...getPropsM(form, "outcomeIds", thesisOutcomes)} />
+              <SimpleSelect {...getPropsS(form, "status", allowedStatuses)} />
+            </div>
+
+            {/* row 5-6 - keywords */}
+            <div className="col-span-2 flex flex-col gap-2">
+              <KeywordSelector onChange={updateKeywords} max={20} keywords={dto?.keywords ?? []} />
             </div>
           </div>
         </Step>
@@ -307,8 +171,15 @@ export const PageThesisNew = () => {
             <ArrayField label="Literature" value={form.dto.literature ?? []} setValue={v => form.setDto({ ...form.dto, literature: v })} />
           </div>
         </Step>
+        <Step label="Authors">
+          <div className="grid grid-cols-2 gap-4">
+            {/* <SimpleSelect {...getPropsM(form, "", thesisOutcomes)} /> */}
+            {/* <ArrayField label="Authors" value={form.dto.authors ?? []} setValue={v => form.setDto({ ...form.dto, authors: v })} /> */}
+          </div>
+        </Step>
       </Stepper>
-      <div className="flex ">
+
+      <div className="mt-auto flex">
         <Button onClick={prevStep} disabled={!hasPrevStep} text>
           Prev
         </Button>
@@ -317,8 +188,12 @@ export const PageThesisNew = () => {
           Next
         </Button>
 
-        {step > -1 && <Button onClick={handleSubmit}>Create</Button>}
+        {step == 2 && <Button onClick={handleSubmit}>Create</Button>}
       </div>
+
+      <Modal open={isOpen} onClose={close} width="md" className="rounded-md bg-neutral-200 p-6">
+        <ClipboardFromBpDp setThesis={setDto} thesis={dto} />
+      </Modal>
 
       {/* <div>
         <pre>
@@ -331,7 +206,7 @@ export const PageThesisNew = () => {
           <code>{JSON.stringify(touched, null, 2)}</code>
         </pre>
       </div> */}
-    </div>
+    </>
   );
 };
 
@@ -366,62 +241,37 @@ const getProps = <T,>(formData: formData<T>, prop: keyof T) => {
   };
 };
 
-const valueGetterById = <T extends IDto>(items: T[], id: Key) => {
-  const item = items.find(i => i.id === id);
-  if (!item) {
-    return "";
-  }
-
-  if ("value" in item) {
-    return (item as any).value;
-  }
-
-  if ("name" in item) {
-    return (item as any).name;
-  }
-
-  return id;
-};
-
-const getPropsS = <T, K extends IDto>(formData: formData<T>, prop: keyof T, options?: K[] | null) => {
+const getPropsS = <TDto extends IDto>(formData: formData<T>, prop: keyof T, options?: TDto[] | null) => {
   const { dto, setDto, errors, touched, setTouched } = formData;
-  const optionsByKey = pluckIds(options);
 
   return {
-    options: optionsByKey,
+    options: options ?? [],
     label: R(prop as EnKeys),
-    value: dto[prop] as unknown as Key,
+    value: dto[prop],
     helperText: errors[prop],
     helperColor: !!errors[prop],
-    valueGetter: (k: Key) => valueGetterById(options ?? [], k),
-    onChange: (value: Key) => {
-      setDto({ ...dto, [prop]: value });
-    },
+    onValue: k => setDto({ ...dto, [prop]: k }),
     onBlur: () => {
       setTouched({ ...touched, [prop]: true });
     },
-  } as Select2SingleProps<Key>;
+  } as SimpleSelectProps<TDto>;
 };
 
-const getPropsM = <T, K extends IDto>(formData: formData<T>, prop: keyof T, options?: K[] | null) => {
+const getPropsM = <TDto extends IDto>(formData: formData<T>, prop: keyof T, options?: TDto[] | null) => {
   const { dto, setDto, errors, touched, setTouched } = formData;
-  const optionsByKey = pluckIds(options);
 
   return {
     multiple: true,
-    options: optionsByKey,
+    options: options ?? [],
     label: R(prop as EnKeys),
-    value: (dto[prop] as unknown as Key[]) ?? [],
+    value: dto[prop] ?? [],
     helperText: errors[prop],
     helperColor: !!errors[prop],
-    valueGetter: (k: Key) => valueGetterById(options ?? [], k),
-    onChange: (value: Key[]) => {
-      setDto({ ...dto, [prop]: value });
-    },
+    onValue: k => setDto({ ...dto, [prop]: k }),
     onBlur: () => {
       setTouched({ ...touched, [prop]: true });
     },
-  } as Select2MultipleProps<Key>;
+  } as SimpleSelectProps<TDto>;
 };
 
 const generateName = <T extends INameDto>(items: T[] | null | undefined, language?: LanguagesId) => {

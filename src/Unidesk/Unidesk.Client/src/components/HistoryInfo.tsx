@@ -3,9 +3,7 @@ import { FaCalendar } from "react-icons/fa";
 import { useContext } from "react";
 import { LanguageContext } from "@locales/LanguageContext";
 import { TrackedEntityDto } from "@api-client";
-import moment from "moment";
-import "moment/dist/locale/en-gb";
-import "moment/dist/locale/cs";
+import { getMoment } from "@core/momentProvider";
 
 interface IHistoryInfoProps {
   item: TrackedEntityDto;
@@ -18,9 +16,8 @@ const languageLocaleMapping = {
 
 export const Moment = (props: { date: string | number; fromNow?: boolean }) => {
   const { language } = useContext(LanguageContext);
-  const locale = languageLocaleMapping[language];
   const { date, fromNow = true } = props;
-  const dateMoment = moment(date).locale(locale);
+  const dateMoment = getMoment(date);
   const dateString = dateMoment.format("YYYY-MM-DD HH:mm:ss");
 
   if (fromNow) {
@@ -32,14 +29,14 @@ export const Moment = (props: { date: string | number; fromNow?: boolean }) => {
 
 const momentFromNow = (date: string) => {
   const { language } = useContext(LanguageContext);
-  const locale = languageLocaleMapping[language];
-  const dateMoment = moment(date).locale(locale);
+  const dateMoment = getMoment(date);
   return dateMoment.fromNow();
 };
 
 export const HistoryInfo = (props: IHistoryInfoProps) => {
   const { item } = props;
   const { created, createdBy, modified, modifiedBy } = item;
+  console.log(props);
 
   return (
     <div className="flex flex-col items-center">

@@ -184,7 +184,7 @@ const SelectSingle = <T,>(props: Select2SingleProps<T>) => {
   );
 };
 
-export const Select = <T,>(props: Select2MultipleProps<T> | Select2SingleProps<T>) => {
+export const Select2 = <T,>(props: Select2MultipleProps<T> | Select2SingleProps<T>) => {
   const { multiple = false } = props;
   return multiple ? <SelectMultiple {...(props as Select2MultipleProps<T>)} /> : <SelectSingle {...(props as Select2SingleProps<T>)} />;
 };

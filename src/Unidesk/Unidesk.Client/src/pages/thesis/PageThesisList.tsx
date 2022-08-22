@@ -6,11 +6,14 @@ import { httpClient } from "@core/init";
 import { R } from "@locales/R";
 import { RequestInfo } from "../../components/utils/RequestInfo";
 import { PageThesisNew } from "./PageThesisNew";
-import { Select } from "ui/Select";
 import { KeyValue } from "utils/KeyValue";
+import { SimpleSelect } from "ui/SimpleSelect";
+import { Button } from "ui/Button";
+import { Menu } from "ui/Menu";
+import { Modal } from "ui/Modal";
+import { useOpenClose } from "hooks/useOpenClose";
 
 const yesNoOptions = [
-  { key: "all", value: "all" },
   { key: "yes", value: "yes" },
   { key: "no", value: "no" },
 ] as KeyValue[];
@@ -34,10 +37,11 @@ export const PageThesisList = () => {
   // const { error, isLoading, data: theses } = useFetch(() => httpClient.thesis.getAll({ pageSize: 30 * 2, status, hasKeywords }), [status, hasKeywords]);
 
   const [status, setStatus] = useState<ThesisStatus>();
-  const [hasKeywords, setHasKeywords] = useState<KeyValue>(yesNoOptions[0]);
+  const [hasKeywords, setHasKeywords] = useState<KeyValue>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | undefined>();
   const [theses, setTheses] = useState<ThesisDto[]>([]);
+  const { open, close, isOpen } = useOpenClose(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -45,7 +49,7 @@ export const PageThesisList = () => {
       .getAll({
         pageSize: 30 * 2,
         status,
-        hasKeywords: hasKeywords.value === "yes" ? true : hasKeywords.value === "no" ? false : undefined,
+        hasKeywords: !hasKeywords ? undefined : hasKeywords.value === "yes" ? true : hasKeywords.value === "no" ? false : undefined,
       })
       .then(setTheses)
       .catch(setError)
@@ -55,41 +59,41 @@ export const PageThesisList = () => {
   return (
     <>
       <RequestInfo error={error} isLoading={isLoading} />
-      <PageThesisNew />
+      <div className="flex justify-end">
+        <Menu icon="menu" pop="right">
+          <Button text justify="justify-start" onClick={open}>
+            Create new thesis
+          </Button>
+        </Menu>
+      </div>
+
+      <Modal open={isOpen} onClose={close} y="top" height="lg" className="bg-slate-100 p-6">
+        <div className="flex flex-col content-between h-full">
+          <PageThesisNew />
+        </div>
+      </Modal>
 
       {theses && true && (
         <div>
           <FilterBar>
-            {/* <FormControl variant="outlined" fullWidth sx={{ minWidth: 120 }} size="small">
-              <InputLabel id="status-select-label">{R("status")}</InputLabel>
-              <Select label={R("status")} value={status ?? ""} onChange={e => setStatus(e.target.value as ThesisStatus)}>
-                <MenuItem value="">
-                  <em>{R("all")}</em>
-                </MenuItem>
-                {Object.keys(ThesisStatus).map(key => (
-                  <MenuItem value={key} key={key}>
-                    {key}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl variant="outlined" fullWidth sx={{ minWidth: 160 }} size="small">
-               <InputLabel id="status-select-label">{R("has-keywords")}</InputLabel>
-              <Select
-                label={R("has-keywords")}
-                value={hasKeywords ?? ""}
-                onChange={e => setHasKeywords(e.target.value == "" ? undefined : e.target.value == "true")}
-              >
-                <MenuItem value="">
-                  <em>{R("all")}</em>
-                </MenuItem>
-                <MenuItem value="true">{R("yes")}</MenuItem>
-                <MenuItem value="false">{R("no")}</MenuItem>
-              </Select>
-            </FormControl>  */}
-            <Select options={Object.keys(ThesisStatus).map(i => i as ThesisStatus)} value={status as any} onChange={setStatus} />
-            <Select options={yesNoOptions} value={hasKeywords.key} onChange={setHasKeywords} />
+            <SimpleSelect
+              label={R("status")}
+              options={Object.keys(ThesisStatus).map(i => i as ThesisStatus)}
+              value={status}
+              onValue={(_, v) => setStatus(v)}
+              required={false}
+              deselectLabel={R("all")}
+              fullWidth={false}
+            />
+            <SimpleSelect
+              label={R("has-keywords")}
+              options={yesNoOptions}
+              value={hasKeywords?.key}
+              onValue={(_, v) => setHasKeywords(v)}
+              required={false}
+              deselectLabel={R("all")}
+              fullWidth={false}
+            />
           </FilterBar>
 
           <h1>{R("topics")}</h1>

@@ -4,7 +4,7 @@
 
 import type { DepartmentDto } from './DepartmentDto';
 import type { Faculty } from './Faculty';
-import type { KeywordThesisDto } from './KeywordThesisDto';
+import type { KeywordDto } from './KeywordDto';
 import type { SchoolYearDto } from './SchoolYearDto';
 import type { StudyProgrammeDto } from './StudyProgrammeDto';
 import type { ThesisOutcome } from './ThesisOutcome';
@@ -21,7 +21,7 @@ nameEng?: string | null;
 nameCze?: string | null;
 abstractEng?: string | null;
 abstractCze?: string | null;
-keywordThesis: Array<KeywordThesisDto>;
+keywords: Array<KeywordDto>;
 schoolYear?: SchoolYearDto;
 schoolYearId?: string;
 department?: DepartmentDto;

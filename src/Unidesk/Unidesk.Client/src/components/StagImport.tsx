@@ -4,8 +4,9 @@ import { Translate } from "@locales/R";
 import { FilterBar } from "./FilterBar";
 import { ThesisSimpleView } from "./ThesisSimpleView";
 import { Button } from "ui/Button";
-import { Select } from "ui/Select";
 import { LinearProgress } from "ui/LinearProgress";
+import { SimpleSelect } from "ui/SimpleSelect";
+import { toast } from "react-toastify";
 
 export const StagImport = () => {
   const years = [2021, 2019, 2020, 2022];
@@ -64,8 +65,8 @@ export const StagImport = () => {
   return (
     <div>
       <FilterBar disabled={isLoading}>
-        <Select sm outlined options={years} value={year} onChange={e => setYear(e as any)} />
-        <Select sm outlined options={departments} value={department} onChange={e => setDepartment(e as string)} />
+        <SimpleSelect sm outlined options={years} value={year} onValue={e => setYear(e as number)} fullWidth={false} />
+        <SimpleSelect sm outlined options={departments} value={department} onValue={e => setDepartment(e as string)} fullWidth={false} />
 
         {/* import one */}
         <Button className="ml-auto" error={!!error} onClick={importFromStag}>
@@ -77,13 +78,15 @@ export const StagImport = () => {
         <div className="flex flex-col">
           <Button
             loading={isLoading}
-            className="ml-auto h-full"
+            disableClass=""
+            className="ml-auto h-full with-progress before:bg-gradient-to-l before:from-lime-600 before:to-lime-400"
             onClick={importAllFromStag}
-            // sx={batchIndex > 0 ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 } : {}}
+            style={{'--progress': batchIndex > 0 ? `${(batchIndex / totalBatches) * 100}%` : "0"} as any}
           >
-            Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}
+            <div>
+              Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}
+            </div>
           </Button>
-          {batchIndex > 0 && <LinearProgress value={(batchIndex / totalBatches) * 100} />}
         </div>
       </FilterBar>
       {error && (

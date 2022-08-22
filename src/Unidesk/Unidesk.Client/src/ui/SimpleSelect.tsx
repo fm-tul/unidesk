@@ -1,11 +1,14 @@
 import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
-import { useOpenClose } from "hooks/useOpenClose";
-import { Key, useContext } from "react";
+import { Key, ReactNode, useContext } from "react";
 import { MdArrowDropDown } from "react-icons/md";
+
+import { useOpenClose } from "hooks/useOpenClose";
+
 import { Button } from "./Button";
-import { ComplexComponentProps, HelperProps, getStyleProps, getHelperProps, UiColors } from "./shared";
+import { ListItem, ListRenderer } from "./ListRenderer";
+import { ComplexComponentProps, getHelperProps, getStyleProps, HelperProps, UiColors } from "./shared";
 
 type BaseProps<TValue> = React.DetailedHTMLProps<React.HTMLAttributes<HTMLButtonElement>, HTMLButtonElement> &
   HelperProps &
@@ -15,24 +18,28 @@ type BaseProps<TValue> = React.DetailedHTMLProps<React.HTMLAttributes<HTMLButton
     label?: string | JSX.Element;
     required?: boolean;
     deselectLabel?: string | JSX.Element;
+    open?: boolean;
+    onClose?: () => void;
+    hidden?: boolean;
   };
 
-type SimpleSelectProps<TValue> = BaseProps<TValue> &
+export type SimpleSelectProps<TValue> = BaseProps<TValue> &
   (
     | {
         options: TValue[];
         value?: Key[] | null;
-        onValue?: (keys: Key[], values: TValue[]) => void;
+        onValue?: (keys: Key[], values?: TValue[] | undefined) => void;
         multiple: true;
       }
     | {
         options: TValue[];
         value?: Key | null;
-        onValue?: (key: Key, value: TValue) => void;
+        onValue?: (key: Key, value?: TValue | undefined) => void;
         multiple?: never;
       }
   );
 
+const keyProps = ["key", "id"];
 const defaultKeyGetter = (value: any): Key => {
   if (typeof value === "string") {
     return value;
@@ -42,11 +49,13 @@ const defaultKeyGetter = (value: any): Key => {
   }
 
   if (typeof value === "object") {
-    return "key" in value ? value.key : `${value}`;
+    const firstValid = keyProps.find(i => i in value);
+    return firstValid ? value[firstValid] : `${value}`;
   }
   return `${value}`;
 };
 
+const valueProps = ["value", "name"];
 const defaultValueGetter = (value: any): Key => {
   if (typeof value === "string") {
     return value;
@@ -56,17 +65,22 @@ const defaultValueGetter = (value: any): Key => {
   }
 
   if (typeof value === "object") {
-    return "value" in value ? value.value : `${value}`;
+    const firstValid = valueProps.find(i => i in value);
+    if (firstValid) {
+      return value[firstValid];
+    }
+    debugger;
+    return `${value}`;
   }
   return `${value}`;
 };
 
-const renderPills = (options: any[], color: UiColors = "info") => {
+const renderPills = (options: [Key, any][], color: UiColors = "info") => {
   return (
     <span className="inline-flex flex-wrap gap-1">
-      {options.map(i => (
-        <span className={`pill ${color}`} key={i}>
-          {i}
+      {options.map(([key, value]) => (
+        <span className={`pill ${color}`} key={key}>
+          {value}
         </span>
       ))}
     </span>
@@ -75,7 +89,7 @@ const renderPills = (options: any[], color: UiColors = "info") => {
 
 const arrowOpenCss = "text-[22px] transition w-8 -mr-2 -rotate-180";
 const arrowCloseCss = "text-[22px] transition w-8 -mr-2 rotate-0";
-const buttonBaseCss = "min-w-[50px] flex-nowrap justify-between normal-case";
+const buttonBaseCss = "min-w-[50px] flex-nowrap normal-case";
 
 export const SimpleSelect = <TValue,>(props: SimpleSelectProps<TValue>) => {
   // contexts
@@ -83,9 +97,9 @@ export const SimpleSelect = <TValue,>(props: SimpleSelectProps<TValue>) => {
 
   // extract props
   const { value, options, label = "select-item", keyProp = defaultKeyGetter, valueProp = defaultValueGetter } = props;
-  const { onValue, onBlur, onChange } = props;
+  const { onValue, onBlur, onChange, open: manualOpen, hidden, onClose } = props;
   const { className = "" } = props;
-  const { fullWidth, loading, disabled, multiple = false, required = true, deselectLabel } = props;
+  const { fullWidth = true, loading, disabled, multiple = false, required = true, deselectLabel } = props;
   const { color, size, variant } = getStyleProps(props, "outlined");
   const { helperText, helperColorCss } = getHelperProps(props);
 
@@ -95,29 +109,27 @@ export const SimpleSelect = <TValue,>(props: SimpleSelectProps<TValue>) => {
   // css
   const fullWidthCss = fullWidth ? "w-full" : "";
   const buttonCss = `${buttonBaseCss} ${className}`;
+  const hiddenCss = hidden ? "hidden" : "";
 
   // button props
-  const buttonProps = { loading, disabled, fullWidth, color, size, variant };
+  const buttonProps = { loading, disabled, fullWidth, color: helperColorCss ? "error" : color, size, variant, justify: "justify-between" };
 
   // logic
   const valueIsArray = Array.isArray(value);
-  const valueIsFalsy = value === null || value === undefined || (valueIsArray && value.length === 0);
+  const valueIsFalsy = value === null || value === undefined || value === "" || (valueIsArray && value.length === 0);
   const optionsWithKey = options.map(
     i =>
       ({
         key: typeof keyProp === "function" ? keyProp(i) : i[keyProp],
         label: typeof valueProp === "function" ? valueProp(i) : i[valueProp],
         value: i,
-      } as {
-        key: Key;
-        label: Key | JSX.Element;
-        value: TValue;
-      })
+      } as ListItem<TValue>)
   );
 
   // handlers
   const doClose = () => {
     close();
+    onClose?.();
     onBlur?.({} as any);
   };
 
@@ -125,7 +137,7 @@ export const SimpleSelect = <TValue,>(props: SimpleSelectProps<TValue>) => {
     if (multiple) {
       (onValue as any)?.([], []);
     } else {
-      (onValue as any)?.(null, null);
+      (onValue as any)?.(undefined, undefined);
     }
     doClose();
   };
@@ -158,46 +170,48 @@ export const SimpleSelect = <TValue,>(props: SimpleSelectProps<TValue>) => {
 
   return (
     <div className={`select-wrapper relative ${fullWidthCss}`}>
-      <Button {...buttonProps} className={buttonCss} onClick={open}>
+      <Button {...buttonProps} className={`${buttonCss} ${hiddenCss}`} onClick={open}>
         <span>
           {valueIsFalsy ? (
             label
           ) : (
             <>
-              {valueIsArray
-                ? renderPills(
-                    optionsWithKey.filter(i => value.includes(i.key)).map(i => i.label),
-                    color
-                  )
-                : optionsWithKey.find(i => i.key === value)!.label}
+              {valueIsArray ? (
+                <ListRenderer items={optionsWithKey.filter(i => value.includes(i.key))} color={color} />
+              ) : (
+                optionsWithKey.find(i => i.key === value)!.label
+              )}
             </>
           )}
         </span>
         <MdArrowDropDown className={isOpen ? arrowOpenCss : arrowCloseCss} />
       </Button>
-      {isOpen && (
+      {(isOpen || manualOpen) && (
         <>
-          {/* clickable area which closes modal */}
-          <div onClick={doClose} className="fixed inset-0 z-10 bg-black/10" />
+          {/* clickable area which closes modal bg-black/10 */}
+          <div onClick={doClose} className="fixed inset-0 z-10 " />
 
           {/* actual modal */}
           <div className="select gap-1">
+            {required === false && !valueIsFalsy && (
+              <div className="w-full">
+                <Button onClick={resetSelection} className={`${buttonBaseCss} select-item w-full`} text warning justify="justify-between">
+                  {deselectLabel ?? "Cancel"}
+                </Button>
+              </div>
+            )}
             {optionsWithKey.map(({ key, label, value: option }) => (
               <Button
-                onClick={() => handleClick(key, option)}
+                onClick={() => handleClick(key, option!)}
                 className={`${buttonCss} select-item ${selectedCss(key)}`}
                 color={color}
                 text
                 key={key}
+                justify="justify-between"
               >
                 {label}
               </Button>
             ))}
-            {required === false && (
-              <Button onClick={resetSelection} className={`${buttonCss} select-item`} text>
-                {deselectLabel ?? "Cancel"}
-              </Button>
-            )}
           </div>
         </>
       )}

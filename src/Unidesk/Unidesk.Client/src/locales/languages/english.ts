@@ -25,6 +25,8 @@ export const en = {
   no: "No",
   "has-keywords": "Has keywords",
   "restore-work": "Restore work",
+  saved: "Saved",
+  filled: "Filled",
 
   // history
   created: "Created",

@@ -15,6 +15,22 @@ module.exports = {
       xl: '1440px',
     },
     extend: {
+      keyframes: {
+        "reveal-sm": {
+          "0%": { maxHeight: 0, overflow: 'hidden' },
+          "99%": { maxHeight: "50px", overflow: 'hidden' },
+          "100%": { maxHeight: undefined, overflow: 'initial' },
+        },
+        "reveal-var": {
+          "0%": { maxHeight: 0, overflow: 'hidden' },
+          "99%": { maxHeight: "var(--h, 20px)", overflow: 'hidden' },
+          "100%": { maxHeight: undefined, overflow: 'initial' },
+        }
+      },
+      animation: {
+        "reveal-sm": "reveal-sm 150ms ease-in-out",
+        "reveal-var": "reveal-var 150ms ease-in-out",
+      },
       fontSize: {
         xxs: ['10px', '14px'],
       },
@@ -35,7 +51,35 @@ module.exports = {
         lg: '976px',
         xl: '1440px',
       },
+      maxWidth: {
+        xs: '320px',
+        sm: '480px',
+        md: '768px',
+        lg: '976px',
+        xl: '1440px',
+      },
+      width: {
+        xs: '320px',
+        sm: '480px',
+        md: '768px',
+        lg: '976px',
+        xl: '1440px',
+      },
       maxHeight: {
+        xs: '320px',
+        sm: '480px',
+        md: '768px',
+        lg: '976px',
+        xl: '1440px',
+      },
+      minHeight: {
+        xs: '320px',
+        sm: '480px',
+        md: '768px',
+        lg: '976px',
+        xl: '1440px',
+      },
+      height: {
         xs: '320px',
         sm: '480px',
         md: '768px',

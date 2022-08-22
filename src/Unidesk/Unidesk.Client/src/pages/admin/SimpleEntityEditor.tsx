@@ -20,10 +20,11 @@ import { EditorPropertiesOf, extractInitialValues, extractYupSchema, extractColD
 import { TextField } from "ui/TextField";
 import { Button } from "ui/Button";
 import { MdAdd, MdSave, MdDelete } from "react-icons/md";
+import { Table } from "ui/Table";
 
 type TItem = DepartmentDto | FacultyDto | ThesisOutcomeDto | SchoolYearDto | ThesisTypeDto | StudyProgrammeDto;
 
-interface SimpleEntityEditor2Props<T> {
+interface SimpleEntityEditor2Props<T extends TItem> {
   schema: EditorPropertiesOf<T>;
   getAll: () => Promise<T[]>;
   upsertOne: (item: T) => Promise<T>;
@@ -74,14 +75,15 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
       <RequestInfo isLoading={isLoading} error={error} />
       {dataKV.length > 0 && (
         <div className="flex flex-col gap-4 ">
-          {/* <DataGrid
+          <Table
+            clientSort
             className="no-pagination data-grid"
-            selectionModel={itemId}
-            rows={data!}
-            columns={extractColDefinition(schema)}
-            onRowClick={i => setItemToEdit(i.row.id)}
+            selected={itemId}
+            rows={data}
+            columns={extractColDefinition(schema, language)}
+            onRowClick={i => setItemToEdit(i.id)}
             autoHeight
-          /> */}
+          />
           <div className="flex justify-end">
             <Button sm onClick={() => setItemToEdit(EMPTY_GUID)}>
               Add new <MdAdd className="text-base" />

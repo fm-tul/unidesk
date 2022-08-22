@@ -45,15 +45,15 @@ export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
       </div>
 
       <div className="flex flex-wrap items-center justify-start gap-2">
-        {thesis.keywordThesis
-          .filter((i: any) => i.locale == language)
-          .map((i: any, j: number) => (
-            <Link key={i.keywordId} to={`/keywords/${i.keywordId}`}>
+        {thesis.keywords
+          .filter(i => i.locale === language)
+          .map((i, j) => (
+            <Link key={i.id} to={`/keywords/${i.id}`}>
               <span
                 key={j}
                 className="rounded-lg bg-blue-500/10 px-1 text-sm text-gray-700 transition hover:bg-blue-500/80 hover:text-white"
               >
-                {i.keyword}
+                {i.value}
               </span>
             </Link>
           ))}

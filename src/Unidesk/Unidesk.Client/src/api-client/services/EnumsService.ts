@@ -87,7 +87,7 @@ export class EnumsService {
      * @returns FacultyDto Success
      * @throws ApiError
      */
-    public facultyCreateOrUpdate({
+    public facultyUpsert({
 requestBody,
 }: {
 requestBody: FacultyDto,
@@ -104,7 +104,7 @@ requestBody: FacultyDto,
      * @returns DepartmentDto Success
      * @throws ApiError
      */
-    public departmentCreateOrUpdate({
+    public departmentUpsert({
 requestBody,
 }: {
 requestBody: DepartmentDto,
@@ -121,7 +121,7 @@ requestBody: DepartmentDto,
      * @returns SchoolYearDto Success
      * @throws ApiError
      */
-    public schoolYearCreateOrUpdate({
+    public schoolYearUpsert({
 requestBody,
 }: {
 requestBody: SchoolYearDto,
@@ -138,7 +138,7 @@ requestBody: SchoolYearDto,
      * @returns ThesisOutcomeDto Success
      * @throws ApiError
      */
-    public thesisOutcomeCreateOrUpdate({
+    public thesisOutcomeUpsert({
 requestBody,
 }: {
 requestBody: ThesisOutcomeDto,
@@ -155,7 +155,7 @@ requestBody: ThesisOutcomeDto,
      * @returns ThesisTypeDto Success
      * @throws ApiError
      */
-    public thesisTypeCreateOrUpdate({
+    public thesisTypeUpsert({
 requestBody,
 }: {
 requestBody: ThesisTypeDto,
@@ -172,7 +172,7 @@ requestBody: ThesisTypeDto,
      * @returns StudyProgrammeDto Success
      * @throws ApiError
      */
-    public studyProgrammeCreateOrUpdate({
+    public studyProgrammeUpsert({
 requestBody,
 }: {
 requestBody: StudyProgrammeDto,
