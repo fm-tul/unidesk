@@ -1,26 +1,20 @@
-import {
-  DepartmentDto,
-  FacultyDto,
-  SchoolYearDto,
-  SimpleJsonResponse,
-  StudyProgrammeDto,
-  ThesisOutcomeDto,
-  ThesisTypeDto,
-} from "@api-client";
-import { useFormik } from "formik";
-import { getFormikProps as inputProps } from "hooks/getFormikProps";
-import React, { useContext, useMemo, useState } from "react";
-import { useGetSetDeleteFetch } from "hooks/useFetch";
-import { RequestInfo } from "components/utils/RequestInfo";
-import { LanguageContext } from "@locales/LanguageContext";
+import { DepartmentDto, FacultyDto, SchoolYearDto, SimpleJsonResponse, StudyProgrammeDto, ThesisOutcomeDto, ThesisTypeDto } from "@api-client";
 import { EMPTY_GUID } from "@core/config";
-import { KeyValue } from "utils/KeyValue";
 import { LanguagesId } from "@locales/all";
-import { EditorPropertiesOf, extractInitialValues, extractYupSchema, extractColDefinition } from "models/typing";
-import { TextField } from "ui/TextField";
+import { LanguageContext } from "@locales/LanguageContext";
+import { useFormik } from "formik";
+import React, { useContext, useMemo, useState } from "react";
+import { MdAdd, MdDelete, MdSave } from "react-icons/md";
+
+import { LoadingWrapper } from "components/utils/LoadingWrapper";
+import { RequestInfo } from "components/utils/RequestInfo";
+import { getFormikProps as inputProps } from "hooks/getFormikProps";
+import { useGetSetDeleteFetch } from "hooks/useFetch";
+import { EditorPropertiesOf, extractColDefinition, extractInitialValues, extractYupSchema } from "models/typing";
 import { Button } from "ui/Button";
-import { MdAdd, MdSave, MdDelete } from "react-icons/md";
 import { Table } from "ui/Table";
+import { TextField } from "ui/TextField";
+import { KeyValue } from "utils/KeyValue";
 
 type TItem = DepartmentDto | FacultyDto | ThesisOutcomeDto | SchoolYearDto | ThesisTypeDto | StudyProgrammeDto;
 
@@ -46,7 +40,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
   const { data, savedData, isLoading, isSaving, isDeleting, error, saveItem, deleteItem, loadData } = useGetSetDeleteFetch(
     () => getAll(),
     () => createOrUpdate(formik.values),
-    () => deleteOne(formik.values.id)
+    () => deleteOne(formik.values.id),
   );
   const dataKV = useMemo(() => toKV(language, data), [data, language]);
   const [itemId, setItemId] = useState<string>("");
@@ -71,8 +65,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <RequestInfo isLoading={isLoading} error={error} />
+    <LoadingWrapper className="flex flex-col gap-4" isLoading={isLoading || isSaving || isDeleting} error={error}>
       {dataKV.length > 0 && (
         <div className="flex flex-col gap-4 ">
           <Table
@@ -149,6 +142,6 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
       {/* <pre>
         <code>{JSON.stringify(formik.values, null, 2)}</code>
       </pre> */}
-    </div>
+    </LoadingWrapper>
   );
 };

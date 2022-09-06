@@ -2,10 +2,10 @@ import { httpClient } from "@core/init";
 import { UserDto } from "@models/UserDto";
 import { Key, useState } from "react";
 
+import { renderUser } from "models/cellRenderers/UserRenderer";
 import { Button } from "ui/Button";
-import { Select2, SelectOption } from "ui/Select2";
+import { Select, SelectOption } from "ui/Select";
 import { UiColors, UiSizes, UiVariants } from "ui/shared";
-import { SimpleSelect } from "ui/SimpleSelect";
 import { Step, Stepper } from "ui/Stepper";
 import { TextField } from "ui/TextField";
 
@@ -75,28 +75,26 @@ const Selects = () => {
   let longItems = Array.from({ length: 100 }, (_, i) => ({ key: i.toString(), value: `Item ${i}`, label: `Item ${i}` }));
   const [value, setValue] = useState<Key>();
   const [values, setValues] = useState<Key[]>([items2[0].key]);
-  const [items, setItems] = useState<SelectOption<string>[]>([]);
-
+  const [items, setItems] = useState<string[]>([]);
 
   const colors = "info success warning error".split(" ");
   const variants = "contained outlined text".split(" ");
   const sizes = "sm md lg".split(" ");
   const disabled = [false, true] as any;
   const combinations = true ? [] : ([...product([colors, sizes, variants, disabled])] as [UiColors, UiSizes, UiVariants, boolean][]);
-  
 
-  const [users, setUsers] = useState<SelectOption<UserDto>[]>([]);
+  const [users, setUsers] = useState<UserDto[]>([]);
   const findUsers = (keyword: string) => {
-    return new Promise<SelectOption<UserDto>[]>(async (resolve) => {
-      const users = await httpClient.users.find({keyword});
-      resolve(users.map(u => ({ key: u.id, value: u, label: u.firstName + " " + u.lastName })));
-    })
-  }
+    return new Promise<SelectOption<UserDto>[]>(async resolve => {
+      const users = await httpClient.users.find({ requestBody: { keyword } });
+      resolve(users.items.map(u => ({ key: u.id, value: u, label: u.firstName + " " + u.lastName })));
+    });
+  };
 
   return (
     <div>
       <div className="flex flex-wrap gap-2">
-        {combinations.map(([color, size, variant, disabled]) => (
+        {/* {combinations.map(([color, size, variant, disabled]) => (
           <>
             <SimpleSelect
               options={items2}
@@ -120,16 +118,16 @@ const Selects = () => {
               disabled={disabled}
             />
           </>
-        ))}
+        ))} */}
 
         {/* <SimpleSelect className="min-w-xs" options={items} value={values} multiple onValue={setValues} fullWidth={false} /> */}
       </div>
       <div className="flex max-w-sm flex-col gap-2">
-        <Select2 onValue={setItems} value={items} options={longItems} searchable clearable helperColor={items.length > 2} helperText={items.length === 0 ? "" : "asdcsa"}  />
-        <Select2 onValue={setItems} value={items} options={longItems} searchable clearable multiple helperColor={items.length > 2 ? "success" : "warning"} helperText={items.length === 0 ? "" : "asdcsa"}  />
+        {/* <Select onValue={setItems} value={items} options={longItems} searchable clearable helperColor={items.length > 2} helperText={items.length === 0 ? "" : "asdcsa"}  />
+        <Select onValue={setItems} value={items} options={longItems} searchable clearable multiple helperColor={items.length > 2 ? "success" : "warning"} helperText={items.length === 0 ? "" : "asdcsa"}  /> */}
         <hr />
-        <Select2 onValue={setUsers} value={users} options={findUsers} searchable clearable />
-        <Select2 onValue={setUsers} value={users} options={findUsers} searchable clearable multiple disabled />
+        <Select onValue={setUsers} value={users} options={findUsers} optionRender={renderUser} searchable clearable />
+        <Select onValue={setUsers} value={users} options={findUsers} optionRender={renderUser} searchable clearable multiple />
       </div>
     </div>
   );

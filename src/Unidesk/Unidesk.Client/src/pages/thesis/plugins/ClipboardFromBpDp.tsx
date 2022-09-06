@@ -87,9 +87,9 @@ export const ClipboardFromBpDp = (props: ClipboardFromBpDpProps) => {
       ...thesis,
       nameCze: nameVal,
       abstractCze: abstractVal.join("\n"),
-      schoolYearId: data.schoolYears!.find(x => x.name === academicYearVal)?.id,
+      schoolYearId: data.schoolYears!.find(x => x.name === academicYearVal)?.id ?? "",
       thesisTypeCandidateIds: data.thesisTypes!.filter(x => x.code === thesisTypeVal).map(x => x.id),
-      departmentId: data.departments!.find(x => x.code === facultyVal)?.id,
+      departmentId: data.departments!.find(x => x.code === facultyVal)?.id ?? "",
     });
     toast.success(RR("filled", language));
   };

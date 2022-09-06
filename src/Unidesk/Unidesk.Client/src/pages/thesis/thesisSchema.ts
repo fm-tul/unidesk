@@ -11,45 +11,52 @@ export const thesisInitialValues: Partial<ThesisDto> = {
   nameCze: "",
   nameEng: "",
 
-  abstractCze: "",
-  abstractEng: "",
+  abstractCze: null,
+  abstractEng: null,
 
   status: ThesisStatus.DRAFT,
 
   thesisTypeCandidateIds: [],
+  thesisTypeId: null,
   outcomeIds: [],
 
+  facultyId: "",
   schoolYearId: "",
   departmentId: "",
   studyProgrammeId: "",
 
   // advanced section
-  guidelines: ["", "", ""],
-  literature: ["", "", ""],
+  guidelinesList: ["", "", ""],
+  literatureList: ["", "", ""],
 
-  // users: [],
-  // teams: [],
+  authors: [],
+  supervisors: [],
+  opponents: [],
+  teams: [],
+  keywords: [],
 };
 
 export const thesisValidationSchema = Yup.object({
   nameCze: Yup.string().required(REQUIRED),
   nameEng: Yup.string().required(REQUIRED),
 
-  abstractCze: Yup.string(),
-  abstractEng: Yup.string(),
+  abstractCze: Yup.string().nullable(),
+  abstractEng: Yup.string().nullable(),
 
   status: Yup.string().required(REQUIRED),
 
   thesisTypeCandidates: Yup.array(),
+  thesisTypeId: Yup.string().nullable(),
 
   schoolYearId: Yup.string().required(REQUIRED),
   departmentId: Yup.string().required(REQUIRED),
-  studyProgrammeId: Yup.string().required(REQUIRED),
+  studyProgrammeId: Yup.string().nullable(),
   outcomeIds: Yup.array().required(REQUIRED).min(3, MIN_3),
 
   // advanced section
   guidelines: Yup.array(),
   literature: Yup.array(),
 
-  // users: Yup.array().required("Required"),
+  authors: Yup.array().required(REQUIRED),
+  teams: Yup.array().required(REQUIRED),
 });

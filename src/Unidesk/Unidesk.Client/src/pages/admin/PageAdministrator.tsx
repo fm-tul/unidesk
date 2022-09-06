@@ -1,12 +1,11 @@
-import { DepartmentDto, FacultyDto, SchoolYearDto, StudyProgrammeDto, ThesisOutcomeDto, ThesisTypeDto, UserDto } from "@api-client";
+import { DepartmentDto, FacultyDto, SchoolYearDto, StudyProgrammeDto, ThesisOutcomeDto, ThesisTypeDto } from "@api-client";
 import { httpClient } from "@core/init";
-import { useState } from "react";
+import { R } from "@locales/R";
 import { Link, useParams } from "react-router-dom";
 
-import { renderUser } from "models/cellRenderers/UserRenderer";
 import { propertiesDepartmentDto, propertiesFacultyDto, propertiesSchoolYearDto, propertiesStudyProgrammeDto, propertiesThesisOutcomeDto, propertiesThesisTypeDto } from "models/dtos";
 import { Button } from "ui/Button";
-import { SelectResource } from "ui/SelectResource";
+import { classnames } from "ui/shared";
 import { toKV, toKVWithCode } from "utils/transformUtils";
 
 import { SimpleEntityEditor } from "./SimpleEntityEditor";
@@ -20,6 +19,7 @@ export const PageAdministrator = () => {
       path: "departments",
       component: (
         <SimpleEntityEditor
+          key="departments"
           schema={propertiesDepartmentDto}
           getAll={() => httpClient.enums.departmentGetAll()}
           upsertOne={i => httpClient.enums.departmentUpsert({ requestBody: i as DepartmentDto })}
@@ -33,6 +33,7 @@ export const PageAdministrator = () => {
       path: "faculties",
       component: (
         <SimpleEntityEditor
+          key="faculties"
           schema={propertiesFacultyDto}
           getAll={() => httpClient.enums.facultyGetAll()}
           upsertOne={i => httpClient.enums.facultyUpsert({ requestBody: i as FacultyDto })}
@@ -46,6 +47,7 @@ export const PageAdministrator = () => {
       path: "school-years",
       component: (
         <SimpleEntityEditor
+          key="school-years"
           schema={propertiesSchoolYearDto}
           getAll={() => httpClient.enums.schoolYearGetAll()}
           upsertOne={i => httpClient.enums.schoolYearUpsert({ requestBody: i as SchoolYearDto })}
@@ -59,6 +61,7 @@ export const PageAdministrator = () => {
       path: "thesis-outcomes",
       component: (
         <SimpleEntityEditor
+          key="thesis-outcomes"
           schema={propertiesThesisOutcomeDto}
           getAll={() => httpClient.enums.thesisOutcomeGetAll()}
           upsertOne={i => httpClient.enums.thesisOutcomeUpsert({ requestBody: i as ThesisOutcomeDto })}
@@ -72,6 +75,7 @@ export const PageAdministrator = () => {
       path: "thesis-types",
       component: (
         <SimpleEntityEditor
+          key="thesis-types"
           schema={propertiesThesisTypeDto}
           getAll={() => httpClient.enums.thesisTypeGetAll()}
           upsertOne={i => httpClient.enums.thesisTypeUpsert({ requestBody: i as ThesisTypeDto })}
@@ -85,6 +89,7 @@ export const PageAdministrator = () => {
       path: "study-programmes",
       component: (
         <SimpleEntityEditor
+          key="study-programmes"
           schema={propertiesStudyProgrammeDto}
           getAll={() => httpClient.enums.studyProgrammeGetAll()}
           upsertOne={i => httpClient.enums.studyProgrammeUpsert({ requestBody: i as StudyProgrammeDto })}
@@ -97,34 +102,22 @@ export const PageAdministrator = () => {
 
   const validEnum = enumsList.find(e => e.path === enumName);
 
-  const [user, setUser] = useState<UserDto|null>();
-  const [users, setUsers] = useState<UserDto[]>();
-
-  const foo = (keys: any, values: any) => {
-    console.log(keys, values);
-    setUsers(values);
-  }
-
   return (
     <div>
-      <SelectResource
-        find={k => httpClient.users.find({ keyword: k })} 
-        onChange={foo} 
-        valueProp={renderUser} 
-        label={!users ? null : (users ?? []).map(renderUser)} 
-        value={users?.map(i => ({key: i.id, label: renderUser(i), value: i}))}
-        multiple
-      />
-
-      <h1>{validEnum ? `Manage ${validEnum.name}` : "Administration"}</h1>
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
-        {!validEnum &&
-          enumsList.map(i => (
-            <Button key={i.name} lg outlined component={Link} to={`/admin/manage/${i.path}`}>
-              <span className="px-4 py-3">{i.name}</span>
-            </Button>
-          ))}
+      {!validEnum && <h1 className="text-xl">{R("administration-menu")}</h1>}
+      <div
+        className={classnames(
+          "grid gap-4",
+          validEnum ? "mb-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]" : "grid-cols-[repeat(auto-fit,minmax(250px,1fr))]"
+        )}
+      >
+        {enumsList.map(i => (
+          <Button key={i.name} lg outlined component={Link} to={`/admin/manage/${i.path}`}>
+            <span className={classnames(validEnum ? "p-1" : "px-4 py-3")}>{i.name}</span>
+          </Button>
+        ))}
       </div>
+      {validEnum && <h1 className="text-xl">{R("admin-manage-x", validEnum.name)}</h1>}
       {validEnum && <>{validEnum.component}</>}
     </div>
   );

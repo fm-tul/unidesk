@@ -1,12 +1,13 @@
-import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
-import { PageUserDetailComponent, PageUserListComponent } from "./links.pageUser";
-import { PageStagImportComponent } from "./links.pageStagImport";
-import { PageThesisListComponent } from "./links.pageThesis";
-import { PageStylesComponent } from "./links.pageStyles";
-import { PageHomeComponent } from "./links.pageHome";
 import { User_Admin } from "@api-client/constants/UserGrants_Grants";
-import { ExtraRouteProps } from "./core";
+
 import { link_admin, link_adminManageEnum } from "./admin/links";
+import { ExtraRouteProps } from "./core";
+import { PageHomeComponent } from "./links.pageHome";
+import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
+import { PageStagImportComponent } from "./links.pageStagImport";
+import { PageStylesComponent } from "./links.pageStyles";
+import { PageThesisDetailComponent, PageThesisListComponent } from "./links.pageThesis";
+import { PageUserDetailComponent, PageUserListComponent } from "./links.pageUser";
 
 export const link_stagImport: ExtraRouteProps = {
   title: "import",
@@ -23,10 +24,18 @@ export const link_pageHome: ExtraRouteProps = {
   element: PageHomeComponent,
 };
 
+// theses
 export const link_pageThesisList: ExtraRouteProps = {
   title: "Theses",
   path: "/theses",
   element: PageThesisListComponent,
+};
+
+export const link_pageThesisDetail: ExtraRouteProps = {
+  title: "Thesis",
+  path: "/theses/:id",
+  visible: false,
+  element: PageThesisDetailComponent,
 };
 
 export const link_styles: ExtraRouteProps = {
@@ -36,6 +45,8 @@ export const link_styles: ExtraRouteProps = {
   element: PageStylesComponent,
 };
 
+
+// keywords
 export const link_pageKeywordDetail: ExtraRouteProps = {
   title: "Keyword",
   path: "/keywords/:keywordId",
@@ -49,6 +60,7 @@ export const link_pageKeywordList: ExtraRouteProps = {
   element: PageKeywordListComponent,
 };
 
+// users
 export const link_pageUserDetail: ExtraRouteProps = {
   title: "User",
   path: "/users/:userId",
@@ -74,6 +86,7 @@ export const links = [
   link_pageKeywordList,
 
   link_pageThesisList,
+  link_pageThesisDetail,
 
   link_styles,
 

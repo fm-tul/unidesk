@@ -1,12 +1,13 @@
+import { API_URL } from "@core/config";
+import { httpClient } from "@core/init";
+import { Translate } from "@locales/R";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
 import { HistoryInfoIcon } from "../../components/HistoryInfo";
 import { ThesisSimpleView } from "../../components/ThesisSimpleView";
-import { API_URL } from "@core/config";
-import { httpClient } from "@core/init";
 import { useFetch } from "../../hooks/useFetch";
-import { Translate } from "@locales/R";
 
 export const PageUserDetail = () => {
   const { userId } = useParams();
@@ -18,8 +19,8 @@ export const PageUserDetail = () => {
   const {
     error: errorTheses,
     isLoading: isLoadingTheses,
-    data: theses,
-  } = useFetch(() => httpClient.thesis.getAll({ userId: userId! }), [userId]);
+    data: response,
+  } = useFetch(() => httpClient.thesis.find({requestBody: { userId: userId! }}), [userId]);
 
   const isLoading = isLoadingUser || isLoadingTheses;
   const error = errorUser || errorTheses;
@@ -38,10 +39,10 @@ export const PageUserDetail = () => {
           <HistoryInfoIcon item={user} />
         </div>
       )}
-      {theses && (
+      {response && (
         <div>
-          {theses.map((thesis) => (
-            <ThesisSimpleView key={thesis.id} thesis={thesis} />
+          {response.items.map((thesis) => (
+            <ThesisSimpleView key={thesis.id} thesis={thesis} withEdit />
           ))}
         </div>
       )}
