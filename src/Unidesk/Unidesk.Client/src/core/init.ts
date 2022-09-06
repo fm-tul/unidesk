@@ -1,5 +1,21 @@
+import { extractErrorMessage, makeMessage } from "@core/errors";
+import axios from "axios";
+import { toast } from "react-toastify";
+
 import { ApiClient } from "../api-client";
 import { API_URL } from "./config";
+
+// spa reload
+(axios.interceptors.response as any).handlers = [];
+
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    const desc = extractErrorMessage(error?.response?.data)?.message ?? "";
+    toast.error(makeMessage(error.message, desc));
+    return Promise.reject(error?.response?.data ?? error);
+  }
+);
 
 /**
  * ApiClient instance with credentials sent by default, server can recognize is user has access to some resources

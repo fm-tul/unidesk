@@ -1,4 +1,5 @@
 import { ILocale } from "../all";
+
 export const cs: ILocale = {
   id: "cze",
   flag: "🇨🇿",
@@ -21,4 +22,13 @@ export const cs: ILocale = {
   "min-3": "Vyberte alespoň 3 položky",
   created: "Vytvořeno",
   modified: "Upraveno",
+
+  // thesis
+  authors: "Autoři",
+  keywords: "Klíčová slova",
+  "school-year": "Školní rok",
+
+  
+  // paging
+  "page-of": "z",
 };

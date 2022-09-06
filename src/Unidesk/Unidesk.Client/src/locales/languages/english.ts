@@ -3,6 +3,9 @@ export const en = {
   flag: "🇺🇸",
   language: "English",
 
+  // users
+  "user-function": "User Function",
+
   // navbar
   import: "Import",
   styles: "Styles",
@@ -16,6 +19,8 @@ export const en = {
   "imported-thesis-new": "new",
 
   // general
+  ok: "Ok",
+  cancel: "Cancel",
   error: "error",
   "error-occurred": "Error occurred",
   topics: "Topics",
@@ -27,6 +32,12 @@ export const en = {
   "restore-work": "Restore work",
   saved: "Saved",
   filled: "Filled",
+  loading: "Loading",
+  "import-successful": "Import successful",
+  "type-to-search": "Type to search...",
+  "search": "Search",
+  create: "Create",
+  update: "Update",
 
   // history
   created: "Created",
@@ -40,6 +51,8 @@ export const en = {
   // thesis
   "thesis-type": "Thesis type",
   name: "Name",
+  authors: "Authors",
+  keywords: "Keywords",
   "name-lang": (lang: string) => `Name (${lang})`,
   "multiple-types": "Multiple types",
   abstract: "Abstract",
@@ -48,11 +61,25 @@ export const en = {
   department: "Department",
   outcomes: "Expected Outcomes",
   "study-programme": "Study programme",
+  "thesis-from-stag-id": "Thesis is linked with STAG using ID:",
+  "suggested-keywords": "Suggested keywords",
+  "no-keywords-found": "No keywords found",
+  "create-new-keyword-for-x": (x: string) => `Create new keyword for ${x}`,
 
   // errors
   required: "Required",
   "min-3": "Select at least 3 values",
   "basic-information": "Basic information",
+
+  //admin
+  "administration-menu": "Administration",
+  "admin-manage-x": (x: string) => `Manage ${x}`,
+
+  // paging
+  "page-of": "of",
+
+  // keywords
+  "keyword-used-count": "Used count",
 };
 
 export default en;

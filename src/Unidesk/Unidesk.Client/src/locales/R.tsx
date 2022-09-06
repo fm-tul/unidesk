@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { EnKeys, languages } from "./all";
+import { EnKeys, languages, LanguagesId } from "./all";
 import { ILanguageContext, LanguageContext } from "./LanguageContext";
 
 export const R = (key: EnKeys, ...args: any) => {
@@ -23,8 +23,9 @@ export const Translate = (props: TranslateProps) => {
   return <span className={className}>{result}</span>;
 };
 
-export const RR = (key: EnKeys, context: ILanguageContext, ...args: any) => {
-  const dict = languages.find(i => i.id === context.language) ?? languages[0];
+export const RR = (key: EnKeys, context: ILanguageContext|LanguagesId, ...args: any) => {
+  const lang = typeof context === "string" ? context : context.language;
+  const dict = languages.find(i => i.id === lang) ?? languages[0];
   const result = dict[key] ?? languages[0][key] ?? key;
   if (typeof result === "string") {
     return result;
