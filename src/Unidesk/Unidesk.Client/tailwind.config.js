@@ -52,6 +52,7 @@ module.exports = {
         error: colors.red,
       },
       minWidth: {
+        xxs: '160px',
         xs: '320px',
         sm: '480px',
         md: '768px',
