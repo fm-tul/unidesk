@@ -2,19 +2,22 @@
 
 import React from "react";
 
-interface ToolbarProps {
+import { getSize, getVariant, SizeProps, VariantProps } from "ui/shared";
+
+interface ToolbarProps extends SizeProps, VariantProps {
     disabled?: boolean;
     className?: string;
     children?: React.ReactNode;
-    variant?: "btn-bar" | "btn-group" | ""
 }
 
 export const FilterBar: React.FC<ToolbarProps> = (props) => {
-    const { disabled, className="", children, variant="btn-bar" } = props;
+    const { disabled, className="", children } = props;
+    const size = getSize(props);
+    const variant = getVariant(props);
 
     const clonedChildren = React.Children.map(children, (child) => (
-        React.cloneElement(child as any, { disabled })
+        React.cloneElement(child as any, { disabled, size, variant })
     ));
 
-    return <div className={`${variant} ${className}`}>{clonedChildren}</div>;
+    return <div className={`btn-bar ${className}`}>{clonedChildren}</div>;
 }

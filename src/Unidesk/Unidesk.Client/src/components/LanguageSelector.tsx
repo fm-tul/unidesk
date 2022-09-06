@@ -1,9 +1,9 @@
-import { useContext } from "react";
-import { LanguageContext } from "@locales/LanguageContext";
-import { languages, LanguagesId } from "@locales/all";
-import { SimpleSelect } from "ui/SimpleSelect";
-import moment from "moment";
 import { setLocale } from "@core/momentProvider";
+import { languages, LanguagesId } from "@locales/all";
+import { LanguageContext } from "@locales/LanguageContext";
+import { useContext } from "react";
+
+import { Select, SelectOption } from "ui/Select";
 
 const languageLocaleMapping = {
   cze: "cs",
@@ -13,6 +13,12 @@ const languageLocaleMapping = {
 export function LanguageSelector() {
   const { language, setLanguage } = useContext(LanguageContext);
 
+  const languagesOptions = languages.map(i => ({
+    key: i.id,
+    label: i.flag,
+    value: i.id,
+  })) as SelectOption<LanguagesId>[];
+
   const handleNewLanguage = (language: LanguagesId) => {
     const locale = languageLocaleMapping[language];
     setLocale(locale);
@@ -20,14 +26,12 @@ export function LanguageSelector() {
   };
 
   return (
-    <SimpleSelect
-      options={languages}
+    <Select
       sm
-      fullWidth={false}
+      options={languagesOptions}
       value={language}
-      keyProp="id"
-      valueProp="flag"
-      onValue={i => handleNewLanguage(i as any)}
+      optionRender={option => languages.find(i => i.id === option)?.flag}
+      onValue={(_, v) => handleNewLanguage(v!)}
     />
   );
 }

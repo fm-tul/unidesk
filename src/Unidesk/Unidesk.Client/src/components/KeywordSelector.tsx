@@ -1,12 +1,15 @@
 import { EMPTY_GUID } from "@core/config";
 import { httpClient } from "@core/init";
 import { KeywordDto } from "@models/KeywordDto";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { MdChecklist, MdClear } from "react-icons/md";
 
 import { useOpenClose } from "hooks/useOpenClose";
 import { Button } from "ui/Button";
 import { TextField } from "ui/TextField";
+import { LanguageContext } from "@locales/LanguageContext";
+import { RR } from "@locales/R";
+import { locales } from "@locales/all";
 
 interface KeywordSelectorProps {
   keywords?: KeywordDto[];
@@ -15,14 +18,14 @@ interface KeywordSelectorProps {
   separateByLocale?: boolean;
 }
 export const KeywordSelector = (props: KeywordSelectorProps) => {
+  const { language } = useContext(LanguageContext);
   const { keywords=[], onChange, max = 100, separateByLocale = false } = props;
   // const [keywords, setKeywords] = useState<KeywordDto[]>(defaultValue ?? []);
-  const [keywordCandidates, setKeywordCandidates] = useState<KeywordDto[]>([]);
+  const [keywordCandidates, setKeywordCandidates] = useState<KeywordDto[]>(keywords);
   const [keyword, setKeyword] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { open, close, isOpen } = useOpenClose();
-  const locales = ["cze", "eng"];
 
   const setKeyworsdWithChange = (value: KeywordDto[]) => {
     // remove duplicates
@@ -87,13 +90,13 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
 
       <div className="flex flex-col gap-1">
         {locales.map(locale => (
-          <div className="flex flex-wrap items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1" key={locale}>
             <span className="text-sm font-semibold">{locale}: </span>
             {keywords
               .filter(i => i.locale === locale)
               .map(i => (
                 <Button key={i.id} text sm success outlined className="rounded-full" onClick={() => removeKeyword(i)}>
-                  {i.value} ({i.locale}) <MdClear className="text-base" />
+                  {i.value} <MdClear className="text-base" />
                 </Button>
               ))}
           </div>
@@ -106,13 +109,13 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
               {keywordCandidates.length > 0 && (
                 <div className="absolute left-0 z-10 grid w-max grid-cols-2 gap-4 rounded border border-solid border-neutral-200 bg-white p-2 shadow-xl">
                   <div className="col-span-2 flex w-full justify-between border-b border-solid border-black/30 p-2 text-sm font-semibold">
-                    Suggetisons
+                    {RR("suggested-keywords", language)}
                     <Button onClick={close} text sm>
                       <MdClear className="text-base" />
                     </Button>
                   </div>
                   {locales.map(locale => (
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center" key={locale}>
                       {locale}
                       <div className="flex flex-col gap-1">
                         {keywordCandidates
@@ -138,17 +141,17 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
               {keywordCandidates.length === 0 && (
                 <div className="absolute left-0 z-10 grid w-max grid-cols-1 gap-4 rounded border border-solid border-neutral-200 bg-white p-2 shadow-xl">
                   <div className="flex w-full justify-between border-b border-solid border-black/30 p-2 text-sm font-semibold">
-                    No keywords found
+                    {RR("no-keywords-found", language)}
                     <Button onClick={close} text sm>
                       <MdClear className="text-base" />
                     </Button>
                   </div>
                   <div className="flex flex-col items-center">
                     <Button sm text success onClick={() => addKeyword({ id: EMPTY_GUID, value: keyword, locale: "cze", used: 0 } as KeywordDto)}>
-                      Create new keyword for <em>CZE</em> language
+                      {RR("create-new-keyword-for-x", language, "CZE")}
                     </Button>
                     <Button sm text info onClick={() => addKeyword({ id: EMPTY_GUID, value: keyword, locale: "eng", used: 0 } as KeywordDto)}>
-                      Create new keyword for <em>ENG</em> language
+                      {RR("create-new-keyword-for-x", language, "ENG")}
                     </Button>
                   </div>
                 </div>

@@ -1,21 +1,28 @@
-import { useState } from "react";
 import { httpClient } from "@core/init";
-import { Translate } from "@locales/R";
-import { FilterBar } from "./FilterBar";
-import { ThesisSimpleView } from "./ThesisSimpleView";
-import { Button } from "ui/Button";
-import { LinearProgress } from "ui/LinearProgress";
-import { SimpleSelect } from "ui/SimpleSelect";
+import { LanguageContext } from "@locales/LanguageContext";
+import { RR, Translate } from "@locales/R";
+import { ThesisDto } from "@models/ThesisDto";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 
-export const StagImport = () => {
-  const years = [2021, 2019, 2020, 2022];
-  const departments = ["NTI", "MTI", "ITE"];
+import { Button } from "ui/Button";
+import { generateOptions, Select, SelectOption } from "ui/Select";
+import { TextField } from "ui/TextField";
 
-  const [year, setYear] = useState(years[0]);
-  const [department, setDepartment] = useState(departments[0]);
+import { FilterBar } from "./FilterBar";
+import { TextArea } from "./mui/ArrayField";
+import { ThesisSimpleView } from "./ThesisSimpleView";
+
+export const StagImport = () => {
+  const language = useContext(LanguageContext);
+  const years = [2021, 2019, 2020, 2022, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008].map(String).map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
+  const departments = ["NTI", "MTI", "ITE"].map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
+
+  const [textData, setTextData] = useState<string>("");
+  const [year, setYear] = useState(years[0].value);
+  const [department, setDepartment] = useState(departments[0].value);
   const [isLoading, setIsLoading] = useState(false);
-  const [resposeData, setResponseData] = useState<any[]>();
+  const [resposeData, setResponseData] = useState<ThesisDto[]>();
   const [error, setError] = useState<string>("");
   const [batchIndex, setBatchIndex] = useState(0);
   const totalBatches = years.length * departments.length;
@@ -25,14 +32,14 @@ export const StagImport = () => {
     setError("");
 
     const response = await httpClient.import
-      .getApiImportStag({
+      .importFromStag({
         year,
         department,
       })
       .catch(error => {
         setError(error.message);
         setIsLoading(false);
-        return { data: [] };
+        return [];
       });
 
     setResponseData(response);
@@ -41,7 +48,7 @@ export const StagImport = () => {
   };
 
   const importFromStag = async () => {
-    await importOneFromStag(year, department);
+    await importOneFromStag(parseInt(year), department);
   };
 
   const importAllFromStag = async () => {
@@ -51,7 +58,7 @@ export const StagImport = () => {
     for (const year of years) {
       for (const department of departments) {
         setBatchIndex(index);
-        const batchItems = await importOneFromStag(year, department);
+        const batchItems = await importOneFromStag(parseInt(year.value), department.value);
         items = [...items, ...batchItems];
         // await new Promise((resolve) => setTimeout(resolve, 1000));
         index++;
@@ -62,11 +69,24 @@ export const StagImport = () => {
     setResponseData(items);
   };
 
+  const importFromText = async () => {
+    setIsLoading(true);
+    httpClient.import.importOneFromStag({requestBody: {data: textData}})
+      .then(response => {
+        setResponseData([response]);
+        setIsLoading(false);
+        toast.success(RR("import-successful", language));
+      }).catch(error => {
+        setError(error.message);
+        setIsLoading(false);
+      });
+  }
+
   return (
-    <div>
+    <div className="flex flex-col">
       <FilterBar disabled={isLoading}>
-        <SimpleSelect sm outlined options={years} value={year} onValue={e => setYear(e as number)} fullWidth={false} />
-        <SimpleSelect sm outlined options={departments} value={department} onValue={e => setDepartment(e as string)} fullWidth={false} />
+        <Select options={years} value={year} onValue={(_, v) => setYear(v!)} sm />
+        <Select options={departments} value={department} onValue={(_, v) => setDepartment(v!)} sm />
 
         {/* import one */}
         <Button className="ml-auto" error={!!error} onClick={importFromStag}>
@@ -79,13 +99,11 @@ export const StagImport = () => {
           <Button
             loading={isLoading}
             disableClass=""
-            className="ml-auto h-full with-progress before:bg-gradient-to-l before:from-lime-600 before:to-lime-400"
+            className="with-progress ml-auto h-full before:bg-gradient-to-l before:from-lime-600 before:to-lime-400"
             onClick={importAllFromStag}
-            style={{'--progress': batchIndex > 0 ? `${(batchIndex / totalBatches) * 100}%` : "0"} as any}
+            style={{ "--progress": batchIndex > 0 ? `${(batchIndex / totalBatches) * 100}%` : "0" } as any}
           >
-            <div>
-              Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}
-            </div>
+            <div>Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}</div>
           </Button>
         </div>
       </FilterBar>
@@ -111,11 +129,19 @@ export const StagImport = () => {
             {resposeData
               .sort((a, b) => Number(b.isNew) - Number(a.isNew))
               .map(thesis => (
-                <ThesisSimpleView thesis={thesis} key={thesis.id} />
+                <ThesisSimpleView thesis={thesis} key={thesis.id} withEdit />
               ))}
           </div>
         </div>
       )}
+
+      <div className="flex flex-col gap-4">
+        <h3 className="text-lg font-semibold">Import from text</h3>
+        <TextField rows={20} value={textData} onValue={setTextData} className="font-mono" spellCheck={false} />
+        <Button onClick={importFromText} loading={isLoading}>
+          Import
+        </Button>
+      </div>
     </div>
   );
 };
