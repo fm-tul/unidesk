@@ -1,14 +1,51 @@
-import { Link, Route, Routes } from "react-router-dom";
-import { links, link_pageHome } from "./routes/links";
-import { ExtraRouteProps } from "./routes/core";
+import { UserDto } from "@api-client";
 import { EnKeys } from "@locales/all";
-import { LanguageSelector } from "./components/LanguageSelector";
-import { UserMenu } from "./components/UserMenu";
 import { R } from "@locales/R";
 import { useContext } from "react";
-import { UserContext } from "./user/UserContext";
-import { UserDto } from "@api-client";
+import { Link, Route, Routes } from "react-router-dom";
+
 import { Button } from "ui/Button";
+
+import { LanguageSelector } from "./components/LanguageSelector";
+import { UserMenu } from "./components/UserMenu";
+import { ExtraRouteProps } from "./routes/core";
+import { link_pageHome, links } from "./routes/links";
+import { UserContext } from "./user/UserContext";
+
+const renderMenu = (available_links: ExtraRouteProps[]) => {
+  return (
+    <div className="bg-white/80 border-b border-solid border-neutral-300 has-backdrop:bg-white/60 has-backdrop:backdrop-blur-md relative z-10">
+      <div className="container mx-auto print:hidden">
+        <div className="flex items-center gap-2 p-4">
+          {/* name and logo */}
+          <Link to={link_pageHome.path}>
+            <div className="font-mono">Unidesk</div>
+          </Link>
+
+          {/* links */}
+          <div className="flex gap-3">
+            {available_links
+              .filter(i => i.visible !== false)
+              .map(i => (
+                <Button text key={i.path} to={i.path} component={Link}>
+                  {R(i.title as EnKeys)}
+                </Button>
+              ))}
+          </div>
+
+          {/* push to the right */}
+          <div className="ml-auto"></div>
+
+          {/* user */}
+          <UserMenu />
+
+          {/* language selector */}
+          <LanguageSelector />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const App = () => {
   const { user } = useContext(UserContext);
@@ -16,44 +53,26 @@ export const App = () => {
 
   // min-w-max
   return (
-    <div className="container mx-auto grid bg-orange-100">
-      {/* menu */}
-      <div className="flex items-center gap-2 p-4">
-        {/* name and logo */}
-        <Link to={link_pageHome.path}>
-          <div className="font-mono">Unidesk</div>
-        </Link>
+    <>
+      <div
+        className="fixed inset-0 -z-10 root-bg"
+      ></div>
 
-        {/* links */}
-        <div className="flex gap-3">
-          {available_links
-            .filter(i => i.visible !== false)
-            .map(i => (
-              <Button text key={i.path} to={i.path} component={Link}>
-                {R(i.title as EnKeys)}
-              </Button>
-            ))}
+      <div className="min-h-screen bg-neutral-200/50">
+        {renderMenu(available_links)}
+
+        <div className="container mx-auto grid bg-white/80 print:max-w-[90vw]">
+          {/* content */}
+          <div className="rounded-sm p-4 shadow print:shadow-none">
+            <Routes>
+              {available_links.map(i => (
+                <Route key={i.path} {...i} />
+              ))}
+            </Routes>
+          </div>
         </div>
-
-        {/* push to the right */}
-        <div className="ml-auto"></div>
-
-        {/* user */}
-        <UserMenu />
-
-        {/* language selector */}
-        <LanguageSelector />
       </div>
-
-      {/* content */}
-      <div className="rounded-sm bg-slate-100 p-4 shadow">
-        <Routes>
-          {available_links.map(i => (
-            <Route key={i.path} {...i} />
-          ))}
-        </Routes>
-      </div>
-    </div>
+    </>
   );
 };
 

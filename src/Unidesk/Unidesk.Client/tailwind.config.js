@@ -5,6 +5,7 @@ const plugin = require('tailwindcss/plugin');
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx,html}",
+    "index.html"
   ],
   theme: {
     screens: {
@@ -25,11 +26,17 @@ module.exports = {
           "0%": { maxHeight: 0, overflow: 'hidden' },
           "99%": { maxHeight: "var(--h, 20px)", overflow: 'hidden' },
           "100%": { maxHeight: undefined, overflow: 'initial' },
+        },
+        "delay-fade-in": {
+          "0%": { opacity: 0 },
+          "50%": { opacity: 0 },
+          "100%": { opacity: 1 },
         }
       },
       animation: {
         "reveal-sm": "reveal-sm 150ms ease-in-out",
         "reveal-var": "reveal-var 150ms ease-in-out",
+        "delay-fade-in": "delay-fade-in 150ms ease-in-out",
       },
       fontSize: {
         xxs: ['10px', '14px'],
@@ -106,6 +113,7 @@ module.exports = {
     require('@mertasan/tailwindcss-variables')({ colorVariables: true }),
     require('prettier-plugin-tailwindcss'),
     require("tailwindcss-animate"),
+    require('@tailwindcss/typography'),
 
     plugin(function ({ addVariant }) {
       addVariant('optional', '&:optional');
