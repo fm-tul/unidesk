@@ -32,6 +32,6 @@ export const extractErrorMessage = (error: unknown) => {
 export const makeMessage = (title: string, message: string) => {
   return <div>
     <h3 className="text-xl">{title}</h3>
-    <p className="text-sm whitespace-pre">{message}</p>
+    <p className="text-sm opacity-70">{message}</p>
   </div>
 };

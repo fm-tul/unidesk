@@ -4,6 +4,7 @@ import { SimilarKeywordDto } from "@models/SimilarKeywordDto";
 import { useState } from "react";
 import { Button } from "ui/Button";
 import { TextField } from "ui/TextField";
+import { serverResponseOrDefault } from "utils/jsonUtils";
 
 interface KeywordMergerProps {}
 
@@ -11,12 +12,21 @@ export const KeywordMerger = (props: KeywordMergerProps) => {
   const [duplicates, setDuplicates] = useState<SimilarKeywordDto[] | null>();
   const [duplicatesKeyword, setDuplicatesKeyword] = useState<string>();
   const [selectedSimilarKeywords, setSelectedSimilarKeywords] = useState<[string, string][]>([]);
+  const [error, setError] = useState<string>();
   const allSelectedMains = selectedSimilarKeywords.map(i => i[0]);
   const allSelectedAliases = selectedSimilarKeywords.map(i => i[1]);
 
   const handleFindDuplicatesButtonClick = async () => {
     setDuplicates(null);
-    const dupes = await httpClient.keywords.findDuplicates({ keyword: duplicatesKeyword });
+    setError("");
+    const dupes = await httpClient.keywords.findDuplicates({ keyword: duplicatesKeyword }).catch((e: unknown) => {
+      setDuplicates([]);
+      const serverError = serverResponseOrDefault(e);
+      if (serverError) {
+        setError(serverError.message ?? "Error occured");
+      }
+      return [];
+    });
     setDuplicates(dupes);
   };
 
@@ -55,7 +65,8 @@ export const KeywordMerger = (props: KeywordMergerProps) => {
           </Button>
         )}
       </div>
-      {!!duplicates && (
+      {error && <div className="text-red-500 p-4">{error}</div>}
+      {!!duplicates && !error &&(
         <div className="flex flex-col gap-1">
           {locales.map(locale => (
             <div key={locale}>

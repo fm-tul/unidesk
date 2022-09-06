@@ -64,7 +64,7 @@ export const PageKeywordList = () => {
       <h1>Keywords</h1>
       <Button onClick={open}>Merge Keywords...</Button>
 
-      <Modal open={isOpen} onClose={close} height="xl" >
+      <Modal open={isOpen} onClose={close} height="xl" className="rounded bg-white p-6" >
         <KeywordMerger />
       </Modal>
 

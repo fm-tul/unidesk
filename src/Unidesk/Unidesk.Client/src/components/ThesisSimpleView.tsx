@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useOpenClose } from "hooks/useOpenClose";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
-import { PageThesisEdit } from "pages/thesis/PageThesisEdit";
+import { ThesisEdit } from "pages/thesis/PageThesisEdit";
 import { Modal } from "ui/Modal";
 
 import { DualLanguage } from "./DualLanguage";
@@ -30,13 +30,8 @@ export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
   const handleClick = () => {
     onClick?.(thesis);
     if (withEdit) {
-      console.log("withEdit", thesis);
       setSelectedThesis(thesis);
       open();
-    }
-
-    if (withDetail) {
-      navigate(`/thesis/${thesis.id}`);
     }
   };
 
@@ -59,9 +54,15 @@ export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
               {adipidno}
             </Link>
           )}
-          <span className="cursor-pointer px-2 py-1 font-bold transition hover:bg-black/10" onClick={handleClick}>
-            <DualLanguage eng={thesis.nameEng!} cze={thesis.nameCze!} language={language} />
-          </span>
+          {withDetail === true ? (
+            <Link className="cursor-pointer px-2 py-1 font-bold transition hover:bg-black/10" to={`/theses/${thesis.id}`}>
+              <DualLanguage eng={thesis.nameEng!} cze={thesis.nameCze!} language={language} />
+            </Link>
+          ) : (
+            <span className="cursor-pointer px-2 py-1 font-bold transition hover:bg-black/10" onClick={handleClick}>
+              <DualLanguage eng={thesis.nameEng!} cze={thesis.nameCze!} language={language} />
+            </span>
+          )}
           {thesis.authors.length > 0 && (
             <span className="italic">
               -
@@ -97,7 +98,7 @@ export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
       {withEdit === true && isOpen && (
         <Modal open={isOpen} onClose={close} y="top" height="lg" className="bg-slate-100 p-6">
           <div className="flex h-full flex-col content-between">
-            <PageThesisEdit initialValues={selectedThesis} />
+            <ThesisEdit initialValues={selectedThesis} />
           </div>
         </Modal>
       )}

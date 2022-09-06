@@ -15,7 +15,9 @@ import { ThesisSimpleView } from "./ThesisSimpleView";
 
 export const StagImport = () => {
   const language = useContext(LanguageContext);
-  const years = [2021, 2019, 2020, 2022, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008].map(String).map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
+  const years = [2021, 2019, 2020, 2022, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008]
+    .map(String)
+    .map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
   const departments = ["NTI", "MTI", "ITE"].map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
 
   const [textData, setTextData] = useState<string>("");
@@ -71,16 +73,18 @@ export const StagImport = () => {
 
   const importFromText = async () => {
     setIsLoading(true);
-    httpClient.import.importOneFromStag({requestBody: {data: textData}})
+    httpClient.import
+      .importOneFromStag({ requestBody: { data: textData } })
       .then(response => {
         setResponseData([response]);
         setIsLoading(false);
         toast.success(RR("import-successful", language));
-      }).catch(error => {
+      })
+      .catch(error => {
         setError(error.message);
         setIsLoading(false);
       });
-  }
+  };
 
   return (
     <div className="flex flex-col">
@@ -89,9 +93,8 @@ export const StagImport = () => {
         <Select options={departments} value={department} onValue={(_, v) => setDepartment(v!)} sm />
 
         {/* import one */}
-        <Button className="ml-auto" error={!!error} onClick={importFromStag}>
+        <Button className="ml-auto min-w-xxs" error={!!error} onClick={importFromStag} loading={isLoading}>
           Import
-          {isLoading && <span className="spinner white"></span>}
         </Button>
 
         {/* import all */}
@@ -99,7 +102,7 @@ export const StagImport = () => {
           <Button
             loading={isLoading}
             disableClass=""
-            className="with-progress ml-auto h-full before:bg-gradient-to-l before:from-lime-600 before:to-lime-400"
+            className="with-progress ml-auto h-full before:bg-gradient-to-l before:from-lime-600 before:to-lime-400 min-w-xxs"
             onClick={importAllFromStag}
             style={{ "--progress": batchIndex > 0 ? `${(batchIndex / totalBatches) * 100}%` : "0" } as any}
           >

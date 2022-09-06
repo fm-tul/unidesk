@@ -17,7 +17,7 @@ import { generatePrimitive, Select } from "ui/Select";
 
 import { FilterBar } from "../../components/FilterBar";
 import { ThesisSimpleView } from "../../components/ThesisSimpleView";
-import { PageThesisEdit } from "./PageThesisEdit";
+import { ThesisEdit } from "./PageThesisEdit";
 import { TextField } from "ui/TextField";
 import { useDebounceState } from "hooks/useDebounceState";
 
@@ -82,7 +82,7 @@ export const PageThesisList = () => {
       {isOpen && (
         <Modal open={isOpen} onClose={close} y="top" height="xl" className="bg-slate-100 p-6">
           <div className="flex h-full flex-col content-between">
-            <PageThesisEdit initialValues={selectedThesis} />
+            <ThesisEdit initialValues={selectedThesis} />
           </div>
         </Modal>
       )}
@@ -107,10 +107,8 @@ export const PageThesisList = () => {
               width="min-w-xs"
               clearable
             />
-            <TextField label={R("search")} value={keyword} onValue={setKeyword} />
-            <div className="ml-auto">
-              <Paging filter={filter} onValue={applyNewFilter} />
-            </div>
+            <TextField label={R("search")} value={keyword} onValue={setKeyword} className="grow" />
+            <Paging filter={filter} onValue={applyNewFilter} className="ml-auto" />
           </FilterBar>
 
           <div className="flex justify-end">

@@ -8,7 +8,7 @@ import { useOpenClose } from "hooks/useOpenClose";
 import { distinctBy } from "utils/arrays";
 
 import { ListRenderer } from "./ListRenderer";
-import { classnames, getHelperColor, getHelperProps, getSize, HelperProps, SizeProps, UiColors, UiSizes } from "./shared";
+import { classnames, ColorProps, getColor, getHelperColor, getHelperProps, getSize, HelperProps, SizeProps, UiColors, UiSizes } from "./shared";
 
 export interface TId {
   id: string;
@@ -19,7 +19,7 @@ export interface SelectOption<T extends TId | string> {
   value: T;
   label: ReactNode;
 }
-interface SelectBaseProps<T extends TId | string> extends HelperProps, SizeProps {
+interface SelectBaseProps<T extends TId | string> extends SizeProps, ColorProps {
   options: SelectOption<T>[] | ((value: string) => Promise<SelectOption<T>[]>) | ((value: string) => Promise<T[]>);
   label?: ReactNode;
 
@@ -40,7 +40,7 @@ interface SelectBaseProps<T extends TId | string> extends HelperProps, SizeProps
   textSize?: UiSizes;
   className?: string;
 
-  onSingleValue?: (value: T|undefined) => void;
+  onSingleValue?: (value: T | undefined) => void;
   onMultiValue?: (value: T[]) => void;
 }
 
@@ -81,8 +81,8 @@ export interface SelectProps<T extends TId | string> extends SelectBaseProps<T> 
 export const Select = <T extends TId | string>(props: SelectProps<T>) => {
   const { options, loading, disabled, searchable, clearable, multiple, label, className } = props;
   const { value = [], textSize, onValue, onBlur, optionRender, onSingleValue, onMultiValue } = props;
-  const { helperText, helperColor } = getHelperColor(props);
-  const theme = THEME[(helperColor || "info") as keyof typeof THEME];
+  const color = getColor(props);
+  const theme = THEME[color];
   const sizeText = SIZES_TEXT[textSize ?? getSize(props)];
   const sizeTheme = SIZES_THEME[getSize(props)];
 
@@ -101,7 +101,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
     label: optionRender?.(v) ?? (typeof v === "string" ? (v as string) : v.id),
   }));
 
-  const { width } = props;
+  const { width="w-full" } = props;
   const { modalHeight = "max-h-xs" } = props;
 
   const handleSelectClick = () => {
@@ -127,7 +127,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
     if (valueSafe.map(i => (typeof i === "string" ? i : i.id)).includes(optionId)) {
       const newValue = [...valueSafe.filter(i => (typeof i === "string" ? i : i.id) !== optionId)];
       onValue?.(newValue, newValue[0]);
-      if(multiple) {
+      if (multiple) {
         onMultiValue?.(newValue);
       } else {
         onSingleValue?.(newValue[0]);
@@ -136,7 +136,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
       // add the option to the list
       const newValue = [...valueSafe, option];
       onValue?.(newValue, newValue[0]);
-      if(multiple) {
+      if (multiple) {
         onMultiValue?.(newValue);
       } else {
         onSingleValue?.(newValue[0]);
@@ -147,7 +147,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
   const handleOptionClickSingle = (option: T) => {
     onValue?.([option], option);
 
-    if(multiple) {
+    if (multiple) {
       onMultiValue?.([option]);
     } else {
       onSingleValue?.(option);
@@ -170,7 +170,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
       setSearchText("");
     } else {
       onValue?.([], undefined);
-      if(multiple) {
+      if (multiple) {
         onMultiValue?.([]);
       } else {
         onSingleValue?.(undefined);
@@ -236,12 +236,14 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
       );
 
   return (
-    <div className={classnames("select-root relative select-none inline-flex flex-col", width, disabled && "pointer-events-none", className)}>
+    <div
+      className={classnames("select-root relative inline-flex select-none flex-col", width, disabled && "pointer-events-none", className)}
+    >
       {/* main flex wrapper */}
       <div
         tabIndex={0}
         className={classnames(
-          "select-wrapper flex justify-between bg-white/80 rounded border border-solid border-neutral-400 ring-0 transition-all focus-within:ring-2 h-full",
+          "select-wrapper flex h-full justify-between rounded border border-solid border-neutral-400 bg-white/80 ring-0 transition-all focus-within:ring-2",
           theme.ring
         )}
       >
@@ -334,7 +336,9 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
                 className={classnames(
                   "p-1 px-2 transition",
                   theme.option,
-                  valueSafe.map(j => (typeof j === "string" ? j : j.id)).includes(i.key) && "selected"
+                  (valueSafe.map(j => (typeof j === "string" ? j : j.id)).includes(i.key) ||
+                    valueSafe.map(j => (typeof j === "string" ? j : j.id)).includes(i.value as string)) &&
+                    "selected"
                 )}
                 tabIndex={0}
                 onClick={e => handleOptionClick(i.value)}
@@ -347,7 +351,6 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
           </div>
         </div>
       )}
-      {!!helperText && <div className={classnames("animate-reveal-var pl-2 text-sm", theme.helperColor)}>{helperText}</div>}
     </div>
   );
 };
@@ -380,6 +383,13 @@ const THEME = {
     ring: "ring-warning-500/50 focus-within:border-warning-500",
     helperColor: "text-warning-600",
     option: "hocus:bg-warning-200 selected:bg-warning-300",
+  },
+  neutral: {
+    name: "neutral",
+    border: "border-neutral-500",
+    ring: "ring-neutral-500/50 focus-within:border-neutral-500",
+    helperColor: "text-neutral-700",
+    option: "hocus:bg-neutral-200 selected:bg-neutral-300",
   },
 };
 

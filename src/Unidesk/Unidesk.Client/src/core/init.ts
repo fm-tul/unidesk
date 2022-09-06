@@ -11,8 +11,13 @@ import { API_URL } from "./config";
 axios.interceptors.response.use(
   response => response,
   error => {
-    const desc = extractErrorMessage(error?.response?.data)?.message ?? "";
-    toast.error(makeMessage(error.message, desc));
+    const jsonResponse = extractErrorMessage(error?.response?.data);
+    toast.error(makeMessage(
+      jsonResponse?.message ?? error.message,
+      jsonResponse?.debugMessage ?? jsonResponse?.stackTrace?.join("\n") ?? ""
+    ), {
+      autoClose: false,
+    });
     return Promise.reject(error?.response?.data ?? error);
   }
 );

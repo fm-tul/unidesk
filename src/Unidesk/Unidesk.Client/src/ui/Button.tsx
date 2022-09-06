@@ -49,6 +49,7 @@ const COLORS = {
   success: "btn-success",
   warning: "btn-warning",
   error: "btn-error",
+  neutral: "btn-neutral",
 };
 
 const VARIANTS = {

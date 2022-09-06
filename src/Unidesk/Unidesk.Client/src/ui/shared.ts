@@ -1,10 +1,11 @@
 export type UiSizes = "sm" | "md" | "lg";
-export type UiColors = "info" | "success" | "warning" | "error";
+export type UiColors = "info" | "success" | "warning" | "error" | "neutral";
 export type UiVariants = "contained" | "outlined" | "text";
 
 export interface HelperProps {
   helperText?: string;
   helperColor?: UiColors | boolean;
+  helperClassName?: string;
 }
 
 export interface SizeProps {
@@ -61,7 +62,7 @@ export const getSize = (props: SizeProps, def: UiSizes = "md") => {
   return def;
 };
 
-export const getColor = (props: ComplexComponentProps, def: UiColors = "info") => {
+export const getColor = (props: ColorProps, def: UiColors = "info") => {
   if (props.color) {
     return props.color;
   }
@@ -114,6 +115,7 @@ export const getHelperColor = (props: HelperProps) => ({
   helperColor: (typeof props.helperColor === "boolean" ? (props.helperColor === true ? "error" : "") : props.helperColor) as
     | UiColors
     | undefined,
+    helperClassName: props.helperClassName,
 });
 
 export const classnames = (...args: any[]) => {

@@ -1,5 +1,5 @@
 import { DepartmentDto, FacultyDto, SchoolYearDto, SimpleJsonResponse, StudyProgrammeDto, ThesisOutcomeDto, ThesisTypeDto } from "@api-client";
-import { EMPTY_GUID } from "@core/config";
+import { GUID_EMPTY } from "@core/config";
 import { LanguagesId } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { useFormik } from "formik";
@@ -78,7 +78,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
             autoHeight
           />
           <div className="flex justify-end">
-            <Button sm onClick={() => setItemToEdit(EMPTY_GUID)}>
+            <Button sm onClick={() => setItemToEdit(GUID_EMPTY)}>
               Add new <MdAdd className="text-base" />
             </Button>
           </div>
@@ -129,7 +129,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
               </Button>
               {savedData && <span className="text-sm text-green-600 animate-in fade-in">Saved</span>}
             </div>
-            {itemId !== EMPTY_GUID && (
+            {itemId !== GUID_EMPTY && (
               <div>
                 <Button outlined error className="peer" onClick={handleDeleteClick} loading={isDeleting}>
                   Delete <MdDelete className="text-base peer-loading:hidden" />

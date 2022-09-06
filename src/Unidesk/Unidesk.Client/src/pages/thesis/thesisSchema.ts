@@ -1,4 +1,4 @@
-import { EMPTY_GUID } from "@core/config";
+import { GUID_EMPTY } from "@core/config";
 import { ThesisDto } from "@models/ThesisDto";
 import { ThesisStatus } from "@models/ThesisStatus";
 import * as Yup from "yup";
@@ -7,7 +7,7 @@ const REQUIRED = "required";
 const MIN_3 = "min-3";
 
 export const thesisInitialValues: Partial<ThesisDto> = {
-  id: EMPTY_GUID,
+  id: GUID_EMPTY,
   nameCze: "",
   nameEng: "",
 
@@ -48,9 +48,11 @@ export const thesisValidationSchema = Yup.object({
   thesisTypeCandidates: Yup.array(),
   thesisTypeId: Yup.string().nullable(),
 
+  facultyId: Yup.string().required(REQUIRED),
   schoolYearId: Yup.string().required(REQUIRED),
   departmentId: Yup.string().required(REQUIRED),
   studyProgrammeId: Yup.string().nullable(),
+
   outcomeIds: Yup.array().required(REQUIRED).min(3, MIN_3),
 
   // advanced section

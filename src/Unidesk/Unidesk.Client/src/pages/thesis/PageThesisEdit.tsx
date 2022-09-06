@@ -1,5 +1,15 @@
-import { Severity, SimpleJsonResponse } from "@api-client";
-import { EMPTY_GUID } from "@core/config";
+import {
+  DepartmentDto,
+  FacultyDto,
+  SchoolYearDto,
+  Severity,
+  SimpleJsonResponse,
+  StudyProgrammeDto,
+  TeamDto,
+  ThesisOutcomeDto,
+  ThesisTypeDto,
+} from "@api-client";
+import { GUID_EMPTY } from "@core/config";
 import { guestHttpClient, httpClient } from "@core/init";
 import { EnKeys, LanguagesId } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
@@ -10,14 +20,14 @@ import { ThesisStatus } from "@models/ThesisStatus";
 import { UserDto } from "@models/UserDto";
 import { useContext, useEffect, useState } from "react";
 import { MdChecklist } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { debounce } from "throttle-debounce";
 import * as Yup from "yup";
 
 import { Moment } from "components/HistoryInfo";
 import { KeywordSelector } from "components/KeywordSelector";
 import { ArrayField } from "components/mui/ArrayField";
-import { toPromiseArray, useFetch } from "hooks/useFetch";
+import { toPromiseArray, useFetch, useQuery, useSingleQuery } from "hooks/useFetch";
 import { useOpenClose } from "hooks/useOpenClose";
 import { useStepper } from "hooks/useStepper";
 import { renderTeam } from "models/cellRenderers/TeamRenderer";
@@ -38,10 +48,11 @@ import { ClipboardFromBpDp } from "./plugins/ClipboardFromBpDp";
 import { thesisValidationSchema as schema, thesisInitialValues } from "./thesisSchema";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { toast } from "react-toastify";
+import { FormField } from "ui/FormField";
 
 type T = ThesisDto;
 type errorObj = { message: string; severity?: Severity };
-const PERSISTED_OBJECT_KEY = `thesis.new.${EMPTY_GUID}`;
+const PERSISTED_OBJECT_KEY = `thesis.new.${GUID_EMPTY}`;
 type thesisProps = keyof ThesisDto;
 type thesisErrorObject = { [k in thesisProps]?: errorObj };
 type thesisTouchedObject = { [k in thesisProps]?: boolean };
@@ -51,13 +62,13 @@ const allowedStatusesEditThesis = generatePrimitive(Object.values(ThesisStatus) 
 interface PageThesisNewProps {
   initialValues?: ThesisDto;
 }
-export const PageThesisEdit = (props: PageThesisNewProps) => {
+export const ThesisEdit = (props: PageThesisNewProps) => {
   const { language } = useContext(LanguageContext);
   const { initialValues } = props;
   const persistentObject = getPersistedObject<ThesisDto>(PERSISTED_OBJECT_KEY);
 
   const [dto, _setDto] = useState<ThesisDto>((initialValues ?? thesisInitialValues) as ThesisDto);
-  const isNew = dto.id === EMPTY_GUID;
+  const isNew = dto.id === GUID_EMPTY;
   const [errors, setErrors] = useState<thesisErrorObject>({});
   const [touched, setTouched] = useState<thesisTouchedObject>({});
   const { step, nextStep, prevStep, hasNextStep, hasPrevStep, setStep } = useStepper(2);
@@ -176,7 +187,7 @@ export const PageThesisEdit = (props: PageThesisNewProps) => {
           Paste from clipboard
         </Button>
 
-        <Button disabled={dto.id === EMPTY_GUID} sm text justify="justify-start" component={Link} to={`/theses/${dto.id}`}>
+        <Button disabled={dto.id === GUID_EMPTY} sm text justify="justify-start" component={Link} to={`/theses/${dto.id}`}>
           Go to thesis detail
         </Button>
       </Menu>
@@ -188,43 +199,72 @@ export const PageThesisEdit = (props: PageThesisNewProps) => {
           </Link>
         </div>
       )}
+      {dto.id !== GUID_EMPTY && (
+        <div className="flex items-center gap-1">
+          <Button component={Link} text color="success" sm to={`/theses/${dto.id}`}>
+            Go to thesis detail
+          </Button>
+        </div>
+      )}
       <Stepper step={step} setStep={setStep}>
         <Step label={R("basic-information")} error={step0Invalid !== undefined}>
           <div className="grid grid-cols-2 gap-4">
             {/* row 1 - names */}
-            <TextField required {...getProps(form, "nameCze")} />
-            <TextField required {...getProps(form, "nameEng")} />
+            <FormField as={TextField} required {...getProps(form, "nameCze")} />
+            <FormField as={TextField} required {...getProps(form, "nameEng")} />
 
             {/* row 2 - abstracts */}
-            <TextField maxRows={10} rows={10} {...getProps(form, "abstractCze")} sm />
-            <TextField maxRows={10} rows={10} {...getProps(form, "abstractEng")} sm />
+            <FormField as={TextField} maxRows={10} rows={10} {...getProps(form, "abstractCze")} sm />
+            <FormField as={TextField} maxRows={10} rows={10} {...getProps(form, "abstractEng")} sm />
 
             {/* row 3 - school year, department, study programme */}
             <div className="col-span-2 grid grid-cols-3 items-start gap-4">
-              <Select {...getPropsS(form, "schoolYearId", schoolYears)} optionRender={i => i.name} />
-              <Select {...getPropsS(form, "departmentId", departments)} optionRender={getName} textSize="sm" />
-              <Select {...getPropsS(form, "studyProgrammeId", studyProgrammes)} optionRender={getName} />
+              <FormField
+                as={Select<SchoolYearDto>}
+                {...getPropsS(form, "schoolYearId", schoolYears)}
+                optionRender={(i: SchoolYearDto) => i.name}
+              />
+              <FormField
+                as={Select<DepartmentDto>}
+                {...getPropsS(form, "departmentId", departments)}
+                optionRender={getName}
+                textSize="sm"
+              />
+              <FormField as={Select<StudyProgrammeDto>} {...getPropsS(form, "studyProgrammeId", studyProgrammes)} optionRender={getName} />
             </div>
 
             {/* row 4 - thesis type, outcome, status */}
-            <div className="col-span-2 grid grid-cols-2 items-start gap-4">
-              <Select
+            <div className="col-span-2 grid grid-cols-4 items-start gap-4">
+              <FormField
+                as={Select<ThesisTypeDto>}
                 optionRender={getName}
-                className="col-span-1"
+                classNameField="col-span-1"
                 {...(!!dto.thesisTypeId
                   ? getPropsS(form, "thesisTypeId", thesisTypes)
                   : { ...getPropsM(form, "thesisTypeCandidateIds", thesisTypes), clearable: true })}
               />
 
-              <Select optionRender={getName} className="col-span-1" {...getPropsS(form, "facultyId", faculties)} />
+              <FormField
+                as={Select<FacultyDto>}
+                optionRender={getName}
+                classNameField="col-span-2"
+                {...getPropsS(form, "facultyId", faculties)}
+              />
 
-              <Select
+              <FormField
+                as={Select<ThesisStatus>}
                 {...getPropsS(form, "status", isNew ? allowedStatusesNewThesis : allowedStatusesEditThesis)}
-                className="col-span-1"
+                classNameField="col-span-1"
                 optionRender={renderThesisStatus}
               />
 
-              <Select {...getPropsM(form, "outcomeIds", thesisOutcomes)} optionRender={getName} clearable className="col-span-2" />
+              <FormField
+                as={Select<ThesisOutcomeDto>}
+                {...getPropsM(form, "outcomeIds", thesisOutcomes)}
+                optionRender={getName}
+                clearable
+                classNameField="col-span-4"
+              />
             </div>
 
             {/* row 5-6 - keywords */}
@@ -249,23 +289,25 @@ export const PageThesisEdit = (props: PageThesisNewProps) => {
         </Step>
         <Step label="Authors">
           <div className="grid grid-cols-2 gap-4">
-            <Select
+            <FormField
+              as={Select<UserDto>}
               searchable
               clearable
               multiple
               optionRender={renderUser}
-              options={keyword => toPromiseArray(httpClient.users.find({ requestBody: { keyword } }))}
+              options={(keyword: string) => toPromiseArray(httpClient.users.find({ requestBody: { keyword } }))}
               value={dto.authors}
-              onValue={authors => form.setDto({ ...form.dto, authors })}
+              onMultiValue={(authors: UserDto[]) => form.setDto({ ...form.dto, authors })}
             />
-            <Select
+            <FormField
+              as={Select<TeamDto>}
               searchable
               clearable
               multiple
               optionRender={renderTeam}
-              options={keyword => httpClient.team.find({ keyword })}
+              options={(keyword: string) => httpClient.team.find({ keyword })}
               value={dto.teams}
-              onValue={teams => form.setDto({ ...form.dto, teams })}
+              onMultiValue={(teams: TeamDto[]) => form.setDto({ ...form.dto, teams })}
             />
             {/* <SimpleSelect {...getPropsM(form, "", thesisOutcomes)} /> */}
             {/* <ArrayField label="Authors" value={form.dto.authors ?? []} setValue={v => form.setDto({ ...form.dto, authors: v })} /> */}
@@ -403,3 +445,19 @@ const generateOptions = <T extends INameDto>(items: T[] | null | undefined, lang
     label: language === "cze" ? i.nameCze : i.nameEng,
   }));
 };
+
+export const PageThesisEdit = () => {
+  const { id } = useParams<{ id: string }>();
+  const { data: thesis, isLoading, error, loadData } = useSingleQuery<ThesisDto>();
+  useEffect(() => {
+    loadData(httpClient.thesis.getOne({id}));
+  }, [id]);
+
+  return (
+    <LoadingWrapper isLoading={isLoading} error={error}>
+      {!!thesis && <ThesisEdit initialValues={thesis} />}
+    </LoadingWrapper>
+  );
+};
+
+export default PageThesisEdit;

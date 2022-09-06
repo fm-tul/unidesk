@@ -1,4 +1,4 @@
-import { EMPTY_GUID } from "@core/config";
+import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { KeywordDto } from "@models/KeywordDto";
 import { useContext, useState } from "react";
@@ -147,10 +147,10 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
                     </Button>
                   </div>
                   <div className="flex flex-col items-center">
-                    <Button sm text success onClick={() => addKeyword({ id: EMPTY_GUID, value: keyword, locale: "cze", used: 0 } as KeywordDto)}>
+                    <Button sm text success onClick={() => addKeyword({ id: GUID_EMPTY, value: keyword, locale: "cze", used: 0 } as KeywordDto)}>
                       {RR("create-new-keyword-for-x", language, "CZE")}
                     </Button>
-                    <Button sm text info onClick={() => addKeyword({ id: EMPTY_GUID, value: keyword, locale: "eng", used: 0 } as KeywordDto)}>
+                    <Button sm text info onClick={() => addKeyword({ id: GUID_EMPTY, value: keyword, locale: "eng", used: 0 } as KeywordDto)}>
                       {RR("create-new-keyword-for-x", language, "ENG")}
                     </Button>
                   </div>

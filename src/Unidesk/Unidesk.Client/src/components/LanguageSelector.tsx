@@ -28,6 +28,7 @@ export function LanguageSelector() {
   return (
     <Select
       sm
+      width=""
       options={languagesOptions}
       value={language}
       optionRender={option => languages.find(i => i.id === option)?.flag}

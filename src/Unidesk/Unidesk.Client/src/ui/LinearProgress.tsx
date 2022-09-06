@@ -30,6 +30,7 @@ const COLORS = {
   success: "bg-success-500",
   warning: "bg-warning-500",
   error: "bg-error-500",
+  neutral: "bg-neutral-500",
 };
 
 const COLORS_BG = {
@@ -37,6 +38,7 @@ const COLORS_BG = {
   success: "bg-success-100",
   warning: "bg-warning-100",
   error: "bg-error-100",
+  neutral: "bg-neutral-100",
 };
 
 const SIZES = {

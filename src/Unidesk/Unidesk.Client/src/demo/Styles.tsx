@@ -10,6 +10,7 @@ import { Step, Stepper } from "ui/Stepper";
 import { TextField } from "ui/TextField";
 
 import { product } from "../utils/product";
+import { FormField } from "ui/FormField";
 
 const Buttons = () => {
   const colors = [
@@ -133,6 +134,51 @@ const Selects = () => {
   );
 };
 
+const FormFields = () => {
+  const items2 = [
+    { key: "1", value: "Beer", label: "Beer" },
+    { key: "2", value: "Wine", label: "Wine" },
+    { key: "3", value: "Long Cocktail", label: "Long Cocktail" },
+  ];
+
+  const [value, setValue] = useState<string>("");
+  const [values, setValues] = useState<string[]>([]);
+
+  return (
+    <div className="flex items-stretch gap-2">
+      <FormField
+        label="csacascsa"
+        as={TextField}
+        value={value}
+        onValue={setValue}
+        helperColor={value.length > 2 ? "success" : "warning"}
+        helperText={value.length < 3 ? "" : "asdcsa"}
+        forceTheme
+      />
+      <FormField
+        as={Button}
+        sm
+        helperColor={value.length > 2 ? "error" : undefined}
+        helperText={value.length < 3 ? "" : "asdcsa"}
+        forceTheme
+      >
+        Click me
+      </FormField>
+      <FormField
+        width="min-w-xs"
+        as={Select<string>}
+        options={items2}
+        value={values}
+        onMultiValue={setValues}
+        multiple
+        helperColor={value.length > 2 ? "success" : "warning"}
+        helperText={value.length < 3 ? "" : "asdcsa"}
+        forceTheme
+      />
+    </div>
+  );
+};
+
 const TextFields = () => {
   const [value, setValue] = useState("");
   const setValue2 = (e: any) => setValue(e.target.value);
@@ -158,7 +204,8 @@ const Steppers = () => {
 export const Styles = () => {
   return (
     <div className="">
-      <Selects />
+      <FormFields />
+      {/* <Selects /> */}
       {/* <TextFields />
       <Buttons />
       <Steppers />  */}

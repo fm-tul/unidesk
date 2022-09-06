@@ -20,30 +20,6 @@ export const useFetch = <T>(func: () => Promise<T>, deps: DependencyList = []) =
       .finally(() => setIsLoading(false));
   }, deps);
 
-  // useEffect(() => {
-  //   let ignore = false;
-
-  //   async function fetchData() {
-  //     setIsLoading(true);
-  //     try {
-  //       const json = await func();
-  //       setIsLoading(false);
-  //       if (!ignore) {
-  //         setData(json);
-  //       }
-  //     } catch (e) {
-  //       debugger;
-  //       setIsLoading(false);
-  //       setError(e);
-  //     }
-  //   }
-
-  //   fetchData();
-
-  //   return () => {
-  //     ignore = true;
-  //   };
-  // }, deps);
 
   return { isLoading, data, error };
 };
@@ -183,3 +159,25 @@ export const toPromiseArray = <T>(promise: Promise<PagedResponse<T>>): Promise<T
       .catch(reject);
   });
 };
+
+
+export const useSingleQuery = <T>() => {
+  const [error, setError] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<T>();
+
+  const loadData = async (promise: Promise<T>) => {
+    setIsLoading(true);
+    promise
+      .then(setData)
+      .catch(setError)
+      .finally(() => setIsLoading(false));
+  };
+
+  return {
+    isLoading,
+    data,
+    error,
+    loadData,
+  };
+}

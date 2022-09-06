@@ -5,7 +5,7 @@ import { ThesisDto } from "@models/ThesisDto";
 import { UserFunction } from "@models/UserFunction";
 import { useContext, useEffect, useState } from "react";
 import { MdDoubleArrow } from "react-icons/md";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { useFetch } from "hooks/useFetch";
@@ -44,7 +44,9 @@ export const PageThesisDetail = (props: PageThesisDetailProps) => {
         <article className="prose prose-lg prose-slate mx-auto max-w-full bg-white print:prose-sm">
           {/* header */}
           <header className="flex flex-col gap-1">
-            <h1>{language === "cze" ? dto.nameCze : dto.nameEng}</h1>
+            <Link to={`/theses/${dto.id}/edit`}  className="no-underline">
+              <h1>{language === "cze" ? dto.nameCze : dto.nameEng}</h1>
+            </Link>
 
             <h3 className="ml-4 -mt-8 inline-flex items-center gap-1 text-lg text-neutral-500 print:hidden">
               <MdDoubleArrow />

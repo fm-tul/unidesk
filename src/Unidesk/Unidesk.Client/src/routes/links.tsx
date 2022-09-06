@@ -6,7 +6,7 @@ import { PageHomeComponent } from "./links.pageHome";
 import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
 import { PageStagImportComponent } from "./links.pageStagImport";
 import { PageStylesComponent } from "./links.pageStyles";
-import { PageThesisDetailComponent, PageThesisListComponent } from "./links.pageThesis";
+import { PageThesisDetailComponent, PageThesisEditComponent, PageThesisListComponent } from "./links.pageThesis";
 import { PageUserDetailComponent, PageUserListComponent } from "./links.pageUser";
 
 export const link_stagImport: ExtraRouteProps = {
@@ -36,6 +36,13 @@ export const link_pageThesisDetail: ExtraRouteProps = {
   path: "/theses/:id",
   visible: false,
   element: PageThesisDetailComponent,
+};
+
+export const link_pageThesisEdit: ExtraRouteProps = {
+  title: "Edit Thesis",
+  path: "/theses/:id/edit",
+  visible: false,
+  element: PageThesisEditComponent,
 };
 
 export const link_styles: ExtraRouteProps = {
@@ -87,6 +94,7 @@ export const links = [
 
   link_pageThesisList,
   link_pageThesisDetail,
+  link_pageThesisEdit,
 
   link_styles,
 

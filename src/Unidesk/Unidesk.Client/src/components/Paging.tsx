@@ -60,7 +60,7 @@ export const Paging = <T,>(props: PagingProps<T>) => {
   };
 
   return (
-    <div className={classnames("flex h-full items-stretch gap-1", className)}>
+    <div className={classnames("flex items-stretch gap-1", className)}>
       <div className="flex items-stretch gap-1 rounded border border-solid border-neutral-400 bg-white/80">
         <Button sm text onClick={firstPage} disabled={!hasPreviousPage}>
           <FaAngleDoubleLeft className="text-base" />

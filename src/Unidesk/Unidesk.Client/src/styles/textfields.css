@@ -23,7 +23,7 @@
   --border: 4px;
 }
 .tf-label {
-  @apply pointer-events-none absolute top-0 select-none rounded-sm text-neutral-400 transition-all peer-focus:opacity-100;
+  @apply pointer-events-none absolute top-1 select-none rounded-sm text-neutral-400 transition-all peer-focus:opacity-100;
   @apply peer-focus:top-[-7px] peer-focus:left-2 peer-focus:bg-info-500 peer-focus:px-1 peer-focus:py-0 peer-focus:text-xxs peer-focus:text-white;
 }
 .tf-label.locked {

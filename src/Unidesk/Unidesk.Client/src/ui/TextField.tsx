@@ -4,9 +4,9 @@ import { FocusEventHandler } from "react";
 
 import { TextArea } from "components/mui/ArrayField";
 
-import { getSize, SimpleComponentProps, UiColors } from "./shared";
+import { ColorProps, getColor, getSize, SimpleComponentProps, UiColors } from "./shared";
 
-export interface TextFieldProps extends SimpleComponentProps {
+export interface TextFieldProps extends SimpleComponentProps, ColorProps {
   label?: string;
   name?: string;
   value?: string | null;
@@ -23,20 +23,17 @@ export interface TextFieldProps extends SimpleComponentProps {
 
   required?: boolean;
 
-  helperColor?: UiColors | boolean;
-  helperText?: string;
   spellCheck?: boolean;
 }
 export const TextField = (props: TextFieldProps) => {
   const { label, value, name, type = "text", onChange, onBlur, onValue, onEnter, onEscape } = props;
-  const { helperColor, helperText, className: classNameDefault = "", fullWidth = true, rows = 1, required = false } = props;
+  const { className: classNameDefault = "", fullWidth = true, rows = 1, required = false } = props;
   const { multiline = rows > 1, maxRows, loading = false, disabled = false, disableClass = "disabled", spellCheck } = props;
+  const color = getColor(props);
   const size = getSize(props);
 
-  const hasError = !!helperColor;
   const sizeCss = SIZES[size];
-  const errorCss = hasError ? ERROR_CSS[helperColor === true ? "error" : helperColor] : "";
-  const errorCssHelperText = hasError ? HELPER_COLORS[helperColor === true ? "error" : helperColor] : "";
+  const errorCss = color.toString();
   const lockLabelCss = !!value || type.includes("date") ? "locked" : "";
   const fullWidthCss = fullWidth ? "w-full" : "";
   const disabledCss = loading || disabled ? `${disableClass} i-disabled` : "";
@@ -68,10 +65,10 @@ export const TextField = (props: TextFieldProps) => {
           spellCheck={spellCheck}
         />
       ) : (
-        <div className="grid grid-cols-1 items-center">
+        <div className="grid grid-cols-1 items-center h-full">
           <input
             name={name}
-            className={`tf peer col-start-1 row-start-1 transition-all ${sizeCss} ${errorCss} ${disabledCss} ${
+            className={`tf peer h-full col-start-1 row-start-1 transition-all ${sizeCss} ${errorCss} ${disabledCss} ${
               loading ? "pl-10 text-neutral-600" : ""
             }`}
             type={type}
@@ -94,7 +91,6 @@ export const TextField = (props: TextFieldProps) => {
           {label}
         </label>
       )}
-      {helperText && <div className={`mb-1 pl-4 text-xs ${errorCssHelperText}`}>{R(helperText as EnKeys)}</div>}
     </div>
   );
 };
