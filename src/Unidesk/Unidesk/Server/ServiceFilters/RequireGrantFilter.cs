@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Unidesk.Db.Models;
+using Unidesk.Dtos;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
 
@@ -27,12 +29,21 @@ public class RequireGrantFilter : IActionFilter
             return;
         }
 
+        var requiredGrants = requiredAttributes.Select(x => x.Grant).ToList();
         var userGrants = _userProvider!.CurrentUser?.Roles.SelectMany(i => i.Grants).ToList() ?? new List<Grant>();
-        var result = HasAccess(requiredAttributes, userGrants);
+        var result = HasAccess(requiredGrants, userGrants);
 
         if (!result.Granted)
         {
-            context.Result = new JsonResult(new { result.Error })
+            context.Result = new JsonResult(new SimpleJsonResponse
+                {
+                    Success = false,
+                    Message = "Access denied",
+                    DebugMessage = $"Access denied for user {_userProvider!.CurrentUser?.Username} " +
+                                   $"to {context.ActionDescriptor.DisplayName} because of missing grants: " +
+                                   $"{string.Join(", ", requiredGrants.Select(i => $"{i.Name} ({i.Id}"))}",
+                    Errors = new[] { new ValidationFailure("Grants", "Access denied") }
+                })
                 { StatusCode = result.StatusCode };
         }
     }

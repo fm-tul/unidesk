@@ -41,7 +41,8 @@ public static class EntityQueryExtensions
     public static IQueryable<KeywordThesis> Query(this DbSet<KeywordThesis> dbSet)
     {
         return dbSet
-            .Include(i => i.Keyword);
+            .Include(i => i.Keyword)
+            .Include(i => i.Thesis);
     }
 
     public static T First<T>(this IQueryable<T> items, Guid id) where T : TrackedEntity

@@ -22,6 +22,9 @@ public static class UserGrants
 
     public static readonly Grant User_Guest = new Grant { Name = User_Guest_Id, Description = "Guest", Id = new Guid("07E6E5B4-8E31-411A-9ED9-26EC462984CC")};
     public const string User_Guest_Id = "User_Guest";
+    
+    public static readonly Grant Action_Merge_Keywords = new Grant { Name = Action_Merge_Keywords_Id, Description = "Merge Keywords", Id = new Guid("10018290-58EF-4BC9-B5B8-3D93DCB07805")};
+    public const string Action_Merge_Keywords_Id = "Action_Merge_Keywords";
 
     // get all grants via reflection
     public static IEnumerable<Grant> All =>

@@ -6,6 +6,8 @@ using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
+using Unidesk.Security;
+using Unidesk.ServiceFilters;
 using Unidesk.Services;
 using Unidesk.Utils;
 using Unidesk.Utils.Extensions;
@@ -58,6 +60,7 @@ public class KeywordsController : ControllerBase
     }
 
     [HttpGet, Route("find-duplicates")]
+    [RequireGrant(UserGrants.Action_Merge_Keywords_Id)]
     [SwaggerOperation(OperationId = nameof(FindDuplicates))]
     [ProducesResponseType(typeof(List<SimilarKeywordDto>), 200)]
     public async Task<IActionResult> FindDuplicates(string? keyword = null)
@@ -81,6 +84,7 @@ public class KeywordsController : ControllerBase
 
     [HttpGet, Route("merge")]
     [SwaggerOperation(OperationId = nameof(Merge))]
+    [RequireGrant(UserGrants.Action_Merge_Keywords_Id)]
     public async Task<IActionResult> Merge(Guid keywordMain, Guid keywordAlias)
     {
         await _keywordsService.MergeAsync(keywordMain, keywordAlias);
@@ -89,6 +93,7 @@ public class KeywordsController : ControllerBase
     
     [HttpPost, Route("merge-multiple")]
     [SwaggerOperation(OperationId = nameof(MergeMultiple))]
+    [RequireGrant(UserGrants.Action_Merge_Keywords_Id)]
     public async Task<IActionResult> MergeMultiple(MergePairs pairs)
     {
         foreach (var keyword in pairs.Pairs)

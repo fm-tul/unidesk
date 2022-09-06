@@ -121,7 +121,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         }
         else if (exception?.Error is FluentValidation.ValidationException fluentError)
         {
-            data.Message = exception.Error.Message ?? "Invalid Data";
+            data.Message = "Valdation Failed";
             data.DebugMessage = exception.Error.Message;
             data.Errors = fluentError.Errors;
         }
