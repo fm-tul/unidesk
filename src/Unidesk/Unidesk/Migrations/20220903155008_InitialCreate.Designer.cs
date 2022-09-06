@@ -12,8 +12,8 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    [Migration("20220806184259_Thesis_add_StudyProgramme")]
-    partial class Thesis_add_StudyProgramme
+    [Migration("20220903155008_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -465,6 +465,12 @@ namespace Unidesk.Migrations
                     b.Property<int?>("Grade")
                         .HasColumnType("int");
 
+                    b.Property<string>("Guidelines")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Literature")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("Modified")
                         .HasColumnType("datetime2");
 
@@ -639,6 +645,24 @@ namespace Unidesk.Migrations
                     b.ToTable("ThesisTypes");
                 });
 
+            modelBuilder.Entity("Unidesk.Db.Models.ThesisUser", b =>
+                {
+                    b.Property<Guid>("ThesisId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Function")
+                        .HasColumnType("int");
+
+                    b.HasKey("ThesisId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ThesisUsers");
+                });
+
             modelBuilder.Entity("Unidesk.Db.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -687,14 +711,14 @@ namespace Unidesk.Migrations
                     b.Property<string>("StagId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ThesisId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("TitleAfter")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TitleBefore")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserFunction")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(max)");
@@ -711,8 +735,6 @@ namespace Unidesk.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AvatarId");
-
-                    b.HasIndex("ThesisId");
 
                     b.ToTable("Users");
                 });
@@ -893,15 +915,30 @@ namespace Unidesk.Migrations
                         .HasForeignKey("ThesisId");
                 });
 
+            modelBuilder.Entity("Unidesk.Db.Models.ThesisUser", b =>
+                {
+                    b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
+                        .WithMany("Users")
+                        .HasForeignKey("ThesisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Unidesk.Db.Models.User", "User")
+                        .WithMany("Theses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Thesis");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Unidesk.Db.Models.User", b =>
                 {
                     b.HasOne("Unidesk.Db.Models.Document", "Avatar")
                         .WithMany()
                         .HasForeignKey("AvatarId");
-
-                    b.HasOne("Unidesk.Db.Models.Thesis", null)
-                        .WithMany("Users")
-                        .HasForeignKey("ThesisId");
 
                     b.Navigation("Avatar");
                 });
@@ -964,6 +1001,8 @@ namespace Unidesk.Migrations
             modelBuilder.Entity("Unidesk.Db.Models.User", b =>
                 {
                     b.Navigation("Roles");
+
+                    b.Navigation("Theses");
 
                     b.Navigation("UserInTeams");
                 });

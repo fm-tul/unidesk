@@ -121,7 +121,7 @@ namespace Unidesk.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ThesisTypes",
+                name: "StudyProgrammes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -137,7 +137,7 @@ namespace Unidesk.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ThesisTypes", x => x.Id);
+                    table.PrimaryKey("PK_StudyProgrammes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -164,135 +164,11 @@ namespace Unidesk.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Theses",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Adipidno = table.Column<long>(type: "bigint", nullable: false),
-                    NeedsReview = table.Column<bool>(type: "bit", nullable: false),
-                    Reviewed = table.Column<bool>(type: "bit", nullable: false),
-                    NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AbstractEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AbstractCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SchoolYearId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FacultyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ThesisTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    Grade = table.Column<int>(type: "int", nullable: true),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Theses", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Theses_Departments_DepartmentId",
-                        column: x => x.DepartmentId,
-                        principalTable: "Departments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Theses_Faculties_FacultyId",
-                        column: x => x.FacultyId,
-                        principalTable: "Faculties",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Theses_SchoolYears_SchoolYearId",
-                        column: x => x.SchoolYearId,
-                        principalTable: "SchoolYears",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Theses_ThesisTypes_ThesisTypeId",
-                        column: x => x.ThesisTypeId,
-                        principalTable: "ThesisTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "KeywordThesis",
-                columns: table => new
-                {
-                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    KeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_KeywordThesis", x => new { x.KeywordId, x.ThesisId });
-                    table.ForeignKey(
-                        name: "FK_KeywordThesis_Keywords_KeywordId",
-                        column: x => x.KeywordId,
-                        principalTable: "Keywords",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_KeywordThesis_Theses_ThesisId",
-                        column: x => x.ThesisId,
-                        principalTable: "Theses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Teams",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Teams", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Teams_Theses_ThesisId",
-                        column: x => x.ThesisId,
-                        principalTable: "Theses",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ThesisOutcomes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ThesisOutcomes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ThesisOutcomes_Theses_ThesisId",
-                        column: x => x.ThesisId,
-                        principalTable: "Theses",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StagId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -305,10 +181,10 @@ namespace Unidesk.Migrations
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Position = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AvatarId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Work = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    WorkAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    WorkPosition = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Work = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WorkAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WorkPosition = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserFunction = table.Column<int>(type: "int", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -322,11 +198,6 @@ namespace Unidesk.Migrations
                         column: x => x.AvatarId,
                         principalTable: "Documents",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Users_Theses_ThesisId",
-                        column: x => x.ThesisId,
-                        principalTable: "Theses",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -336,7 +207,7 @@ namespace Unidesk.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StagId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -360,6 +231,68 @@ namespace Unidesk.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserRoles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Grants = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRoles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserRoles_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "KeywordThesis",
+                columns: table => new
+                {
+                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    KeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KeywordThesis", x => new { x.KeywordId, x.ThesisId });
+                    table.ForeignKey(
+                        name: "FK_KeywordThesis_Keywords_KeywordId",
+                        column: x => x.KeywordId,
+                        principalTable: "Keywords",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Teams",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Teams", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -388,14 +321,26 @@ namespace Unidesk.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "Theses",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Grants = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Adipidno = table.Column<long>(type: "bigint", nullable: true),
+                    NeedsReview = table.Column<bool>(type: "bit", nullable: false),
+                    Reviewed = table.Column<bool>(type: "bit", nullable: false),
+                    NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AbstractEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AbstractCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SchoolYearId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FacultyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StudyProgrammeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ThesisTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Guidelines = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Literature = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Grade = table.Column<int>(type: "int", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -403,11 +348,54 @@ namespace Unidesk.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => x.Id);
+                    table.PrimaryKey("PK_Theses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserRoles_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_Theses_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Theses_Faculties_FacultyId",
+                        column: x => x.FacultyId,
+                        principalTable: "Faculties",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Theses_SchoolYears_SchoolYearId",
+                        column: x => x.SchoolYearId,
+                        principalTable: "SchoolYears",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Theses_StudyProgrammes_StudyProgrammeId",
+                        column: x => x.StudyProgrammeId,
+                        principalTable: "StudyProgrammes",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ThesisOutcomes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DescriptionEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ThesisOutcomes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ThesisOutcomes_Theses_ThesisId",
+                        column: x => x.ThesisId,
+                        principalTable: "Theses",
                         principalColumn: "Id");
                 });
 
@@ -438,6 +426,57 @@ namespace Unidesk.Migrations
                         name: "FK_ThesisReports_Theses_ThesisId",
                         column: x => x.ThesisId,
                         principalTable: "Theses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ThesisTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NameEng = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NameCze = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionEng = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DescriptionCze = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ThesisTypes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ThesisTypes_Theses_ThesisId",
+                        column: x => x.ThesisId,
+                        principalTable: "Theses",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ThesisUsers",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Function = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ThesisUsers", x => new { x.ThesisId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_ThesisUsers_Theses_ThesisId",
+                        column: x => x.ThesisId,
+                        principalTable: "Theses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ThesisUsers_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -479,6 +518,11 @@ namespace Unidesk.Migrations
                 column: "SchoolYearId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Theses_StudyProgrammeId",
+                table: "Theses",
+                column: "StudyProgrammeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Theses_ThesisTypeId",
                 table: "Theses",
                 column: "ThesisTypeId");
@@ -499,6 +543,16 @@ namespace Unidesk.Migrations
                 column: "ThesisId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ThesisTypes_ThesisId",
+                table: "ThesisTypes",
+                column: "ThesisId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ThesisUsers_UserId",
+                table: "ThesisUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserInTeams_TeamId",
                 table: "UserInTeams",
                 column: "TeamId");
@@ -513,14 +567,35 @@ namespace Unidesk.Migrations
                 table: "Users",
                 column: "AvatarId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_ThesisId",
-                table: "Users",
-                column: "ThesisId");
+            migrationBuilder.AddForeignKey(
+                name: "FK_KeywordThesis_Theses_ThesisId",
+                table: "KeywordThesis",
+                column: "ThesisId",
+                principalTable: "Theses",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Teams_Theses_ThesisId",
+                table: "Teams",
+                column: "ThesisId",
+                principalTable: "Theses",
+                principalColumn: "Id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Theses_ThesisTypes_ThesisTypeId",
+                table: "Theses",
+                column: "ThesisTypeId",
+                principalTable: "ThesisTypes",
+                principalColumn: "Id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_ThesisTypes_Theses_ThesisId",
+                table: "ThesisTypes");
+
             migrationBuilder.DropTable(
                 name: "ChangeLogs");
 
@@ -535,6 +610,9 @@ namespace Unidesk.Migrations
 
             migrationBuilder.DropTable(
                 name: "ThesisReports");
+
+            migrationBuilder.DropTable(
+                name: "ThesisUsers");
 
             migrationBuilder.DropTable(
                 name: "UserInTeams");
@@ -568,6 +646,9 @@ namespace Unidesk.Migrations
 
             migrationBuilder.DropTable(
                 name: "SchoolYears");
+
+            migrationBuilder.DropTable(
+                name: "StudyProgrammes");
 
             migrationBuilder.DropTable(
                 name: "ThesisTypes");
