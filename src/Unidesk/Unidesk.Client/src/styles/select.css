@@ -1,0 +1,29 @@
+.select {
+  @apply absolute z-20 flex max-h-sm w-max min-w-full flex-col flex-nowrap overflow-auto rounded bg-white p-1 shadow-lg
+     shadow-black/30 has-backdrop:bg-white/80 has-backdrop:backdrop-blur;
+}
+
+.select-item {
+  @apply justify-start normal-case;
+}
+
+.select::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+.select::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+/* Handle */
+.select::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+.select::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

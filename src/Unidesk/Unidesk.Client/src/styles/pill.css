@@ -1,0 +1,19 @@
+.pill {
+  @apply whitespace-nowrap rounded-full border border-solid px-2 text-sm text-neutral-700 transition;
+}
+.pill.clickable {
+  @apply cursor-pointer hover:bg-opacity-100;
+}
+
+.pill.info {
+  @apply border-info-300 bg-info-200 bg-opacity-50 text-info-700;
+}
+.pill.success {
+  @apply border-success-300 bg-success-200 bg-opacity-50 text-success-700;
+}
+.pill.warning {
+  @apply border-warning-300 bg-warning-100 bg-opacity-50 text-warning-700;
+}
+.pill.error {
+  @apply border-error-300 bg-error-200 bg-opacity-50 text-error-700;
+}

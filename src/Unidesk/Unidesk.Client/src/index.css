@@ -1,35 +1,56 @@
+@import "./styles/buttons.css";
+@import "./styles/pill.css";
+@import "./styles/scrollbar.css";
+@import "./styles/select.css";
+@import "./styles/spinners.css";
+@import "./styles/table.css";
+@import "./styles/textfields.css";
+
 @import "tailwindcss/base";
 @import "tailwindcss/components";
-
-@import "./styles/buttons.css";
-@import "./styles/spinners.css";
 @import "tailwindcss/utilities";
 
+.fade {
+  @apply duration-500 animate-in fade-in-0;
+}
 
 .no-pagination .MuiDataGrid-footerContainer {
-    display: none ;
+  display: none;
 }
 .MuiDataGrid-root.data-grid .MuiDataGrid-row {
-    cursor: pointer;
+  cursor: pointer;
 }
 .MuiDataGrid-root.data-grid .MuiDataGrid-row .MuiDataGrid-cell {
-    outline: none;
+  outline: none;
 }
 .MuiDataGrid-root.data-grid .MuiDataGrid-row.Mui-selected {
-    background-color: #3276d549;
+  background-color: #3276d549;
 }
 .MuiDataGrid-root.data-grid .MuiDataGrid-row.Mui-selected:hover {
-        background-color: #329fd561;
+  background-color: #329fd561;
 }
 
 :root {
-    --toastify-color-progress-light: linear-gradient(
-    to right,
-    #007aff,
-    #34aadc
-  );
+  --toastify-color-progress-light: linear-gradient(to right, #007aff, #34aadc);
+}
+
+.Toastify__toast-container {
+  --toastify-toast-width: 420px;
 }
 
 .Toastify__progress-bar {
-    height: 4px;
+  height: 4px;
+}
+
+#root[modal] {
+  overflow: hidden;
+}
+
+.root-bg {
+  background-color: #f0f7e6;
+  opacity: 0.7;
+  background-image: radial-gradient(#0e9a21 1.2000000000000002px, transparent 1.2000000000000002px),
+    radial-gradient(#0e9a21 1.2000000000000002px, #f0f7e6 1.2000000000000002px);
+  background-size: 48px 48px;
+  background-position: 0 0, 24px 24px;
 }

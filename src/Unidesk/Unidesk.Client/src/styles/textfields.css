@@ -1,0 +1,37 @@
+.tf {
+  @apply rounded border border-solid border-neutral-300 bg-slate-200/50 outline-none focus:border-info-500 focus:ring-1 focus:ring-info-500;
+}
+.tf.error {
+  @apply border-error-500 focus:ring-error-500;
+}
+.tf.warning {
+  @apply border-warning-500 focus:ring-warning-500;
+}
+.tf-sm {
+  @apply px-3 py-2 text-xs;
+  --size: 16px;
+  --border: 3px;
+}
+.tf-md {
+  @apply px-4 py-2 text-sm;
+  --size: 20px;
+  --border: 4px;
+}
+.tf-lg {
+  @apply px-5 py-3 text-sm;
+  --size: 24px;
+  --border: 4px;
+}
+.tf-label {
+  @apply pointer-events-none absolute top-0 select-none rounded-sm text-neutral-400 transition-all peer-focus:opacity-100;
+  @apply peer-focus:top-[-7px] peer-focus:left-2 peer-focus:bg-info-500 peer-focus:px-1 peer-focus:py-0 peer-focus:text-xxs peer-focus:text-white;
+}
+.tf-label.locked {
+  @apply top-[-7px] left-2 bg-neutral-200 px-1 py-0 text-xxs text-gray-800;
+}
+.tf-label.error {
+  @apply peer-focus:bg-error-500;
+}
+.tf-label.locked.error {
+  @apply bg-error-500;
+}

@@ -1,25 +1,26 @@
 .btn {
-  @apply cursor-pointer rounded px-2 py-1 transition font-roboto uppercase font-medium
-   shadow-md shadow-black/20 hover:shadow-black/40  min-w-[60px] select-none
+  @apply min-w-[60px] cursor-pointer select-none rounded px-2 py-1 font-roboto font-medium
+   uppercase shadow-md shadow-black/20  transition hover:shadow-black/40
+   inline-flex items-center;
 }
 
 /* btn-info | btn-success | btn-warning | btn-error */
 .btn-info {
-  @apply bg-info-600 text-white hover:bg-info-700
+  @apply bg-info-600 text-white hover:bg-info-700;
 }
 .btn-success {
-  @apply bg-success-700 text-white hover:bg-success-800
+  @apply bg-success-700 text-white hover:bg-success-800;
 }
 .btn-warning {
-  @apply bg-warning-600 text-white hover:bg-warning-700
+  @apply bg-warning-600 text-white hover:bg-warning-700;
 }
 .btn-error {
-  @apply bg-error-600 text-white hover:bg-error-700
+  @apply bg-error-600 text-white hover:bg-error-700;
 }
 
 /* btn-sm | btn-md | btn-lg */
 .btn-sm {
-  @apply px-2 py-1 text-xs min-w-[24px];
+  @apply min-w-[24px] px-2 py-1 text-xs;
   --size: 16px;
   --border: 3px;
 }
@@ -34,66 +35,66 @@
   --border: 4px;
 }
 
-
 /* btn-outlined | btn-text */
 .btn-outlined {
-  @apply border border-solid bg-transparent shadow-none hover:shadow-none
+  @apply border border-solid bg-transparent shadow-none hover:shadow-none;
 }
 
 .btn-outlined.btn-info {
-  @apply border-info-500 text-info-600 hover:border-info-600 hover:text-info-800 hover:bg-info-100 active:bg-info-200;
+  @apply border-info-500 text-info-600 hover:border-info-600 hover:bg-info-100 hover:text-info-800 active:bg-info-200;
   --color-spinner-a: var(--color-info-600-rgb);
 }
 .btn-outlined.btn-success {
-  @apply border-success-500 text-success-600 hover:border-success-600 hover:text-success-800 hover:bg-success-100 active:bg-success-200;
+  @apply border-success-500 text-success-600 hover:border-success-600 hover:bg-success-100 hover:text-success-800 active:bg-success-200;
   --color-spinner-a: var(--color-success-500-rgb);
 }
 .btn-outlined.btn-warning {
-  @apply border-warning-500 text-warning-600 hover:border-warning-600 hover:text-warning-800 hover:bg-warning-100 active:bg-warning-200;
+  @apply border-warning-500 text-warning-600 hover:border-warning-600 hover:bg-warning-100 hover:text-warning-800 active:bg-warning-200;
   --color-spinner-a: var(--color-warning-600-rgb);
 }
 .btn-outlined.btn-error {
-  @apply border-error-500 text-error-600 hover:border-error-600 hover:text-error-800 hover:bg-error-100 active:bg-error-200;
+  @apply border-error-500 text-error-600 hover:border-error-600 hover:bg-error-100 hover:text-error-800 active:bg-error-200;
   --color-spinner-a: var(--color-error-500-rgb);
 }
 
 .btn-text {
-  @apply bg-transparent shadow-none hover:shadow-none
+  @apply bg-transparent shadow-none hover:shadow-none;
 }
 .btn-text.btn-info {
-  @apply text-info-600 hover:text-info-800 hover:bg-info-100 active:bg-info-200 selected:bg-info-600/40 selected:text-black;
+  @apply text-info-600 hover:bg-info-100 hover:text-info-800 active:bg-info-200 selected:bg-info-600/40 selected:text-black;
   --color-spinner-a: var(--color-info-500-rgb);
 }
 .btn-text.btn-success {
-  @apply text-success-600 hover:text-success-800 hover:bg-success-100 active:bg-success-200 selected:bg-success-600/40 selected:text-black;
+  @apply text-success-600 hover:bg-success-100 hover:text-success-800 active:bg-success-200 selected:bg-success-600/40 selected:text-black;
   --color-spinner-a: var(--color-success-700-rgb);
 }
 .btn-text.btn-warning {
-  @apply text-warning-600 hover:text-warning-800 hover:bg-warning-100 active:bg-warning-200 selected:bg-warning-600/40 selected:text-black;
+  @apply text-warning-600 hover:bg-warning-100 hover:text-warning-800 active:bg-warning-200 selected:bg-warning-600/40 selected:text-black;
   --color-spinner-a: var(--color-warning-600-rgb);
 }
 .btn-text.btn-error {
-  @apply text-error-600 hover:text-error-800 hover:bg-error-100 active:bg-error-200 selected:bg-error-600/40 selected:text-black;
+  @apply text-error-600 hover:bg-error-100 hover:text-error-800 active:bg-error-200 selected:bg-error-600/40 selected:text-black;
   --color-spinner-a: var(--color-error-500-rgb);
 }
-
 
 /* spinner options */
 .btn-contained {
   --color-spinner-a: var(--color-white-rgb);
 }
 
-
-
 .i-disabled {
-  @apply cursor-not-allowed pointer-events-none;
+  @apply pointer-events-none cursor-not-allowed;
 }
 
 .btn.disabled {
-  @apply cursor-not-allowed opacity-80 bg-neutral-300 text-neutral-400 border-neutral-400 pointer-events-none;
+  @apply pointer-events-none cursor-not-allowed border-neutral-400 bg-neutral-300 text-neutral-400 opacity-80;
   --color-spinner-a: var(--color-neutral-400-rgb);
 }
 
+.btn.btn-text.disabled {
+  @apply pointer-events-none cursor-not-allowed border-neutral-400 bg-transparent text-neutral-400 opacity-80;
+  --color-spinner-a: var(--color-neutral-400-rgb);
+}
 
 .btn-bar {
   @apply flex items-stretch gap-1;
@@ -112,145 +113,9 @@
 }
 
 .btn.with-progress {
-  @apply content-[_] before:block relative before:absolute before:h-full before:inset-0;
+  @apply relative content-[_] before:absolute before:inset-0 before:block before:h-full;
 }
 .btn.with-progress::before {
   width: var(--progress);
 }
 
-
-
-.select {
-  @apply flex max-h-sm w-max flex-col overflow-auto rounded bg-white p-1 shadow-lg min-w-full absolute z-20 flex-nowrap
-   shadow-black/30 has-backdrop:bg-white/80 has-backdrop:backdrop-blur;
-}
-
-.select-item {
-  @apply justify-start normal-case;
-}
-
-.select::-webkit-scrollbar {
-  width: 6px;
-}
-
-/* Track */
-.select::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-/* Handle */
-.select::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
-}
-
-/* Handle on hover */
-.select::-webkit-scrollbar-thumb:hover {
-  background: #555;
-} 
-
-
-.tf {
-  @apply outline-none rounded border border-neutral-300 border-solid focus:border-info-500 focus:ring-1 focus:ring-info-500
-}
-.tf.error {
-  @apply border-error-500 focus:ring-error-500
-}
-.tf-sm {
-  @apply px-3 py-2 text-xs;
-  --size: 16px;
-  --border: 3px;
-}
-.tf-md {
-  @apply px-4 py-2 text-sm;
-  --size: 20px;
-  --border: 4px;
-}
-.tf-lg {
-  @apply px-5 py-3 text-sm;
-  --size: 24px;
-  --border: 4px;
-}
-.tf-label {
-  @apply absolute select-none peer-focus:opacity-100 transition-all top-0 rounded-sm text-neutral-400 pointer-events-none;
-  @apply peer-focus:text-xxs peer-focus:top-[-7px] peer-focus:left-2 peer-focus:bg-info-500 peer-focus:px-1 peer-focus:py-0 peer-focus:text-white ;
-}
-.tf-label.locked {
-  @apply text-xxs top-[-7px] bg-neutral-200 px-1 py-0 text-gray-800 left-2;
-}
-.tf-label.error {
-  @apply peer-focus:bg-error-500;
-}
-.tf-label.locked.error {
-  @apply bg-error-500;
-}
-
-
-.pill {
-  @apply text-sm text-neutral-700 border border-solid rounded-full px-2 whitespace-nowrap transition;
-}
-.pill.clickable {
-  @apply cursor-pointer hover:bg-opacity-100
-}
-
-.pill.info {
-  @apply bg-opacity-50 bg-info-200 text-info-700 border-info-300;
-}
-.pill.success {
-  @apply bg-opacity-50 bg-success-200 text-success-700 border-success-300;
-}
-.pill.warning {
-  @apply bg-opacity-50 bg-warning-100 text-warning-700 border-warning-300;
-}
-.pill.error {
-  @apply bg-opacity-50 bg-error-200 text-error-700 border-error-300;
-}
-
-
-.table th {
-  @apply transition text-sm text-neutral-500 font-bold cursor-pointer hover:text-neutral-600 hover:bg-neutral-200 select-none;
-}
-.table th, .table td {
-  @apply px-3 py-2 text-sm
-}
-.table.dense th, .table.dense td {
-  @apply px-2 py-1;
-}
-
-.table tr.table-header {
-  @apply border-b border-solid border-black/10;
-}
-
-.table.h-borders tr {
-  @apply border-b border-solid border-black/10;
-}
-.table.v-borders td {
-  @apply border-x border-solid border-black/10;
-}
-
-.table tr.table-body {
-  @apply transition hover:bg-info-200/30 cursor-pointer
-}
-
-
-.pretty-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-/* Track */
-.pretty-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
-}
-
-/* Handle */
-.pretty-scrollbar::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
-}
-
-/* Handle on hover */
-.pretty-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
-} 
