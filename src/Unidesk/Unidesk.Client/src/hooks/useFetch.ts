@@ -1,5 +1,11 @@
+import { CancelablePromise, QueryFilter } from "@api-client";
 import { SimpleJsonResponse } from "@models/SimpleJsonResponse";
 import { DependencyList, useEffect, useState } from "react";
+
+import { PagedResponse } from "components/Paging";
+
+import { usePaging } from "./usePaging";
+import { useRefresh } from "./useRefresh";
 
 export const useFetch = <T>(func: () => Promise<T>, deps: DependencyList = []) => {
   const [data, setData] = useState<T>();
@@ -135,4 +141,45 @@ export const useGetSetDeleteFetch = <T>(
     // error
     error,
   };
+};
+
+export const useQuery = <T>(initialValue?: Partial<QueryFilter>) => {
+  const [error, setError] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<T[]>([]);
+  const { filter, setFilter } = usePaging(initialValue);
+  const { refresh, refreshIndex } = useRefresh();
+
+  const loadData = async (promise: Promise<PagedResponse<T>> | CancelablePromise<PagedResponse<T>>) => {
+    setIsLoading(true);
+    promise
+      .then((i: PagedResponse<T>) => {
+        setData(i.items);
+        setFilter(i.filter);
+        setError(undefined);
+      })
+      .catch(setError)
+      .finally(() => setIsLoading(false));
+  };
+
+  return {
+    isLoading,
+    data,
+    error,
+    filter,
+    refreshIndex,
+    refresh,
+    setFilter,
+    loadData,
+  };
+};
+
+export const toPromiseArray = <T>(promise: Promise<PagedResponse<T>>): Promise<T[]> => {
+  return new Promise((resolve, reject) => {
+    promise
+      .then((i: PagedResponse<T>) => {
+        resolve(i.items);
+      })
+      .catch(reject);
+  });
 };
