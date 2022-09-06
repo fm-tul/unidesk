@@ -2,7 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { ThesisDto } from '../models/ThesisDto';
-import type { ThesisStatus } from '../models/ThesisStatus';
+import type { ThesisDtoPagedResponse } from '../models/ThesisDtoPagedResponse';
+import type { ThesisFilter } from '../models/ThesisFilter';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -15,37 +16,53 @@ export class ThesisService {
      * @returns ThesisDto Success
      * @throws ApiError
      */
-    public getAll({
-userId,
-keywords,
-status,
-hasKeywords,
-page,
-pageSize,
-orderBy,
-orderAscending,
+    public getOne({
+id,
 }: {
-userId?: string,
-keywords?: Array<string>,
-status?: ThesisStatus,
-hasKeywords?: boolean,
-page?: number,
-pageSize?: number,
-orderBy?: string,
-orderAscending?: boolean,
-}): CancelablePromise<Array<ThesisDto>> {
+id?: string,
+}): CancelablePromise<ThesisDto> {
         return this.httpRequest.request({
             method: 'GET',
-            url: '/api/Thesis/list',
+            url: '/api/Thesis/get-one',
             query: {
-                'UserId': userId,
-                'Keywords': keywords,
-                'Status': status,
-                'HasKeywords': hasKeywords,
-                'Page': page,
-                'PageSize': pageSize,
-                'OrderBy': orderBy,
-                'OrderAscending': orderAscending,
+                'id': id,
+            },
+        });
+    }
+
+    /**
+     * @returns ThesisDtoPagedResponse Success
+     * @throws ApiError
+     */
+    public find({
+requestBody,
+}: {
+requestBody?: ThesisFilter,
+}): CancelablePromise<ThesisDtoPagedResponse> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/Thesis/find',
+            body: requestBody,
+            mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @returns ThesisDto Success
+     * @throws ApiError
+     */
+    public upsert({
+requestBody,
+}: {
+requestBody?: ThesisDto,
+}): CancelablePromise<ThesisDto> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/api/Thesis/upsert',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                500: `Server Error`,
             },
         });
     }

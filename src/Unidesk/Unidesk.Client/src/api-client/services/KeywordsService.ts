@@ -2,6 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { KeywordDto } from '../models/KeywordDto';
+import type { KeywordDtoPagedResponse } from '../models/KeywordDtoPagedResponse';
+import type { KeywordFilter } from '../models/KeywordFilter';
 import type { MergePairs } from '../models/MergePairs';
 import type { SimilarKeywordDto } from '../models/SimilarKeywordDto';
 
@@ -13,29 +15,19 @@ export class KeywordsService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
 
     /**
-     * @returns KeywordDto Success
+     * @returns KeywordDtoPagedResponse Success
      * @throws ApiError
      */
     public getAll({
-page,
-pageSize,
-orderBy,
-orderAscending,
+requestBody,
 }: {
-page?: number,
-pageSize?: number,
-orderBy?: string,
-orderAscending?: boolean,
-}): CancelablePromise<Array<KeywordDto>> {
+requestBody?: KeywordFilter,
+}): CancelablePromise<KeywordDtoPagedResponse> {
         return this.httpRequest.request({
-            method: 'GET',
+            method: 'POST',
             url: '/api/Keywords/all',
-            query: {
-                'Page': page,
-                'PageSize': pageSize,
-                'OrderBy': orderBy,
-                'OrderAscending': orderAscending,
-            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 

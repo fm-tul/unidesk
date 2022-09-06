@@ -9,6 +9,7 @@ import { EnumsService } from './services/EnumsService';
 import { HelloWorldService } from './services/HelloWorldService';
 import { ImportService } from './services/ImportService';
 import { KeywordsService } from './services/KeywordsService';
+import { TeamService } from './services/TeamService';
 import { ThesisService } from './services/ThesisService';
 import { UnideskService } from './services/UnideskService';
 import { UsersService } from './services/UsersService';
@@ -21,6 +22,7 @@ export class ApiClient {
     public readonly helloWorld: HelloWorldService;
     public readonly import: ImportService;
     public readonly keywords: KeywordsService;
+    public readonly team: TeamService;
     public readonly thesis: ThesisService;
     public readonly unidesk: UnideskService;
     public readonly users: UsersService;
@@ -44,6 +46,7 @@ export class ApiClient {
         this.helloWorld = new HelloWorldService(this.request);
         this.import = new ImportService(this.request);
         this.keywords = new KeywordsService(this.request);
+        this.team = new TeamService(this.request);
         this.thesis = new ThesisService(this.request);
         this.unidesk = new UnideskService(this.request);
         this.users = new UsersService(this.request);

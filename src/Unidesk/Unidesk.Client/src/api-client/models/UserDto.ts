@@ -2,22 +2,19 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type UserDto = {
-    id: string;
-    readonly _DtoType?: string | null;
-    created: string;
-    createdBy?: string | null;
-    modified: string;
-    modifiedBy?: string | null;
-    readonly isNew?: boolean;
-    readonly isNew2?: boolean;
-    username?: string | null;
-    email?: string | null;
-    stagId?: string | null;
-    firstName?: string | null;
-    lastName?: string | null;
-    middleName?: string | null;
-    titleBefore?: string | null;
-    titleAfter?: string | null;
-    grants: Array<string>;
-};
+import type { TrackedEntityDto } from './TrackedEntityDto';
+import type { UserFunction } from './UserFunction';
+
+export type UserDto = (TrackedEntityDto & {
+username?: string | null;
+email?: string | null;
+stagId?: string | null;
+firstName?: string | null;
+lastName?: string | null;
+middleName?: string | null;
+titleBefore?: string | null;
+titleAfter?: string | null;
+grants: Array<string>;
+thesisCount?: number;
+userFunction?: UserFunction;
+});

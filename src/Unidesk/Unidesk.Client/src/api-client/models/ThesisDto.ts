@@ -2,14 +2,10 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { DepartmentDto } from './DepartmentDto';
-import type { Faculty } from './Faculty';
 import type { KeywordDto } from './KeywordDto';
-import type { SchoolYearDto } from './SchoolYearDto';
-import type { StudyProgrammeDto } from './StudyProgrammeDto';
-import type { ThesisOutcome } from './ThesisOutcome';
+import type { TeamDto } from './TeamDto';
 import type { ThesisStatus } from './ThesisStatus';
-import type { ThesisType } from './ThesisType';
+import type { ThesisUserDto } from './ThesisUserDto';
 import type { TrackedEntityDto } from './TrackedEntityDto';
 import type { UserDto } from './UserDto';
 
@@ -22,23 +18,22 @@ nameCze?: string | null;
 abstractEng?: string | null;
 abstractCze?: string | null;
 keywords: Array<KeywordDto>;
-schoolYear?: SchoolYearDto;
-schoolYearId?: string;
-department?: DepartmentDto;
-departmentId?: string;
-faculty?: Faculty;
-facultyId?: string;
-studyProgramme?: StudyProgrammeDto;
+schoolYearId: string;
+departmentId: string;
+facultyId: string;
 studyProgrammeId?: string | null;
 status: ThesisStatus;
-thesisType?: ThesisType;
 thesisTypeId?: string | null;
-thesisTypeCandidates?: Array<ThesisType> | null;
-thesisTypeCandidateIds?: Array<string> | null;
-outcomes?: Array<ThesisOutcome> | null;
-outcomeIds?: Array<string> | null;
-guidelines?: Array<string> | null;
-literature?: Array<string> | null;
+thesisTypeCandidateIds: Array<string>;
+outcomeIds: Array<string>;
+guidelines?: string | null;
+guidelinesList: Array<string>;
+literature?: string | null;
+literatureList: Array<string>;
 grade?: number | null;
-users: Array<UserDto>;
+thesisUsers?: Array<ThesisUserDto> | null;
+authors: Array<UserDto>;
+supervisors: Array<UserDto>;
+opponents: Array<UserDto>;
+teams: Array<TeamDto>;
 });

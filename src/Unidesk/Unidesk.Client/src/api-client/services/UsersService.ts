@@ -3,7 +3,8 @@
 /* eslint-disable */
 import type { LoginRequest } from '../models/LoginRequest';
 import type { LoginResponse } from '../models/LoginResponse';
-import type { UserDto } from '../models/UserDto';
+import type { UserDtoPagedResponse } from '../models/UserDtoPagedResponse';
+import type { UserFilter } from '../models/UserFilter';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
@@ -77,47 +78,19 @@ id: string,
     }
 
     /**
-     * @returns UserDto Success
-     * @throws ApiError
-     */
-    public getAll({
-page,
-pageSize,
-orderBy,
-orderAscending,
-}: {
-page?: number,
-pageSize?: number,
-orderBy?: string,
-orderAscending?: boolean,
-}): CancelablePromise<Array<UserDto>> {
-        return this.httpRequest.request({
-            method: 'GET',
-            url: '/api/Users/all',
-            query: {
-                'Page': page,
-                'PageSize': pageSize,
-                'OrderBy': orderBy,
-                'OrderAscending': orderAscending,
-            },
-        });
-    }
-
-    /**
-     * @returns UserDto Success
+     * @returns UserDtoPagedResponse Success
      * @throws ApiError
      */
     public find({
-keyword,
+requestBody,
 }: {
-keyword?: string,
-}): CancelablePromise<Array<UserDto>> {
+requestBody?: UserFilter,
+}): CancelablePromise<UserDtoPagedResponse> {
         return this.httpRequest.request({
             method: 'POST',
             url: '/api/Users/find',
-            query: {
-                'keyword': keyword,
-            },
+            body: requestBody,
+            mediaType: 'application/json',
         });
     }
 
