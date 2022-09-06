@@ -1,4 +1,6 @@
-﻿namespace Unidesk.Dtos;
+﻿using FluentValidation.Results;
+
+namespace Unidesk.Dtos;
 
 public class SimpleJsonResponse
 {
@@ -7,4 +9,5 @@ public class SimpleJsonResponse
 
     public IEnumerable<string> StackTrace { get; set; } = Enumerable.Empty<string>();
     public string? DebugMessage { get; set; }
+    public IEnumerable<ValidationFailure> Errors { get; set; }
 }

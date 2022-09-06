@@ -11,7 +11,7 @@ public class SchoolYearDto : TrackedEntityDto
     [Required]
     public DateTime End { get; set; }
     
-    public string Name => $"{Start.Year:D2}-{End.Year:D2}";
+    public string Name => $"{Start.Year:D2}/{End.Year:D2}";
 }
 
 public class SchoolYearDtoValidation : AbstractValidator<SchoolYearDto>

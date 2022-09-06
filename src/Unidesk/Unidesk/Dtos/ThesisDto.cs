@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using Unidesk.Db.Models;
+using Unidesk.Dtos.Resolvers;
 using Unidesk.Server;
 
 namespace Unidesk.Dtos;
 
+[HasMapping(typeof(Thesis))]
 public class ThesisDto : TrackedEntityDto
 {
     public long Adipidno { get; set; }
@@ -17,77 +20,126 @@ public class ThesisDto : TrackedEntityDto
     public string? AbstractCze { get; set; }
 
     [Required]
-    public List<KeywordThesisDto> KeywordThesis { get; set; } = new List<KeywordThesisDto>();
+    public List<KeywordDto> Keywords { get; set; } = new List<KeywordDto>();
+
     /// <summary>
     /// Schoold year of the thesis
     /// </summary>
-    public SchoolYearDto SchoolYear { get; set; }
+    [Required]
     public Guid SchoolYearId { get; set; }
-    
 
     /// <summary>
     /// Department of the thesis (e.g. NTI, ITE, MTI)
     /// </summary>
-    public DepartmentDto Department { get; set; }
+    [Required]
     public Guid DepartmentId { get; set; }
-    
 
     /// <summary>
     /// Faculty of the thesis (e.g. FM, or maybe other faculties)
     /// </summary>
-    public Faculty Faculty { get; set; }
+    [Required]
     public Guid FacultyId { get; set; }
-    
+
     /// <summary>
     /// Study Programme of the thesis (e.g. Information Technology, Applied Sciences in Engineering)
     /// </summary>
-    public StudyProgrammeDto StudyProgramme { get; set; }
     public Guid? StudyProgrammeId { get; set; }
-    
+
     /// <summary>
     /// Status of the thesis (e.g. New, Assigned, etc.)
     /// </summary>
     [Required]
     public ThesisStatus Status { get; set; }
-    
+
     /// <summary>
     /// Selected type of the thesis (e.g. bachelor, master, PhD)
-    /// before the thesis is accepted, this can be null, and possible candidates are used instead <see cref="ThesisTypeCandidates"/>
+    /// before the thesis is accepted, this can be null, and possible candidates are used instead <see cref="ThesisTypeCandidateIds"/>
     /// </summary>
-    public ThesisType? ThesisType { get; set; }
     public Guid? ThesisTypeId { get; set; }
 
     /// <summary>
-    /// types, which are possible candidates for the thesis type
-    /// after the thesis is accepted, this can be ignored, and the selected type is used instead <see cref="ThesisType"/>
+    /// Ids of the thesis types. During the approval phase, this is list of the thesis types, which are possible candidates for the thesis type
+    /// After the thesis is accepted, this can be ignored (as it should be empty), and the selected type is used instead <see cref="ThesisType"/>
     /// </summary>
-    public List<ThesisType> ThesisTypeCandidates { get; set; } = new List<ThesisType>();
-    
-    [IgnoreMapping]
+    [Required]
     public List<Guid> ThesisTypeCandidateIds { get; set; } = new List<Guid>();
-    
+
     /// <summary>
-    /// List of possible outcomes for the thesis (e.g. HW solution, SW solution, Modelling, etc.)
+    /// Ids of possible outcomes for the thesis (e.g. HW solution, SW solution, Modelling, etc.)
     /// </summary>
-    public List<ThesisOutcome> Outcomes { get; set; } = new List<ThesisOutcome>();
-    
-    [IgnoreMapping]
+    [Required]
     public List<Guid> OutcomeIds { get; set; } = new List<Guid>();
-    
-    /// <summary>
-    /// List of Guidlines for the thesis (e.g. 1. Research, 2. Do an experiment, 3. Do a simulation, etc.)
-    /// </summary>
-    public List<string> Guidelines { get; set; } = new List<string>();
-    
+
+    public string? Guidelines { get; set; }
+
+    [Required]
+    public List<string> GuidelinesList
+    {
+        get => StringListParser.Parse(Guidelines);
+        set => Guidelines = StringListParser.Serialize(value);
+    }
+
     /// <summary>
     /// List of recommended literature for the thesis (e.g. 1. Thesis, 2. Book, 3. Article, etc.)
     /// </summary>
-    public List<string> Literature { get; set; } = new List<string>();
-    
-    public int? Grade { get; set; }
-    
+    public string? Literature { get; set; }
+
     [Required]
-    public List<UserDto> Users { get; set; } = new List<UserDto>();
-    //
-    // public List<Team> Teams { get; set; }
+    public List<string> LiteratureList
+    {
+        get => StringListParser.Parse(Literature);
+        set => Literature = StringListParser.Serialize(value);
+    }
+
+    public int? Grade { get; set; }
+
+    [IgnoreMapping]
+    public List<ThesisUserDto> ThesisUsers { get; set; } = new List<ThesisUserDto>();
+
+    [Required]
+    public List<UserDto> Authors { get; set; } = new List<UserDto>();
+
+    [Required]
+    public List<UserDto> Supervisors { get; set; } = new List<UserDto>();
+
+    [Required]
+    public List<UserDto> Opponents { get; set; } = new List<UserDto>();
+
+    [Required]
+    [IgnoreMapping]
+    public List<TeamDto> Teams { get; set; } = new List<TeamDto>();
+}
+
+public class ThesisDtoValidator : AbstractValidator<ThesisDto>
+{
+    public ThesisDtoValidator()
+    {
+        RuleFor(x => x.NameCze).NotEmpty();
+        RuleFor(x => x.NameEng).NotEmpty();
+        RuleFor(x => x.AbstractCze).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-cze");
+        RuleFor(x => x.AbstractEng).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-eng");
+
+        RuleFor(x => x.Keywords).NotEmpty();
+        RuleFor(x => x.Authors).NotEmpty();
+        RuleFor(x => x.ThesisTypeCandidateIds)
+            .Must((x, y) =>
+            {
+                switch (x.Status)
+                {
+                    case ThesisStatus.Draft:
+                    case ThesisStatus.New:
+                        return true;
+                    
+                    case ThesisStatus.Submitted:
+                    case ThesisStatus.Finished_Susccessfully:
+                    case ThesisStatus.Finished_Unsuccessfully:
+                    case ThesisStatus.Finished:
+                    case ThesisStatus.Assigned:
+                        return y.Count == 0 && x.ThesisTypeId.HasValue;
+                    
+                    default:
+                        return true;
+                }
+            }).WithMessage("Submitted thesis must be of exactly one type");
+    }
 }

@@ -6,9 +6,11 @@ using Unidesk.Controllers;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Dtos.Requests;
 using Unidesk.Security;
 using Unidesk.Server;
 using Unidesk.Utils;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Services;
 
@@ -21,22 +23,68 @@ public class UserService
         _db = db;
     }
 
-    public Task<User?> FindUserAsync(ILoginRequest request)
+    public Task<User?> FindAsync(ILoginRequest request)
     {
         return _db.Users.FirstOrDefaultAsync(x => x.Username == request.Username);
     }
 
-    public Task<User?> FindUserAsync(Guid id)
+    public Task<User?> FindAsync(Guid id)
     {
         return _db.Users.FirstOrDefaultAsync(x => x.Id == id);
     }
-    
+
+    public Task<List<User>> FindAllAsync(UserFilter keyword)
+    {
+        return this
+            .Where(keyword)
+            .ToListAsync();
+    }
+
+    public IQueryable<User> Where(UserFilter? filter)
+    {
+        var query = _db.Users.AsQueryable();
+        if (filter == null)
+        {
+            return query;
+        }
+
+        if (filter.UserFunctions.Any())
+        {
+            // combine list of enums bitwise
+            var combinedFunctions = filter.UserFunctions.Aggregate((x, y) => x | y);
+            query = query.Where(x => (x.UserFunction & combinedFunctions) != 0);
+        }
+
+        if (filter.Keyword.IsNotNullOrEmpty())
+        {
+            var keyword = filter.Keyword;
+            var isGuid = Guid.TryParse(keyword, out var guid);
+            if (isGuid)
+            {
+                query = query.Where(x => x.Id == guid);
+            }
+            else
+            {
+                query = query.Where(x =>
+                    (isGuid && x.Id == guid) ||
+                    (x.Username != null && x.Username.Contains(keyword)) ||
+                    (x.Email != null && x.Email.Contains(keyword)) ||
+                    (x.FirstName != null && x.FirstName.Contains(keyword)) ||
+                    (x.LastName != null && x.LastName.Contains(keyword)) ||
+                    (x.MiddleName != null && x.MiddleName.Contains(keyword))
+                );
+            }
+        }
+
+        return query;
+    }
+
     public IEnumerable<KeyValuePair<string, string>> GetUserClaimableProperties(User user)
     {
-        yield return new KeyValuePair<string, string> (ClaimTypes.Name, user.Username ?? string.Empty);
-        yield return new KeyValuePair<string, string> (ClaimTypes.NameIdentifier, user.Id.ToString());
-        yield return new KeyValuePair<string, string> ("Grants", string.Join(",", user.Roles.SelectMany(i => i.Grants.Select(j => j.Id))));
-        yield return new KeyValuePair<string, string> ("Created", $"{user.Created:O}");
+        yield return new KeyValuePair<string, string>(ClaimTypes.Name, user.Username ?? string.Empty);
+        yield return new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, user.Id.ToString());
+        yield return new KeyValuePair<string, string>("Grants", string.Join(",", user.Roles.SelectMany(i => i.Grants.Select(j => j.Id))));
+        yield return new KeyValuePair<string, string>("Created", $"{user.Created:O}");
     }
 
     public IEnumerable<Claim> GetClaims(User user)
@@ -62,7 +110,7 @@ public class UserService
             .ToList()
             .ToDictionary(i => i.Type, i => i.Value)
             .ToList();
-        
+
         var fingerprint = principal.FindFirstValue("Fingerprint");
 
         var computedFingerprint = CryptographyUtils.Hash(props);

@@ -1,4 +1,5 @@
-﻿using Unidesk.Db.Core;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Unidesk.Db.Core;
 using Unidesk.Security;
 
 namespace Unidesk.Db.Models;
@@ -28,6 +29,13 @@ public class User : TrackedEntity, ISimpleUser
     public List<UserRole> Roles { get; set; } = new List<UserRole>();
 
     public List<UserInTeam> UserInTeams { get; set; } = new List<UserInTeam>();
+    public UserFunction UserFunction { get; set; }
+    
+    public List<ThesisUser> Theses { get; set; } = new List<ThesisUser>();
+    
+    [NotMapped]
+    public int ThesisCount => Theses.Count;
+
 
     public static readonly User Guest = new User
     {

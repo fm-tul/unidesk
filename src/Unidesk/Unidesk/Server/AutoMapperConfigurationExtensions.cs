@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using AutoMapper;
+using Unidesk.Controllers;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Resolvers;
+using Unidesk.Services;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Server;
@@ -21,40 +23,58 @@ public static class AutoMapperConfigurationExtensions
         options.CreateMapBetween<ThesisType, ThesisTypeDto>();
         options.CreateMapBetween<ThesisOutcome, ThesisOutcomeDto>();
         options.CreateMapBetween<StudyProgramme, StudyProgrammeDto>();
+        
+        options.CreateMapBetween<ThesisUser, ThesisUserDto>();
+        
+        options.CreateMapBetween<Keyword, KeywordDto>();
+        options.CreateMapBetween<SimilarKeyword, SimilarKeywordDto>();
+        
+        options.CreateMapBetween<Team, TeamDto>();
 
-        options.CreateMap<SchoolYear, SchoolYearDto>()
+        options.CreateMapWithIgnore<UserInTeamDto, UserInTeam>();
+        options.CreateMapWithIgnore<UserInTeam, UserInTeamDto>()
+            .ForMember(i => i.Team, i => i.MapFrom(j => j.Team.Name));
+
+        options.CreateMapWithIgnore<SchoolYear, SchoolYearDto>()
             .ForMember(i => i.Start, i => i.MapFrom(j => j._start))
             .ForMember(i => i.End, i => i.MapFrom(j => j._end));
         
-        options.CreateMap<SchoolYearDto, SchoolYear>()
+        options.CreateMapWithIgnore<SchoolYearDto, SchoolYear>()
             .ForMember(i => i.Start, i => i.MapFrom(j => DateOnly.FromDateTime(j.Start)))
             .ForMember(i => i.End, i => i.MapFrom(j => DateOnly.FromDateTime(j.End)));
 
-        options.CreateMap<User, UserDto>()
+        options.CreateMapWithIgnore<User, UserDto>()
             .ForMember(i => i.Grants, i => i.MapFrom(j => j.Roles.SelectMany(k => k.Grants).Select(k => k.Id)));
 
-        options.CreateMap<KeywordThesis, KeywordThesisDto>()
-            .ForMember(i => i.Keyword, i => i.MapFrom(j => j.Keyword.Value))
+        options.CreateMapWithIgnore<UserDto, User>();
+        
+        options.CreateMapWithIgnore<KeywordThesis, KeywordThesisDto>()
+            .ForMember(i => i.Value, i => i.MapFrom(j => j.Keyword.Value))
             .ForMember(i => i.Locale, i => i.MapFrom(j => j.Keyword.Locale));
 
-        options.CreateMap<Thesis, ThesisDto>()
-            .ForMember(i => i.KeywordThesis, i => i.MapFrom(j => j.KeywordThesis))
-            .ForMember(i => i.Guidelines, i => i.MapFrom<ThesisGuidelinesResolver>())
-            .ForMember(i => i.Literature, i => i.MapFrom<ThesisLiteratureResolver>())
-            .IgnoreNoMap();
-
-        options.CreateMap<Keyword, KeywordDto>()
-            .ForMember(i => i.Used, opt => opt.MapFrom(i => i.KeywordThesis.Count));
+        options.CreateMapWithIgnore<Thesis, ThesisDto>();
+        
+        options.CreateMapWithIgnore<ThesisDto, Thesis>();
+            
 
         return options;
+    }
+    
+    public static IMappingExpression<TSource,TDestination> CreateMapWithIgnore<TSource, TDestination>(this IMapperConfigurationExpression options)
+    {
+        return options.CreateMap<TSource, TDestination>()
+            .IgnoreNoMap();
     }
 
     public static IMapperConfigurationExpression CreateMapBetween<TSource, TDestination>(this IMapperConfigurationExpression options)
     {
         options.CreateMap<TSource, TDestination>()
-            .AddTransform<string?>(i => i == null ? null : string.IsNullOrEmpty(i.Trim()) ? null : i);
+            .AddTransform<string?>(i => i == null ? null : string.IsNullOrEmpty(i.Trim()) ? null : i)
+            .IgnoreNoMap();
+        
         options.CreateMap<TDestination, TSource>()
-            .AddTransform<string?>(i => i == null ? null : string.IsNullOrEmpty(i.Trim()) ? null : i);
+            .AddTransform<string?>(i => i == null ? null : string.IsNullOrEmpty(i.Trim()) ? null : i)
+            .IgnoreNoMap();
         return options;
     }
 

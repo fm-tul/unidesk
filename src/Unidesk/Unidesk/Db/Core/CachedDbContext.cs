@@ -59,4 +59,6 @@ public class CachedDbContext
 
     public ChangeTrackedStats GetStats() => _db.GetStats();
     public async Task<int> SaveChangesAsync() => await _db.SaveChangesAsync();
+    
+    public UnideskDbContext GetDbContext() => _db;
 }

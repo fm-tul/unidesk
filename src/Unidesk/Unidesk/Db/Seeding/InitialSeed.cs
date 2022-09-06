@@ -95,12 +95,12 @@ public static class InitialSeed
         {
             var names = new[]
             {
-                ("Bachelor's thesis", "Bakalářská práce", "bakalářská"),
-                ("Bachelor's project", "Bakalářský projekt", null),
-                ("Master's thesis", "Magisterská práce", "diplomová"),
+                ("Bachelor's thesis", "Bakalářská práce", "BP"),
+                ("Bachelor's project", "Bakalářský projekt", "BPRJ"),
+                ("Master's thesis", "Magisterská práce", "DP"),
                 ("Master's project", "Magisterský projekt", null),
-                ("Doctoral dissertation", "Disertační práce", "disertační"),
-                ("Rigorous Thesis", "Rigorózní práce", "rigorózní"),
+                ("Doctoral dissertation", "Disertační práce", null),
+                ("Rigorous Thesis", "Rigorózní práce", null),
             };
 
             info += db.ThesisTypes.AddRangeEnumerable(names.Select(name => new ThesisType { NameEng = name.Item1, NameCze = name.Item2, Code = name.Item3 }));

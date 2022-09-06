@@ -38,6 +38,7 @@ public class UnideskDbContext : DbContext
     public DbSet<ThesisType> ThesisTypes { get; set; }
     public DbSet<Keyword> Keywords { get; set; }
     public DbSet<KeywordThesis> KeywordThesis { get; set; }
+    public DbSet<ThesisUser> ThesisUsers { get; set; }
 
     public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
@@ -65,6 +66,9 @@ public class UnideskDbContext : DbContext
         
         modelBuilder.Entity<KeywordThesis>()
             .HasKey(j => new { j.KeywordId, j.ThesisId });
+        
+        modelBuilder.Entity<ThesisUser>()
+            .HasKey(j => new { j.ThesisId, j.UserId });
     }
     
 

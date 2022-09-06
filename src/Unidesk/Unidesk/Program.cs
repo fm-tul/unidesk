@@ -42,8 +42,10 @@ services.AddScoped<ImportService>();
 services.AddScoped<RequireGrantFilter>();
 services.AddScoped<IUserProvider, UserProvider>();
 services.AddScoped<UserService>();
+services.AddScoped<TeamService>();
 services.AddScoped<SimpleEnumService>();
 services.AddScoped<IDateTimeService, DefaultDateTimeService>();
+services.AddScoped<KeywordsService>();
 
 // mapper
 services.AddAutoMapper(options => options.CreateMappingConfiguration(), typeof(Program));
@@ -64,6 +66,10 @@ services.AddCookieAuthentication();
 services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(connectionString));
 services.AddScoped<CachedDbContext>();
 services.AddDatabaseDeveloperPageExceptionFilter();
+if (builder.Environment.IsDevelopment())
+{
+    services.AddSingleton(new ModelGeneration());
+}
 
 
 var app = builder.Build();
@@ -113,10 +119,11 @@ app.UseExceptionHandler(exceptionHandlerApp =>
             data.Message = "Database Exception";
             data.DebugMessage = exception.Error.InnerException?.Message ?? exception.Error.Message;
         }
-        else if (exception?.Error is FluentValidation.ValidationException)
+        else if (exception?.Error is FluentValidation.ValidationException fluentError)
         {
             data.Message = exception.Error.Message ?? "Invalid Data";
             data.DebugMessage = exception.Error.Message;
+            data.Errors = fluentError.Errors;
         }
         else
         {

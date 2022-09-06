@@ -8,11 +8,6 @@ public class ThesisLiteratureResolver : IValueResolver<Thesis, ThesisDto, List<s
 {
     public List<string> Resolve(Thesis source, ThesisDto destination, List<string> destMember, ResolutionContext context)
     {
-        if (string.IsNullOrEmpty(source.Literature))
-        {
-            return new List<string>();
-        }
-
-        return  JsonSerializer.Deserialize<List<string>>(source.Literature) ?? new List<string>();
+        return StringListParser.Parse(source.Literature);
     }
 }

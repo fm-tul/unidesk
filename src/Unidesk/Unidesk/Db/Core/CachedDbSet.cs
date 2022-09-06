@@ -15,7 +15,7 @@ public class CachedDbSet<T> where T : class
         DbSet = dbSet;
     }
     
-    public async Task<List<T>> LoadCacheAsync()
+    public async Task<List<T>> LoadCacheAsync(IQueryable<T>? query = null)
     {
         if (_isLoaded)
         {
@@ -24,7 +24,7 @@ public class CachedDbSet<T> where T : class
         
         _isLoaded = true;
         _cache.Clear();
-        _cache.AddRange(await DbSet.ToListAsync());
+        _cache.AddRange(await (query ?? DbSet).ToListAsync());
         return _cache;
     }
     
@@ -101,6 +101,12 @@ public static class CachedDbSetExtensions
     public static async Task<T?> FirstOrDefaultAsync<T>(this CachedDbSet<T> cachedDbSet, Func<T, bool> predicate) where T: class
     {
         await cachedDbSet.LoadCacheAsync();
+        return cachedDbSet._cache.FirstOrDefault(predicate);
+    }
+    
+    public static T? FirstOrDefault<T>(this CachedDbSet<T> cachedDbSet, Func<T, bool> predicate) where T: class
+    {
+        cachedDbSet.LoadCache();
         return cachedDbSet._cache.FirstOrDefault(predicate);
     }
     

@@ -16,4 +16,8 @@ public class UserDto : TrackedEntityDto
     
     [Required]
     public List<Guid> Grants { get; set; } = new List<Guid>();
+    
+    public int ThesisCount { get; set; }
+    
+    public UserFunction UserFunction { get; set; }
 }

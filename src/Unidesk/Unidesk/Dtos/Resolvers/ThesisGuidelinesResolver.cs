@@ -8,11 +8,8 @@ public class ThesisGuidelinesResolver : IValueResolver<Thesis, ThesisDto, List<s
 {
     public List<string> Resolve(Thesis source, ThesisDto destination, List<string> destMember, ResolutionContext context)
     {
-        if (string.IsNullOrEmpty(source.Guidelines))
-        {
-            return new List<string>();
-        }
-
-        return  JsonSerializer.Deserialize<List<string>>(source.Guidelines) ?? new List<string>();
+        return StringListParser.Parse(source.Guidelines);
     }
+
 }
+

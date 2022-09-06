@@ -28,7 +28,7 @@ public static class CookieAuthentication
         
         // try to get a user from the cookies
         var claims = ClaimsObject.Create(principal);
-        var user = await userService.FindUserAsync(claims.NameIdentifier);
+        var user = await userService.FindAsync(claims.NameIdentifier);
 
         // user is found? goood 🤖
         if (user is not null)

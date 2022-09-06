@@ -1,6 +1,6 @@
 ﻿namespace Unidesk.Client;
 
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum, AllowMultiple = true)]
 public class GenerateModelAttribute : Attribute
 {
     public string Name { get; set; }

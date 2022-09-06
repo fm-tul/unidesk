@@ -46,15 +46,15 @@ public class UserServiceTests
         _db.Users.ToList().Should().HaveCount(2);
 
         // non existing user
-        (await userService.FindUserAsync(Guid.Empty))
+        (await userService.FindAsync(Guid.Empty))
             .Should().BeNull();
 
         // existing user
-        var user = (await userService.FindUserAsync(User.ImportUser.Id))!;
+        var user = (await userService.FindAsync(User.ImportUser.Id))!;
         user.Should().NotBeNull();
         user.Id.Should().Be(User.ImportUser.Id);
 
-        var userByRequest = (await userService.FindUserAsync(new LoginRequest { Username = User.ImportUser.Username! }))!;
+        var userByRequest = (await userService.FindAsync(new LoginRequest { Username = User.ImportUser.Username! }))!;
         userByRequest.Should().NotBeNull();
         userByRequest.Id.Should().Be(User.ImportUser.Id);
     }
