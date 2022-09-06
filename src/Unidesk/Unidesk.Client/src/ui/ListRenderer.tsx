@@ -1,4 +1,4 @@
-import { Key, ReactNode } from "react";
+import React, { Key, ReactNode } from "react";
 
 import { UiColors } from "./shared";
 
@@ -9,6 +9,7 @@ interface ListRendererProps<T> {
   onClick?: (item: ListItem<T>, event: React.MouseEvent<HTMLElement>) => void;
   commas?: boolean;
   clickable?: boolean;
+  className?: string;
 }
 export interface ListItem<T> {
   key: string;
@@ -17,15 +18,18 @@ export interface ListItem<T> {
 }
 
 export const ListRenderer = <T,>(props: ListRendererProps<T>) => {
-  const { items = [], color = "info", asFragment, onClick, commas, clickable=true } = props;
+  const { items = [], color = "info", asFragment, onClick, commas, clickable = true, className = "" } = props;
 
   const body = items.map((item, j) => (
-    <>
-      <span className={`pill ${color} ${clickable ? "clickable" : ""}`} key={item.key} onClick={(e) => clickable && onClick?.(item, e)}>
+    <React.Fragment key={item.key}>
+      <span
+        className={`pill ${className} ${color} ${clickable ? "clickable" : ""}`}
+        onClick={e => clickable && onClick?.(item, e)}
+      >
         {item.label}
       </span>
       <>{commas && j < items.length - 1 ? ", " : ""}</>
-    </>
+    </React.Fragment>
   ));
 
   if (asFragment) {

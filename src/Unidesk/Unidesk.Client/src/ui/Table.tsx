@@ -72,7 +72,6 @@ export const Table = <TValue extends TId>(props: TableProps<TValue>) => {
   };
 
   const sortedRows = !!sortColumn ? applySort(rows, sortColumn) : rows;
-  console.log(getMoment().format("LLLL"));
 
   return (
     <div className={`table-wrapper ${fullWidthCss}`}>

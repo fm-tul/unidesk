@@ -6,7 +6,7 @@ import { TextArea } from "components/mui/ArrayField";
 
 import { getSize, SimpleComponentProps, UiColors } from "./shared";
 
-interface TextFieldProps extends SimpleComponentProps {
+export interface TextFieldProps extends SimpleComponentProps {
   label?: string;
   name?: string;
   value?: string | null;
@@ -25,17 +25,18 @@ interface TextFieldProps extends SimpleComponentProps {
 
   helperColor?: UiColors | boolean;
   helperText?: string;
+  spellCheck?: boolean;
 }
 export const TextField = (props: TextFieldProps) => {
   const { label, value, name, type = "text", onChange, onBlur, onValue, onEnter, onEscape } = props;
   const { helperColor, helperText, className: classNameDefault = "", fullWidth = true, rows = 1, required = false } = props;
-  const { multiline = rows > 1, maxRows, loading = false, disabled = false, disableClass = "disabled" } = props;
+  const { multiline = rows > 1, maxRows, loading = false, disabled = false, disableClass = "disabled", spellCheck } = props;
   const size = getSize(props);
 
-  const hasError = helperColor === "error" || helperColor === true;
+  const hasError = !!helperColor;
   const sizeCss = SIZES[size];
-  const errorCss = hasError ? "error" : "";
-  const errorCssHelperText = hasError ? "text-error-600" : "";
+  const errorCss = hasError ? ERROR_CSS[helperColor === true ? "error" : helperColor] : "";
+  const errorCssHelperText = hasError ? HELPER_COLORS[helperColor === true ? "error" : helperColor] : "";
   const lockLabelCss = !!value || type.includes("date") ? "locked" : "";
   const fullWidthCss = fullWidth ? "w-full" : "";
   const disabledCss = loading || disabled ? `${disableClass} i-disabled` : "";
@@ -64,12 +65,13 @@ export const TextField = (props: TextFieldProps) => {
           value={value ?? ""}
           onChange={handleChange}
           onBlur={onBlur}
+          spellCheck={spellCheck}
         />
       ) : (
         <div className="grid grid-cols-1 items-center">
           <input
             name={name}
-            className={`first-letter:tf peer col-start-1 row-start-1 transition-all ${sizeCss} ${errorCss} ${disabledCss} ${
+            className={`tf peer col-start-1 row-start-1 transition-all ${sizeCss} ${errorCss} ${disabledCss} ${
               loading ? "pl-10 text-neutral-600" : ""
             }`}
             type={type}
@@ -77,6 +79,7 @@ export const TextField = (props: TextFieldProps) => {
             onChange={handleChange}
             onBlur={onBlur}
             onKeyUp={handleKeyUp}
+            spellCheck={spellCheck}
           />
           {loading && (
             <div className="col-start-1 row-start-1 ml-2 flex max-w-[40px] items-center bg-gradient-to-r from-white via-white/90 fade-in-0 animate-in">
@@ -101,3 +104,19 @@ const SIZES = {
   md: "tf-md",
   lg: "tf-lg",
 };
+
+
+const HELPER_COLORS = {
+  error: "text-error-600",
+  success: "text-success-600",
+  info: "text-info-600",
+  warning: "text-warning-600",
+  neutral: "text-neutral-600",
+};
+
+const ERROR_CSS = {
+  error: "error",
+  success: "success",
+  info: "info",
+  warning: "warning",
+}

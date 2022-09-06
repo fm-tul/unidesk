@@ -1,6 +1,5 @@
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { getSize, SizeProps } from "./shared";
 
 export interface ModalProps {
   open: boolean;
@@ -14,6 +13,27 @@ export interface ModalProps {
   height?: "sm" | "md" | "lg" | "xl" | "auto";
   className?: string;
 }
+
+class ModalStack {
+  private _id = 0;
+  private _stack: number[] = [];
+
+  public createNew = () => {
+    const newId = this._id++;
+    this._stack.push(newId);
+    return newId;
+  };
+
+  public destroy = (id: number) => {
+    this._stack = this._stack.filter(i => i !== id);
+  };
+
+  public isOnTop = (id: number) => this._stack.length > 0 && this._stack[this._stack.length - 1] === id;
+
+  public someModalIsOpen = () => this._stack.length > 0;
+}
+
+const modalStack = new ModalStack();
 
 export const Modal = (props: PropsWithChildren<ModalProps>) => {
   const {
@@ -38,6 +58,27 @@ export const Modal = (props: PropsWithChildren<ModalProps>) => {
 
   const [canClose, setCanClose] = useState(false);
 
+  useEffect(() => {
+    const modalId = modalStack.createNew();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && modalStack.isOnTop(modalId)) {
+        setCanClose(true);
+        onClose();
+      }
+    };
+
+    document.getElementById("root")!.classList.add("overflow-hidden", "h-screen");
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      modalStack.destroy(modalId);
+      document.removeEventListener("keydown", handleKeyDown);
+      if (!modalStack.someModalIsOpen()) {
+        document.getElementById("root")!.classList.remove("overflow-hidden", "h-screen");
+      }
+    };
+  }, []);
+
   const handleWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLDivElement;
     if (target.classList.contains("modal-dismiss")) {
@@ -57,8 +98,12 @@ export const Modal = (props: PropsWithChildren<ModalProps>) => {
   }
 
   return ReactDOM.createPortal(
-    <div className={`modal-dismiss z-100 fixed inset-0 grid h-screen w-screen bg-black/30 ${yCss} ${xCss}`} onMouseUp={handleWrapperClick} onMouseDown={handleWrapperClick}>
-      <div className={`modal-dismiss p-8 pretty-scrollbar ${widthCss} ${fullWidthCss}`}>
+    <div
+      className={`modal-dismiss z-100 fixed inset-0 grid h-screen w-screen bg-black/30 ${yCss} ${xCss}`}
+      onMouseUp={handleWrapperClick}
+      onMouseDown={handleWrapperClick}
+    >
+      <div className={`modal-dismiss pretty-scrollbar p-8 ${widthCss} ${fullWidthCss}`}>
         <div className={`relative max-h-[calc(100vh-64px)] overflow-auto shadow-md ${className} ${heightCss} ${widthCss}`}>{children}</div>
       </div>
     </div>,
