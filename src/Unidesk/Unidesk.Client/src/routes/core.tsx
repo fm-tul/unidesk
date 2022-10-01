@@ -5,3 +5,8 @@ export interface ExtraRouteProps extends PathRouteProps {
   visible?: boolean;
   requiredGrants?: string[];
 }
+
+
+export interface ExtraRoutePropsWithGoto extends ExtraRouteProps {
+  navigate: (...args: any[]) => string;
+}
