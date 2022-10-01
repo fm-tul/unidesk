@@ -50,6 +50,24 @@ keyword?: string,
     }
 
     /**
+     * @returns KeywordDto Success
+     * @throws ApiError
+     */
+    public findRelated({
+keywordId,
+}: {
+keywordId?: string,
+}): CancelablePromise<Array<KeywordDto>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/Keywords/find-related',
+            query: {
+                'keywordId': keywordId,
+            },
+        });
+    }
+
+    /**
      * @returns SimilarKeywordDto Success
      * @throws ApiError
      */

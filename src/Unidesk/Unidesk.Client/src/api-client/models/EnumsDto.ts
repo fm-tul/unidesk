@@ -10,6 +10,7 @@ import type { ThesisOutcomeDto } from './ThesisOutcomeDto';
 import type { ThesisTypeDto } from './ThesisTypeDto';
 
 export type EnumsDto = {
+    readonly _DtoType?: string | null;
     departments?: Array<DepartmentDto> | null;
     faculties?: Array<FacultyDto> | null;
     schoolYears?: Array<SchoolYearDto> | null;

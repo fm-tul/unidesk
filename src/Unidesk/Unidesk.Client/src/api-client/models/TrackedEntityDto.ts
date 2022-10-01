@@ -3,12 +3,10 @@
 /* eslint-disable */
 
 export type TrackedEntityDto = {
-    id: string;
     readonly _DtoType?: string | null;
+    id: string;
     created: string;
     createdBy?: string | null;
     modified: string;
     modifiedBy?: string | null;
-    readonly isNew?: boolean;
-    readonly isNew2?: boolean;
 };

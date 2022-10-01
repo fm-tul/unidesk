@@ -2,19 +2,17 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { TrackedEntityDto } from './TrackedEntityDto';
+import type { TeamSimpleDto } from './TeamSimpleDto';
 import type { UserFunction } from './UserFunction';
+import type { UserInTeamDto } from './UserInTeamDto';
+import type { UserSimpleDto } from './UserSimpleDto';
 
-export type UserDto = (TrackedEntityDto & {
-username?: string | null;
-email?: string | null;
-stagId?: string | null;
-firstName?: string | null;
-lastName?: string | null;
-middleName?: string | null;
-titleBefore?: string | null;
-titleAfter?: string | null;
-grants: Array<string>;
+export type UserDto = (UserSimpleDto & {
+readonly grantIds: Array<string>;
 thesisCount?: number;
-userFunction?: UserFunction;
+userFunction: UserFunction;
+supervisionsRatio?: number | null;
+supervisionsTotal?: number | null;
+userInTeams: Array<UserInTeamDto>;
+teams: Array<TeamSimpleDto>;
 });

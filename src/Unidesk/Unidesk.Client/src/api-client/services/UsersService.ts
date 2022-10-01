@@ -3,6 +3,7 @@
 /* eslint-disable */
 import type { LoginRequest } from '../models/LoginRequest';
 import type { LoginResponse } from '../models/LoginResponse';
+import type { UserDto } from '../models/UserDto';
 import type { UserDtoPagedResponse } from '../models/UserDtoPagedResponse';
 import type { UserFilter } from '../models/UserFilter';
 
@@ -60,14 +61,14 @@ path: string,
     }
 
     /**
-     * @returns any Success
+     * @returns UserDto Success
      * @throws ApiError
      */
-    public getApiUsersGet({
+    public get({
 id,
 }: {
 id: string,
-}): CancelablePromise<any> {
+}): CancelablePromise<UserDto> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/api/Users/get/{id}',
@@ -91,6 +92,17 @@ requestBody?: UserFilter,
             url: '/api/Users/find',
             body: requestBody,
             mediaType: 'application/json',
+        });
+    }
+
+    /**
+     * @returns UserDto Success
+     * @throws ApiError
+     */
+    public getTheBestTeachers(): CancelablePromise<Array<UserDto>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/Users/the-best-teachers',
         });
     }
 
