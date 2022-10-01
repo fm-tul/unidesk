@@ -40,8 +40,8 @@ public class UserServiceTests
     public async Task Test_Should_Get_User_By_Id()
     {
         var userService = new UserService(_db);
-        _db.Users.Add(User.ImportUser);
-        _db.Users.Add(User.Guest);
+        _db.Users.Add(StaticUsers.ImportUser);
+        _db.Users.Add(StaticUsers.Guest);
         _db.SaveChanges();
         _db.Users.ToList().Should().HaveCount(2);
 
@@ -50,27 +50,27 @@ public class UserServiceTests
             .Should().BeNull();
 
         // existing user
-        var user = (await userService.FindAsync(User.ImportUser.Id))!;
+        var user = (await userService.FindAsync(StaticUsers.ImportUser.Id))!;
         user.Should().NotBeNull();
-        user.Id.Should().Be(User.ImportUser.Id);
+        user.Id.Should().Be(StaticUsers.ImportUser.Id);
 
-        var userByRequest = (await userService.FindAsync(new LoginRequest { Username = User.ImportUser.Username! }))!;
+        var userByRequest = (await userService.FindAsync(new LoginRequest { Username = StaticUsers.ImportUser.Username! }))!;
         userByRequest.Should().NotBeNull();
-        userByRequest.Id.Should().Be(User.ImportUser.Id);
+        userByRequest.Id.Should().Be(StaticUsers.ImportUser.Id);
     }
 
     [Fact]
     public void Test_Should_Get_Correct_Claims_For_User()
     {
         var userService = new UserService(_db);
-        var claims = userService.GetClaims(User.ImportUser).ToList();
+        var claims = userService.GetClaims(StaticUsers.ImportUser).ToList();
         claims.First(i => i.Type == ClaimTypes.NameIdentifier)
-            .Value.Should().Be(User.ImportUser.Id.ToString());
+            .Value.Should().Be(StaticUsers.ImportUser.Id.ToString());
 
         claims.Where(i => i.Type == "Fingerprint")
             .Should().NotBeNullOrEmpty();
 
-        var claimsGuest = userService.GetClaims(User.Guest).ToList();
+        var claimsGuest = userService.GetClaims(StaticUsers.Guest).ToList();
         claims.First(i => i.Type == "Fingerprint")
             .Value
             .Should()
@@ -91,13 +91,13 @@ public class UserServiceTests
         var userService = new UserService(_db);
         var importUser = userService.FromClaims(new ClaimsObject
         {
-            NameIdentifier = User.ImportUser.Id,
-            Name = User.ImportUser.Username!,
+            NameIdentifier = StaticUsers.ImportUser.Id,
+            Name = StaticUsers.ImportUser.Username!,
             Grants = new List<Grant>(),
             Created = DateTime.Now,
         });
         
-        importUser.Id.Should().Be(User.ImportUser.Id);
-        importUser.Username.Should().Be(User.ImportUser.Username);
+        importUser.Id.Should().Be(StaticUsers.ImportUser.Id);
+        importUser.Username.Should().Be(StaticUsers.ImportUser.Username);
     }
 }

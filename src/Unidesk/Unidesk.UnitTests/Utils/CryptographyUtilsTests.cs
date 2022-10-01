@@ -20,20 +20,20 @@ public class CryptographyUtilsTests
         var guid = Guid.NewGuid();
         var props1 = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, guid.ToString()),
-            new KeyValuePair<string, string>(ClaimTypes.DateOfBirth, now.ToString(CultureInfo.InvariantCulture)),
+            new(ClaimTypes.NameIdentifier, guid.ToString()),
+            new(ClaimTypes.DateOfBirth, now.ToString(CultureInfo.InvariantCulture)),
         };
         
         var props2 = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, guid.ToString()),
-            new KeyValuePair<string, string>(ClaimTypes.DateOfBirth, now.AddDays(1).ToString(CultureInfo.InvariantCulture)),
+            new(ClaimTypes.NameIdentifier, guid.ToString()),
+            new(ClaimTypes.DateOfBirth, now.AddDays(1).ToString(CultureInfo.InvariantCulture)),
         };
         
         var props3 = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, guid.ToString()),
-            new KeyValuePair<string, string>(ClaimTypes.DateOfBirth, now.AddHours(24).ToString(CultureInfo.InvariantCulture)),
+            new(ClaimTypes.NameIdentifier, guid.ToString()),
+            new(ClaimTypes.DateOfBirth, now.AddHours(24).ToString(CultureInfo.InvariantCulture)),
         };
 
         var hash1 = CryptographyUtils.Hash(props1);

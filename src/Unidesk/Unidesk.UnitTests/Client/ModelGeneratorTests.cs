@@ -52,7 +52,7 @@ public static class Foo
     public readonly static string A = "A";
     public readonly static string B = "B";
 
-    public readonly static Foobar AA = new Foobar { Foo = "AA", Bar = 1, Baz = true };
-    public readonly static Foobar BB = new Foobar { Foo = "BB", Bar = 2, Baz = false };
-    public readonly static Foobar CC = new Foobar { Foo = "CC", Bar = 3, Baz = true };
+    public readonly static Foobar AA = new() { Foo = "AA", Bar = 1, Baz = true };
+    public readonly static Foobar BB = new() { Foo = "BB", Bar = 2, Baz = false };
+    public readonly static Foobar CC = new() { Foo = "CC", Bar = 3, Baz = true };
 }

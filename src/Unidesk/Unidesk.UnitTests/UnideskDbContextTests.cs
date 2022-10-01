@@ -149,7 +149,7 @@ public class UnideskDbContextTests
             NameEng = "Test thesis",
             NameCze = "Testovací práce",
             Grade = 5,
-            ThesisUsers = new List<ThesisUser> { new ThesisUser{User = userC, ThesisId = thesisGuid} },
+            ThesisUsers = new List<ThesisUser> { new() {User = userC, ThesisId = thesisGuid} },
             Teams = new List<Team> { team },
             KeywordThesis = new List<KeywordThesis>(),
 

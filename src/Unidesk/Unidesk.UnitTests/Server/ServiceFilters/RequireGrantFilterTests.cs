@@ -28,7 +28,7 @@ public class RequireGrantFilterTests
     {
         var requiredAttributes = new List<RequireGrantAttribute>
         {
-            new RequireGrantAttribute(UserGrants.User_SuperAdmin_Id)
+            new(UserGrants.User_SuperAdmin_Id)
         };
 
         var userGrants = new List<Grant> { UserGrants.User_SuperAdmin };

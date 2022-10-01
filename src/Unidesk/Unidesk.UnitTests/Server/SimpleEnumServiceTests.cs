@@ -89,7 +89,7 @@ public class SimpleEnumServiceTests : IDisposable
         var IOutputCacheStoreSub = Substitute.For<IOutputCacheStore>();
         var service = new SimpleEnumService(_db, _mapper, IOutputCacheStoreSub);
         var frozenDT = new DateTime(2012, 3, 4);
-        _userProvider.CurrentUser = User.ImportUser;
+        _userProvider.CurrentUser = StaticUsers.ImportUser;
         _dateTimeService.Now.Returns(frozenDT);
 
         var initalDtos = new[]
@@ -113,7 +113,7 @@ public class SimpleEnumServiceTests : IDisposable
         newItem.NameEng.Should().Be("Informatics");
         newItem.Code.Should().Be("IT");
         newItem.DescriptionEng.Should().BeNull();
-        newItem.ModifiedBy.Should().Be(User.ImportUser.Email);
+        newItem.ModifiedBy.Should().Be(StaticUsers.ImportUser.Email);
         newItem.Modified.Should().Be(frozenDT);
 
         var itemFromDb = _db.Departments.FirstOrDefault(x => x.Id == newItem.Id)!;
@@ -123,7 +123,7 @@ public class SimpleEnumServiceTests : IDisposable
         itemFromDb.NameEng.Should().Be("Informatics");
         itemFromDb.Code.Should().Be("IT");
         itemFromDb.DescriptionEng.Should().BeNull();
-        itemFromDb.ModifiedBy.Should().Be(User.ImportUser.Email);
+        itemFromDb.ModifiedBy.Should().Be(StaticUsers.ImportUser.Email);
         itemFromDb.Modified.Should().Be(frozenDT);
     }
 
@@ -133,7 +133,7 @@ public class SimpleEnumServiceTests : IDisposable
         var IOutputCacheStoreSub = Substitute.For<IOutputCacheStore>();
         var service = new SimpleEnumService(_db, _mapper, IOutputCacheStoreSub);
         var frozenDT = new DateTime(2012, 3, 4);
-        _userProvider.CurrentUser = User.ImportUser;
+        _userProvider.CurrentUser = StaticUsers.ImportUser;
         _dateTimeService.Now.Returns(frozenDT);
 
         var initalDtos = new[]
@@ -157,7 +157,7 @@ public class SimpleEnumServiceTests : IDisposable
         newItem.NameEng.Should().Be("Informatics");
         newItem.Code.Should().Be("IT");
         newItem.DescriptionEng.Should().BeNull();
-        newItem.ModifiedBy.Should().Be(User.ImportUser.Email);
+        newItem.ModifiedBy.Should().Be(StaticUsers.ImportUser.Email);
         newItem.Modified.Should().Be(frozenDT);
 
         var allItems = _db.Faculties.ToList();
