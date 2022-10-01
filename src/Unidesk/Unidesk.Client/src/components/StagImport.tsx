@@ -6,11 +6,10 @@ import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 
 import { Button } from "ui/Button";
-import { generateOptions, Select, SelectOption } from "ui/Select";
+import { Select, SelectOption } from "ui/Select";
 import { TextField } from "ui/TextField";
 
 import { FilterBar } from "./FilterBar";
-import { TextArea } from "./mui/ArrayField";
 import { ThesisSimpleView } from "./ThesisSimpleView";
 
 export const StagImport = () => {
@@ -102,7 +101,7 @@ export const StagImport = () => {
           <Button
             loading={isLoading}
             disableClass=""
-            className="with-progress ml-auto h-full before:bg-gradient-to-l before:from-lime-600 before:to-lime-400 min-w-xxs"
+            className="with-progress ml-auto h-full before:bg-gradient-to-l before:from-lime-600 before:to-lime-400 min-w-xs"
             onClick={importAllFromStag}
             style={{ "--progress": batchIndex > 0 ? `${(batchIndex / totalBatches) * 100}%` : "0" } as any}
           >
@@ -130,7 +129,6 @@ export const StagImport = () => {
 
           <div className="flex flex-col gap-1 text-sm">
             {resposeData
-              .sort((a, b) => Number(b.isNew) - Number(a.isNew))
               .map(thesis => (
                 <ThesisSimpleView thesis={thesis} key={thesis.id} withEdit />
               ))}

@@ -30,3 +30,22 @@ export function randomChoice<T>(arr: T[]): T {
 export function distinctBy<K, V>(list: Array<V>, keyGetter: (input: V) => K): Array<V> {
     return [...groupBy(list, keyGetter).values()].map(v => v[0]);
 }
+
+export function sortBy<K, V>(list: Array<V>, keyGetter: (input: V) => K, reverse=false): Array<V> {
+    const reverseMultiplier = reverse ? -1 : 1;
+    return list.sort((a, b) => {
+        const keyA = keyGetter(a);
+        const keyB = keyGetter(b);
+        if (keyA < keyB) {
+            return -1 * reverseMultiplier;
+        }
+        if (keyA > keyB) {
+            return 1 * reverseMultiplier;
+        }
+        return 0;
+    });
+}
+
+export const addId = <T>(items: T[], func: (item: T) => string) => {
+    return items.map(item => ({ ...item, id: func(item) }));
+}

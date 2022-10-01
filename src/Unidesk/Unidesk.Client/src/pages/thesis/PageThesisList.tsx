@@ -1,10 +1,13 @@
 import { QueryFilter, ThesisDto, ThesisStatus } from "@api-client";
+import { All as YesNoAll } from "@api-client/constants/YesNo";
 import { httpClient } from "@core/init";
+import { LanguageContext } from "@locales/LanguageContext";
 import { R } from "@locales/R";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import { PagedResponse, Paging } from "components/Paging";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
+import { useDebounceState } from "hooks/useDebounceState";
 import { useLocalStorage } from "hooks/useLocalStorage";
 import { useOpenClose } from "hooks/useOpenClose";
 import { usePaging } from "hooks/usePaging";
@@ -14,19 +17,11 @@ import { Button } from "ui/Button";
 import { Menu } from "ui/Menu";
 import { Modal } from "ui/Modal";
 import { generatePrimitive, Select } from "ui/Select";
+import { TextField } from "ui/TextField";
 
 import { FilterBar } from "../../components/FilterBar";
 import { ThesisSimpleView } from "../../components/ThesisSimpleView";
 import { ThesisEdit } from "./PageThesisEdit";
-import { TextField } from "ui/TextField";
-import { useDebounceState } from "hooks/useDebounceState";
-
-const yesNoOptions = [
-  { key: "yes", value: "yes", label: "Yes" },
-  { key: "no", value: "no", label: "No" },
-];
-
-const thesisOptions = generatePrimitive(Object.values(ThesisStatus) as ThesisStatus[], renderThesisStatus);
 
 export const PageThesisList = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +29,9 @@ export const PageThesisList = () => {
   const [selectedThesis, setSelectedThesis] = useState<ThesisDto>();
   const { open, close, isOpen } = useOpenClose(false);
   const { refresh, refreshIndex } = useRefresh();
+  const { language } = useContext(LanguageContext);
+  const thesisOptions = generatePrimitive(Object.values(ThesisStatus) as ThesisStatus[], i => renderThesisStatus(i, language));
+  const yesNo = generatePrimitive(YesNoAll.map(i => i.value), i => YesNoAll.find(j => j.value === i)?.[language] ?? i);
 
   const [theses, setTheses] = useState<ThesisDto[]>([]);
 
@@ -87,7 +85,7 @@ export const PageThesisList = () => {
         </Modal>
       )}
 
-      {theses && true && (
+      {theses && (
         <div>
           <FilterBar>
             <Select
@@ -95,15 +93,17 @@ export const PageThesisList = () => {
               options={thesisOptions}
               value={status}
               onValue={(_, v) => setStatus(v)}
+              optionRender={i => renderThesisStatus(i, language)}
               width="min-w-xs"
               clearable
               searchable
             />
             <Select
               label={R("has-keywords")}
-              options={yesNoOptions}
+              options={yesNo}
               value={hasKeywords}
               onValue={(_, v) => setHasKeywords(v)}
+              optionRender={i => YesNoAll.find(j => j.value === i)?.[language] ?? i}
               width="min-w-xs"
               clearable
             />
@@ -112,7 +112,7 @@ export const PageThesisList = () => {
           </FilterBar>
 
           <div className="flex justify-end">
-            <Menu icon="menu" pop="right">
+            <Menu link="menu" pop="right">
               <Button text justify="justify-start" onClick={newThesis}>
                 Create new thesis
               </Button>

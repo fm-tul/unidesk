@@ -1,14 +1,4 @@
-import {
-  DepartmentDto,
-  FacultyDto,
-  SchoolYearDto,
-  Severity,
-  SimpleJsonResponse,
-  StudyProgrammeDto,
-  TeamDto,
-  ThesisOutcomeDto,
-  ThesisTypeDto,
-} from "@api-client";
+import { DepartmentDto, FacultyDto, SchoolYearDto, Severity, SimpleJsonResponse, StudyProgrammeDto, TeamDto, ThesisOutcomeDto, ThesisTypeDto } from "@api-client";
 import { GUID_EMPTY } from "@core/config";
 import { guestHttpClient, httpClient } from "@core/init";
 import { EnKeys, LanguagesId } from "@locales/all";
@@ -21,12 +11,14 @@ import { UserDto } from "@models/UserDto";
 import { useContext, useEffect, useState } from "react";
 import { MdChecklist } from "react-icons/md";
 import { Link, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { debounce } from "throttle-debounce";
 import * as Yup from "yup";
 
 import { Moment } from "components/HistoryInfo";
 import { KeywordSelector } from "components/KeywordSelector";
 import { ArrayField } from "components/mui/ArrayField";
+import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { toPromiseArray, useFetch, useQuery, useSingleQuery } from "hooks/useFetch";
 import { useOpenClose } from "hooks/useOpenClose";
 import { useStepper } from "hooks/useStepper";
@@ -35,6 +27,7 @@ import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { renderUser } from "models/cellRenderers/UserRenderer";
 import { Button } from "ui/Button";
 import { CreateConfirmDialog as confirmWith } from "ui/Confirm";
+import { FormField } from "ui/FormField";
 import { Menu } from "ui/Menu";
 import { Modal } from "ui/Modal";
 import { generatePrimitive, Select, SelectOption, SelectProps, TId } from "ui/Select";
@@ -46,9 +39,7 @@ import { toCamelCase } from "utils/stringUtils";
 
 import { ClipboardFromBpDp } from "./plugins/ClipboardFromBpDp";
 import { thesisValidationSchema as schema, thesisInitialValues } from "./thesisSchema";
-import { LoadingWrapper } from "components/utils/LoadingWrapper";
-import { toast } from "react-toastify";
-import { FormField } from "ui/FormField";
+import { link_pageThesisDetail } from "routes/links";
 
 type T = ThesisDto;
 type errorObj = { message: string; severity?: Severity };
@@ -57,8 +48,6 @@ type thesisProps = keyof ThesisDto;
 type thesisErrorObject = { [k in thesisProps]?: errorObj };
 type thesisTouchedObject = { [k in thesisProps]?: boolean };
 
-const allowedStatusesNewThesis = generatePrimitive([ThesisStatus.DRAFT, ThesisStatus.NEW] as ThesisStatus[], renderThesisStatus);
-const allowedStatusesEditThesis = generatePrimitive(Object.values(ThesisStatus) as ThesisStatus[], renderThesisStatus);
 interface PageThesisNewProps {
   initialValues?: ThesisDto;
 }
@@ -83,6 +72,11 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
   const thesisOutcomes = generateOptions(enums?.thesisOutcomes, language);
   const thesisTypes = generateOptions(enums?.thesisTypes, language);
   const faculties = generateOptions(enums?.faculties, language);
+
+  const allowedStatusesNewThesis = generatePrimitive([ThesisStatus.DRAFT, ThesisStatus.NEW] as ThesisStatus[], i =>
+    renderThesisStatus(i, language)
+  );
+  const allowedStatusesEditThesis = generatePrimitive(Object.values(ThesisStatus) as ThesisStatus[], i => renderThesisStatus(i, language));
 
   const updateKeywords = (keywords: KeywordDto[]) => {
     setDto({ ...dto, keywords });
@@ -170,10 +164,10 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
 
   return (
     <LoadingWrapper isLoading={isLoading} error="">
-      <Menu className="absolute top-0 right-0" icon="menu">
+      <Menu className="absolute top-0 right-0" link="menu">
         <>
           {!!persistentObject && (
-            <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-start">
+            <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-end">
               <div className="flex flex-col">
                 {R("restore-work")}
                 <span className="text-xxs normal-case italic text-neutral-600">
@@ -183,25 +177,25 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
             </Button>
           )}
         </>
-        <Button sm text onClick={open} justify="justify-start">
+        <Button sm text onClick={open} justify="justify-end">
           Paste from clipboard
         </Button>
 
-        <Button disabled={dto.id === GUID_EMPTY} sm text justify="justify-start" component={Link} to={`/theses/${dto.id}`}>
+        <Button disabled={dto.id === GUID_EMPTY} sm text justify="justify-end" component={Link} to={link_pageThesisDetail.navigate(dto.id)}>
           Go to thesis detail
         </Button>
       </Menu>
       {!!dto.adipidno && (
         <div className="flex items-center gap-1">
           {RR("thesis-from-stag-id", language)}
-          <Link className="code rounded bg-rose-50 text-sm text-rose-600" to={`/theses/${dto.adipidno}`}>
+          <Link className="code rounded bg-rose-50 text-sm text-rose-600" to={link_pageThesisDetail.navigate(dto.adipidno)}>
             {dto.adipidno}
           </Link>
         </div>
       )}
       {dto.id !== GUID_EMPTY && (
         <div className="flex items-center gap-1">
-          <Button component={Link} text color="success" sm to={`/theses/${dto.id}`}>
+          <Button component={Link} text color="success" sm to={link_pageThesisDetail.navigate(dto.id)}>
             Go to thesis detail
           </Button>
         </div>
@@ -255,7 +249,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
                 as={Select<ThesisStatus>}
                 {...getPropsS(form, "status", isNew ? allowedStatusesNewThesis : allowedStatusesEditThesis)}
                 classNameField="col-span-1"
-                optionRender={renderThesisStatus}
+                optionRender={(i: ThesisStatus) => renderThesisStatus(i, language)}
               />
 
               <FormField
@@ -268,8 +262,9 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
             </div>
 
             {/* row 5-6 - keywords */}
-            <div className="col-span-2 flex flex-col gap-2">
-              <KeywordSelector onChange={updateKeywords} max={20} keywords={dto?.keywords ?? []} />
+            <div className="col-span-2 flex gap-2 items-baseline">
+              <span className="font-medium">{RR("keywords", language)}:</span>
+              <FormField as={KeywordSelector} onChange={updateKeywords} max={20} keywords={dto?.keywords ?? []} classNameField="grow" />
             </div>
           </div>
         </Step>
@@ -305,12 +300,10 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
               clearable
               multiple
               optionRender={renderTeam}
-              options={(keyword: string) => httpClient.team.find({ keyword })}
+              options={(keyword: string) => toPromiseArray(httpClient.team.find({ requestBody: { keyword } }))}
               value={dto.teams}
               onMultiValue={(teams: TeamDto[]) => form.setDto({ ...form.dto, teams })}
             />
-            {/* <SimpleSelect {...getPropsM(form, "", thesisOutcomes)} /> */}
-            {/* <ArrayField label="Authors" value={form.dto.authors ?? []} setValue={v => form.setDto({ ...form.dto, authors: v })} /> */}
           </div>
         </Step>
       </Stepper>
@@ -448,9 +441,9 @@ const generateOptions = <T extends INameDto>(items: T[] | null | undefined, lang
 
 export const PageThesisEdit = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: thesis, isLoading, error, loadData } = useSingleQuery<ThesisDto>();
+  const { data: thesis, isLoading, error, loadData } = useSingleQuery<ThesisDto|undefined>(undefined);
   useEffect(() => {
-    loadData(httpClient.thesis.getOne({id}));
+    loadData(httpClient.thesis.getOne({ id }));
   }, [id]);
 
   return (

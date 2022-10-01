@@ -37,3 +37,15 @@ export const guestHttpClient = new ApiClient({
   BASE: API_URL,
   WITH_CREDENTIALS: false,
 });
+
+
+export const executeAdminAction = async (action: string, data: any = {}) => {
+  return httpClient.admin.httpRequest.request({
+    method: "POST",
+    url: "/api/Admin/action",
+    query: {
+      ...data,
+      action: action,
+    },
+  });
+};

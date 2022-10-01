@@ -42,6 +42,8 @@ interface SelectBaseProps<T extends TId | string> extends SizeProps, ColorProps 
 
   onSingleValue?: (value: T | undefined) => void;
   onMultiValue?: (value: T[]) => void;
+
+  filter?: (option: T) => boolean;
 }
 
 const getValuesSafe = <T extends TId | string>(
@@ -79,7 +81,7 @@ const getValuesSafe = <T extends TId | string>(
 
 export interface SelectProps<T extends TId | string> extends SelectBaseProps<T> {}
 export const Select = <T extends TId | string>(props: SelectProps<T>) => {
-  const { options, loading, disabled, searchable, clearable, multiple, label, className } = props;
+  const { options, loading, disabled, searchable, clearable, multiple, label, className, filter } = props;
   const { value = [], textSize, onValue, onBlur, optionRender, onSingleValue, onMultiValue } = props;
   const color = getColor(props);
   const theme = THEME[color];
@@ -226,7 +228,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
   }, [searchText]);
 
   const filteredOptions = isAsync
-    ? asyncOptions
+    ? (filter != null ? asyncOptions.filter(i => filter(i.value)) : asyncOptions)
     : options.filter(
         o =>
           o.label
@@ -234,6 +236,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
             .toLowerCase()
             .includes(searchText.toLowerCase() ?? false) || o.key.toLowerCase().includes(searchText.toLowerCase())
       );
+  
 
   return (
     <div
@@ -319,12 +322,12 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
       {isOpen && !disabled && !loading && (
         <div className="modal-wrapper">
           {/* modal backdrop */}
-          <div className="fixed inset-0 opacity-0" onClick={doClose} />
+          <div className="fixed inset-0 opacity-0 bg-black z-20 h-screen" onClick={doClose} />
 
           {/* popup */}
           <div
             className={classnames(
-              "select-modal absolute left-0 right-0 z-10 mt-2 cursor-pointer overflow-auto shadow-xl",
+              "select-modal absolute left-0 right-0 z-30 mt-2 cursor-pointer overflow-auto shadow-xl",
               "pretty-scrollbar rounded border border-solid bg-white",
               theme.border,
               modalHeight

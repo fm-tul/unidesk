@@ -1,6 +1,8 @@
+import { All } from "@api-client/constants/ThesisStatus";
+import { LanguagesId } from "@locales/all";
 import { ThesisStatus } from "@models/ThesisStatus";
 
-export const renderThesisStatus = (item: ThesisStatus) => {
-    const value = (item?.toString() ?? "").replaceAll("_", " ");
-    return <span>{value}</span>;
+export const renderThesisStatus = (status: ThesisStatus, locale: LanguagesId) => {
+    const item = All.find(i => i.value === status);
+    return <span>{item?.[locale] ?? status}</span>;
 }

@@ -4,7 +4,7 @@ import { FocusEventHandler } from "react";
 
 import { TextArea } from "components/mui/ArrayField";
 
-import { ColorProps, getColor, getSize, SimpleComponentProps, UiColors } from "./shared";
+import { classnames, ColorProps, getColor, getSize, SimpleComponentProps, UiColors } from "./shared";
 
 export interface TextFieldProps extends SimpleComponentProps, ColorProps {
   label?: string;
@@ -24,19 +24,20 @@ export interface TextFieldProps extends SimpleComponentProps, ColorProps {
   required?: boolean;
 
   spellCheck?: boolean;
+  width?: string;
 }
 export const TextField = (props: TextFieldProps) => {
   const { label, value, name, type = "text", onChange, onBlur, onValue, onEnter, onEscape } = props;
-  const { className: classNameDefault = "", fullWidth = true, rows = 1, required = false } = props;
+  const { className, rows = 1, width = "w-full", required = false } = props;
   const { multiline = rows > 1, maxRows, loading = false, disabled = false, disableClass = "disabled", spellCheck } = props;
-  const color = getColor(props);
+  const color = getColor(props, "neutral");
   const size = getSize(props);
 
   const sizeCss = SIZES[size];
-  const errorCss = color.toString();
+  const colorCss = color.toString();
   const lockLabelCss = !!value || type.includes("date") ? "locked" : "";
-  const fullWidthCss = fullWidth ? "w-full" : "";
   const disabledCss = loading || disabled ? `${disableClass} i-disabled` : "";
+  const alignItems = multiline ? "items-start top-1" : "items-center";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     onChange?.(e);
@@ -52,44 +53,40 @@ export const TextField = (props: TextFieldProps) => {
   };
 
   return (
-    <div className={`relative flex flex-col ${classNameDefault} ${fullWidthCss}`}>
+    <div className={classnames("tf-wrapper", width, colorCss, className)}>
       {multiline ? (
         <TextArea
+          name={name}
+          className={classnames("tf", disabledCss, lockLabelCss, sizeCss)}
           rows={rows}
           maxRows={maxRows}
-          name={name}
-          className={`tf peer ${sizeCss} ${errorCss} ${disabledCss}`}
           value={value ?? ""}
           onChange={handleChange}
           onBlur={onBlur}
+          onKeyUp={handleKeyUp}
           spellCheck={spellCheck}
         />
       ) : (
-        <div className="grid grid-cols-1 items-center h-full">
-          <input
-            name={name}
-            className={`tf peer h-full col-start-1 row-start-1 transition-all ${sizeCss} ${errorCss} ${disabledCss} ${
-              loading ? "pl-10 text-neutral-600" : ""
-            }`}
-            type={type}
-            value={value ?? ""}
-            onChange={handleChange}
-            onBlur={onBlur}
-            onKeyUp={handleKeyUp}
-            spellCheck={spellCheck}
-          />
-          {loading && (
-            <div className="col-start-1 row-start-1 ml-2 flex max-w-[40px] items-center bg-gradient-to-r from-white via-white/90 fade-in-0 animate-in">
-              <span className="spinner info"></span>
-            </div>
-          )}
+        <input
+          name={name}
+          className={classnames("tf", disabledCss, lockLabelCss, sizeCss)}
+          type={type}
+          value={value ?? ""}
+          onChange={handleChange}
+          onBlur={onBlur}
+          onKeyUp={handleKeyUp}
+          spellCheck={spellCheck}
+        />
+      )}
+      {loading && (
+        <div className={classnames("pointer-events-none absolute inset-0 right-2 flex justify-end animate-in fade-in-0", alignItems)}>
+          <span className="spinner info"></span>
         </div>
       )}
       {label && (
-        <label className={`${sizeCss} ${errorCss} ${lockLabelCss} tf-label `}>
-          {required && <span className="pr-1 text-red-900 opacity-60">*</span>}
-          {label}
-        </label>
+        <div className={classnames("pointer-events-none absolute inset-0 flex", alignItems)}>
+          <label className={`${lockLabelCss} tf-label`}>{label}</label>
+        </div>
       )}
     </div>
   );
@@ -100,7 +97,6 @@ const SIZES = {
   md: "tf-md",
   lg: "tf-lg",
 };
-
 
 const HELPER_COLORS = {
   error: "text-error-600",
@@ -115,4 +111,4 @@ const ERROR_CSS = {
   success: "success",
   info: "info",
   warning: "warning",
-}
+};

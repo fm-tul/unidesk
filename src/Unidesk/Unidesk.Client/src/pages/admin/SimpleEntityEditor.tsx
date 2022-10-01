@@ -2,6 +2,7 @@ import { DepartmentDto, FacultyDto, SchoolYearDto, SimpleJsonResponse, StudyProg
 import { GUID_EMPTY } from "@core/config";
 import { LanguagesId } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
+import { RR } from "@locales/R";
 import { useFormik } from "formik";
 import React, { useContext, useMemo, useState } from "react";
 import { MdAdd, MdDelete, MdSave } from "react-icons/md";
@@ -79,7 +80,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
           />
           <div className="flex justify-end">
             <Button sm onClick={() => setItemToEdit(GUID_EMPTY)}>
-              Add new <MdAdd className="text-base" />
+              {RR("add-new", language)} <MdAdd className="text-base" />
             </Button>
           </div>
         </div>

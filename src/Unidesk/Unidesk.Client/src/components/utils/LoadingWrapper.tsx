@@ -9,7 +9,7 @@ import { classnames } from "ui/shared";
 interface LoadingWrapperProps extends HTMLAttributes<HTMLDivElement> {
   isLoading: boolean;
   message?: EnKeys;
-  error: unknown;
+  error?: unknown;
   size?: string | number;
 }
 export const LoadingWrapper = (props: PropsWithChildren<LoadingWrapperProps>) => {

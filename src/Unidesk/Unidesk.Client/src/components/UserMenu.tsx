@@ -1,11 +1,19 @@
-import { useContext } from "react";
-import { R } from "@locales/R";
-import { UserContext } from "../user/UserContext";
 import { httpClient } from "@core/init";
+import { LanguageContext } from "@locales/LanguageContext";
+import { R, RR } from "@locales/R";
+import { useContext } from "react";
+import { MdAccountCircle } from "react-icons/md";
+import { Link } from "react-router-dom";
+
+import { link_pageMyProfile } from "routes/links";
 import { Button } from "ui/Button";
+import { Menu } from "ui/Menu";
+
+import { UserContext } from "../user/UserContext";
 
 export function UserMenu() {
   const { user, setUser, resetUser } = useContext(UserContext);
+  const { language } = useContext(LanguageContext);
 
   const authUser = async () => {
     const response = await httpClient.users.login({
@@ -36,21 +44,39 @@ export function UserMenu() {
 
   return (
     <div>
-      {user.username}
+      <Menu
+        className="rounded-none bg-neutral-100 p-2 shadow-lg ring-1 ring-neutral-300"
+        withModal
+        minWidth={256}
+        link={
+          <span className="flow">
+            {user.fullName ?? user.username} <MdAccountCircle />
+          </span>
+        }
+      >
+        <span className="py-2 text-center text-sm font-semibold text-neutral-600">{RR("account-settings", language)}</span>
+        <hr className="my-1" />
 
-      {/* not logged in */}
-      {user.grants.length == 0 && (
-        <Button sm text onClick={authUser}>
-          {R("login")}
-        </Button>
-      )}
+        {/* not logged in */}
+        {user.grantIds?.length == 0 && (
+          <Button sm text onClick={authUser} justify="justify-start">
+            {R("login")}
+          </Button>
+        )}
 
-      {/* logged in */}
-      {user.grants.length > 0 && (
-        <Button sm text onClick={logoutUser}>
-          {R("logout")}
-        </Button>
-      )}
+        {/* logged in */}
+        {user.grantIds?.length > 0 && (
+          <>
+            <Button component={Link} text to={link_pageMyProfile.path} justify="justify-start">
+              {R("my-profile")}
+            </Button>
+
+            <Button text warning onClick={logoutUser} justify="justify-start">
+              {R("logout")}
+            </Button>
+          </>
+        )}
+      </Menu>
     </div>
   );
 }

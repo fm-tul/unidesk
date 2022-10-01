@@ -10,6 +10,7 @@ import { Link, useParams } from "react-router-dom";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { useFetch } from "hooks/useFetch";
 import { renderUser, renderUserPretty } from "models/cellRenderers/UserRenderer";
+import { link_pageThesisEdit } from "routes/links";
 
 interface PageThesisDetailProps {}
 export const PageThesisDetail = (props: PageThesisDetailProps) => {
@@ -44,7 +45,7 @@ export const PageThesisDetail = (props: PageThesisDetailProps) => {
         <article className="prose prose-lg prose-slate mx-auto max-w-full bg-white print:prose-sm">
           {/* header */}
           <header className="flex flex-col gap-1">
-            <Link to={`/theses/${dto.id}/edit`}  className="no-underline">
+            <Link to={link_pageThesisEdit.navigate(dto.id)}  className="no-underline">
               <h1>{language === "cze" ? dto.nameCze : dto.nameEng}</h1>
             </Link>
 

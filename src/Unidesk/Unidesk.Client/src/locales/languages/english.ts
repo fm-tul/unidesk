@@ -18,6 +18,15 @@ export const en = {
   "imported-thesis-none": "No Thesis found to be imported",
   "imported-thesis-new": "new",
 
+  // account-settings
+  "account-settings": "Account Settings",
+  "my-profile": "My Profile",
+  "firstName": "Firstname",
+  "lastName": "Lastname",
+  "middleName": "Middlename",
+  "titleBefore": "Title Before",
+  "titleAfter": "Title After",
+
   // general
   ok: "Ok",
   cancel: "Cancel",
@@ -31,6 +40,8 @@ export const en = {
   "has-keywords": "Has keywords",
   "restore-work": "Restore work",
   saved: "Saved",
+  saving: "Saving...",
+  "error-saving": "Error while saving",
   filled: "Filled",
   loading: "Loading",
   "import-successful": "Import successful",
@@ -38,6 +49,8 @@ export const en = {
   "search": "Search",
   create: "Create",
   update: "Update",
+  "click-to-edit": "Click to edit",
+  "add-new": "Add New",
 
   // history
   created: "Created",

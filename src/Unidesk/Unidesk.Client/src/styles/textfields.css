@@ -1,4 +1,44 @@
+.tf-wrapper {
+  @apply relative flex h-auto items-stretch rounded border border-solid transition-all focus-within:ring-2 ring-0;
+}
 .tf {
+  @apply bg-transparent px-2 py-1 outline-none w-full;
+}
+
+.tf-label {
+  @apply pointer-events-none absolute select-none rounded-sm pl-2 text-neutral-400 transition-all peer-focus:opacity-100;
+  @apply peer-focus:top-[-7px] peer-focus:left-2 peer-focus:bg-info-500 peer-focus:px-1 peer-focus:py-0 peer-focus:text-xxs peer-focus:text-white;
+}
+.tf-label.locked {
+  @apply top-[-7px] left-2 bg-neutral-200 px-1 py-0 text-xxs text-gray-800;
+}
+
+.tf-wrapper.success {
+  @apply border-success-500 bg-success-200 bg-gray-50/60;
+  @apply focus-within:ring-success-500/50 focus-within:border-success-500;
+}
+
+.tf-wrapper.info {
+  @apply border-info-500 bg-info-200 bg-gray-50/60;
+  @apply focus-within:ring-info-500/50 focus-within:border-info-500;
+}
+
+.tf-wrapper.warning {
+  @apply border-warning-500 bg-warning-200 bg-gray-50/60;
+  @apply focus-within:ring-warning-500/50 focus-within:border-warning-500;
+}
+
+.tf-wrapper.error {
+  @apply border-error-500 bg-error-200 bg-gray-50/60;
+  @apply focus-within:ring-error-500/50 focus-within:border-error-500;
+}
+
+.tf-wrapper.neutral {
+  @apply border-neutral-400 bg-neutral-200 bg-gray-50/60;
+  @apply focus-within:ring-info-500/50 focus-within:border-info-400;
+}
+
+/*.tf {
   @apply rounded border border-solid border-neutral-300 bg-slate-200/50 outline-none focus:border-info-500 focus:ring-1 focus:ring-info-500;
 }
 .tf.error {
@@ -22,16 +62,4 @@
   --size: 24px;
   --border: 4px;
 }
-.tf-label {
-  @apply pointer-events-none absolute top-1 select-none rounded-sm text-neutral-400 transition-all peer-focus:opacity-100;
-  @apply peer-focus:top-[-7px] peer-focus:left-2 peer-focus:bg-info-500 peer-focus:px-1 peer-focus:py-0 peer-focus:text-xxs peer-focus:text-white;
-}
-.tf-label.locked {
-  @apply top-[-7px] left-2 bg-neutral-200 px-1 py-0 text-xxs text-gray-800;
-}
-.tf-label.error {
-  @apply peer-focus:bg-error-500;
-}
-.tf-label.locked.error {
-  @apply bg-error-500;
-}
+*/

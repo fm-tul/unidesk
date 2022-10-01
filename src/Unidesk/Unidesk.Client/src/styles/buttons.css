@@ -20,7 +20,7 @@
 
 /* btn-sm | btn-md | btn-lg */
 .btn-sm {
-  @apply min-w-[24px] px-2 py-1 text-xs;
+  @apply px-2 py-1 text-xs min-w-fit;
   --size: 16px;
   --border: 3px;
 }

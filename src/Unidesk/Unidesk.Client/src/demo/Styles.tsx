@@ -4,13 +4,13 @@ import { Key, useState } from "react";
 
 import { renderUser } from "models/cellRenderers/UserRenderer";
 import { Button } from "ui/Button";
+import { FormField } from "ui/FormField";
 import { Select, SelectOption } from "ui/Select";
 import { UiColors, UiSizes, UiVariants } from "ui/shared";
 import { Step, Stepper } from "ui/Stepper";
 import { TextField } from "ui/TextField";
 
 import { product } from "../utils/product";
-import { FormField } from "ui/FormField";
 
 const Buttons = () => {
   const colors = [
@@ -145,36 +145,59 @@ const FormFields = () => {
   const [values, setValues] = useState<string[]>([]);
 
   return (
-    <div className="flex items-stretch gap-2">
+    <div>
+      <div className="flex items-stretch gap-2">
+        <FormField
+          label="csacascsa"
+          as={TextField}
+          value={value}
+          onValue={setValue}
+          helperColor={value.length > 2 ? "success" : "warning"}
+          helperText={value.length < 3 ? "" : "asdcsa"}
+          forceTheme
+        />
+        <FormField
+          loading
+          label="csacascsa"
+          as={TextField}
+          value={value}
+          onValue={setValue}
+          helperColor={value.length > 2 ? "success" : "warning"}
+          helperText={value.length < 3 ? "" : "asdcsa"}
+          forceTheme
+        />
+        <FormField
+          as={Button}
+          sm
+          helperColor={value.length > 2 ? "error" : undefined}
+          helperText={value.length < 3 ? "" : "asdcsa"}
+          forceTheme
+        >
+          Click me
+        </FormField>
+        <FormField
+          width="min-w-xs"
+          as={Select<string>}
+          options={items2}
+          value={values}
+          onMultiValue={setValues}
+          multiple
+          helperColor={value.length > 2 ? "success" : "info"}
+          helperText={value.length < 3 ? "" : "asdcaaaasa"}
+          forceTheme
+        />
+      </div>
       <FormField
         label="csacascsa"
         as={TextField}
         value={value}
         onValue={setValue}
-        helperColor={value.length > 2 ? "success" : "warning"}
+        helperColor={value.length > 2 ? "error" : "warning"}
         helperText={value.length < 3 ? "" : "asdcsa"}
         forceTheme
       />
-      <FormField
-        as={Button}
-        sm
-        helperColor={value.length > 2 ? "error" : undefined}
-        helperText={value.length < 3 ? "" : "asdcsa"}
-        forceTheme
-      >
-        Click me
-      </FormField>
-      <FormField
-        width="min-w-xs"
-        as={Select<string>}
-        options={items2}
-        value={values}
-        onMultiValue={setValues}
-        multiple
-        helperColor={value.length > 2 ? "success" : "warning"}
-        helperText={value.length < 3 ? "" : "asdcsa"}
-        forceTheme
-      />
+      <FormField label="csacascsa" as={TextField} value={value} onValue={setValue} />
+      <FormField color="info" label="csacascaaaasa" as={TextField} value={value} onValue={setValue} forceTheme={false} />
     </div>
   );
 };

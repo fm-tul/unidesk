@@ -3,6 +3,8 @@ import moment from "moment";
 import { HTMLAttributes, Key, useState } from "react";
 import { MdOutlineArrowDownward } from "react-icons/md";
 
+import { classnames } from "./shared";
+
 const asSortAscCss = "transition text-base text-gray-600 hover:text-gray-700";
 const asSortDescCss = "transition text-base text-gray-600 hover:text-gray-700 rotate-180";
 
@@ -51,7 +53,7 @@ const applySort = <TValue extends TId>(rows: TValue[], sortBy: SortBy<TValue>): 
 };
 
 export const Table = <TValue extends TId>(props: TableProps<TValue>) => {
-  const { rows = [], columns, onRowClick, autoHeight, fullWidth = true, clientSort = false, selected, ...rest } = props;
+  const { rows = [], columns, onRowClick, autoHeight, fullWidth = true, clientSort = false, selected, className, ...rest } = props;
   const fullWidthCss = fullWidth ? "w-full" : "";
 
   const [sortColumn, setSortColumn] = useState<SortBy<TValue>>();
@@ -74,7 +76,7 @@ export const Table = <TValue extends TId>(props: TableProps<TValue>) => {
   const sortedRows = !!sortColumn ? applySort(rows, sortColumn) : rows;
 
   return (
-    <div className={`table-wrapper ${fullWidthCss}`}>
+    <div className={classnames("table-wrapper", fullWidthCss, className)}>
       <table className={`table ${fullWidthCss}`}>
         <thead>
           <tr className="table-tr table-header">

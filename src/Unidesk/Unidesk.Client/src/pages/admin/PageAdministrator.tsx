@@ -9,6 +9,7 @@ import { classnames } from "ui/shared";
 import { toKV, toKVWithCode } from "utils/transformUtils";
 
 import { SimpleEntityEditor } from "./SimpleEntityEditor";
+import { link_adminManageEnum } from "routes/admin/links";
 
 export const PageAdministrator = () => {
   const { enumName } = useParams();
@@ -112,7 +113,7 @@ export const PageAdministrator = () => {
         )}
       >
         {enumsList.map(i => (
-          <Button key={i.name} lg outlined component={Link} to={`/admin/manage/${i.path}`}>
+          <Button key={i.name} lg outlined component={Link} to={link_adminManageEnum.navigate(i.path)}>
             <span className={classnames(validEnum ? "p-1" : "px-4 py-3")}>{i.name}</span>
           </Button>
         ))}

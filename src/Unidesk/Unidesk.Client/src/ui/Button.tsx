@@ -11,7 +11,7 @@ interface ButtonProps extends ComplexComponentProps {
   component?: React.ElementType;
   tabIndex?: number;
   title?: string;
-  justify?: "justify-start" | "justify-center" | "justify-end" | "justify-between" | "justify-around" | string;
+  justify?: "justify-start" | "justify-center" | "justify-end" | "justify-between" | "justify-around";
 }
 export const Button = (props: PropsWithChildren<ButtonProps> & HtmlHTMLAttributes<HTMLButtonElement>) => {
   const { loading, disabled, disableClass="disabled", fullWidth = false, component, to, tabIndex, title } = props;
@@ -36,7 +36,7 @@ export const Button = (props: PropsWithChildren<ButtonProps> & HtmlHTMLAttribute
 
   return (
     <button className={className} onClick={onClick} tabIndex={tabIndex} disabled={disabled} title={title} style={style}>
-      <div className={`inline-flex items-center gap-1 relative w-full ${justify}`} >
+      <div role={"button"} className={`inline-flex items-center gap-1 relative w-full ${justify}`} >
         {children}
         {loading && <span className="spinner2"></span>}
       </div>

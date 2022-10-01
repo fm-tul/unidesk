@@ -15,6 +15,7 @@ import { generatePrimitive, Select } from "ui/Select";
 import { TextField } from "ui/TextField";
 
 import { useQuery } from "../../hooks/useFetch";
+import { link_pageUserDetail } from "routes/links";
 
 const userFunctionOptions = generatePrimitive(Object.values(UserFunction));
 export const PageUserList = () => {
@@ -73,7 +74,7 @@ export const PageUserList = () => {
             data.map(user => (
               <div key={user.id} className="flex items-center gap-1">
                 {/* <Tooltip title={user.stagId ?? ""} placement="left"> */}
-                <Button component={Link} to={`/users/${user.id}`} sm text title={user.stagId ?? ""}>
+                <Button component={Link} to={link_pageUserDetail.navigate(user.id)} sm text title={user.stagId ?? ""}>
                   <span className="flex items-center gap-1">
                     <span className="min-w-[26px] text-right text-xs text-gray-500">{user.titleBefore}</span>
                     {user.lastName} {user.firstName}

@@ -160,11 +160,54 @@ export const toPromiseArray = <T>(promise: Promise<PagedResponse<T>>): Promise<T
   });
 };
 
+export const fakePromise = <T>(data: T): Promise<T> => {
+  return new Promise((resolve, _) => {
+    resolve(data);
+  });
+};
 
-export const useSingleQuery = <T>() => {
+export const castPromise = <T>(data: any): Promise<T> => {
+  return new Promise((resolve, _) => {
+    resolve(data as T);
+  });
+};
+
+
+export const useSingleQuery = <T>(initialValue: T) => {
   const [error, setError] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
-  const [data, setData] = useState<T>();
+  const [data, setData] = useState<T>(initialValue);
+
+  const loadData = async (promise: Promise<T>) => {
+    return new Promise((resolve, reject) => {
+      setIsLoading(true);
+      promise
+        .then(data => {
+          setData(data);
+          setError(undefined);
+          resolve(data);
+        })
+        .catch(error => {
+          setError(error);
+          reject(error);
+        })
+        .finally(() => setIsLoading(false));
+    });
+  };
+
+  return {
+    isLoading,
+    data,
+    error,
+    loadData,
+    setData,
+  };
+}
+
+export const useSingleQueryDefault = <T>(initialValue?: T|undefined) => {
+  const [error, setError] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState<T|undefined>(initialValue);
 
   const loadData = async (promise: Promise<T>) => {
     setIsLoading(true);
@@ -179,5 +222,6 @@ export const useSingleQuery = <T>() => {
     data,
     error,
     loadData,
+    setData,
   };
 }

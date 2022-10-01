@@ -16,7 +16,7 @@ export const FormField = <T,>(props: FormFieldProps<T> & T) => {
 
   return (
     <div className={classnames("inline-flex flex-col gap-1", classNameField)}>
-      <div className="min-h-[36px]">
+      <div className="min-h-[36px] h-full">
         <Component {...propsToPass} />
       </div>
       {!!helperText && <div className={classnames("animate-reveal-var text-sm", theme, helperClassName)}>{helperText}</div>}

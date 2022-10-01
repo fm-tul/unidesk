@@ -82,7 +82,7 @@ function has_access(i: ExtraRouteProps, user: UserDto): boolean {
   if (!i.requiredGrants || i.requiredGrants.length == 0) {
     return true;
   }
-  const { grants } = user;
-  const has_access = i.requiredGrants.every(grant => grants.includes(grant));
+  const { grantIds } = user;
+  const has_access = i.requiredGrants.every(grant => grantIds?.includes(grant));
   return has_access;
 }
