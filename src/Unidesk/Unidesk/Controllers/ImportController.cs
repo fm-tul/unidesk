@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
+using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Services;
 using Unidesk.Services.Stag;
@@ -31,7 +32,7 @@ public class ImportController : ControllerBase
     [ProducesResponseType(typeof(List<ThesisDto>), 200)]
     public async Task<IActionResult> ImportFromStag(int year, string department)
     {
-        _userProvider.CurrentUser = _userProvider.CurrentUser ?? Db.Models.User.ImportUser;
+        _userProvider.CurrentUser = _userProvider.CurrentUser ?? StaticUsers.ImportUser;
         var items = await _stagService.ImportFromStagAsync(year, department);
         var dtos = _mapper.Map<List<ThesisDto>>(items);
         return Ok(dtos);
@@ -42,7 +43,7 @@ public class ImportController : ControllerBase
     [ProducesResponseType(typeof(ThesisDto), 200)]
     public async Task<IActionResult> ImportOneFromStag(ImportOneRequest body)
     {
-        _userProvider.CurrentUser = _userProvider.CurrentUser ?? Db.Models.User.ImportUser;
+        _userProvider.CurrentUser = _userProvider.CurrentUser ?? StaticUsers.ImportUser;
         var prace = JsonConvert.DeserializeObject<KvalifikacniPrace>(body.Data)
             ?? throw new ArgumentException("Invalid data");
         var item = await _stagService.ImportOneFromStagAsync(prace);

@@ -1,10 +1,12 @@
 using System.Data.Common;
 using System.Net.Mime;
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Unidesk.Client;
 using Unidesk.Configurations;
 using Unidesk.Db;
@@ -24,8 +26,8 @@ var services = builder.Services;
 
 // optionally add appsettings.secret.{username}.json which is ignored
 var configuration = builder.Configuration
-    .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
-    .Build();
+   .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
+   .Build();
 
 
 services.AddEndpointsApiExplorer();
@@ -46,6 +48,7 @@ services.AddScoped<TeamService>();
 services.AddScoped<SimpleEnumService>();
 services.AddScoped<IDateTimeService, DefaultDateTimeService>();
 services.AddScoped<KeywordsService>();
+services.AddScoped<AdminService>();
 
 // mapper
 services.AddAutoMapper(options => options.CreateMappingConfiguration(), typeof(Program));
@@ -63,7 +66,12 @@ services.AddControllersWithFilters();
 services.AddDevCors();
 services.AddHttpContextAccessor();
 services.AddCookieAuthentication();
-services.AddDbContext<UnideskDbContext>(options => options.UseSqlServer(connectionString));
+services.AddDbContext<UnideskDbContext>(options =>
+{
+    options.UseSqlServer(connectionString);
+    // https://stackoverflow.com/questions/70555317/multiple-level-properties-with-ef-core-6
+    options.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
+});
 services.AddScoped<CachedDbContext>();
 services.AddDatabaseDeveloperPageExceptionFilter();
 if (builder.Environment.IsDevelopment())
@@ -78,7 +86,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.GenerateModels<Program>(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "Unidesk.Client", "src", "api-client", "constants")));
+    app.GenerateModels<Program>(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "Unidesk.Client",
+        "src", "api-client", "constants")));
 }
 
 app.UseExceptionHandler();
@@ -105,7 +114,8 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
         context.Response.ContentType = MediaTypeNames.Application.Json;
         var exception = context.Features.Get<IExceptionHandlerPathFeature>();
-        var errorMessage = exception?.Error?.InnerException?.Message ?? exception?.Error?.Message ?? "An error occurred";
+        var errorMessage = exception?.Error?.InnerException?.Message ??
+                           exception?.Error?.Message ?? "An error occurred";
         var data = new SimpleJsonResponse
         {
             Success = false,
@@ -151,7 +161,7 @@ app.MapGet("api/enum/All/list", ([FromServices] UnideskDbContext db, [FromServic
         ThesisTypes = mapper.Map<List<ThesisTypeDto>>(db.ThesisTypes.ToList()),
         StudyProgrammes = mapper.Map<List<StudyProgrammeDto>>(db.StudyProgrammes.ToList())
     })
-    .UseEnumsCachedEndpoint<EnumsDto>("AllEnums");
+   .UseEnumsCachedEndpoint<EnumsDto>("AllEnums");
 
 
 app.MapGet("api/enum/Cache/reset", async ([FromServices] IOutputCacheStore cache, CancellationToken ct) =>

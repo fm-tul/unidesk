@@ -22,9 +22,11 @@ public class KeywordsService
         var combinations = MathUtils.Combinations(keywords.ToList());
         foreach (var (a, b) in combinations)
         {
-            var aValue = a.Value.RemoveWeirdCharacters().Replace(" ", string.Empty);
-            var bValue = b.Value.RemoveWeirdCharacters().Replace(" ", string.Empty);
-            
+            var aValue = a.Value.RemoveWeirdCharacters()
+                .Replace(" ", string.Empty);
+            var bValue = b.Value.RemoveWeirdCharacters()
+                .Replace(" ", string.Empty);
+
             if (onlyVerySimilar && Math.Abs(aValue.Length - bValue.Length) > 2)
             {
                 continue;
@@ -59,7 +61,7 @@ public class KeywordsService
         {
             query = query.Where(i => i.Value.StartsWith(filter.Keyword) || i.Value.Contains(filter.Keyword));
         }
-        
+
         if (filter.UsedCount.HasValue)
         {
             var minUsage = filter.UsedCount switch
@@ -69,11 +71,11 @@ public class KeywordsService
                 KeywordUsedCount.MoreThan10 => 10,
                 _ => 0
             };
-            
+
             query = query
                 .Where(i => i.KeywordThesis.Count > minUsage);
         }
-        
+
         return query;
     }
 
@@ -83,7 +85,7 @@ public class KeywordsService
         var query = includeUsage
             ? _db.Keywords.Include(i => i.KeywordThesis)
             : _db.Keywords.AsQueryable();
-        
+
         var keywords = await query
             .OrderBy(i => i.Value)
             .Where(i => i.Value.StartsWith(keyword))
@@ -93,12 +95,14 @@ public class KeywordsService
         // find partial match if number of results is less than pageSize
         if (keywords.Count < pageSize)
         {
-            var excludeIds = keywords.Select(i => i.Id).ToList();
-            keywords.AddRange(await query
-                .OrderBy(i => i.Value)
-                .Where(i => !excludeIds.Contains(i.Id) && i.Value.Contains(keyword))
-                .Take(pageSize - keywords.Count)
-                .ToListAsync());
+            var excludeIds = keywords.Select(i => i.Id)
+                .ToList();
+            keywords.AddRange(
+                await query
+                    .OrderBy(i => i.Value)
+                    .Where(i => !excludeIds.Contains(i.Id) && i.Value.Contains(keyword))
+                    .Take(pageSize - keywords.Count)
+                    .ToListAsync());
         }
 
         return keywords
@@ -109,7 +113,28 @@ public class KeywordsService
             .ThenBy(i => i.Value.Length)
             .ToList();
     }
-    
+
+    public async Task<List<Keyword>> FindRelatedKeywords(Guid keywordId)
+    {
+        var keywords = await _db.KeywordThesis
+            .Include(i => i.Thesis)
+            .ThenInclude(i => i.KeywordThesis)
+            .ThenInclude(i => i.Keyword)
+            .Where(i => i.KeywordId == keywordId)
+            .SelectMany(i => i.Thesis.KeywordThesis)
+            .ToListAsync();
+
+        var groups = keywords
+            .GroupBy(i => i.Keyword, (i, j) => new { Keyword = i, Count = j.Count() })
+            .Where(i => i.Count > 1)
+            .OrderByDescending(i => i.Count)
+            .Select(i => i.Keyword)
+            .Take(20)
+            .ToList();
+
+        return groups;
+    }
+
     public async Task MergeAsync(Guid keywordMain, Guid keywordAlias)
     {
         var main = await _db.Keywords.FindAsync(keywordMain)
@@ -126,7 +151,8 @@ public class KeywordsService
             .ToListAsync();
 
         // extract theses ids
-        var affectedTheses = affectedKT.Select(i => i.Thesis).ToList();
+        var affectedTheses = affectedKT.Select(i => i.Thesis)
+            .ToList();
 
         // delete affected keyword theses
         _db.KeywordThesis.RemoveRange(affectedKT);
@@ -134,7 +160,8 @@ public class KeywordsService
         // create new keyword theses
         var newKT = affectedTheses
             .Where(i => !i.Keywords.Contains(alias))
-            .Select(i => new KeywordThesis { ThesisId = i.Id, KeywordId = main.Id }).ToList();
+            .Select(i => new KeywordThesis { ThesisId = i.Id, KeywordId = main.Id })
+            .ToList();
 
         // add new keyword theses
         _db.KeywordThesis.AddRange(newKT);

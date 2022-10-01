@@ -11,17 +11,20 @@ public static class EnumerableExtensions
         }
     }
 
-    public static (List<T> Same, List<T> ToBeAdded, List<T> ToBeDeleted) Synchronize<T>(this List<T> items, List<T> other, Func<T, T, bool> comparer)
+    public static (List<T> Same, List<T> SameNew, List<T> ToBeAdded, List<T> ToBeDeleted) Synchronize<T>(this List<T> items, List<T> other, Func<T, T, bool> comparer)
     {
         var toBeAdded = new List<T>();
         var toBeDeleted = new List<T>();
         var same = new List<T>();
+        var sameNew = new List<T>();
 
         foreach (var item in items)
         {
-            if (other.Any(x => comparer(item, x)))
+            var match = other.FirstOrDefault(x => comparer(item, x));
+            if (match is not null)
             {
                 same.Add(item);
+                sameNew.Add(match);
             }
             else
             {
@@ -37,6 +40,22 @@ public static class EnumerableExtensions
             }
         }
 
-        return (same, toBeAdded, toBeDeleted);
+        return (same, sameNew, toBeAdded, toBeDeleted);
+    }
+    
+    public static (List<T> Same, List<T> SameNew, List<T> ToBeAdded, List<T> ToBeDeleted) SynchronizeWithAction<T>(this List<T> items, List<T> other, Func<T, T, bool> comparer, Action<T, T> action)
+    {
+        var (same, sameNew, toBeAdded, toBeDeleted) = items.Synchronize(other, comparer);
+        if (same.Count != sameNew.Count)
+        {
+            throw new Exception("Same and SameNew lists must be the same length");
+        }
+        
+        for (var i = 0; i < same.Count; i++)
+        {
+            action(same[i], sameNew[i]);
+        }
+        
+        return (same, sameNew, toBeAdded, toBeDeleted);
     }
 }

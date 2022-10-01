@@ -1,23 +1,33 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Unidesk.Db.Models;
+using Unidesk.Server;
 
 namespace Unidesk.Dtos;
 
-public class UserDto : TrackedEntityDto
+public class UserDto : UserSimpleDto
 {
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string? StagId { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public string? MiddleName { get; set; }
-    public string? TitleBefore { get; set; }
-    public string? TitleAfter { get; set; }
+    [JsonIgnore]
+    public List<Grant> Grants { get; set; } = new();
     
     [Required]
-    public List<Guid> Grants { get; set; } = new List<Guid>();
+    public List<Guid> GrantIds => Grants.Select(g => g.Id).ToList();
     
     public int ThesisCount { get; set; }
     
+    [Required]
     public UserFunction UserFunction { get; set; }
+    
+    
+    [IgnoreMapping]
+    public double? SupervisionsRatio { get; set; }
+    
+    [IgnoreMapping]
+    public int? SupervisionsTotal { get; set; }
+    
+    [Required]
+    public List<UserInTeamDto> UserInTeams { get; set; } = new();
+    
+    [Required]
+    public List<TeamSimpleDto> Teams { get; set; } = new();
 }

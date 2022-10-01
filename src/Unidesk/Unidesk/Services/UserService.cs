@@ -30,7 +30,9 @@ public class UserService
 
     public Task<User?> FindAsync(Guid id)
     {
-        return _db.Users.FirstOrDefaultAsync(x => x.Id == id);
+        return _db.Users
+           .Query()
+           .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public Task<List<User>> FindAllAsync(UserFilter keyword)
@@ -50,8 +52,7 @@ public class UserService
 
         if (filter.UserFunctions.Any())
         {
-            // combine list of enums bitwise
-            var combinedFunctions = filter.UserFunctions.Aggregate((x, y) => x | y);
+            var combinedFunctions = filter.UserFunctions.Combine();
             query = query.Where(x => (x.UserFunction & combinedFunctions) != 0);
         }
 
@@ -77,6 +78,45 @@ public class UserService
         }
 
         return query;
+    }
+
+    public async Task GetUsersRatio(UserFunction userFunction = UserFunction.Supervisor, ThesisStatus thesisStatus = ThesisStatus.Finished_Susccessfully)
+    {
+        var teachers = await _db.ThesisUsers
+            .Where(i => i.Function == userFunction)
+            .Select(i => new { i.User, i.Thesis.Status })
+            .ToListAsync();
+
+        var grouped = teachers
+            .GroupBy(i => i.User, (i, j) =>
+            {
+                var statuses = j
+                    .Select(k => k.Status)
+                    .ToList();
+                
+                return new { User = i, Ratio = statuses.Count(k => k == thesisStatus) / (double)statuses.Count(), Total = statuses.Count };
+            })
+            .Where(i => i.Total >= 10)
+            .OrderByDescending(i => i.Ratio)
+            .ToList();
+    }
+    
+    public async Task<(double? Ratio, int? Total)> GetUserRatio(User user, UserFunction userFunction = UserFunction.Supervisor, ThesisStatus thesisStatus = ThesisStatus.Finished_Susccessfully)
+    {
+        var statuses = await _db.ThesisUsers
+            .Where(i => i.Function == userFunction && i.UserId == user.Id)
+            .Select(i => i.Thesis.Status)
+            .ToListAsync();
+
+        if (!statuses.Any())
+        {
+            return (null, null);
+        }
+
+        var total = statuses.Count;
+        var ratio = statuses.Count(i => i == thesisStatus) / (double)total;
+        
+        return (ratio, total);
     }
 
     public IEnumerable<KeyValuePair<string, string>> GetUserClaimableProperties(User user)
@@ -128,7 +168,7 @@ public class UserService
                 : $"{claims.Name}@unidesk.tul",
             Roles = new List<UserRole>
             {
-                new UserRole
+                new()
                 {
                     Name = "Debug",
                     Grants = claims.Grants
@@ -163,7 +203,7 @@ public class UserService
         {
             user.Roles = new List<UserRole>
             {
-                new UserRole { Name = "Admin", Grants = UserGrants.All.ToList() }
+                new() { Name = "Admin", Grants = UserGrants.All.ToList() }
             };
         }
 

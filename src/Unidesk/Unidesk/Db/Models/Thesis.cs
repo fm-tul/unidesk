@@ -46,7 +46,7 @@ public class Thesis : TrackedEntity
     /// List of keywords for the thesis (both English and Czech)
     /// </summary>
     [IgnoreMapping]
-    public List<KeywordThesis> KeywordThesis { get; set; } = new List<KeywordThesis>();
+    public List<KeywordThesis> KeywordThesis { get; set; } = new();
     
     [NotMapped]
     public List<Keyword> Keywords => KeywordThesis.Select(x => x.Keyword).ToList();
@@ -97,7 +97,7 @@ public class Thesis : TrackedEntity
     /// after the thesis is accepted, this can be ignored, and the selected type is used instead <see cref="ThesisType"/>
     /// </summary>
     [IgnoreMapping]
-    public List<ThesisType> ThesisTypeCandidates { get; set; } = new List<ThesisType>();
+    public List<ThesisType> ThesisTypeCandidates { get; set; } = new();
     [NotMapped]
     public IEnumerable<Guid> ThesisTypeCandidateIds => ThesisTypeCandidates.Select(x => x.Id).ToList();
 
@@ -106,7 +106,7 @@ public class Thesis : TrackedEntity
     /// List of possible outcomes for the thesis (e.g. HW solution, SW solution, Modelling, etc.)
     /// </summary>
     [IgnoreMapping]
-    public List<ThesisOutcome> Outcomes { get; set; } = new List<ThesisOutcome>();
+    public List<ThesisOutcome> Outcomes { get; set; } = new();
     [NotMapped]
     public IEnumerable<Guid> OutcomeIds => Outcomes.Select(x => x.Id).ToList();
 
@@ -147,7 +147,7 @@ public class Thesis : TrackedEntity
     /// List of users who are assigned to the thesis, after the thesis is accepted must contain at least one user (or one team)
     /// </summary>
     [IgnoreMapping]
-    public List<ThesisUser> ThesisUsers { get; set; } = new List<ThesisUser>();
+    public List<ThesisUser> ThesisUsers { get; set; } = new();
     
     [NotMapped]
     public List<User> Authors => ThesisUsers.Where(i => i.Function == UserFunction.Author).Select(x => x.User).ToList();
@@ -162,6 +162,6 @@ public class Thesis : TrackedEntity
     /// <summary>
     ///List of teams who are assigned to the thesis, after the thesis is accepted must contain at least one user (or one team)
     /// </summary>
-    public List<Team> Teams { get; set; } = new List<Team>();
+    public List<Team> Teams { get; set; } = new();
     // public List<Review> Reviews { get; set; }
 }

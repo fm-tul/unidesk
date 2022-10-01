@@ -28,13 +28,15 @@ public static class AutoMapperConfigurationExtensions
         
         options.CreateMapBetween<Keyword, KeywordDto>();
         options.CreateMapBetween<SimilarKeyword, SimilarKeywordDto>();
-        
+
         options.CreateMapBetween<Team, TeamDto>();
-
-        options.CreateMapWithIgnore<UserInTeamDto, UserInTeam>();
-        options.CreateMapWithIgnore<UserInTeam, UserInTeamDto>()
-            .ForMember(i => i.Team, i => i.MapFrom(j => j.Team.Name));
-
+        options.CreateMapBetween<User, UserDto>();
+        
+        options.CreateMapBetween<UserInTeam, UserInTeamDto>();
+        
+        options.CreateMapBetween<User, UserSimpleDto>();
+        options.CreateMapBetween<Team, TeamSimpleDto>();
+        
         options.CreateMapWithIgnore<SchoolYear, SchoolYearDto>()
             .ForMember(i => i.Start, i => i.MapFrom(j => j._start))
             .ForMember(i => i.End, i => i.MapFrom(j => j._end));
@@ -43,10 +45,6 @@ public static class AutoMapperConfigurationExtensions
             .ForMember(i => i.Start, i => i.MapFrom(j => DateOnly.FromDateTime(j.Start)))
             .ForMember(i => i.End, i => i.MapFrom(j => DateOnly.FromDateTime(j.End)));
 
-        options.CreateMapWithIgnore<User, UserDto>()
-            .ForMember(i => i.Grants, i => i.MapFrom(j => j.Roles.SelectMany(k => k.Grants).Select(k => k.Id)));
-
-        options.CreateMapWithIgnore<UserDto, User>();
         
         options.CreateMapWithIgnore<KeywordThesis, KeywordThesisDto>()
             .ForMember(i => i.Value, i => i.MapFrom(j => j.Keyword.Value))
@@ -59,14 +57,14 @@ public static class AutoMapperConfigurationExtensions
 
         return options;
     }
-    
-    public static IMappingExpression<TSource,TDestination> CreateMapWithIgnore<TSource, TDestination>(this IMapperConfigurationExpression options)
+
+    private static IMappingExpression<TSource,TDestination> CreateMapWithIgnore<TSource, TDestination>(this IMapperConfigurationExpression options)
     {
         return options.CreateMap<TSource, TDestination>()
             .IgnoreNoMap();
     }
 
-    public static IMapperConfigurationExpression CreateMapBetween<TSource, TDestination>(this IMapperConfigurationExpression options)
+    private static IMapperConfigurationExpression CreateMapBetween<TSource, TDestination>(this IMapperConfigurationExpression options)
     {
         options.CreateMap<TSource, TDestination>()
             .AddTransform<string?>(i => i == null ? null : string.IsNullOrEmpty(i.Trim()) ? null : i)
@@ -78,7 +76,7 @@ public static class AutoMapperConfigurationExtensions
         return options;
     }
 
-    public static IMappingExpression<TSource, TDestination> IgnoreNoMap<TSource, TDestination>(
+    private static IMappingExpression<TSource, TDestination> IgnoreNoMap<TSource, TDestination>(
         this IMappingExpression<TSource, TDestination> expression)
     {
         var type = typeof(TDestination);

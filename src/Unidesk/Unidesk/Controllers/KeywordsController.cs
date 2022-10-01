@@ -41,7 +41,7 @@ public class KeywordsController : ControllerBase
         var response = await query
             .OrderByDescending(i => i.KeywordThesis.Count)
             .ToListWithPagingAsync<Keyword, KeywordDto>(filter.Filter, _mapper);
-
+        
         return Ok(response);
     }
 
@@ -52,6 +52,19 @@ public class KeywordsController : ControllerBase
     {
         var pageSize = 30;
         var keywords = await _keywordsService.FindAsync(keyword, pageSize, includeUsage: true);
+
+        var keywordsDto = _mapper
+            .Map<List<KeywordDto>>(keywords);
+
+        return Ok(keywordsDto);
+    }
+    
+    [HttpGet, Route("find-related")]
+    [SwaggerOperation(OperationId = nameof(FindRelated))]
+    [ProducesResponseType(typeof(List<KeywordDto>), 200)]
+    public async Task<IActionResult> FindRelated(Guid keywordId)
+    {
+        var keywords = await _keywordsService.FindRelatedKeywords(keywordId);
 
         var keywordsDto = _mapper
             .Map<List<KeywordDto>>(keywords);
@@ -112,7 +125,7 @@ public class MergePair
 }
 public class MergePairs
 {
-    public List<MergePair> Pairs { get; set; } = new List<MergePair>();
+    public List<MergePair> Pairs { get; set; } = new();
 }
 
 public class SimilarKeywordDto

@@ -1,8 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -10,6 +7,9 @@ using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
+using Unidesk.Security;
+using Unidesk.ServiceFilters;
+using Unidesk.Services;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Controllers;
@@ -20,12 +20,14 @@ public class ThesisController : Controller
     private readonly IMapper _mapper;
     private readonly UnideskDbContext _db;
     private readonly ILogger<ThesisController> _logger;
+    private readonly IUserProvider _userProvider;
 
-    public ThesisController(IMapper mapper, UnideskDbContext db, ILogger<ThesisController> logger)
+    public ThesisController(IMapper mapper, UnideskDbContext db, ILogger<ThesisController> logger, IUserProvider userProvider)
     {
         _mapper = mapper;
         _db = db;
         _logger = logger;
+        _userProvider = userProvider;
     }
 
     [HttpGet, Route("get-one")]
@@ -56,7 +58,7 @@ public class ThesisController : Controller
         var dto = _mapper.Map<ThesisDto>(item);
         return Ok(dto);
     }
-
+    
 
     [HttpPost, Route("find")]
     [SwaggerOperation(OperationId = nameof(Find))]
@@ -116,6 +118,7 @@ public class ThesisController : Controller
     [SwaggerOperation(OperationId = nameof(Upsert))]
     [ProducesResponseType(typeof(ThesisDto), 200)]
     [ProducesResponseType(typeof(SimpleJsonResponse), 500)]
+    [RequireGrant(UserGrants.Entity_Thesis_Edit_Id)]
     public async Task<IActionResult> Upsert([FromBody] ThesisDto dto)
     {
         new ThesisDtoValidator().ValidateAndThrow(dto);
@@ -124,7 +127,7 @@ public class ThesisController : Controller
             ? new Thesis()
             : await _db.Theses
                   .Query()
-                  .FirstOrDefaultAsync(i => i.Id == dto.Id)
+                  .FirstOrDefaultAsync(dto.Id)
               ?? throw new Exception("Thesis not found");
 
         item = isNew
@@ -158,11 +161,11 @@ public class ThesisController : Controller
         else
         {
             // handling students/authors/supervisors/oppontents is bit more complicated
-            var (_, toBeAdded, toBeDeleted) = item.ThesisUsers.Synchronize(newThesisUsers, (i, j) => i.UserId == j.UserId);
+            var (_, _, toBeAdded, toBeDeleted) = item.ThesisUsers.Synchronize(newThesisUsers, (i, j) => i.UserId == j.UserId);
             _db.ThesisUsers.AddRange(toBeAdded.Select(i => i.StripToGuids()));
             _db.ThesisUsers.RemoveRange(toBeDeleted);
 
-            _logger.LogInformation("Removed {count} users from thesis {thesisId}", toBeDeleted.Count, item.Id);
+            _logger.LogInformation("Removed {Count} users from thesis {ThesisId}", toBeDeleted.Count, item.Id);
             _db.Theses.Update(item);
         }
 

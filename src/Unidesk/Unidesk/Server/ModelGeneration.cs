@@ -4,7 +4,7 @@ namespace Unidesk.Server;
 
 public class ModelGeneration
 {
-    private readonly HttpClient _httpClient = new HttpClient();
+    private readonly HttpClient _httpClient = new();
     private readonly Thread _thread;
     private bool _shouldStop { get; set; } = false;
     private const string SwaggerUrl = "http://localhost:5222/swagger/v1/swagger.json";
@@ -15,7 +15,14 @@ public class ModelGeneration
         {
             while (!_shouldStop)
             {
-                await GetModel();
+                try
+                {
+                    await GetModel();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
                 await Task.Delay(TimeSpan.FromSeconds(1));
             }
         });

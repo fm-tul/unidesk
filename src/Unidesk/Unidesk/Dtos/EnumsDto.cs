@@ -2,7 +2,7 @@
 
 namespace Unidesk.Dtos;
 
-public class EnumsDto
+public class EnumsDto : DtoBase
 {
     public List<DepartmentDto> Departments { get; set; }
     public List<FacultyDto> Faculties { get; set; }

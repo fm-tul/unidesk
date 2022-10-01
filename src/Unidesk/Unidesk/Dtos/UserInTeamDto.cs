@@ -1,17 +1,21 @@
-﻿using Unidesk.Db.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Unidesk.Db.Models;
 using Unidesk.Server;
 
 namespace Unidesk.Dtos;
 
-public class UserInTeamDto
+public class UserInTeamDto : DtoBase
 {
     public Guid UserId { get; set; }
-    public UserDto User { get; set; }
-
+    public UserSimpleDto User { get; set; }
     
-    [IgnoreMapping]
-    public string Team { get; set; }
     public Guid TeamId { get; set; }
-
+    public TeamSimpleDto Team { get; set; }
+    
     public UserInTeamStatus Status { get; set; }
+    public TeamRole Role { get; set; }
+    
+    [Required]
+    [IgnoreMapping]
+    public string Id => $"{UserId}_{TeamId}";
 }

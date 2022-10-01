@@ -1,9 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using AutoMapper;
 using Unidesk.Db.Core;
+using Unidesk.Dtos;
 using Unidesk.Security;
+using Unidesk.Server;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Db.Models;
 
+[AutoMap(typeof(UserDto))]
 public class User : TrackedEntity, ISimpleUser
 {
     public string? Username { get; set; }
@@ -13,6 +19,9 @@ public class User : TrackedEntity, ISimpleUser
     public string? MiddleName { get; set; }
     public string? TitleBefore { get; set; }
     public string? TitleAfter { get; set; }
+    
+    [NotMapped]
+    public string? FullName => this.FullName();
 
     public string? Email { get; set; }
     public string? Phone { get; set; }
@@ -26,77 +35,26 @@ public class User : TrackedEntity, ISimpleUser
     public string? Work { get; set; }
     public string? WorkAddress { get; set; }
     public string? WorkPosition { get; set; }
-    public List<UserRole> Roles { get; set; } = new List<UserRole>();
+    public List<UserRole> Roles { get; set; } = new();
 
-    public List<UserInTeam> UserInTeams { get; set; } = new List<UserInTeam>();
     public UserFunction UserFunction { get; set; }
     
-    public List<ThesisUser> Theses { get; set; } = new List<ThesisUser>();
     
     [NotMapped]
+    public List<Team> Teams => UserInTeams.Select(x => x.Team).ToList();
+    
+    [IgnoreMapping]
+    public List<UserInTeam> UserInTeams { get; set; } = new();
+    
+    public List<ThesisUser> Theses { get; set; } = new();
+
+    [NotMapped]
+    [IgnoreMapping]
+    public List<Grant> Grants => Roles.SelectMany(r => r.Grants).ToList();
+    
+    [NotMapped]
+    public List<Guid> GrantIds => Grants.Select(g => g.Id).ToList();
+
+    [NotMapped]
     public int ThesisCount => Theses.Count;
-
-
-    public static readonly User Guest = new User
-    {
-        Id = Guid.Empty,
-        Username = "Guest",
-        FirstName = "Guest",
-        LastName = "Guest",
-        MiddleName = "Guest",
-        Email = "guest@unidesk.com",
-        Roles = new List<UserRole>()
-        {
-            new UserRole()
-            {
-                Name = "Guest",
-                Grants = new List<Grant>()
-                {
-                    UserGrants.User_Guest,
-                }
-            }
-        }
-    };
-    
-    public static readonly User ImportUser = new User
-    {
-        Id = Guid.Empty,
-        Username = "Import",
-        FirstName = "Import",
-        LastName = "Import",
-        MiddleName = "Import",
-        Email = "import-user@unidesk.com",
-        Roles = new List<UserRole>()
-        {
-            new UserRole()
-            {
-                Name = "Import",
-                Grants = new List<Grant>()
-                {
-                    UserGrants.User_SuperAdmin
-                }
-            }
-        }
-    };
-    
-    public static readonly User InitialSeedUser = new User
-    {
-        Id = Guid.Empty,
-        Username = "InitialSeed",
-        FirstName = "InitialSeed",
-        LastName = "InitialSeed",
-        MiddleName = "InitialSeed",
-        Email = "seed@unidesk.com",
-        Roles = new List<UserRole>()
-        {
-            new UserRole()
-            {
-                Name = "InitialSeed",
-                Grants = new List<Grant>()
-                {
-                    UserGrants.User_SuperAdmin
-                }
-            }
-        }
-    };
 }

@@ -1,9 +1,11 @@
 ﻿using System.Text.Json.Serialization;
+using Unidesk.Client;
 
 namespace Unidesk.Db.Models;
 
 [Flags]
 [JsonConverter(typeof(JsonStringEnumConverter))]
+[GenerateModel(Name = "UserFunction", ForType = typeof(UserFunction), GenerateAggreation = true)]
 public enum UserFunction
 {
     None = 0,

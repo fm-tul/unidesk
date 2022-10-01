@@ -74,7 +74,7 @@ public class UnideskDbContext : DbContext
 
     public async Task<OperationInfo> SeedDbAsync()
     {
-        _userProvider.CurrentUser = _userProvider.CurrentUser ?? User.InitialSeedUser;
+        _userProvider.CurrentUser = _userProvider.CurrentUser ?? StaticUsers.InitialSeedUser;
         var info = InitialSeed.Seed(this);
 
         if (info.TotalRows > 0)

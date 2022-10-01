@@ -9,7 +9,7 @@ public static class ModelGenerator
 {
     
     // regex mathing GENERATED ON 2022-08-07 18:15:21
-    private static readonly Regex _generatedOnRegex = new Regex(@"GENERATED ON (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", RegexOptions.Multiline);
+    private static readonly Regex _generatedOnRegex = new(@"GENERATED ON (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", RegexOptions.Multiline);
     
     public static IEnumerable<string> Generate(Type root, string outputDir)
     {
@@ -37,7 +37,8 @@ public static class ModelGenerator
                 output.AppendLine("/* DO NOT EDIT */");
                 output.AppendLine($"/* GENERATED ON {DateTime.Now:yyyy-MM-dd HH:mm:ss} */");
                 output.AppendLine();
-                var outputFile = Path.Combine(outputDir, $"{attr.Name}_{attr.ForType.Name}s.ts");
+                var name = attr.Name ?? attr.ForType.Name;
+                var outputFile = Path.Combine(outputDir, $"{name}.ts");
 
                 // look for public static fields or certain type
                 var fields = cls.GetFields(BindingFlags.Static | BindingFlags.Public)
@@ -47,8 +48,23 @@ public static class ModelGenerator
                 foreach (var field in fields)
                 {
                     var value = field.GetValue(null);
-                    var str = JsonSerializer.Serialize(value, options);
-                    output.AppendLine($"export const {field.Name} = {str};");
+                    
+                    var multiLangAttributes = field
+                        .GetCustomAttributes<MultiLangAttribute>()
+                        .ToList();
+                    
+                    if (multiLangAttributes.Any())
+                    {
+                        var multiLangDict = multiLangAttributes.Combine();
+                        multiLangDict["value"] = value!;
+                        var str = JsonSerializer.Serialize(multiLangDict, options);
+                        output.AppendLine($"export const {field.Name} = {str};");
+                    }
+                    else
+                    {
+                        var str = JsonSerializer.Serialize(value, options);
+                        output.AppendLine($"export const {field.Name} = {str};");
+                    }
                 }
 
                 if (attr.GenerateAggreation)

@@ -7,7 +7,7 @@ namespace Unidesk.Db.Core;
 public class CachedDbSet<T> where T : class
 {
     public DbSet<T> DbSet { get; set; }
-    internal readonly List<T> _cache = new List<T>();
+    internal readonly List<T> _cache = new();
     private bool _isLoaded;
     
     public CachedDbSet(DbSet<T> dbSet)

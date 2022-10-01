@@ -229,6 +229,8 @@ public class ImportService
         
         if (existing.Count == 1)
         {
+            // update user function
+            existing[0].UserFunction |= userFunction;
             return existing[0];
         }
         

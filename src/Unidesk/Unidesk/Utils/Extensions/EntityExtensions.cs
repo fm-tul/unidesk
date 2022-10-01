@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
+using Unidesk.Dtos;
 
 namespace Unidesk.Utils.Extensions;
 
@@ -23,6 +24,13 @@ public static class EntityExtensions
             Function = thesisUser.Function
         };
     }
+    
+    public static UserInTeam StripToGuids(this UserInTeam thesisUser)
+    {
+        thesisUser.Team = null;
+        thesisUser.User = null;
+        return thesisUser;
+    }
 }
 
 public static class EntityQueryExtensions
@@ -38,11 +46,27 @@ public static class EntityQueryExtensions
             .ThenInclude(i => i.User);
     }
     
+    public static IQueryable<Team> Query(this DbSet<Team> dbSet)
+    {
+        return dbSet
+           .Include(i => i.UserInTeams)
+           .ThenInclude(i => i.Team)
+           .Include(i => i.UserInTeams)
+           .ThenInclude(i => i.User);
+    }
+    
     public static IQueryable<KeywordThesis> Query(this DbSet<KeywordThesis> dbSet)
     {
         return dbSet
             .Include(i => i.Keyword)
             .Include(i => i.Thesis);
+    }
+    
+    public static IQueryable<User> Query(this DbSet<User> dbSet)
+    {
+        return dbSet
+           .Include(i => i.UserInTeams)
+           .ThenInclude(i => i.Team);
     }
 
     public static T First<T>(this IQueryable<T> items, Guid id) where T : TrackedEntity

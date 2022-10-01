@@ -30,7 +30,7 @@ public class RequireGrantFilter : IActionFilter
         }
 
         var requiredGrants = requiredAttributes.Select(x => x.Grant).ToList();
-        var userGrants = _userProvider!.CurrentUser?.Roles.SelectMany(i => i.Grants).ToList() ?? new List<Grant>();
+        var userGrants = _userProvider!.CurrentUser?.Grants.ToList() ?? new List<Grant>();
         var result = HasAccess(requiredGrants, userGrants);
 
         if (!result.Granted)

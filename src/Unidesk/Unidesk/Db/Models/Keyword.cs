@@ -10,7 +10,7 @@ public class Keyword : TrackedEntity
     public string Locale { get; set; }
     
     [IgnoreMapping]
-    public List<KeywordThesis> KeywordThesis { get; set; } = new List<KeywordThesis>();
+    public List<KeywordThesis> KeywordThesis { get; set; } = new();
     
     [NotMapped]
     public int Used => KeywordThesis.Count;

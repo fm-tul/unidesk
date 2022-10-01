@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Swashbuckle.AspNetCore.Annotations;
-using Unidesk.Server;
 
 namespace Unidesk.Dtos;
 
@@ -23,8 +22,4 @@ public class TrackedEntityDto : IdEntityDto
     [Required]
     public DateTime Modified { get; set; } = DateTime.Now;
     public string? ModifiedBy { get; set; }
-
-    public bool IsNew => false;
-    public bool IsNew2 => DateOnly.FromDateTime(Created) == DateOnly.FromDateTime(DateTime.Now)
-                         && (TimeOnly.FromDateTime(Created) - TimeOnly.FromDateTime(DateTime.Now)) < TimeSpan.FromMilliseconds(1);
 }

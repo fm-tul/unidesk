@@ -22,7 +22,7 @@ public class QueryFilter
     public int Total { get; set; }
     
     
-    public static readonly QueryFilter DefaultQueryFilter = new QueryFilter
+    public static readonly QueryFilter DefaultQueryFilter = new()
     {
         Page = 1,
         PageSize = 20,

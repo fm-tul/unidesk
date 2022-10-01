@@ -3,7 +3,7 @@ using Unidesk.Db.Models;
 
 namespace Unidesk.Dtos;
 
-public class KeywordThesisDto
+public class KeywordThesisDto : DtoBase
 {
     public Guid KeywordId { get; set; }
     public Guid ThesisId { get; set; }

@@ -4,7 +4,7 @@ namespace Unidesk.Utils.Text;
 
 public static class TitlesUtils
 {
-    public static readonly List<TitleSpec> TitleSpecs = new List<TitleSpec>
+    public static readonly List<TitleSpec> TitleSpecs = new()
     {
         new TitleSpec("Bc.", true, "bakalář"),
         new TitleSpec("BcA.", true, "bakalář umění"),

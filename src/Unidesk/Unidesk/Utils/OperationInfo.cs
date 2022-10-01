@@ -24,7 +24,7 @@ public struct OperationInfoEntry
 public class OperationInfo
 {
     private readonly string OperationName;
-    private List<OperationInfoEntry> _entries { get; set; } = new List<OperationInfoEntry>();
+    private List<OperationInfoEntry> _entries { get; set; } = new();
     public int TotalRows => _entries.Sum(x => x.Rows);
     public TimeSpan TotalDuration => _entries.Aggregate(TimeSpan.Zero, (acc, x) => acc + x.Duration);
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unidesk.Db;
 
@@ -11,9 +12,10 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    partial class UnideskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220923160208_TeamChanges")]
+    partial class TeamChanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -400,6 +402,7 @@ namespace Unidesk.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Avatar")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Created")
@@ -428,14 +431,9 @@ namespace Unidesk.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ThesisId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Teams");
                 });
@@ -849,10 +847,6 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.Thesis", null)
                         .WithMany("Teams")
                         .HasForeignKey("ThesisId");
-
-                    b.HasOne("Unidesk.Db.Models.User", null)
-                        .WithMany("Teams")
-                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.Thesis", b =>
@@ -964,7 +958,7 @@ namespace Unidesk.Migrations
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.User", "User")
-                        .WithMany()
+                        .WithMany("UserInTeams")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1014,9 +1008,9 @@ namespace Unidesk.Migrations
                 {
                     b.Navigation("Roles");
 
-                    b.Navigation("Teams");
-
                     b.Navigation("Theses");
+
+                    b.Navigation("UserInTeams");
                 });
 #pragma warning restore 612, 618
         }

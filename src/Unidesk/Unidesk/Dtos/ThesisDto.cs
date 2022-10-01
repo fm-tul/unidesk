@@ -20,7 +20,7 @@ public class ThesisDto : TrackedEntityDto
     public string? AbstractCze { get; set; }
 
     [Required]
-    public List<KeywordDto> Keywords { get; set; } = new List<KeywordDto>();
+    public List<KeywordDto> Keywords { get; set; } = new();
 
     /// <summary>
     /// Schoold year of the thesis
@@ -62,13 +62,13 @@ public class ThesisDto : TrackedEntityDto
     /// After the thesis is accepted, this can be ignored (as it should be empty), and the selected type is used instead <see cref="ThesisType"/>
     /// </summary>
     [Required]
-    public List<Guid> ThesisTypeCandidateIds { get; set; } = new List<Guid>();
+    public List<Guid> ThesisTypeCandidateIds { get; set; } = new();
 
     /// <summary>
     /// Ids of possible outcomes for the thesis (e.g. HW solution, SW solution, Modelling, etc.)
     /// </summary>
     [Required]
-    public List<Guid> OutcomeIds { get; set; } = new List<Guid>();
+    public List<Guid> OutcomeIds { get; set; } = new();
 
     public string? Guidelines { get; set; }
 
@@ -94,20 +94,20 @@ public class ThesisDto : TrackedEntityDto
     public int? Grade { get; set; }
 
     [IgnoreMapping]
-    public List<ThesisUserDto> ThesisUsers { get; set; } = new List<ThesisUserDto>();
+    public List<ThesisUserDto> ThesisUsers { get; set; } = new();
 
     [Required]
-    public List<UserDto> Authors { get; set; } = new List<UserDto>();
+    public List<UserDto> Authors { get; set; } = new();
 
     [Required]
-    public List<UserDto> Supervisors { get; set; } = new List<UserDto>();
+    public List<UserDto> Supervisors { get; set; } = new();
 
     [Required]
-    public List<UserDto> Opponents { get; set; } = new List<UserDto>();
+    public List<UserDto> Opponents { get; set; } = new();
 
     [Required]
     [IgnoreMapping]
-    public List<TeamDto> Teams { get; set; } = new List<TeamDto>();
+    public List<TeamDto> Teams { get; set; } = new();
 }
 
 public class ThesisDtoValidator : AbstractValidator<ThesisDto>

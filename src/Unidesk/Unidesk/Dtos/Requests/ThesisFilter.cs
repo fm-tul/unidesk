@@ -6,7 +6,7 @@ public class ThesisFilter : IFilter
 {
     public QueryFilter Filter { get; set; }
     public Guid? UserId { get; set; }
-    public List<Guid> Keywords { get; set; } = new List<Guid>();
+    public List<Guid> Keywords { get; set; } = new();
     
     public ThesisStatus? Status { get; set; }
     

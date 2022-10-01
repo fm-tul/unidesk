@@ -43,6 +43,8 @@ public partial class UsersController : ControllerBase
 
 
     [HttpGet, Route("get/{id}")]
+    [SwaggerOperation(OperationId = nameof(Get))]
+    [ProducesResponseType(typeof(UserDto), 200)]
     public async Task<IActionResult> Get(Guid id)
     {
         var user = await _userService.FindAsync(id);
@@ -51,7 +53,13 @@ public partial class UsersController : ControllerBase
             return NotFound();
         }
 
-        return Ok(_mapper.Map<UserDto>(user));
+        var dto = _mapper.Map<UserDto>(user);
+        if ((user.UserFunction & UserFunction.Supervisor) > 0)
+        {
+            (dto.SupervisionsRatio, dto.SupervisionsTotal) = await _userService.GetUserRatio(user);
+        }
+
+        return Ok(dto);
     }
     
     [HttpPost, Route("find")]
@@ -64,7 +72,33 @@ public partial class UsersController : ControllerBase
             .Include(i => i.Theses)
             .OrderByDescending(i => i.Theses.Count)
             .ToListWithPagingAsync<User, UserDto>(query?.Filter, _mapper);
-            
+
         return Ok(response);
+    }
+    
+    [HttpGet, Route("the-best-teachers")]
+    [SwaggerOperation(OperationId = nameof(GetTheBestTeachers))]
+    [ProducesResponseType(typeof(List<UserDto>), 200)]
+    public async Task<IActionResult> GetTheBestTeachers()
+    {
+        var teachers = _db.ThesisUsers
+            .Where(i => i.Function == UserFunction.Supervisor)
+            .Select(i => new { i.User, i.Thesis.Status })
+            .ToList();
+
+        var grouped = teachers
+            .GroupBy(i => i.User, (i, j) =>
+            {
+                var statuses = j
+                    .Select(k => k.Status)
+                    .ToList();
+                
+                return new { User = i, Ratio = statuses.Count(k => k == ThesisStatus.Finished_Susccessfully) / (double)statuses.Count(), Total = statuses.Count };
+            })
+            .Where(i => i.Total >= 10)
+            .OrderByDescending(i => i.Ratio)
+            .ToList();
+        
+        return Ok();
     }
 }

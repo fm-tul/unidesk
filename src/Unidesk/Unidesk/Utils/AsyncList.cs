@@ -9,7 +9,7 @@ public class AsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQuer
     
     public AsyncEnumerable(Expression expression) : base(expression) { }
 
-    public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken())
+    public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new())
     {
         throw new NotImplementedException();
     }

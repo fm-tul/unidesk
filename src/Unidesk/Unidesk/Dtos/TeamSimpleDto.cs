@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace Unidesk.Dtos;
 
-public class IdEntityDto : DtoBase
+public class TeamSimpleDto : DtoBase
 {
     [Required]
     public Guid Id { get; set; }
+    
+    [Required]
+    public string Name { get; set; }
 }
