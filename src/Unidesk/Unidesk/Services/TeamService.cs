@@ -46,6 +46,12 @@ public class TeamService
            .Query()
            .FirstAsync(id);
     }
+    
+    public async Task<UserInTeam?> GetOneUserInTeamAsync(Guid teamId, Guid userId)
+    {
+        return await _db.UserInTeams
+           .FirstAsync(x => x.TeamId == teamId && x.UserId == userId);
+    }
 
     public async Task<Team> UpsertAsync(TeamDto dto)
     {

@@ -51,12 +51,10 @@ public static class ServiceCollectionExtensions
 
     public static async Task<WebApplication> MigrateDbAsync(this WebApplication app)
     {
-        using (var scope = app.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<UnideskDbContext>();
-            await context.Database.MigrateAsync();
-            await context.SeedDbAsync();
-        }
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<UnideskDbContext>();
+        await context.Database.MigrateAsync();
+        await context.SeedDbAsync();
 
         return app;
     }

@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
+using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
-public class ThesisTypeDto : TrackedEntityDto
+public class ThesisTypeDto : TrackedEntityDto, IValidatedEntity<ThesisTypeDto>
 {
     [Required]
     public string NameEng { get; set; }
@@ -19,16 +20,6 @@ public class ThesisTypeDto : TrackedEntityDto
     
     [Required]
     public string? DescriptionCze { get; set; }
-}
 
-public class ThesisTypeDtoValidation : AbstractValidator<ThesisTypeDto>
-{
-    public ThesisTypeDtoValidation()
-    {
-        RuleFor(x => x.NameEng).NotEmpty().WithMessage("Name is required");
-        RuleFor(x => x.NameCze).NotEmpty().WithMessage("Name is required");
-        RuleFor(x => x.Code);
-        RuleFor(x => x.DescriptionEng);
-        RuleFor(x => x.DescriptionCze);
-    }
+    public void ValidateAndThrow(ThesisTypeDto item) => new ThesisTypeDtoValidation().ValidateAndThrow(item);
 }

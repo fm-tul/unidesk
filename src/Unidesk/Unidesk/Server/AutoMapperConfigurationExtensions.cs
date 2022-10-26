@@ -35,8 +35,13 @@ public static class AutoMapperConfigurationExtensions
         options.CreateMapBetween<UserInTeam, UserInTeamDto>();
         
         options.CreateMapBetween<User, UserSimpleDto>();
-        options.CreateMapBetween<Team, TeamSimpleDto>();
-        
+
+
+        options.CreateMapWithIgnore<UserInTeam, UserTeamRoleDto>();
+        options.CreateMapWithIgnore<Team, TeamSimpleDto>()
+           .ForMember(i => i.UserTeamRoles, i => i.MapFrom(j => j.UserInTeams));
+        options.CreateMapWithIgnore<TeamSimpleDto, Team>();
+
         options.CreateMapWithIgnore<SchoolYear, SchoolYearDto>()
             .ForMember(i => i.Start, i => i.MapFrom(j => j._start))
             .ForMember(i => i.End, i => i.MapFrom(j => j._end));

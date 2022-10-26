@@ -1,6 +1,4 @@
-using System.Data.Common;
 using System.Net.Mime;
-using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +12,11 @@ using Unidesk.Db.Core;
 using Unidesk.Dtos;
 using Unidesk.Server;
 using Unidesk.Server.ServiceFilters;
-using Unidesk.ServiceFilters;
 using Unidesk.Services;
 using Unidesk.Services.Enums;
+using Unidesk.Services.Reports;
 using Unidesk.Services.Stag;
+using Unidesk.Services.ThesisTransitions;
 using Unidesk.Utils;
 
 
@@ -49,6 +48,7 @@ services.AddScoped<SimpleEnumService>();
 services.AddScoped<IDateTimeService, DefaultDateTimeService>();
 services.AddScoped<KeywordsService>();
 services.AddScoped<AdminService>();
+services.AddScoped<ReportService>();
 
 // mapper
 services.AddAutoMapper(options => options.CreateMappingConfiguration(), typeof(Program));
@@ -79,8 +79,20 @@ if (builder.Environment.IsDevelopment())
     services.AddSingleton(new ModelGeneration());
 }
 
+// state patters
+services.AddScoped<IThesisStateTransitionService, ThesisDraftState>();
+
+// resolver service
+services.AddScoped<ThesisTransitionService>();
+
 
 var app = builder.Build();
+
+// using (var scope = app.Services.CreateScope())
+// {
+//     var reportService = scope.ServiceProvider.GetRequiredService<ReportService>()!;
+//     reportService.GenerateReport();
+// }
 
 if (app.Environment.IsDevelopment())
 {

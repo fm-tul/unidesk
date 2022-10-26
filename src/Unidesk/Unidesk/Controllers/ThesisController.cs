@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -10,7 +11,9 @@ using Unidesk.Dtos.Requests;
 using Unidesk.Security;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
+using Unidesk.Services.ThesisTransitions;
 using Unidesk.Utils.Extensions;
+using Unidesk.Validations;
 
 namespace Unidesk.Controllers;
 
@@ -21,13 +24,15 @@ public class ThesisController : Controller
     private readonly UnideskDbContext _db;
     private readonly ILogger<ThesisController> _logger;
     private readonly IUserProvider _userProvider;
+    private readonly ThesisTransitionService _thesisTransitionService;
 
-    public ThesisController(IMapper mapper, UnideskDbContext db, ILogger<ThesisController> logger, IUserProvider userProvider)
+    public ThesisController(IMapper mapper, UnideskDbContext db, ILogger<ThesisController> logger, IUserProvider userProvider, ThesisTransitionService thesisTransitionService)
     {
         _mapper = mapper;
         _db = db;
         _logger = logger;
         _userProvider = userProvider;
+        _thesisTransitionService = thesisTransitionService;
     }
 
     [HttpGet, Route("get-one")]
@@ -42,12 +47,12 @@ public class ThesisController : Controller
         if (Guid.TryParse(id, out var guid))
         {
             item = await queryBase
-                .FirstOrDefaultAsync(i => i.Id == guid);
+               .FirstOrDefaultAsync(i => i.Id == guid);
         }
         else if (long.TryParse(id, out var longId))
         {
             item = await queryBase
-                .FirstOrDefaultAsync(i => i.Adipidno == longId);
+               .FirstOrDefaultAsync(i => i.Adipidno == longId);
         }
 
         if (item is null)
@@ -58,7 +63,7 @@ public class ThesisController : Controller
         var dto = _mapper.Map<ThesisDto>(item);
         return Ok(dto);
     }
-    
+
 
     [HttpPost, Route("find")]
     [SwaggerOperation(OperationId = nameof(Find))]
@@ -77,13 +82,13 @@ public class ThesisController : Controller
             var pattern = $"%{requestFilter.Keyword}%";
             query = query.Where(i =>
                 EF.Functions.Like(i.NameCze, pattern)
-                || EF.Functions.Like(i.NameEng, pattern)
-                || (i.AbstractCze != null && EF.Functions.Like(i.AbstractCze, pattern))
-                || (i.AbstractEng != null && EF.Functions.Like(i.AbstractEng, pattern))
-                || (i.Adipidno != null && EF.Functions.Like(i.Adipidno.ToString()!, pattern))
-                || (i.ThesisUsers.Any(j =>
+             || EF.Functions.Like(i.NameEng, pattern)
+             || (i.AbstractCze != null && EF.Functions.Like(i.AbstractCze, pattern))
+             || (i.AbstractEng != null && EF.Functions.Like(i.AbstractEng, pattern))
+             || (i.Adipidno != null && EF.Functions.Like(i.Adipidno.ToString()!, pattern))
+             || (i.ThesisUsers.Any(j =>
                     (j.User.FirstName != null && EF.Functions.Like(j.User.FirstName, pattern))
-                    || (j.User.LastName != null && EF.Functions.Like(j.User.LastName, pattern))
+                 || (j.User.LastName != null && EF.Functions.Like(j.User.LastName, pattern))
                 ))
             );
         }
@@ -107,9 +112,9 @@ public class ThesisController : Controller
         }
 
         var response = await query
-            .OrderBy(i => i.Status)
-            .ThenBy(i => i.Created)
-            .ToListWithPagingAsync<Thesis, ThesisDto>(requestFilter.Filter, _mapper);
+           .OrderBy(i => i.Status)
+           .ThenBy(i => i.Created)
+           .ToListWithPagingAsync<Thesis, ThesisDto>(requestFilter.Filter, _mapper);
 
         return Ok(response);
     }
@@ -121,14 +126,24 @@ public class ThesisController : Controller
     [RequireGrant(UserGrants.Entity_Thesis_Edit_Id)]
     public async Task<IActionResult> Upsert([FromBody] ThesisDto dto)
     {
-        new ThesisDtoValidator().ValidateAndThrow(dto);
+        ThesisDtoValidator.ValidateAndThrow(dto);
         var isNew = dto.Id == Guid.Empty;
         var item = isNew
             ? new Thesis()
             : await _db.Theses
-                  .Query()
-                  .FirstOrDefaultAsync(dto.Id)
-              ?? throw new Exception("Thesis not found");
+                 .Query()
+                 .FirstOrDefaultAsync(dto.Id)
+           ?? throw new Exception("Thesis not found");
+
+        var newState = dto.Status;
+        var context = new TransitionContext(item, newState, _userProvider.CurrentUser);
+        await _thesisTransitionService
+           .ChangeStateAsync(context)
+           .MatchAsync(
+                i => item.Status = i,
+                i => throw new ValidationException(i.Message, new[] { new ValidationFailure { ErrorMessage = i.Description, PropertyName = nameof(item.Status) } })
+            );
+
 
         item = isNew
             ? _mapper.Map<Thesis>(dto)

@@ -3,11 +3,12 @@ using FluentValidation;
 using Unidesk.Db.Models;
 using Unidesk.Dtos.Resolvers;
 using Unidesk.Server;
+using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
 [HasMapping(typeof(Thesis))]
-public class ThesisDto : TrackedEntityDto
+public class ThesisDto : TrackedEntityDto, IValidatedEntity<ThesisDto>
 {
     public long Adipidno { get; set; }
     public bool NeedsReview { get; set; }
@@ -108,38 +109,6 @@ public class ThesisDto : TrackedEntityDto
     [Required]
     [IgnoreMapping]
     public List<TeamDto> Teams { get; set; } = new();
-}
 
-public class ThesisDtoValidator : AbstractValidator<ThesisDto>
-{
-    public ThesisDtoValidator()
-    {
-        RuleFor(x => x.NameCze).NotEmpty();
-        RuleFor(x => x.NameEng).NotEmpty();
-        RuleFor(x => x.AbstractCze).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-cze");
-        RuleFor(x => x.AbstractEng).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-eng");
-
-        RuleFor(x => x.Keywords).NotEmpty();
-        RuleFor(x => x.Authors).NotEmpty();
-        RuleFor(x => x.ThesisTypeCandidateIds)
-            .Must((x, y) =>
-            {
-                switch (x.Status)
-                {
-                    case ThesisStatus.Draft:
-                    case ThesisStatus.New:
-                        return true;
-                    
-                    case ThesisStatus.Submitted:
-                    case ThesisStatus.Finished_Susccessfully:
-                    case ThesisStatus.Finished_Unsuccessfully:
-                    case ThesisStatus.Finished:
-                    case ThesisStatus.Assigned:
-                        return y.Count == 0 && x.ThesisTypeId.HasValue;
-                    
-                    default:
-                        return true;
-                }
-            }).WithMessage("Submitted thesis must be of exactly one type");
-    }
+    public void ValidateAndThrow(ThesisDto item) => new ThesisDtoValidator().ValidateAndThrow(item);
 }

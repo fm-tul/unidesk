@@ -57,4 +57,9 @@ public class User : TrackedEntity, ISimpleUser
 
     [NotMapped]
     public int ThesisCount => Theses.Count;
+
+    public bool HasGrant(string entityTeamEditId)
+    {
+        return Grants.Any(g => g.Name == entityTeamEditId);
+    }
 }

@@ -10,10 +10,14 @@ namespace Unidesk.Services;
 public class AdminService
 {
     private readonly UnideskDbContext _db;
+    private readonly UserService _userService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AdminService(UnideskDbContext db)
+    public AdminService(UnideskDbContext db, UserService userService, IHttpContextAccessor httpContextAccessor)
     {
         _db = db;
+        _userService = userService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<object> RunActionAsync(AdminActions action, HttpRequest request, HttpResponse response, CancellationToken ct)
@@ -35,18 +39,18 @@ public class AdminService
         {
             case AdminActions.Update_User_Functions:
                 var thesisUsers = await _db.ThesisUsers
-                    .Select(i => new { i.UserId, i.Function })
-                    .ToListAsync(ct);
+                   .Select(i => new { i.UserId, i.Function })
+                   .ToListAsync(ct);
 
                 var byUser = thesisUsers
-                    .GroupBy(g => g.UserId)
-                    .ToDictionary(k => k.Key, v => v.Select(i => i.Function).Combine());
-                
+                   .GroupBy(g => g.UserId)
+                   .ToDictionary(k => k.Key, v => v.Select(i => i.Function).Combine());
+
                 var userIds = byUser.Keys.ToArray();
 
                 var users = await _db.Users
-                    .Where(i => userIds.Contains(i.Id))
-                    .ToListAsync(ct);
+                   .Where(i => userIds.Contains(i.Id))
+                   .ToListAsync(ct);
 
                 foreach (var user in users)
                 {
@@ -57,6 +61,39 @@ public class AdminService
         }
 
         throw new NotSupportedException($"Action {action} is not supported");
+    }
+
+    public async Task<User> SwitchUserAsync(string value, CancellationToken ct)
+    {
+        var httpContext = _httpContextAccessor.HttpContext
+                       ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
+
+        var user = await ResolveUserAsync(value, ct);
+        await _userService.SignInAsync(httpContext, user);
+        return user;
+    }
+
+    private async Task<User> ResolveUserAsync(string value, CancellationToken ct)
+    {
+        var isGuid = Guid.TryParse(value, out var userId);
+        var isNumber = int.TryParse(value, out var number);
+        if (isGuid)
+        {
+            return await _db.Users
+                      .FirstOrDefaultAsync(i => i.Id == userId, ct)
+                ?? throw new Exception($"User with id {userId} not found");
+        }
+
+        if (isNumber)
+        {
+            return await _db.Users
+                      .FirstOrDefaultAsync(i => i.StagId == number.ToString(), ct)
+                ?? throw new Exception($"User with number {number} not found");
+        }
+
+        return await _db.Users
+                  .FirstOrDefaultAsync(i => i.Username == value, ct)
+            ?? throw new Exception($"User with name {value} not found");
     }
 }
 

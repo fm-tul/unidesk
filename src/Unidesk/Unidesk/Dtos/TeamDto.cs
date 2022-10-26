@@ -1,18 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
-using Newtonsoft.Json;
-using Unidesk.Db.Core;
 using Unidesk.Db.Models;
-using Unidesk.Server;
-using Unidesk.Utils.Extensions;
+using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
-public class TeamDto : TrackedEntityDto
+public class TeamDto : TrackedEntityDto, IValidatedEntity<TeamDto>
 {
     [Required]
     public List<UserInTeamDto> UserInTeams { get; set; } = new();
-    
+
     [Required]
     public List<UserSimpleDto> Users { get; set; } = new();
 
@@ -24,15 +21,5 @@ public class TeamDto : TrackedEntityDto
     public TeamType Type { get; set; }
 
 
-    public class AValidator : AbstractValidator<TeamDto>
-    {
-        public AValidator()
-        {
-            RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.Description).NotEmpty();
-            RuleFor(x => x.Type).NotEmpty();
-        }
-    }
-
-    public static AbstractValidator<TeamDto> GetValidator() => new AValidator();
+    public void ValidateAndThrow(TeamDto item) => new TeamDtoValidator().ValidateAndThrow(item);
 }
