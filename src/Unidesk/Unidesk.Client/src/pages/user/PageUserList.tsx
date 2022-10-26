@@ -1,73 +1,21 @@
-import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
-import { RR } from "@locales/R";
-import { QueryFilter } from "@models/QueryFilter";
 import { UserDto } from "@models/UserDto";
-import { UserFunction } from "@models/UserFunction";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { FilterBar } from "components/FilterBar";
-import { Paging } from "components/Paging";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
-import { Button } from "ui/Button";
-import { generatePrimitive, Select } from "ui/Select";
-import { TextField } from "ui/TextField";
-
-import { useQuery } from "../../hooks/useFetch";
+import { UserFilterBar } from "filters/UserFilterBar";
 import { link_pageUserDetail } from "routes/links";
+import { Button } from "ui/Button";
 
-const userFunctionOptions = generatePrimitive(Object.values(UserFunction));
 export const PageUserList = () => {
-  const { filter, data, error, isLoading, refreshIndex, refresh, loadData, setFilter } = useQuery<UserDto>({ pageSize: 80 });
   const { language } = useContext(LanguageContext);
-  const [searchText, setSearchText] = useState<string>("");
-  const [userFunctions, setUserFunction] = useState<string[]>([]);
-
-  const doSearch = async (keyword: string) => {
-    const requestBody = {
-      filter,
-      keyword,
-      userFunctions: userFunctions as any,
-    };
-    loadData(httpClient.users.find({ requestBody }));
-  };
-
-  const updateFilter = (filter: QueryFilter) => {
-    setFilter({ ...filter });
-    refresh();
-  };
-
-  useEffect(() => {
-    doSearch(searchText);
-  }, [refreshIndex]);
+  const [data, setData] = useState<UserDto[]>([]);
 
   return (
     <>
-      <LoadingWrapper isLoading={isLoading} error={error} className="flex flex-col gap-4">
-        <FilterBar className="items-stretch" sm>
-          <TextField
-            loading={isLoading}
-            fullWidth={false}
-            className="w-xs"
-            value={searchText}
-            onValue={setSearchText}
-            label={RR("search", language)}
-            onEnter={() => doSearch(searchText)}
-          />
-          <Select
-            options={userFunctionOptions}
-            value={userFunctions}
-            onMultiValue={setUserFunction}
-            label={RR("user-function", language)}
-            clearable
-            multiple
-          />
-          <Paging className="ml-auto" filter={filter} onValue={updateFilter} />
-          <Button loading={isLoading} onClick={() => doSearch(searchText)}>
-            {RR("search", language)}
-          </Button>
-        </FilterBar>
+      <LoadingWrapper isLoading={false} error={null} className="flex flex-col gap-4">
+        <UserFilterBar onChange={setData} />
 
         <div className="grid grid-cols-2 content-start gap-1 md:grid-cols-3 xl:grid-cols-4">
           {data &&

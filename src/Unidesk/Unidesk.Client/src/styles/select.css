@@ -6,24 +6,33 @@
 .select-item {
   @apply justify-start normal-case;
 }
-
+/*
 .select::-webkit-scrollbar {
   width: 6px;
 }
 
-/* Track */
 .select::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 10px;
 }
 
-/* Handle */
 .select::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 10px;
 }
 
-/* Handle on hover */
 .select::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+*/
+
+.select-wrapper .with-label {
+  @apply pt-3;
+}
+
+.select-label {
+  @apply absolute text-neutral-400 transition-all;
+}
+.select-label.with-value {
+  @apply -top-1 left-2 bg-neutral-200 px-1 py-0 text-xxs text-gray-800;
 }

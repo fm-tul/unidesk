@@ -2,7 +2,7 @@
   @apply relative flex h-auto items-stretch rounded border border-solid transition-all focus-within:ring-2 ring-0;
 }
 .tf {
-  @apply bg-transparent px-2 py-1 outline-none w-full;
+  @apply bg-transparent px-2 py-2 outline-none w-full;
 }
 
 .tf-label {
@@ -36,6 +36,10 @@
 .tf-wrapper.neutral {
   @apply border-neutral-400 bg-neutral-200 bg-gray-50/60;
   @apply focus-within:ring-info-500/50 focus-within:border-info-400;
+}
+
+.tf-sm {
+  @apply text-sm py-3;
 }
 
 /*.tf {

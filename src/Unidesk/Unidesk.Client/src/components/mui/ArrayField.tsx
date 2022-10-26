@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { createRef, useEffect, useState } from "react";
 import { MdDelete } from "react-icons/md";
+
 import { Button } from "ui/Button";
-import { TextField } from "ui/TextField";
 
 interface ArrayFieldProps {
   label: string;
@@ -35,8 +35,6 @@ export const ArrayField = (props: ArrayFieldProps) => {
               placeholder={`${label} ${index + 1}`}
               value={value}
               onChange={e => updateItem(index, e.target.value)}
-              rows={1}
-              maxRows={3}
               className="w-full resize-none bg-transparent pt-2 text-sm outline-none"
             />
             <span className="my-2 ml-1 border-r border-gray-300 p-1"></span>
@@ -56,17 +54,26 @@ export const ArrayField = (props: ArrayFieldProps) => {
 };
 
 interface TextAreaProps extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
-  maxRows?: number;
 }
 export const TextArea = (props: TextAreaProps) => {
-  const { maxRows = 3, rows = 1, className = "", ...rest } = props;
-  const [nrows, setRows] = useState(rows);
+  const { rows = 1, className = "", ...rest } = props;
+  const textAreaRef = createRef<HTMLTextAreaElement>();
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // on enter, add a new line
-    if (e.key === "Enter" && nrows < maxRows) {
-      setRows(nrows + 1);
+  const updateHeight = () => {
+    if (textAreaRef.current) {
+      console.log(textAreaRef.current, rest.value);
+      textAreaRef.current.style.height = `0px`;
+      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
+  }
+
+  const handleOnInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    updateHeight();
   };
-  return <textarea onKeyDown={handleKeyDown} rows={nrows} className={`resize-none ${className}`} {...rest} />;
+
+  useEffect(() => {
+    updateHeight();
+  }, [rest.value]);
+
+  return <textarea ref={textAreaRef} onInput={handleOnInput} rows={1} className={`resize-none min-h-[30px] max-h-md ${className}`} {...rest} />;
 };

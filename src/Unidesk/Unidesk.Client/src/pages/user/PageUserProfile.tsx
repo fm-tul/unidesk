@@ -1,4 +1,4 @@
-import { TeamDto, TeamSimpleDto, UserDto, UserFunction } from "@api-client";
+import { TeamDto, TeamSimpleDto, UserDto, UserFunction, UserInTeamStatus } from "@api-client";
 import { All } from "@api-client/constants/UserFunction";
 import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
@@ -17,6 +17,8 @@ import { generatePrimitive, Select } from "ui/Select";
 import { classnames } from "ui/shared";
 import { TextField } from "ui/TextField";
 import { UserContext } from "user/UserContext";
+import { Button } from "ui/Button";
+import { FilterBar } from "components/FilterBar";
 
 const userFunctionsOptions = generatePrimitive(All);
 export const PageUserProfile = () => {
@@ -47,6 +49,9 @@ export const PageUserProfile = () => {
   }, [id]);
 
   const userFunctions = user?.userFunction?.split(",").map(i => i.trim()) ?? [];
+  const pendingTeams = (user?.teams ?? []).filter(i =>
+    i.userTeamRoles.some(i => i.status === UserInTeamStatus.PENDING && i.userId === user?.id)
+  );
 
   return (
     <LoadingWrapper isLoading={isLoading} error={error}>
@@ -65,6 +70,31 @@ export const PageUserProfile = () => {
               ))}
             </div>
           </div>
+
+          {pendingTeams.length > 0 && (
+            <div>
+              Team invitations
+              {pendingTeams.map(i => (
+                <div key={i.id} className="flow">
+                  <div className="font-bold">{renderTeam(i)}</div>
+                  <FilterBar type="btn-group" className="items-center" size="sm">
+                    <Button
+                      onClick={() => httpClient.team.changeStatus({ teamId: i.id, userId: user.id, status: UserInTeamStatus.ACCEPTED })}
+                    >
+                      {translate("accept")}
+                    </Button>
+                    <Button
+                      error
+                      onClick={() => httpClient.team.changeStatus({ teamId: i.id, userId: user.id, status: UserInTeamStatus.DECLINED })}
+                    >
+                      {translate("decline")}
+                    </Button>
+                  </FilterBar>
+                </div>
+              ))}
+            </div>
+          )}
+
           {isEditing === true && (
             <div className="flex flex-col gap-2 p-2">
               <div className="flow">
@@ -82,21 +112,27 @@ export const PageUserProfile = () => {
                 <FormField
                   width="min-w-sm"
                   as={Select<string>}
+                  label={translate("user-function")}
                   options={userFunctionsOptions}
                   multiple
                   value={userFunctions}
-                  onMultiValue={(i: string[]) => setData({ ...user, userFunction: i.join(", ") as UserFunction })}
+                  onMultiValue={(i: string[]) => {
+                    return setData({ ...user, userFunction: i.filter(j => !!j).join(", ") as UserFunction });
+                  }}
                 />
               </div>
               <div className="flow">
                 <FormField
                   as={Select<TeamSimpleDto>}
                   width="min-w-sm"
+                  label={translate("teams")}
                   searchable
                   clearable
                   multiple
                   optionRender={renderTeam}
-                  options={(keyword: string) => castPromise<TeamSimpleDto[]>(toPromiseArray(httpClient.team.find({ requestBody: { keyword }  })))}
+                  options={(keyword: string) =>
+                    castPromise<TeamSimpleDto[]>(toPromiseArray(httpClient.team.find({ requestBody: { keyword } })))
+                  }
                   value={user.teams}
                   onMultiValue={(teams: TeamSimpleDto[]) => setData({ ...user, teams })}
                 />

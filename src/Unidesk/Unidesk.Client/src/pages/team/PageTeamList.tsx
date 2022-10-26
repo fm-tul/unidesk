@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import { link_pageTeamEdit } from "routes/links";
 
 export const PageTeamList = () => {
-  const { filter, data, error, isLoading, loadData, setFilter, refresh, refreshIndex } = useQuery<TeamDto>({ pageSize: 100 });
+  const { paging: filter, data, error, isLoading, loadData, setPaging: setFilter, refresh, refreshIndex } = useQuery<TeamDto>({ pageSize: 100 });
   const [searchText, setSearchText, debouceSearch] = useDebounceState<string>("");
 
   const doSearch = async () => {

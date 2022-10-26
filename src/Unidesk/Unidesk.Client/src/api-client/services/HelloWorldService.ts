@@ -19,4 +19,28 @@ export class HelloWorldService {
         });
     }
 
+    /**
+     * @returns any Success
+     * @throws ApiError
+     */
+    public getApiHelloWorldFoo({
+name,
+description,
+type,
+}: {
+name?: string,
+description?: string,
+type?: string,
+}): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/HelloWorld/foo',
+            query: {
+                'Name': name,
+                'Description': description,
+                'Type': type,
+            },
+        });
+    }
+
 }

@@ -123,29 +123,35 @@ export const useQuery = <T>(initialValue?: Partial<QueryFilter>) => {
   const [error, setError] = useState<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<T[]>([]);
-  const { filter, setFilter } = usePaging(initialValue);
+  const { filter: paging, setFilter: setPaging } = usePaging(initialValue);
   const { refresh, refreshIndex } = useRefresh();
 
-  const loadData = async (promise: Promise<PagedResponse<T>> | CancelablePromise<PagedResponse<T>>) => {
-    setIsLoading(true);
-    promise
-      .then((i: PagedResponse<T>) => {
-        setData(i.items);
-        setFilter(i.filter);
-        setError(undefined);
-      })
-      .catch(setError)
-      .finally(() => setIsLoading(false));
+  const loadData = async (promise: Promise<PagedResponse<T>> | CancelablePromise<PagedResponse<T>>) : Promise<T[]> => {
+    return new Promise((resolve, reject) => {
+      setIsLoading(true);
+      promise
+        .then((i: PagedResponse<T>) => {
+          setData(i.items);
+          setPaging(i.filter);
+          setError(undefined);
+          resolve(i.items);
+        })
+        .catch(e => {
+          setError(e);
+          reject(e);
+        })
+        .finally(() => setIsLoading(false));
+      });
   };
 
   return {
     isLoading,
     data,
     error,
-    filter,
+    paging,
     refreshIndex,
     refresh,
-    setFilter,
+    setPaging,
     loadData,
   };
 };

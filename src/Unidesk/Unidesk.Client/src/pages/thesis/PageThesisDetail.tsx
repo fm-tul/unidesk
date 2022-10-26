@@ -5,6 +5,7 @@ import { ThesisDto } from "@models/ThesisDto";
 import { UserFunction } from "@models/UserFunction";
 import { useContext, useEffect, useState } from "react";
 import { MdDoubleArrow } from "react-icons/md";
+import Latex from "react-latex";
 import { Link, useParams } from "react-router-dom";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
@@ -45,7 +46,7 @@ export const PageThesisDetail = (props: PageThesisDetailProps) => {
         <article className="prose prose-lg prose-slate mx-auto max-w-full bg-white print:prose-sm">
           {/* header */}
           <header className="flex flex-col gap-1">
-            <Link to={link_pageThesisEdit.navigate(dto.id)}  className="no-underline">
+            <Link to={link_pageThesisEdit.navigate(dto.id)} className="no-underline">
               <h1>{language === "cze" ? dto.nameCze : dto.nameEng}</h1>
             </Link>
 
@@ -75,13 +76,12 @@ export const PageThesisDetail = (props: PageThesisDetailProps) => {
             {/* authors */}
             <span>{RR("authors", language)}:</span>
             <div className="inline-flex flex-wrap items-center gap-2">
-              {dto.authors
-                .map((user, i) => (
-                  <>
-                    <span key={user.id}>{renderUserPretty(user)}</span>
-                    {i < dto.authors.length - 1 && <>, </>}
-                  </>
-                ))}
+              {dto.authors.map((user, i) => (
+                <>
+                  <span key={user.id}>{renderUserPretty(user)}</span>
+                  {i < dto.authors.length - 1 && <>, </>}
+                </>
+              ))}
             </div>
 
             {/* School Year */}
@@ -92,24 +92,34 @@ export const PageThesisDetail = (props: PageThesisDetailProps) => {
             <div className="col-span-2 grid grid-cols-2 break-all">
               <div>
                 <span>Guidelines:</span>
-                <ol>
-                  {dto.guidelinesList.map((guideline, i) => (
-                    <small key={i}>
-                      <li>{guideline}</li>
-                    </small>
-                  ))}
-                </ol>
+                {dto.guidelinesList.length === 1 ? (
+                  <p>
+                    <Latex>{dto.guidelinesList[0]}</Latex>
+                  </p>
+                ) : (
+                  <ol>
+                    {dto.guidelinesList.map((item, i) => (
+                      <small key={i}>
+                        <li>
+                          <Latex throwOnError={false}>{item}</Latex>
+                        </li>
+                      </small>
+                    ))}
+                  </ol>
+                )}
               </div>
 
               <div>
                 <span>Literature:</span>
-                <ol>
-                  {dto.literatureList.map((literature, i) => (
+                <ul>
+                  {dto.literatureList.map((item, i) => (
                     <small key={i}>
-                      <li>{literature}</li>
+                      <li>
+                        <Latex throwOnError={false}>{item}</Latex>
+                      </li>
                     </small>
                   ))}
-                </ol>
+                </ul>
               </div>
             </div>
           </div>

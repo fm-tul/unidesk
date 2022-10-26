@@ -8,8 +8,10 @@ import { Link } from "react-router-dom";
 import { FilterBar } from "components/FilterBar";
 import { Paging } from "components/Paging";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
+import { KeywordsFilterBar } from "filters/KeywordsFilterBar";
 import { useDebounceState } from "hooks/useDebounceState";
 import { useOpenClose } from "hooks/useOpenClose";
+import { link_pageKeywordDetail } from "routes/links";
 import { Button } from "ui/Button";
 import { Modal } from "ui/Modal";
 import { Select } from "ui/Select";
@@ -18,7 +20,6 @@ import { TextField } from "ui/TextField";
 import { HistoryInfoIcon } from "../../components/HistoryInfo";
 import { useQuery } from "../../hooks/useFetch";
 import { KeywordMerger } from "./KeywordMerger";
-import { link_pageKeywordDetail } from "routes/links";
 
 const usedCountOptions = [
   { label: ">1", key: "moreThan1", value: KeywordUsedCount.MORE_THAN1 },
@@ -28,61 +29,25 @@ const usedCountOptions = [
 export const PageKeywordList = () => {
   const { language } = useContext(LanguageContext);
 
-  const [searchText, setSearchText, debouceSearch] = useDebounceState<string>("");
-  const [usedCount, setUsedCount] = useState<KeywordUsedCount>();
+  const [data, setData] = useState<KeywordDto[]>([]);
   const { open, close, isOpen } = useOpenClose();
-
-  const { filter, data, error, isLoading, refreshIndex, refresh, loadData, setFilter } = useQuery<KeywordDto>({ pageSize: 80 });
 
   const barWidth = 100;
   const theMostFrequent = Math.max(1, Math.max(...data.map(k => k.used ?? 0)));
   const theMostFrequentWidth = (value: number) => (value / theMostFrequent) * barWidth;
 
-  const doSearch = async () => {
-    const requestBody = {
-      filter,
-      keyword: searchText,
-      usedCount: !!usedCount ? usedCount : undefined,
-    };
-    await loadData(httpClient.keywords.getAll({ requestBody }));
-  };
-
-
-  const updateFilter = (filter: QueryFilter) => {
-    setFilter({ ...filter });
-    refresh();
-  };
-
-  useEffect(() => {
-    if (!isLoading) {
-      doSearch();
-    }
-  }, [refreshIndex, usedCount, debouceSearch]);
-
-
   return (
-    <LoadingWrapper error={error} isLoading={isLoading}>
+    <LoadingWrapper error={""} isLoading={false}>
       <h1>Keywords</h1>
       <Button onClick={open}>Merge Keywords...</Button>
 
-      {isOpen && <Modal open={isOpen} onClose={close} height="xl" className="rounded bg-white p-6">
-        <KeywordMerger />
-      </Modal>}
+      {isOpen && (
+        <Modal open={isOpen} onClose={close} height="xl" className="rounded bg-white p-6">
+          <KeywordMerger />
+        </Modal>
+      )}
 
-      <FilterBar>
-        <TextField loading={isLoading} sm value={searchText} onValue={setSearchText} label={RR("search", language)} onEnter={doSearch} />
-        <Select
-          sm
-          width="w-xs"
-          clearable
-          optionRender={i => usedCountOptions.find(o => o.value === i)?.label}
-          options={usedCountOptions}
-          value={usedCount}
-          onValue={(_, v) => setUsedCount(v)}
-          label={RR("keyword-used-count", language)}
-        />
-        <Paging className="ml-auto" filter={filter} onValue={updateFilter} />
-      </FilterBar>
+      <KeywordsFilterBar onChange={setData} />
 
       {data && (
         <div className="flex flex-col gap-1">
@@ -100,11 +65,6 @@ export const PageKeywordList = () => {
               </div>
             ))}
         </div>
-      )}
-      {data.length > 20 && (
-        <FilterBar>
-          <Paging className="ml-auto" filter={filter} onValue={updateFilter} />
-        </FilterBar>
       )}
     </LoadingWrapper>
   );

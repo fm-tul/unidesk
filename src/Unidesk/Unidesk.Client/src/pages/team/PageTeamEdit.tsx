@@ -92,7 +92,7 @@ export const TeamEdit = (props: PageTeamNewProps) => {
         {
           id: `${user.id}_${dto.id}`,
           user,
-          team: { id: dto.id, name: dto.name! },
+          team: { id: dto.id, name: dto.name!, userTeamRoles: [] },
           userId: user.id,
           teamId: dto.id,
           role: dto.userInTeams.length === 0 ? TeamRole.OWNER : TeamRole.MEMBER,

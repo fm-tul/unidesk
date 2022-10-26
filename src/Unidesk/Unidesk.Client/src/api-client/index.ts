@@ -49,6 +49,7 @@ export { UserFunction } from './models/UserFunction';
 export type { UserInTeamDto } from './models/UserInTeamDto';
 export { UserInTeamStatus } from './models/UserInTeamStatus';
 export type { UserSimpleDto } from './models/UserSimpleDto';
+export type { UserTeamRoleDto } from './models/UserTeamRoleDto';
 export type { ValidationFailure } from './models/ValidationFailure';
 
 export { AdminService } from './services/AdminService';

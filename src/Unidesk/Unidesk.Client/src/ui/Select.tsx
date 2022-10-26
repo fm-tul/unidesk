@@ -5,22 +5,25 @@ import { debounce } from "throttle-debounce";
 
 import { useInputState } from "hooks/useInputState";
 import { useOpenClose } from "hooks/useOpenClose";
-import { distinctBy } from "utils/arrays";
 
 import { ListRenderer } from "./ListRenderer";
 import { classnames, ColorProps, getColor, getHelperColor, getHelperProps, getSize, HelperProps, SizeProps, UiColors, UiSizes } from "./shared";
+
+type Primitive = string | number | boolean;
+type IdOrPrimitive = Primitive | TId;
 
 export interface TId {
   id: string;
 }
 
-export interface SelectOption<T extends TId | string> {
+export interface SelectOption<T extends IdOrPrimitive> {
   key: string;
   value: T;
   label: ReactNode;
 }
-interface SelectBaseProps<T extends TId | string> extends SizeProps, ColorProps {
+interface SelectBaseProps<T extends IdOrPrimitive> extends SizeProps, ColorProps {
   options: SelectOption<T>[] | ((value: string) => Promise<SelectOption<T>[]>) | ((value: string) => Promise<T[]>);
+  placeholder?: ReactNode;
   label?: ReactNode;
 
   loading?: boolean;
@@ -46,7 +49,7 @@ interface SelectBaseProps<T extends TId | string> extends SizeProps, ColorProps 
   filter?: (option: T) => boolean;
 }
 
-const getValuesSafe = <T extends TId | string>(
+const getValuesSafe = <T extends IdOrPrimitive>(
   value: T[] | T | string,
   multiple: boolean | undefined,
   options: SelectOption<T>[] | ((value: string) => Promise<SelectOption<T>[]>) | ((value: string) => Promise<T[]>),
@@ -79,9 +82,9 @@ const getValuesSafe = <T extends TId | string>(
   return result.length > 0 ? [result[0]] : [];
 };
 
-export interface SelectProps<T extends TId | string> extends SelectBaseProps<T> {}
-export const Select = <T extends TId | string>(props: SelectProps<T>) => {
-  const { options, loading, disabled, searchable, clearable, multiple, label, className, filter } = props;
+export interface SelectProps<T extends IdOrPrimitive> extends SelectBaseProps<T> {}
+export const Select = <T extends IdOrPrimitive>(props: SelectProps<T>) => {
+  const { options, loading, disabled, searchable, clearable, multiple, placeholder, className, filter, label } = props;
   const { value = [], textSize, onValue, onBlur, optionRender, onSingleValue, onMultiValue } = props;
   const color = getColor(props);
   const theme = THEME[color];
@@ -98,13 +101,14 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
   const hasValue = valueSafe.length > 0 && !!valueSafe[0];
   const isAsync = typeof options === "function";
   const selectedOptionSafe: SelectOption<T>[] = valueSafe.map(v => ({
-    key: typeof v === "string" ? v : v.id,
+    key: typeof v !== "object" ? v?.toString() : v.id,
     value: v,
-    label: optionRender?.(v) ?? (typeof v === "string" ? (v as string) : v.id),
+    label: optionRender?.(v) ?? (typeof v !== "object" ? v?.toString() : v.id),
   }));
 
   const { width="w-full" } = props;
   const { modalHeight = "max-h-xs" } = props;
+  const hasLabel = !!label;
 
   const handleSelectClick = () => {
     if (inputRef.current) {
@@ -125,9 +129,9 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
 
   const handleOptionClickMultiple = (option: T) => {
     // remove the option from the list
-    const optionId = typeof option === "string" ? option : option.id;
-    if (valueSafe.map(i => (typeof i === "string" ? i : i.id)).includes(optionId)) {
-      const newValue = [...valueSafe.filter(i => (typeof i === "string" ? i : i.id) !== optionId)];
+    const optionId = typeof option !== "object" ? option : option.id;
+    if (valueSafe.map(i => (typeof i !== "object" ? i : i.id)).includes(optionId)) {
+      const newValue = [...valueSafe.filter(i => (typeof i !== "object" ? i : i.id) !== optionId)];
       onValue?.(newValue, newValue[0]);
       if (multiple) {
         onMultiValue?.(newValue);
@@ -251,7 +255,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
         )}
       >
         {/* items (selected, input, others) */}
-        <div className={classnames("flex w-full flex-wrap items-center gap-1", sizeTheme)} onClick={handleSelectClick}>
+        <div className={classnames("flex w-full flex-wrap items-center gap-1", sizeTheme, hasLabel && "with-label")} onClick={handleSelectClick}>
           {/* selected items */}
           {hasValue ? (
             <>
@@ -267,7 +271,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
               {!multiple && <span className={classnames(sizeText)}>{selectedOptionSafe[0].label}</span>}
             </>
           ) : (
-            <span className={classnames(sizeText, "pl-1 text-sm italic text-neutral-600")}>{label}</span>
+            <span className={classnames(sizeText, "pl-1 text-sm italic text-neutral-600")}>{placeholder}</span>
           )}
 
           {/* input */}
@@ -287,6 +291,7 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
             </div>
           )}
           <span>&nbsp;</span>
+          {hasLabel && <span className={classnames("select-label", (hasValue || searchText.length > 0) && "with-value")}>{label}</span>}
         </div>
 
         {/* indicators (arrow, clear) */}
@@ -339,8 +344,8 @@ export const Select = <T extends TId | string>(props: SelectProps<T>) => {
                 className={classnames(
                   "p-1 px-2 transition",
                   theme.option,
-                  (valueSafe.map(j => (typeof j === "string" ? j : j.id)).includes(i.key) ||
-                    valueSafe.map(j => (typeof j === "string" ? j : j.id)).includes(i.value as string)) &&
+                  (valueSafe.map(j => (typeof j !== "object" ? j : j.id)).includes(i.key) ||
+                    valueSafe.map(j => (typeof j !== "object" ? j : j.id)).includes(i.value as string)) &&
                     "selected"
                 )}
                 tabIndex={0}

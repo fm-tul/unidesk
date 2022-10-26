@@ -14,13 +14,15 @@ import { ThesisSimpleView } from "./ThesisSimpleView";
 
 export const StagImport = () => {
   const language = useContext(LanguageContext);
-  const years = [2021, 2019, 2020, 2022, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008]
+  const currentYear = new Date().getFullYear();
+  const years = [...new Set([2021, 2019, 2020, 2022, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, currentYear])]
+    .sort((a, b) => b - a)
     .map(String)
     .map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
   const departments = ["NTI", "MTI", "ITE"].map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
 
   const [textData, setTextData] = useState<string>("");
-  const [year, setYear] = useState(years[0].value);
+  const [year, setYear] = useState(currentYear.toString());
   const [department, setDepartment] = useState(departments[0].value);
   const [isLoading, setIsLoading] = useState(false);
   const [resposeData, setResponseData] = useState<ThesisDto[]>();
@@ -61,7 +63,6 @@ export const StagImport = () => {
         setBatchIndex(index);
         const batchItems = await importOneFromStag(parseInt(year.value), department.value);
         items = [...items, ...batchItems];
-        // await new Promise((resolve) => setTimeout(resolve, 1000));
         index++;
       }
     }

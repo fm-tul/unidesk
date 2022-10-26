@@ -100,16 +100,16 @@
   @apply flex items-stretch gap-1;
 }
 .btn-group {
-  @apply flex gap-0;
+  @apply flex gap-px;
 }
 .btn-group .btn {
-  @apply rounded-none border-x border-y-2;
+  @apply rounded-none;
 }
 .btn-group .btn:first-child {
-  @apply rounded-l-md border-2 border-r;
+  @apply rounded-l-md;
 }
 .btn-group .btn:last-child {
-  @apply rounded-r-md border-2 border-l;
+  @apply rounded-r-md;
 }
 
 .btn.with-progress {

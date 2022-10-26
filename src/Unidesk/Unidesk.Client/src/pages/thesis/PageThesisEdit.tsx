@@ -9,7 +9,7 @@ import { ThesisDto } from "@models/ThesisDto";
 import { ThesisStatus } from "@models/ThesisStatus";
 import { UserDto } from "@models/UserDto";
 import { useContext, useEffect, useState } from "react";
-import { MdChecklist } from "react-icons/md";
+import Latex from "react-latex";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { debounce } from "throttle-debounce";
@@ -25,6 +25,7 @@ import { useStepper } from "hooks/useStepper";
 import { renderTeam } from "models/cellRenderers/TeamRenderer";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { renderUser } from "models/cellRenderers/UserRenderer";
+import { link_pageThesisDetail } from "routes/links";
 import { Button } from "ui/Button";
 import { CreateConfirmDialog as confirmWith } from "ui/Confirm";
 import { FormField } from "ui/FormField";
@@ -39,7 +40,6 @@ import { toCamelCase } from "utils/stringUtils";
 
 import { ClipboardFromBpDp } from "./plugins/ClipboardFromBpDp";
 import { thesisValidationSchema as schema, thesisInitialValues } from "./thesisSchema";
-import { link_pageThesisDetail } from "routes/links";
 
 type T = ThesisDto;
 type errorObj = { message: string; severity?: Severity };
@@ -208,8 +208,8 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
             <FormField as={TextField} required {...getProps(form, "nameEng")} />
 
             {/* row 2 - abstracts */}
-            <FormField as={TextField} maxRows={10} rows={10} {...getProps(form, "abstractCze")} sm />
-            <FormField as={TextField} maxRows={10} rows={10} {...getProps(form, "abstractEng")} sm />
+            <FormField as={TextField} multiline {...getProps(form, "abstractCze")} sm />
+            <FormField as={TextField} multiline {...getProps(form, "abstractEng")} sm />
 
             {/* row 3 - school year, department, study programme */}
             <div className="col-span-2 grid grid-cols-3 items-start gap-4">
@@ -280,6 +280,24 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
               value={form.dto.literatureList ?? []}
               setValue={v => form.setDto({ ...form.dto, literatureList: v })}
             />
+            <div className="prose">
+              <ol>
+                {form.dto.guidelinesList.map((i, index) => (
+                  <li key={index}>
+                    <Latex throwOnError={false}>{i}</Latex>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="prose break-all">
+              <ul>
+                {form.dto.literatureList.map((i, index) => (
+                  <li key={index}>
+                    <Latex throwOnError={false}>{i}</Latex>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </Step>
         <Step label="Authors">
@@ -390,7 +408,7 @@ const getPropsS = <TDto extends TId | string>(formData: formData<T>, prop: keyof
 
   return {
     options: options ?? [],
-    label: R(prop as EnKeys),
+    placeholder: R(prop as EnKeys),
     value: dto[prop] === null ? "" : dto[prop],
     helperText,
     helperColor,
@@ -409,7 +427,7 @@ const getPropsM = <TDto extends TId>(formData: formData<T>, prop: keyof T, optio
   return {
     multiple: true,
     options: options ?? [],
-    label: R(prop as EnKeys),
+    placeholder: R(prop as EnKeys),
     value: dto[prop] === null ? "" : dto[prop],
     helperText,
     helperColor,

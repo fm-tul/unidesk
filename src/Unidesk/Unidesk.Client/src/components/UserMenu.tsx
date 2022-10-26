@@ -1,3 +1,5 @@
+import { All, User_SuperAdmin } from "@api-client/constants/UserGrants";
+import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { R, RR } from "@locales/R";
@@ -5,6 +7,7 @@ import { useContext } from "react";
 import { MdAccountCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
 
+import { SwitchUser } from "admin/SwitchUser";
 import { link_pageMyProfile } from "routes/links";
 import { Button } from "ui/Button";
 import { Menu } from "ui/Menu";
@@ -42,6 +45,9 @@ export function UserMenu() {
     console.log(response);
   };
 
+  const loggedIn = user.id !== GUID_EMPTY;
+  const grantsIds = user.grantIds ?? [];
+
   return (
     <div>
       <Menu
@@ -58,18 +64,21 @@ export function UserMenu() {
         <hr className="my-1" />
 
         {/* not logged in */}
-        {user.grantIds?.length == 0 && (
+        {!loggedIn && (
           <Button sm text onClick={authUser} justify="justify-start">
             {R("login")}
           </Button>
         )}
 
         {/* logged in */}
-        {user.grantIds?.length > 0 && (
+        {loggedIn && (
           <>
             <Button component={Link} text to={link_pageMyProfile.path} justify="justify-start">
               {R("my-profile")}
             </Button>
+
+            {grantsIds.includes(User_SuperAdmin.id) && <SwitchUser />
+            }
 
             <Button text warning onClick={logoutUser} justify="justify-start">
               {R("logout")}

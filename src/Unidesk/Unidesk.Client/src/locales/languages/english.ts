@@ -49,8 +49,13 @@ export const en = {
   "search": "Search",
   create: "Create",
   update: "Update",
+  clear: "Clear",
   "click-to-edit": "Click to edit",
   "add-new": "Add New",
+
+  teams: "Teams",
+  accept: "Accept",
+  decline: "Decline",
 
   // history
   created: "Created",

@@ -28,4 +28,22 @@ action?: AdminActions,
         });
     }
 
+    /**
+     * @returns any Success
+     * @throws ApiError
+     */
+    public switchUser({
+username,
+}: {
+username?: string,
+}): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/api/Admin/switch-user',
+            query: {
+                'username': username,
+            },
+        });
+    }
+
 }
