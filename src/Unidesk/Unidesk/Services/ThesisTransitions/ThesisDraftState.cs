@@ -26,7 +26,7 @@ public class ThesisDraftState : IThesisStateTransitionService
             _ => new TransitionError
             {
                 Message = $"Cannot change status from {context.Thesis.Status} to {context.TargetStatus}",
-                Description = $"Only supervisor of the thesis or user with Grant {UserGrants.User_Admin} can change status from draft to new",
+                Description = $"Cannot change status from {context.Thesis.Status} to {context.TargetStatus}",
             },
         };
     }

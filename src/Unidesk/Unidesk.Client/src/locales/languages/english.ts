@@ -98,6 +98,35 @@ export const en = {
 
   // keywords
   "keyword-used-count": "Used count",
+
+
+  // links
+  "link.import": "Import",
+  "link.styles": "Styles",
+  "link.go-home": "Go home",
+  
+  "link.thesis": "Thesis",
+  "link.theses": "Theses",
+  "link.edit-thesis": "Edit Thesis",
+  "link.create-thesis": "Create new Thesis",
+  
+  "link.keywords": "Keywords",
+  "link.keyword": "Keyword",
+
+  "link.user": "User",
+  "link.my-profile": "My Profile",
+  "link.user-profile": "User Profile",
+  "link.users": "Users",
+
+  "link.team": "Team",
+  "link.teams": "Teams",
+  "link.edit-team": "Edit Team",
+
+  "link.admin": "Admin",
+
+  // select component
+  "select-component.type-to-search": "Type to search...",
+  "select-component.no-results-found": "No results found",
 };
 
 export default en;

@@ -12,6 +12,8 @@ import { Modal } from "ui/Modal";
 
 import { ThesisSimpleView } from "../../components/ThesisSimpleView";
 import { ThesisEdit } from "./PageThesisEdit";
+import { Link } from "react-router-dom";
+import { link_pageThesisCreate } from "routes/links";
 
 export const PageThesisList = () => {
   const [selectedThesis, setSelectedThesis] = useState<ThesisDto>();
@@ -41,13 +43,18 @@ export const PageThesisList = () => {
       {data && (
         <div>
           <ThesisFilterBar onChange={setData} />
-          <div className="flex justify-end">
+          {/* <div className="flex justify-end">
             <Menu link="menu" pop="right">
               <Button text justify="justify-start" onClick={newThesis}>
                 Create new thesis
               </Button>
             </Menu>
-          </div>
+          </div> */}
+
+          <Button component={Link} to={link_pageThesisCreate.path}>
+            {R("link.create-thesis")}
+          </Button>
+
 
           <h1>{R("topics")}</h1>
           {data.map(thesis => (

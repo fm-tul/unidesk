@@ -1,5 +1,6 @@
 ﻿using System.Data.Entity;
 using AutoMapper;
+using FluentValidation;
 using Microsoft.AspNetCore.OutputCaching;
 using Unidesk.Db;
 using Unidesk.Db.Core;
@@ -42,11 +43,12 @@ public class SimpleEnumService
 
     // this POST method is used to create a new enum value for a given enum type or update an existing one
     // TItem : TrackedEntity, TDto : TrackedEntityDto
-    public async Task<TItem> CreateOrUpdateWithValidation<TItem, TDto>(TDto dto, CancellationToken ct)
+    public async Task<TItem> CreateOrUpdate<TItem, TDto, TValidator>(TDto dto, CancellationToken ct)
         where TItem : TrackedEntity
-        where TDto : TrackedEntityDto, IValidatedEntity<TDto>
+        where TDto : TrackedEntityDto
+        where TValidator : AbstractValidator<TDto>, new()
     {
-        dto.ValidateAndThrow(dto);
+        await new TValidator().ValidateAndThrowAsync(dto, cancellationToken: ct);
         return await CreateOrUpdateImpl<TItem, TDto>(dto, ct);
     }
 

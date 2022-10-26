@@ -4,7 +4,7 @@ using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
-public class StudyProgrammeDto : TrackedEntityDto, IValidatedEntity<StudyProgrammeDto>
+public class StudyProgrammeDto : TrackedEntityDto
 
 {
     [Required]
@@ -22,5 +22,5 @@ public class StudyProgrammeDto : TrackedEntityDto, IValidatedEntity<StudyProgram
     [Required]
     public string? DescriptionCze { get; set; }
 
-    public void ValidateAndThrow(StudyProgrammeDto item) => new StudyProgrammeDtoValidation().ValidateAndThrow(item);
+    public static void ValidateAndThrow(StudyProgrammeDto item) => new StudyProgrammeDtoValidation().ValidateAndThrow(item);
 }

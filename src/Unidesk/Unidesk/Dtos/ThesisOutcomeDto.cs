@@ -4,7 +4,7 @@ using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
-public class ThesisOutcomeDto : TrackedEntityDto, IValidatedEntity<ThesisOutcomeDto>
+public class ThesisOutcomeDto : TrackedEntityDto
 {
     [Required]
     public string NameEng { get; set; }
@@ -18,5 +18,5 @@ public class ThesisOutcomeDto : TrackedEntityDto, IValidatedEntity<ThesisOutcome
     [Required]
     public string? DescriptionCze { get; set; }
 
-    public void ValidateAndThrow(ThesisOutcomeDto item) => new ThesisOutcomeDtoValidation().ValidateAndThrow(item);
+    public static void ValidateAndThrow(ThesisOutcomeDto item) => new ThesisOutcomeDtoValidation().ValidateAndThrow(item);
 }

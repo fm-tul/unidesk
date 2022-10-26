@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Services.Enums;
+using Unidesk.Validations;
 
 namespace Unidesk.Server;
 
@@ -61,31 +62,31 @@ public static class MinimalApiExtensions
         // Department
         app.MapPost("/api/enums/DepartmentUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] DepartmentDto dto, CancellationToken ct) =>
-                    s.CreateOrUpdateWithValidation<Department, DepartmentDto>(dto, ct))
+                    s.CreateOrUpdate<Department, DepartmentDto, DepartmentDtoValidation>(dto, ct))
             .UseEnumsEndpoint<DepartmentDto>($"{nameof(Department)}{ApiConfig.UPSERT}");
 
         // SchoolYear
         app.MapPost("/api/enums/SchoolYearUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] SchoolYearDto dto, CancellationToken ct) =>
-                    s.CreateOrUpdateWithValidation<SchoolYear, SchoolYearDto>(dto, ct))
+                    s.CreateOrUpdate<SchoolYear, SchoolYearDto, SchoolYearDtoValidation>(dto, ct))
             .UseEnumsEndpoint<SchoolYearDto>($"{nameof(SchoolYear)}{ApiConfig.UPSERT}");
 
         // ThesisOutcome
         app.MapPost("api/enums/ThesisOutcomeUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] ThesisOutcomeDto dto, CancellationToken ct) =>
-                    s.CreateOrUpdateWithValidation<ThesisOutcome, ThesisOutcomeDto>(dto, ct))
+                    s.CreateOrUpdate<ThesisOutcome, ThesisOutcomeDto, ThesisOutcomeDtoValidation>(dto, ct))
             .UseEnumsEndpoint<ThesisOutcomeDto>($"{nameof(ThesisOutcome)}{ApiConfig.UPSERT}");
 
         // ThesisType
         app.MapPost("api/enums/ThesisTypeUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] ThesisTypeDto dto, CancellationToken ct) =>
-                    s.CreateOrUpdateWithValidation<ThesisType, ThesisTypeDto>(dto, ct))
+                    s.CreateOrUpdate<ThesisType, ThesisTypeDto, ThesisTypeDtoValidation>(dto, ct))
             .UseEnumsEndpoint<ThesisTypeDto>($"{nameof(ThesisType)}{ApiConfig.UPSERT}");
 
         // StudyProgramme
         app.MapPost("api/enums/StudyProgrammeUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] StudyProgrammeDto dto, CancellationToken ct) =>
-                    s.CreateOrUpdateWithValidation<StudyProgramme, StudyProgrammeDto>(dto, ct))
+                    s.CreateOrUpdate<StudyProgramme, StudyProgrammeDto, StudyProgrammeDtoValidation>(dto, ct))
             .UseEnumsEndpoint<StudyProgrammeDto>($"{nameof(StudyProgramme)}{ApiConfig.UPSERT}");
 
         return app;

@@ -67,7 +67,7 @@ public class TeamController : ControllerBase
     [RequireGrant(UserGrants.Entity_Team_Edit_Id)]
     public async Task<IActionResult> Upsert([FromBody] TeamDto dto)
     {
-        dto.ValidateAndThrow(dto);
+        TeamDto.ValidateAndThrow(dto);
         
         var result = await _teamService.UpsertAsync(dto);
         var newDto = _mapper.Map<TeamDto>(result);

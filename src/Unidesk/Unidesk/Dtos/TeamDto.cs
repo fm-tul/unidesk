@@ -5,7 +5,7 @@ using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
-public class TeamDto : TrackedEntityDto, IValidatedEntity<TeamDto>
+public class TeamDto : TrackedEntityDto
 {
     [Required]
     public List<UserInTeamDto> UserInTeams { get; set; } = new();
@@ -21,5 +21,5 @@ public class TeamDto : TrackedEntityDto, IValidatedEntity<TeamDto>
     public TeamType Type { get; set; }
 
 
-    public void ValidateAndThrow(TeamDto item) => new TeamDtoValidator().ValidateAndThrow(item);
+    public static void ValidateAndThrow(TeamDto item) => new TeamDtoValidator().ValidateAndThrow(item);
 }

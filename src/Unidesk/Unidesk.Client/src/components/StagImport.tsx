@@ -98,7 +98,7 @@ export const StagImport = () => {
         </Button>
 
         {/* import all */}
-        <div className="flex flex-col">
+        <FilterBar className="flex flex-col">
           <Button
             loading={isLoading}
             disableClass=""
@@ -108,7 +108,7 @@ export const StagImport = () => {
           >
             <div>Import all {batchIndex > 0 && `(${batchIndex} / ${totalBatches})`}</div>
           </Button>
-        </div>
+        </FilterBar>
       </FilterBar>
       {error && (
         <div className="text-red-500">

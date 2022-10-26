@@ -21,7 +21,6 @@ import "react-toastify/dist/ReactToastify.css";
 const AppWithProviders = () => {
   const [language, setLanguage] = useLocalStorage<LanguagesId>("locale", languages[0].id as LanguagesId);
   const [user, setUser] = useLocalStorage("user", userGuest);
-  const [dialogs, setDialogs] = useState<React.ReactNode[]>([]);
   const resetUser = () => setUser(userGuest);
 
   return (

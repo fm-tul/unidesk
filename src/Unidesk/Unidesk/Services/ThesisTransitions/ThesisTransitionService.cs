@@ -12,15 +12,18 @@ public class ThesisTransitionService : IThesisStateTransitionService
         _transitions = transitions;
     }
 
-    public IThesisStateTransitionService GetTransition(TransitionContext context)
+    private IThesisStateTransitionService GetTransition(TransitionContext context)
     {
         return _transitions.FirstOrDefault(t => t.SourceStates.Contains(context.Thesis.Status))
-            ?? throw new InvalidOperationException($"Changing Status from '{context.Thesis.Status}' to '{context.TargetStatus}' is not implemented");
+            ?? throw new InvalidOperationException($"Changing Status from '{context.Thesis.Status}' to '{context.TargetStatus}' is not supported");
     }
 
     public List<ThesisStatus> SourceStates { get; } = Array.Empty<ThesisStatus>().ToList();
     public Task<OneOf<ThesisStatus, TransitionError>> ChangeStateAsync(TransitionContext context)
     {
-        return GetTransition(context).ChangeStateAsync(context);
+        // find transition logic only if source status and target status are different
+        return context.Thesis.Status == context.TargetStatus
+            ? Task.FromResult<OneOf<ThesisStatus, TransitionError>>(context.TargetStatus)
+            : GetTransition(context).ChangeStateAsync(context);
     }
 }

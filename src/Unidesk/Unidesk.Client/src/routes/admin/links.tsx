@@ -5,14 +5,14 @@ import { PageAdministratorComponent } from "./links.pageAdministration";
 
 export const link_admin: ExtraRouteProps = {
   path: "/admin",
-  title: "Administration",
+  title: "link.admin",
   element: PageAdministratorComponent,
   requiredGrants: [User_Admin.id],
 };
 
 export const link_adminManageEnum: ExtraRoutePropsWithGoto = {
   path: "/admin/manage/:enumName",
-  title: "Administration",
+  title: "link.admin",
   visible: false,
   element: PageAdministratorComponent,
   requiredGrants: [User_Admin.id],

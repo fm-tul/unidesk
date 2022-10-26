@@ -15,8 +15,14 @@ export const userGuest: UserDto = {
 
 export const defaultContext = {
   user: userGuest,
-  setUser: (user: UserDto) => {},
-  resetUser: () => {},
+  setUser: (user: UserDto) => {
+    console.log("DBG setUser", user);
+    debugger;
+  },
+  resetUser: () => {
+    console.log("DBG resetUser");
+    debugger;
+  },
 };
 
 export const UserContext = createContext(defaultContext);

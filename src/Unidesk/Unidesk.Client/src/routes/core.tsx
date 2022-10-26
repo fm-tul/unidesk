@@ -1,7 +1,8 @@
+import { EnKeys } from "@locales/all";
 import { PathRouteProps } from "react-router-dom";
 
 export interface ExtraRouteProps extends PathRouteProps {
-  title: string;
+  title: EnKeys;
   visible?: boolean;
   requiredGrants?: string[];
 }

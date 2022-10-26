@@ -1,4 +1,4 @@
-import { User_Admin } from "@api-client/constants/UserGrants";
+import { User_Admin, User_SuperAdmin } from "@api-client/constants/UserGrants";
 
 import { link_admin, link_adminManageEnum } from "./admin/links";
 import { ExtraRouteProps, ExtraRoutePropsWithGoto } from "./core";
@@ -11,7 +11,7 @@ import { PageThesisDetailComponent, PageThesisEditComponent, PageThesisListCompo
 import { PageUserDetailComponent, PageUserListComponent, PageUserProfileComponent } from "./links.pageUser";
 
 export const link_stagImport: ExtraRouteProps = {
-  title: "import",
+  title: "link.import",
   path: "/stag-import",
   visible: true,
   element: PageStagImportComponent,
@@ -19,7 +19,7 @@ export const link_stagImport: ExtraRouteProps = {
 };
 
 export const link_pageHome: ExtraRouteProps = {
-  title: "Go Home",
+  title: "link.go-home",
   path: "/",
   visible: false,
   element: PageHomeComponent,
@@ -27,13 +27,13 @@ export const link_pageHome: ExtraRouteProps = {
 
 // theses
 export const link_pageThesisList: ExtraRouteProps = {
-  title: "Theses",
+  title: "link.theses",
   path: "/theses",
   element: PageThesisListComponent,
 };
 
 export const link_pageThesisDetail: ExtraRoutePropsWithGoto = {
-  title: "Thesis",
+  title: "link.thesis",
   path: "/theses/:id",
   visible: false,
   element: PageThesisDetailComponent,
@@ -41,24 +41,31 @@ export const link_pageThesisDetail: ExtraRoutePropsWithGoto = {
 };
 
 export const link_pageThesisEdit: ExtraRoutePropsWithGoto = {
-  title: "Edit Thesis",
+  title: "link.edit-thesis",
   path: "/theses/:id/edit",
   visible: false,
   element: PageThesisEditComponent,
   navigate: (id: string) => `/theses/${id}/edit`,
 };
+export const link_pageThesisCreate: ExtraRouteProps = {
+  title: "link.create-thesis",
+  path: "/theses/new",
+  visible: false,
+  element: PageThesisEditComponent,
+};
 
 export const link_styles: ExtraRouteProps = {
-  title: "styles",
+  title: "link.styles",
   visible: false,
   path: "/styles",
   element: PageStylesComponent,
+  requiredGrants: [User_SuperAdmin.id],
 };
 
 
 // keywords
 export const link_pageKeywordDetail: ExtraRoutePropsWithGoto = {
-  title: "Keyword",
+  title: "link.keyword",
   path: "/keywords/:id",
   visible: false,
   element: PageKeywordDetailComponent,
@@ -66,14 +73,14 @@ export const link_pageKeywordDetail: ExtraRoutePropsWithGoto = {
 };
 
 export const link_pageKeywordList: ExtraRouteProps = {
-  title: "Keywords",
+  title: "link.keywords",
   path: "/keywords",
   element: PageKeywordListComponent,
 };
 
 // users
 export const link_pageUserDetail: ExtraRoutePropsWithGoto = {
-  title: "User",
+  title: "link.user",
   path: "/users/:id",
   visible: false,
   element: PageUserDetailComponent,
@@ -81,14 +88,14 @@ export const link_pageUserDetail: ExtraRoutePropsWithGoto = {
 };
 
 export const link_pageMyProfile: ExtraRouteProps = {
-  title: "My Profile",
+  title: "link.my-profile",
   path: "/users/me",
   visible: false,
   element: PageUserProfileComponent,
 };
 
 export const link_pageUserProfile: ExtraRoutePropsWithGoto = {
-  title: "User's Profile",
+  title: "link.user-profile",
   path: "/users/:id/profile",
   visible: false,
   element: PageUserProfileComponent,
@@ -96,7 +103,7 @@ export const link_pageUserProfile: ExtraRoutePropsWithGoto = {
 };
 
 export const link_pageUserList: ExtraRouteProps = {
-  title: "User List",
+  title: "link.users",
   path: "/users",
   visible: true,
   element: PageUserListComponent,
@@ -104,7 +111,7 @@ export const link_pageUserList: ExtraRouteProps = {
 
 // teams
 export const link_pageTeamDetail: ExtraRoutePropsWithGoto = {
-  title: "Team",
+  title: "link.team",
   path: "/teams/:id",
   visible: false,
   element: PageTeamDetailComponent,
@@ -112,14 +119,14 @@ export const link_pageTeamDetail: ExtraRoutePropsWithGoto = {
 };
 
 export const link_pageTeamList: ExtraRouteProps = {
-  title: "Teams",
+  title: "link.teams",
   path: "/teams",
   visible: true,
   element: PageTeamListComponent,
 };
 
 export const link_pageTeamEdit: ExtraRoutePropsWithGoto = {
-  title: "Edit Team",
+  title: "link.edit-team",
   path: "/teams/:id/edit",
   visible: false,
   element: PageTeamEditComponent,
@@ -141,6 +148,7 @@ export const links = [
   link_pageThesisList,
   link_pageThesisDetail,
   link_pageThesisEdit,
+  link_pageThesisCreate,
 
   link_pageTeamDetail,
   link_pageTeamList,

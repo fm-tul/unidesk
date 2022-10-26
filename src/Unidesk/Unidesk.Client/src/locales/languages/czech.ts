@@ -31,4 +31,7 @@ export const cs: ILocale = {
   
   // paging
   "page-of": "z",
+
+  // links
+  "link.theses": "Práce",
 };

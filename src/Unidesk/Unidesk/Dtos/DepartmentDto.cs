@@ -4,7 +4,7 @@ using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
-public class DepartmentDto : TrackedEntityDto, IValidatedEntity<DepartmentDto>
+public class DepartmentDto : TrackedEntityDto
 {
     [Required]
     public string NameEng { get; set; }
@@ -21,5 +21,4 @@ public class DepartmentDto : TrackedEntityDto, IValidatedEntity<DepartmentDto>
     [Required]
     public string? DescriptionCze { get; set; }
 
-    public void ValidateAndThrow(DepartmentDto item) => new DepartmentDtoValidation().ValidateAndThrow(item);
 }

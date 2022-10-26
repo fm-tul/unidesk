@@ -135,10 +135,11 @@ public class ThesisController : Controller
                  .FirstOrDefaultAsync(dto.Id)
            ?? throw new Exception("Thesis not found");
 
-        var newState = dto.Status;
-        var context = new TransitionContext(item, newState, _userProvider.CurrentUser);
         await _thesisTransitionService
-           .ChangeStateAsync(context)
+           .ChangeStateAsync(new TransitionContext(
+                thesis: item,
+                targetStatus: dto.Status,
+                currentUser: _userProvider.CurrentUser))
            .MatchAsync(
                 i => item.Status = i,
                 i => throw new ValidationException(i.Message, new[] { new ValidationFailure { ErrorMessage = i.Description, PropertyName = nameof(item.Status) } })
@@ -175,7 +176,7 @@ public class ThesisController : Controller
         }
         else
         {
-            // handling students/authors/supervisors/oppontents is bit more complicated
+            // handling students/authors/supervisors/opponents is bit more complicated
             var (_, _, toBeAdded, toBeDeleted) = item.ThesisUsers.Synchronize(newThesisUsers, (i, j) => i.UserId == j.UserId);
             _db.ThesisUsers.AddRange(toBeAdded.Select(i => i.StripToGuids()));
             _db.ThesisUsers.RemoveRange(toBeDeleted);

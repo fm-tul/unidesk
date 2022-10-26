@@ -8,7 +8,7 @@ using Unidesk.Validations;
 namespace Unidesk.Dtos;
 
 [HasMapping(typeof(Thesis))]
-public class ThesisDto : TrackedEntityDto, IValidatedEntity<ThesisDto>
+public class ThesisDto : TrackedEntityDto
 {
     public long Adipidno { get; set; }
     public bool NeedsReview { get; set; }
@@ -109,6 +109,6 @@ public class ThesisDto : TrackedEntityDto, IValidatedEntity<ThesisDto>
     [Required]
     [IgnoreMapping]
     public List<TeamDto> Teams { get; set; } = new();
-
-    public void ValidateAndThrow(ThesisDto item) => new ThesisDtoValidator().ValidateAndThrow(item);
+    
+    public static void ValidateAndThrow(ThesisDto item) => new ThesisDtoValidator().ValidateAndThrow(item);
 }

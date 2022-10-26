@@ -28,7 +28,7 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
               .filter(i => i.visible !== false)
               .map(i => (
                 <Button text key={i.path} to={i.path} component={Link}>
-                  {R(i.title as EnKeys)}
+                  {R(i.title)}
                 </Button>
               ))}
           </div>

@@ -10,7 +10,7 @@ import { ThesisStatus } from "@models/ThesisStatus";
 import { UserDto } from "@models/UserDto";
 import { useContext, useEffect, useState } from "react";
 import Latex from "react-latex";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { debounce } from "throttle-debounce";
 import * as Yup from "yup";
@@ -25,7 +25,7 @@ import { useStepper } from "hooks/useStepper";
 import { renderTeam } from "models/cellRenderers/TeamRenderer";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { renderUser } from "models/cellRenderers/UserRenderer";
-import { link_pageThesisDetail } from "routes/links";
+import { link_pageThesisDetail, link_pageThesisEdit } from "routes/links";
 import { Button } from "ui/Button";
 import { CreateConfirmDialog as confirmWith } from "ui/Confirm";
 import { FormField } from "ui/FormField";
@@ -62,6 +62,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
   const [touched, setTouched] = useState<thesisTouchedObject>({});
   const { step, nextStep, prevStep, hasNextStep, hasPrevStep, setStep } = useStepper(2);
   const { open, close, isOpen } = useOpenClose(false);
+  const navigate = useNavigate();
 
   const { data: enums, isLoading: enumsLoading } = useFetch(() => guestHttpClient.enums.allEnums());
   const [loading, setLoading] = useState(false);
@@ -138,14 +139,19 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
       Object.keys(thesisInitialValues).forEach(k => (newTouched[k as thesisProps] = true));
       setTouched(newTouched);
     }
+
     const canSubmit = isValid || (await confirmWith({ title: "Form is not valid", message: "Do you want to continue anyway?" }));
     if (canSubmit) {
       setLoading(true);
       httpClient.thesis
         .upsert({ requestBody: dto })
         .then(i => {
-          toast.success("Thesis saved");
-          setDto(i);
+          if(isNew) {
+            navigate(link_pageThesisEdit.navigate(i.id));
+          } else {
+            setDto(i);
+            toast.success("Thesis saved");
+          }
         })
         .catch((e: SimpleJsonResponse) => {
           if (e.errors) {
@@ -307,6 +313,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
               searchable
               clearable
               multiple
+              label={R("authors")}
               optionRender={renderUser}
               options={(keyword: string) => toPromiseArray(httpClient.users.find({ requestBody: { keyword } }))}
               value={dto.authors}
@@ -317,6 +324,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
               searchable
               clearable
               multiple
+              label={R("teams")}
               optionRender={renderTeam}
               options={(keyword: string) => toPromiseArray(httpClient.team.find({ requestBody: { keyword } }))}
               value={dto.teams}
@@ -459,6 +467,12 @@ const generateOptions = <T extends INameDto>(items: T[] | null | undefined, lang
 
 export const PageThesisEdit = () => {
   const { id } = useParams<{ id: string }>();
+  const isNew = id === undefined;
+
+  if (isNew) {
+    return <ThesisEdit initialValues={thesisInitialValues as ThesisDto} />
+  }
+
   const { data: thesis, isLoading, error, loadData } = useSingleQuery<ThesisDto|undefined>(undefined);
   useEffect(() => {
     loadData(httpClient.thesis.getOne({ id }));

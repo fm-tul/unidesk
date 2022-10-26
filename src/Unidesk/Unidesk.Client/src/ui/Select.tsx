@@ -1,4 +1,4 @@
-import { Key, ReactNode, useCallback, useRef, useState } from "react";
+import { Key, ReactNode, useCallback, useContext, useRef, useState } from "react";
 import { useEffect } from "react";
 import { MdClear, MdKeyboardArrowDown } from "react-icons/md";
 import { debounce } from "throttle-debounce";
@@ -8,6 +8,10 @@ import { useOpenClose } from "hooks/useOpenClose";
 
 import { ListRenderer } from "./ListRenderer";
 import { classnames, ColorProps, getColor, getHelperColor, getHelperProps, getSize, HelperProps, SizeProps, UiColors, UiSizes } from "./shared";
+import { useDebounceState } from "hooks/useDebounceState";
+import { R, RR } from "@locales/R";
+import { EnKeys } from "@locales/all";
+import { LanguageContext } from "@locales/LanguageContext";
 
 type Primitive = string | number | boolean;
 type IdOrPrimitive = Primitive | TId;
@@ -84,6 +88,8 @@ const getValuesSafe = <T extends IdOrPrimitive>(
 
 export interface SelectProps<T extends IdOrPrimitive> extends SelectBaseProps<T> {}
 export const Select = <T extends IdOrPrimitive>(props: SelectProps<T>) => {
+  const {language} = useContext(LanguageContext);
+  const translate = (value: EnKeys) => RR(value, language);
   const { options, loading, disabled, searchable, clearable, multiple, placeholder, className, filter, label } = props;
   const { value = [], textSize, onValue, onBlur, optionRender, onSingleValue, onMultiValue } = props;
   const color = getColor(props);
@@ -91,7 +97,7 @@ export const Select = <T extends IdOrPrimitive>(props: SelectProps<T>) => {
   const sizeText = SIZES_TEXT[textSize ?? getSize(props)];
   const sizeTheme = SIZES_THEME[getSize(props)];
 
-  const { value: searchText, onChange: setSearchText } = useInputState("");
+  const [searchText, setSearchText, debouncedSearchText] = useDebounceState("", 500)
   const { isOpen, close, open } = useOpenClose();
   const [searching, setSearching] = useState(false);
   const [asyncOptions, setAsyncOptions] = useState<SelectOption<T>[]>([]);
@@ -118,7 +124,7 @@ export const Select = <T extends IdOrPrimitive>(props: SelectProps<T>) => {
   };
 
   const handleSearchTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e);
+    setSearchText(e.target.value);
     open();
   };
 
@@ -276,7 +282,7 @@ export const Select = <T extends IdOrPrimitive>(props: SelectProps<T>) => {
 
           {/* input */}
           {searchable && (
-            <div className="grid grid-cols-[0px_min-content]">
+            <div className="grid grid-cols-[0px_max-content]">
               <input
                 ref={inputRef}
                 spellCheck={false}
@@ -291,7 +297,7 @@ export const Select = <T extends IdOrPrimitive>(props: SelectProps<T>) => {
             </div>
           )}
           <span>&nbsp;</span>
-          {hasLabel && <span className={classnames("select-label", (hasValue || searchText.length > 0) && "with-value")}>{label}</span>}
+          {hasLabel && <span className={classnames("select-label pl-2", (hasValue || searchText.length > 0) && "with-value")}>{label}</span>}
         </div>
 
         {/* indicators (arrow, clear) */}
@@ -355,7 +361,9 @@ export const Select = <T extends IdOrPrimitive>(props: SelectProps<T>) => {
                 {i.label}
               </div>
             ))}
-            {filteredOptions.length === 0 && <div className="cursor-default p-1 px-2 text-sm text-neutral-700">No results</div>}
+            {filteredOptions.length === 0 && <div className="cursor-default p-1 px-2 text-sm text-neutral-700">
+              {debouncedSearchText.length === 0 ? translate("select-component.type-to-search") : translate("select-component.no-results-found")}
+              </div>}
           </div>
         </div>
       )}

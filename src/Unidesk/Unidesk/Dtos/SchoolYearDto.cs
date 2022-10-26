@@ -4,7 +4,7 @@ using Unidesk.Validations;
 
 namespace Unidesk.Dtos;
 
-public class SchoolYearDto : TrackedEntityDto, IValidatedEntity<SchoolYearDto>
+public class SchoolYearDto : TrackedEntityDto
 {
     [Required]
     public DateTime Start { get; set; }
@@ -13,5 +13,5 @@ public class SchoolYearDto : TrackedEntityDto, IValidatedEntity<SchoolYearDto>
     public DateTime End { get; set; }
     
     public string Name => $"{Start.Year:D2}/{End.Year:D2}";
-    public void ValidateAndThrow(SchoolYearDto item) => new SchoolYearDtoValidation().ValidateAndThrow(item);
+    public static void ValidateAndThrow(SchoolYearDto item) => new SchoolYearDtoValidation().ValidateAndThrow(item);
 }

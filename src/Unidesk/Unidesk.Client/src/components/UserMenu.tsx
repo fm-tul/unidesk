@@ -26,6 +26,7 @@ export function UserMenu() {
       },
     });
 
+    debugger;
     if (response.isAuthenticated && response.user) {
       setUser(response.user);
     } else {
