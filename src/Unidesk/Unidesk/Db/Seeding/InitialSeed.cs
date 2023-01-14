@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Unidesk.Db.Functions;
 using Unidesk.Db.Models;
 using Unidesk.Utils;
 
@@ -25,10 +26,15 @@ namespace Unidesk.Db.Seeding;
 
 public static class InitialSeed
 {
-    public static OperationInfo Seed(UnideskDbContext db)
+    public static OperationInfo Seed(UnideskDbContext db, bool firstTime)
     {
         db.Database.EnsureCreated();
+        if (firstTime)
+        {
+            db.Database.ExecuteSqlRaw(SQL.LevenshteinFunctionCreateSql);
+        }
         var info = new OperationInfo("Seeding");
+        
 
         if (!db.SchoolYears.Any())
         {
@@ -38,7 +44,7 @@ public static class InitialSeed
                         new SchoolYear
                         {
                             Start = new DateOnly(year, 1, 1),
-                            End = new DateOnly(year + 1, 1, 1)
+                            End = new DateOnly(year + 1, 1, 1),
                         }
                     )
             );

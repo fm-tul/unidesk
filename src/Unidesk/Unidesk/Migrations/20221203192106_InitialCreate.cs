@@ -104,6 +104,24 @@ namespace Unidesk.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ReportTemplate",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Locale = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Template = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReportTemplate", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SchoolYears",
                 columns: table => new
                 {
@@ -138,6 +156,24 @@ namespace Unidesk.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StudyProgrammes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserRoles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Grants = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -234,27 +270,27 @@ namespace Unidesk.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserRoles",
+                name: "UserUserRole",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Grants = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    RolesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UsersId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => x.Id);
+                    table.PrimaryKey("PK_UserUserRole", x => new { x.RolesId, x.UsersId });
                     table.ForeignKey(
-                        name: "FK_UserRoles_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_UserUserRole_UserRoles_RolesId",
+                        column: x => x.RolesId,
+                        principalTable: "UserRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserUserRole_Users_UsersId",
+                        column: x => x.UsersId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -283,7 +319,8 @@ namespace Unidesk.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<int>(type: "int", nullable: false),
                     ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -301,7 +338,8 @@ namespace Unidesk.Migrations
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TeamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -408,6 +446,8 @@ namespace Unidesk.Migrations
                     AccessToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Relation = table.Column<int>(type: "int", nullable: false),
                     ReportUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ReportTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -417,15 +457,21 @@ namespace Unidesk.Migrations
                 {
                     table.PrimaryKey("PK_ThesisReports", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ThesisReports_ReportUsers_ReportUserId",
-                        column: x => x.ReportUserId,
-                        principalTable: "ReportUsers",
+                        name: "FK_ThesisReports_ReportTemplate_ReportTemplateId",
+                        column: x => x.ReportTemplateId,
+                        principalTable: "ReportTemplate",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ThesisReports_Theses_ThesisId",
                         column: x => x.ThesisId,
                         principalTable: "Theses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ThesisReports_Users_ReportUserId",
+                        column: x => x.ReportUserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -533,6 +579,11 @@ namespace Unidesk.Migrations
                 column: "ThesisId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ThesisReports_ReportTemplateId",
+                table: "ThesisReports",
+                column: "ReportTemplateId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ThesisReports_ReportUserId",
                 table: "ThesisReports",
                 column: "ReportUserId");
@@ -558,14 +609,14 @@ namespace Unidesk.Migrations
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_UserId",
-                table: "UserRoles",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_AvatarId",
                 table: "Users",
                 column: "AvatarId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserUserRole_UsersId",
+                table: "UserUserRole",
+                column: "UsersId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_KeywordThesis_Theses_ThesisId",
@@ -606,6 +657,9 @@ namespace Unidesk.Migrations
                 name: "KeywordThesis");
 
             migrationBuilder.DropTable(
+                name: "ReportUsers");
+
+            migrationBuilder.DropTable(
                 name: "ThesisOutcomes");
 
             migrationBuilder.DropTable(
@@ -618,16 +672,19 @@ namespace Unidesk.Migrations
                 name: "UserInTeams");
 
             migrationBuilder.DropTable(
-                name: "UserRoles");
+                name: "UserUserRole");
 
             migrationBuilder.DropTable(
                 name: "Keywords");
 
             migrationBuilder.DropTable(
-                name: "ReportUsers");
+                name: "ReportTemplate");
 
             migrationBuilder.DropTable(
                 name: "Teams");
+
+            migrationBuilder.DropTable(
+                name: "UserRoles");
 
             migrationBuilder.DropTable(
                 name: "Users");

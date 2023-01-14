@@ -12,17 +12,19 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    [Migration("20220923164950_TeamChangesAvatar")]
-    partial class TeamChangesAvatar
+    [Migration("20221215011504_User_Aliases")]
+    partial class UserAliases
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .UseCollation("SQL_Latin1_General_CP1_CI_AI")
+                .HasAnnotation("ProductVersion", "7.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Unidesk.Db.Models.ChangeLog", b =>
                 {
@@ -260,6 +262,40 @@ namespace Unidesk.Migrations
                     b.ToTable("KeywordThesis");
                 });
 
+            modelBuilder.Entity("Unidesk.Db.Models.ReportTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Locale")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Template")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReportTemplate");
+                });
+
             modelBuilder.Entity("Unidesk.Db.Models.ReportUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -322,6 +358,54 @@ namespace Unidesk.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ReportUsers");
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.Reports.ThesisReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AccessToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Relation")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ReportTemplateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ReportUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ThesisId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportTemplateId");
+
+                    b.HasIndex("ReportUserId");
+
+                    b.HasIndex("ThesisId");
+
+                    b.ToTable("ThesisReports");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.SchoolYear", b =>
@@ -562,46 +646,6 @@ namespace Unidesk.Migrations
                     b.ToTable("ThesisOutcomes");
                 });
 
-            modelBuilder.Entity("Unidesk.Db.Models.ThesisReport", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccessToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Modified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Relation")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ReportUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ThesisId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReportUserId");
-
-                    b.HasIndex("ThesisId");
-
-                    b.ToTable("ThesisReports");
-                });
-
             modelBuilder.Entity("Unidesk.Db.Models.ThesisType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -722,6 +766,9 @@ namespace Unidesk.Migrations
                     b.Property<int>("UserFunction")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(max)");
 
@@ -737,6 +784,8 @@ namespace Unidesk.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AvatarId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Users");
                 });
@@ -787,9 +836,6 @@ namespace Unidesk.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("_grants")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -797,9 +843,22 @@ namespace Unidesk.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("UserRoles");
+                });
+
+            modelBuilder.Entity("UserUserRole", b =>
+                {
+                    b.Property<Guid>("RolesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UsersId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RolesId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("UserUserRole");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.DocumentContent", b =>
@@ -839,6 +898,33 @@ namespace Unidesk.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.Reports.ThesisReport", b =>
+                {
+                    b.HasOne("Unidesk.Db.Models.ReportTemplate", "ReportTemplate")
+                        .WithMany()
+                        .HasForeignKey("ReportTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Unidesk.Db.Models.User", "ReportUser")
+                        .WithMany()
+                        .HasForeignKey("ReportUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
+                        .WithMany()
+                        .HasForeignKey("ThesisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReportTemplate");
+
+                    b.Navigation("ReportUser");
+
+                    b.Navigation("Thesis");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.Team", b =>
@@ -894,25 +980,6 @@ namespace Unidesk.Migrations
                         .HasForeignKey("ThesisId");
                 });
 
-            modelBuilder.Entity("Unidesk.Db.Models.ThesisReport", b =>
-                {
-                    b.HasOne("Unidesk.Db.Models.ReportUser", "ReportUser")
-                        .WithMany()
-                        .HasForeignKey("ReportUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
-                        .WithMany()
-                        .HasForeignKey("ThesisId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ReportUser");
-
-                    b.Navigation("Thesis");
-                });
-
             modelBuilder.Entity("Unidesk.Db.Models.ThesisType", b =>
                 {
                     b.HasOne("Unidesk.Db.Models.Thesis", null)
@@ -945,6 +1012,10 @@ namespace Unidesk.Migrations
                         .WithMany()
                         .HasForeignKey("AvatarId");
 
+                    b.HasOne("Unidesk.Db.Models.User", null)
+                        .WithMany("Aliases")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Avatar");
                 });
 
@@ -967,11 +1038,19 @@ namespace Unidesk.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Unidesk.Db.Models.UserRole", b =>
+            modelBuilder.Entity("UserUserRole", b =>
                 {
+                    b.HasOne("Unidesk.Db.Models.UserRole", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Unidesk.Db.Models.User", null)
-                        .WithMany("Roles")
-                        .HasForeignKey("UserId");
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.Document", b =>
@@ -1005,7 +1084,7 @@ namespace Unidesk.Migrations
 
             modelBuilder.Entity("Unidesk.Db.Models.User", b =>
                 {
-                    b.Navigation("Roles");
+                    b.Navigation("Aliases");
 
                     b.Navigation("Theses");
 

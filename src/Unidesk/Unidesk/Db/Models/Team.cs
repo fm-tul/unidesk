@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Unidesk.Client;
 using Unidesk.Db.Core;
+using Unidesk.Dtos.ReadOnly;
 using Unidesk.Server;
 
 namespace Unidesk.Db.Models;
@@ -10,7 +11,7 @@ public class Team : TrackedEntity
 {
 
     [NotMapped]
-    public List<User> Users => UserInTeams.Select(x => x.User).ToList();
+    public List<TeamUserLookupDto> Users { get; set; } = new();
     
     [IgnoreMapping]
     public List<UserInTeam> UserInTeams { get; set; } = new();
@@ -24,7 +25,7 @@ public class Team : TrackedEntity
 
 [Flags]
 [JsonConverter(typeof(JsonStringEnumConverter))]
-[GenerateModel(ForType = typeof(TeamType), GenerateAggreation = true, Name = "TeamType")]
+[GenerateModel(ForType = typeof(TeamType), GenerateAggregation = true, Name = "TeamType")]
 public enum TeamType
 {
     Unknown = 0,

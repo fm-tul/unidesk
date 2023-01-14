@@ -4,7 +4,7 @@ using Unidesk.Client;
 namespace Unidesk.Db.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-[GenerateModel(Name = "ThesisStatus", ForType = typeof(ThesisStatus), GenerateAggreation = true)]
+[GenerateModel(Name = "ThesisStatus", ForType = typeof(ThesisStatus), GenerateAggregation = true)]
 public enum ThesisStatus
 {
     [MultiLang("Draft", "Návrh")]
@@ -22,10 +22,10 @@ public enum ThesisStatus
     [MultiLang("Submitted", "Odevzdáno")]
     Submitted = 4,
     
-    [MultiLang("Finished Successfully", "Úspěšně dokončeno")]
+    [MultiLang("Defended", "Obhájeno")]
     Finished_Susccessfully = 5,
     
-    [MultiLang("Finished Unsuccessfully", "Neúspěšně dokončeno")]
+    [MultiLang("Failed", "Neobhájeno")]
     Finished_Unsuccessfully = 6,
     
     [MultiLang("Finished", "Dokončeno")]

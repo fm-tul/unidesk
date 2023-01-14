@@ -146,7 +146,6 @@ public class Thesis : TrackedEntity
     /// <summary>
     /// List of users who are assigned to the thesis, after the thesis is accepted must contain at least one user (or one team)
     /// </summary>
-    [IgnoreMapping]
     public List<ThesisUser> ThesisUsers { get; set; } = new();
     
     [NotMapped]

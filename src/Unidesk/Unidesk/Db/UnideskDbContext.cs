@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Unidesk.Db.Core;
+using Unidesk.Db.Functions;
 using Unidesk.Db.Models;
+using Unidesk.Db.Models.Reports;
 using Unidesk.Db.Seeding;
 using Unidesk.Services;
 using Unidesk.Utils;
@@ -21,7 +23,6 @@ public class UnideskDbContext : DbContext
         _userProvider = userProvider;
         _logger = logger;
         _dateTimeService = dateTimeService;
-        _logger.LogInformation("UnideskDbContext created");
     }
 
     public DbSet<SchoolYear> SchoolYears { get; set; }
@@ -46,36 +47,48 @@ public class UnideskDbContext : DbContext
 
     public DbSet<Team> Teams { get; set; }
     public DbSet<UserInTeam> UserInTeams { get; set; }
-    
-    
+
+
     public DbSet<ChangeLog> ChangeLogs { get; set; }
-    
+
     private bool _iterceptorsEnabled = true;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.UseCollation("SQL_Latin1_General_CP1_CI_AI");
+        /*
+         ALTER DATABASE Unidesk_dev
+            COLLATE SQL_Latin1_General_CP1_CI_AI
+         */
+        base.OnModelCreating(modelBuilder);
+
+        // register functions
+        modelBuilder
+           .HasDbFunction(SQL.LevenshteinMethodInfo())
+           .HasName(nameof(SQL.Levenshtein));
+
         // backing fields
         modelBuilder.Entity<SchoolYear>().Property(e => e._start);
         modelBuilder.Entity<SchoolYear>().Property(e => e._end);
-        
+
         modelBuilder.Entity<UserRole>().Property(e => e._grants);
 
         // UserInTeam basically handles m-n relation and we must specify the keys here
         modelBuilder.Entity<UserInTeam>()
-            .HasKey(j => new { j.UserId, j.TeamId });
-        
-        modelBuilder.Entity<KeywordThesis>()
-            .HasKey(j => new { j.KeywordId, j.ThesisId });
-        
-        modelBuilder.Entity<ThesisUser>()
-            .HasKey(j => new { j.ThesisId, j.UserId });
-    }
-    
+           .HasKey(j => new { j.UserId, j.TeamId });
 
-    public async Task<OperationInfo> SeedDbAsync()
+        modelBuilder.Entity<KeywordThesis>()
+           .HasKey(j => new { j.KeywordId, j.ThesisId });
+
+        modelBuilder.Entity<ThesisUser>()
+           .HasKey(j => new { j.ThesisId, j.UserId });
+    }
+
+
+    public async Task<OperationInfo> SeedDbAsync(bool firstTime)
     {
         _userProvider.CurrentUser = _userProvider.CurrentUser ?? StaticUsers.InitialSeedUser;
-        var info = InitialSeed.Seed(this);
+        var info = InitialSeed.Seed(this, firstTime);
 
         if (info.TotalRows > 0)
         {
@@ -85,10 +98,10 @@ public class UnideskDbContext : DbContext
         return info;
     }
 
-    public ChangeTrackedStats GetStats()
+    public ChangeTrackedStats GetStats(bool detailed = false)
     {
         ChangeTracker.DetectChanges();
-        return new ChangeTrackedStats(ChangeTracker.Entries());
+        return new ChangeTrackedStats(ChangeTracker.Entries(), detailed);
     }
 
     public OperationInfo HandleInterceptors()
@@ -97,18 +110,18 @@ public class UnideskDbContext : DbContext
         {
             return new OperationInfo("Interceptors: disabled");
         }
-        
+
         var info = new OperationInfo("Interceptors");
         var items = ChangeTracker
-            .Entries()
-            .Where(i => i.Entity is TrackedEntity)
-            .Where(i => i.State == EntityState.Added || i.State == EntityState.Modified)
-            .ToList();
+           .Entries()
+           .Where(i => i.Entity is TrackedEntity)
+           .Where(i => i.State == EntityState.Added || i.State == EntityState.Modified)
+           .ToList();
 
         // update Modified, ModifiedBy, Created and CreatedBy
         info += items
-            .AsEnumerable()
-            .ForEach(i =>
+           .AsEnumerable()
+           .ForEach(i =>
             {
                 if (i.Entity is TrackedEntity entity)
                 {
@@ -138,20 +151,19 @@ public class UnideskDbContext : DbContext
         HandleInterceptors();
         return base.SaveChangesAsync(cancellationToken);
     }
-    
+
     public UnideskDbContext DisableInterceptors()
     {
         _iterceptorsEnabled = false;
         return this;
     }
-    
+
     public UnideskDbContext EnableInterceptors()
     {
         _iterceptorsEnabled = true;
         return this;
     }
 }
-
 
 public struct ChangeTrackedStats
 {
@@ -160,13 +172,41 @@ public struct ChangeTrackedStats
     public readonly int DeletedCount;
     public readonly int UnchangedCount;
 
-    public ChangeTrackedStats(IEnumerable<EntityEntry> items)
+    public readonly Dictionary<string, Dictionary<EntityState, List<EntityEntry>>> All;
+
+    public ChangeTrackedStats(IEnumerable<EntityEntry> items, bool detailed)
     {
-        var grouped = items.GroupBy(i => i.State).ToDictionary(i => i.Key, i => i.Count());
+        var entityEntries = items as EntityEntry[] ?? items.ToArray();
+        var grouped = entityEntries.GroupBy(i => i.State).ToDictionary(i => i.Key, i => i.Count());
         AddedCount = grouped.GetValueOrDefault(EntityState.Added, 0);
         ModifiedCount = grouped.GetValueOrDefault(EntityState.Modified, 0);
         DeletedCount = grouped.GetValueOrDefault(EntityState.Deleted, 0);
         UnchangedCount = grouped.GetValueOrDefault(EntityState.Unchanged, 0);
+
+        if (detailed)
+        {
+            var tmp = new Dictionary<string, Dictionary<EntityState, List<EntityEntry>>>();
+            foreach (var entity in entityEntries)
+            {
+                var type = entity.Entity.GetType().Name;
+                if (!tmp.ContainsKey(type))
+                {
+                    tmp.Add(type, new Dictionary<EntityState, List<EntityEntry>>());
+                }
+                
+                if (!tmp[type].ContainsKey(entity.State))
+                {
+                    tmp[type].Add(entity.State, new List<EntityEntry>());
+                }
+                
+                tmp[type][entity.State].Add(entity);
+            }
+            
+            All = tmp;
+        } else
+        {
+            All = new Dictionary<string, Dictionary<EntityState, List<EntityEntry>>>();
+        }
     }
 
     public override string ToString()

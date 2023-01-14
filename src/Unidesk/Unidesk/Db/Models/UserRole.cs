@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Unidesk.Client;
 using Unidesk.Db.Core;
 using Unidesk.Security;
+using Unidesk.Server;
 
 namespace Unidesk.Db.Models;
 
@@ -12,6 +13,9 @@ public class UserRole : TrackedEntity
     public string Name { get; set; }
 
     public string? Description { get; set; }
+    
+    [IgnoreMapping]
+    public List<User> Users { get; set; } = new List<User>();
 
     [Column("Grants")]
     internal string _grants { get; set; } = "";
@@ -22,6 +26,7 @@ public class UserRole : TrackedEntity
     {
         get => _grants
             .Split(',')
+            .Where(g => !string.IsNullOrWhiteSpace(g))
             .Select(Guid.Parse)
             .Select(i => UserGrants.All.FirstOrDefault(j => i == j.Id))
             .Where(i => i != null)

@@ -1,4 +1,5 @@
 ﻿using Unidesk.Db.Models;
+using Unidesk.Db.Models.Reports;
 
 namespace Unidesk.Db.Core;
 

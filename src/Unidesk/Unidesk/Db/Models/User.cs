@@ -1,15 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using AutoMapper;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using Unidesk.Db.Core;
-using Unidesk.Dtos;
-using Unidesk.Security;
 using Unidesk.Server;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Db.Models;
 
-[AutoMap(typeof(UserDto))]
 public class User : TrackedEntity, ISimpleUser
 {
     public string? Username { get; set; }
@@ -36,30 +31,25 @@ public class User : TrackedEntity, ISimpleUser
     public string? WorkAddress { get; set; }
     public string? WorkPosition { get; set; }
     public List<UserRole> Roles { get; set; } = new();
+    
+    [NotMapped]
+    public List<Grant> Grants => Roles.SelectMany(r => r.Grants).Distinct().ToList();
 
     public UserFunction UserFunction { get; set; }
     
-    
-    [NotMapped]
-    public List<Team> Teams => UserInTeams.Select(x => x.Team).ToList();
-    
-    [IgnoreMapping]
     public List<UserInTeam> UserInTeams { get; set; } = new();
     
     public List<ThesisUser> Theses { get; set; } = new();
 
-    [NotMapped]
-    [IgnoreMapping]
-    public List<Grant> Grants => Roles.SelectMany(r => r.Grants).ToList();
-    
-    [NotMapped]
-    public List<Guid> GrantIds => Grants.Select(g => g.Id).ToList();
-
-    [NotMapped]
-    public int ThesisCount => Theses.Count;
-
-    public bool HasGrant(string entityTeamEditId)
+    public bool HasGrant(string grantName)
     {
-        return Grants.Any(g => g.Name == entityTeamEditId);
+        return Roles.Any(r => r.Grants.Any(g => g.Name == grantName)); 
+    }
+    
+    public List<User> Aliases { get; set; } = new();
+    
+    public static bool Compare(User? user1, User? user2)
+    {
+        return user1?.Id == user2?.Id;
     }
 }
