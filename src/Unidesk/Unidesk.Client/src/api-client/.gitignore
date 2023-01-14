@@ -1,5 +1,6 @@
 # gitignore everything in this folder
-# except this file and the .gitignore file
+# except this file and the .gitignore file and README.md
 *
 !.gitignore
+!README.md
 
