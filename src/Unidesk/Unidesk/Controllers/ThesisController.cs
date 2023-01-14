@@ -1,12 +1,14 @@
-﻿using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Dtos.ReadOnly;
 using Unidesk.Dtos.Requests;
 using Unidesk.Security;
 using Unidesk.ServiceFilters;
@@ -67,7 +69,7 @@ public class ThesisController : Controller
 
     [HttpPost, Route("find")]
     [SwaggerOperation(OperationId = nameof(Find))]
-    [ProducesResponseType(typeof(PagedResponse<ThesisDto>), 200)]
+    [ProducesResponseType(typeof(PagedResponse<ThesisLookupDto>), 200)]
     public async Task<IActionResult> Find([FromBody] ThesisFilter requestFilter)
     {
         var query = _db.Theses.Query();
@@ -79,16 +81,27 @@ public class ThesisController : Controller
 
         if (requestFilter.Keyword.IsNotNullOrEmpty())
         {
+            var top5SimilarKeywordsIds = await _db.Keywords
+               .Where(i => i.Value.Contains(requestFilter.Keyword))
+               .Select(i => i.Id)
+               .ToListAsync();
+            
             var pattern = $"%{requestFilter.Keyword}%";
             query = query.Where(i =>
                 EF.Functions.Like(i.NameCze, pattern)
              || EF.Functions.Like(i.NameEng, pattern)
-             || (i.AbstractCze != null && EF.Functions.Like(i.AbstractCze, pattern))
-             || (i.AbstractEng != null && EF.Functions.Like(i.AbstractEng, pattern))
+             // || (i.AbstractCze != null && EF.Functions.Like(i.AbstractCze, pattern))
+             // || (i.AbstractEng != null && EF.Functions.Like(i.AbstractEng, pattern))
              || (i.Adipidno != null && EF.Functions.Like(i.Adipidno.ToString()!, pattern))
              || (i.ThesisUsers.Any(j =>
                     (j.User.FirstName != null && EF.Functions.Like(j.User.FirstName, pattern))
                  || (j.User.LastName != null && EF.Functions.Like(j.User.LastName, pattern))
+                ))
+             || (i.KeywordThesis.Any(j =>
+                    top5SimilarKeywordsIds.Contains(j.KeywordId)
+                ))
+                || (i.KeywordThesis.Any(j =>
+                    EF.Functions.Like(j.Keyword.Value, pattern)
                 ))
             );
         }
@@ -103,6 +116,19 @@ public class ThesisController : Controller
         {
             query = query.Where(i => i.Status == requestFilter.Status.Value);
         }
+        
+        if (requestFilter.SchoolYearId.HasValue)
+        {
+            query = query.Where(i => i.SchoolYearId == requestFilter.SchoolYearId.Value);
+        }
+
+        if (requestFilter.MyThesis)
+        {
+            var myIds = _userProvider.CurrentUser.Aliases.Select(i => i.Id).Concat(
+                new[] { _userProvider.CurrentUser.Id }
+            ).ToList();
+            query = query.Where(i => i.ThesisUsers.Any(j => myIds.Contains(j.UserId)));
+        }
 
         if (requestFilter.HasKeywords.HasValue)
         {
@@ -114,7 +140,7 @@ public class ThesisController : Controller
         var response = await query
            .OrderBy(i => i.Status)
            .ThenBy(i => i.Created)
-           .ToListWithPagingAsync<Thesis, ThesisDto>(requestFilter.Filter, _mapper);
+           .ToListWithPagingAsync<Thesis, ThesisLookupDto>(requestFilter.Filter, _mapper);
 
         return Ok(response);
     }

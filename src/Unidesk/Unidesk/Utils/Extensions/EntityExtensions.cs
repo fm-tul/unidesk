@@ -7,14 +7,6 @@ namespace Unidesk.Utils.Extensions;
 
 public static class EntityExtensions
 {
-    public static T StripToGuids<T>(this T entity) where T : TrackedEntity, new()
-    {
-        return new T()
-        {
-            Id = entity.Id
-        };
-    }
-
     public static ThesisUser StripToGuids(this ThesisUser thesisUser)
     {
         return new ThesisUser()
@@ -25,11 +17,11 @@ public static class EntityExtensions
         };
     }
     
-    public static UserInTeam StripToGuids(this UserInTeam thesisUser)
+    public static UserInTeam StripToGuids(this UserInTeam userInTeam)
     {
-        thesisUser.Team = null;
-        thesisUser.User = null;
-        return thesisUser;
+        userInTeam.Team = null;
+        userInTeam.User = null;
+        return userInTeam;
     }
 }
 
@@ -65,6 +57,8 @@ public static class EntityQueryExtensions
     public static IQueryable<User> Query(this DbSet<User> dbSet)
     {
         return dbSet
+           .Include(i => i.Aliases)
+           .Include(i => i.Roles)
            .Include(i => i.UserInTeams)
            .ThenInclude(i => i.Team);
     }

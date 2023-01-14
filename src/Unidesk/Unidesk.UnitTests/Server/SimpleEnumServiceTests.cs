@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using FluentAssertions;
+using MapsterMapper;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -39,8 +39,7 @@ public class SimpleEnumServiceTests : IDisposable
         _userProvider = new UserProvider();
         _db = new UnideskDbContext(contextOptions, _userProvider, loggerSubstitute, _dateTimeService);
 
-        var configuration = new MapperConfiguration(options => options.CreateMappingConfiguration());
-        _mapper = configuration.CreateMapper();
+        _mapper = new Mapper(MapsterConfiguration.CreateMapsterConfig());
     }
 
     public void Dispose()

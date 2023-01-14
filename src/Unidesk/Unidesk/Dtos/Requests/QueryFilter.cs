@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using AutoMapper;
+using ExpressionDebugger;
+using Mapster;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Unidesk.Db.Models;
 
 namespace Unidesk.Dtos.Requests;
 
@@ -49,15 +52,16 @@ public static class IQueryableExtensions
     }
 
 
-    public static async Task<PagedResponse<TDto>> ToListWithPagingAsync<TEntity, TDto>(this IQueryable<TEntity> query, QueryFilter? pagedQuery, IMapper mapper)
+    public static async Task<PagedResponse<TDto>> ToListWithPagingAsync<TEntity, TDto>(this IQueryable<TEntity> query, QueryFilter? queryFilter, IMapper mapper)
         where TEntity : class
         where TDto : class
     {
         var hasTotal = query.TryGetNonEnumeratedCount(out var total);
         total = hasTotal ? total : await query.CountAsync();
-        var items = await query.ApplyPaging(pagedQuery).ToListAsync();
+        var pagedQuery = query.ApplyPaging(queryFilter);
+        var items = await pagedQuery.ToListAsync();
         var dtos = mapper.Map<List<TDto>>(items);
-        var response = PagedResponse<TDto>.Create(dtos, pagedQuery, total);
+        var response = PagedResponse<TDto>.Create(dtos, queryFilter, total);
 
         return response;
     }

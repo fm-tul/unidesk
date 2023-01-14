@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
+using Newtonsoft.Json;
 using Unidesk.Db.Models;
-using Unidesk.Dtos.Resolvers;
+using Unidesk.Dtos.ReadOnly;
 using Unidesk.Server;
 using Unidesk.Validations;
 
@@ -14,7 +15,9 @@ public class ThesisDto : TrackedEntityDto
     public bool NeedsReview { get; set; }
     public bool Reviewed { get; set; }
 
+    [Required]
     public string NameEng { get; set; }
+    [Required]
     public string NameCze { get; set; }
 
     public string? AbstractEng { get; set; }
@@ -24,7 +27,7 @@ public class ThesisDto : TrackedEntityDto
     public List<KeywordDto> Keywords { get; set; } = new();
 
     /// <summary>
-    /// Schoold year of the thesis
+    /// School year of the thesis
     /// </summary>
     [Required]
     public Guid SchoolYearId { get; set; }
@@ -71,44 +74,33 @@ public class ThesisDto : TrackedEntityDto
     [Required]
     public List<Guid> OutcomeIds { get; set; } = new();
 
-    public string? Guidelines { get; set; }
-
     [Required]
-    public List<string> GuidelinesList
-    {
-        get => StringListParser.Parse(Guidelines);
-        set => Guidelines = StringListParser.Serialize(value);
-    }
+    public List<string> Guidelines { get; set; } = new();
 
+    
     /// <summary>
     /// List of recommended literature for the thesis (e.g. 1. Thesis, 2. Book, 3. Article, etc.)
     /// </summary>
-    public string? Literature { get; set; }
-
     [Required]
-    public List<string> LiteratureList
-    {
-        get => StringListParser.Parse(Literature);
-        set => Literature = StringListParser.Serialize(value);
-    }
+    public List<string>  Literature { get; set; } = new();
+
 
     public int? Grade { get; set; }
 
-    [IgnoreMapping]
-    public List<ThesisUserDto> ThesisUsers { get; set; } = new();
+    [Required, JsonIgnore]
+    public List<ThesisLookupUserDto> ThesisUsers { get; set; } = new();
+    
+    [Required]
+    public List<ThesisLookupUserDto> Authors => ThesisUsers.Where(x => x.Function == UserFunction.Author).ToList();
+    
+    [Required]
+    public List<ThesisLookupUserDto> Supervisors => ThesisUsers.Where(x => x.Function == UserFunction.Supervisor).ToList();
+    
+    [Required]
+    public List<ThesisLookupUserDto> Opponents => ThesisUsers.Where(x => x.Function == UserFunction.Opponent).ToList();
 
     [Required]
-    public List<UserDto> Authors { get; set; } = new();
-
-    [Required]
-    public List<UserDto> Supervisors { get; set; } = new();
-
-    [Required]
-    public List<UserDto> Opponents { get; set; } = new();
-
-    [Required]
-    [IgnoreMapping]
-    public List<TeamDto> Teams { get; set; } = new();
+    public List<TeamLookupDto> Teams { get; set; } = new();
     
     public static void ValidateAndThrow(ThesisDto item) => new ThesisDtoValidator().ValidateAndThrow(item);
 }

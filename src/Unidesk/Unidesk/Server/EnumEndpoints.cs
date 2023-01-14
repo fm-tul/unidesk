@@ -8,15 +8,9 @@ public static class EnumsCachedEndpoint
     public static RouteHandlerBuilder UseEnumsCachedEndpoint<TResponse>(this RouteHandlerBuilder builder, string operationName)
     {
         return builder
-            .WithTags(EnumsSwaggerTag)
-            .WithName(operationName)
-            .Produces<TResponse>()
-            .CacheOutput(policyBuilder =>
-            {
-                policyBuilder.Expire(TimeSpan.FromMinutes(15));
-                policyBuilder.Tag(EnumsCacheTag);
-                policyBuilder.AddPolicy(typeof(OutputCachingPolicy));
-            });
+           .WithTags(EnumsSwaggerTag)
+           .WithName(operationName)
+           .Produces<TResponse>();
     }
 
     public static RouteHandlerBuilder UseEnumsEndpoint<TResponse>(this RouteHandlerBuilder builder, string operationName)

@@ -3,7 +3,7 @@ using Unidesk.Db.Models;
 
 namespace Unidesk.Dtos;
 
-public class TeamSimpleDto : DtoBase
+public class TeamLookupDto : DtoBase
 {
     [Required]
     public Guid Id { get; set; }

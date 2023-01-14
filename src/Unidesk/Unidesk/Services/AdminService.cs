@@ -98,7 +98,7 @@ public class AdminService
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-[GenerateModel(Name = "AdminActions", ForType = typeof(AdminActions), GenerateAggreation = true)]
+[GenerateModel(Name = "AdminActions", ForType = typeof(AdminActions), GenerateAggregation = true)]
 public enum AdminActions
 {
     Update_User_Functions,

@@ -3,7 +3,7 @@ using Unidesk.Client;
 
 namespace Unidesk.Dtos;
 
-[GenerateModel(ForType = typeof(YesNo), Name = "YesNo", GenerateAggreation = true)]
+[GenerateModel(ForType = typeof(YesNo), Name = "YesNo", GenerateAggregation = true)]
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum YesNo
 {

@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Unidesk.Db.Models;
-using Unidesk.Dtos.ReadOnly;
-using Unidesk.Server;
 
-namespace Unidesk.Dtos;
+namespace Unidesk.Dtos.ReadOnly;
 
-public class UserInTeamDto : UserLookupDto
+public class UserTeamLookupDto : DtoBase
 {
+    [Required]
+    public TeamLookupDto Team { get; set; }
+    [Required]
     public UserInTeamStatus Status { get; set; }
+    [Required]
     public TeamRole Role { get; set; }
 }

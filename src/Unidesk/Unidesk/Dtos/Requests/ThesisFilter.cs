@@ -12,4 +12,8 @@ public class ThesisFilter : IFilter
     
     public bool? HasKeywords { get; set; }
     public string? Keyword { get; set; }
+    
+    public Guid? SchoolYearId { get; set; }
+    
+    public bool MyThesis { get; set; }
 }

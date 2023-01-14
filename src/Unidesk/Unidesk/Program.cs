@@ -1,5 +1,7 @@
+using System.Linq.Expressions;
 using System.Net.Mime;
-using AutoMapper;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
@@ -21,6 +23,9 @@ using Unidesk.Utils;
 
 
 var builder = WebApplication.CreateBuilder(args);
+var generateModel = Environment.GetEnvironmentVariable("GENERATE_MODEL") == "1";
+var isDev = builder.Environment.IsDevelopment();
+
 var services = builder.Services;
 
 // optionally add appsettings.secret.{username}.json which is ignored
@@ -49,9 +54,16 @@ services.AddScoped<IDateTimeService, DefaultDateTimeService>();
 services.AddScoped<KeywordsService>();
 services.AddScoped<AdminService>();
 services.AddScoped<ReportService>();
+services.AddScoped<SettingsService>();
 
 // mapper
-services.AddAutoMapper(options => options.CreateMappingConfiguration(), typeof(Program));
+if (isDev)
+{
+    // TypeAdapterConfig.GlobalSettings.Compiler = exp => exp.CompileWithDebugInfo();
+}
+
+services.AddSingleton(MapsterConfiguration.CreateMapsterConfig());
+services.AddScoped<IMapper, ServiceMapper>();
 
 // configs
 var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>()!;
@@ -68,13 +80,16 @@ services.AddHttpContextAccessor();
 services.AddCookieAuthentication();
 services.AddDbContext<UnideskDbContext>(options =>
 {
-    options.UseSqlServer(connectionString);
+    options.UseSqlServer(connectionString, optionsBuilder =>
+    {
+        optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+    });
     // https://stackoverflow.com/questions/70555317/multiple-level-properties-with-ef-core-6
     options.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
 });
 services.AddScoped<CachedDbContext>();
 services.AddDatabaseDeveloperPageExceptionFilter();
-if (builder.Environment.IsDevelopment())
+if (isDev && generateModel)
 {
     services.AddSingleton(new ModelGeneration());
 }
@@ -94,12 +109,16 @@ var app = builder.Build();
 //     reportService.GenerateReport();
 // }
 
-if (app.Environment.IsDevelopment())
+if (isDev)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.GenerateModels<Program>(Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "Unidesk.Client",
-        "src", "api-client", "constants")));
+    if (generateModel)
+    {
+        app.GenerateModels<Program>(
+            Path.GetFullPath(
+                Path.Combine(Directory.GetCurrentDirectory(), "..", "Unidesk.Client", "src", "api-client", "constants")));
+    }
 }
 
 app.UseExceptionHandler();
@@ -143,7 +162,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         }
         else if (exception?.Error is FluentValidation.ValidationException fluentError)
         {
-            data.Message = "Valdation Failed";
+            data.Message = "Validation Failed";
             data.DebugMessage = exception.Error.Message;
             data.Errors = fluentError.Errors;
         }
@@ -156,12 +175,22 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     });
 });
 
+var apiEnums = app
+   .MapGroup("/api/enums/")
+   .RequireAuthorization()
+   .CacheOutput(policyBuilder =>
+    {
+        policyBuilder.Expire(TimeSpan.FromMinutes(15));
+        policyBuilder.Tag(EnumsCachedEndpoint.EnumsCacheTag);
+        policyBuilder.AddPolicy(typeof(OutputCachingPolicy));
+    });
+
 // add all minimal api routes for listing the basic enum-like types
-app.AddMinimalApiGetters();
+apiEnums.AddMinimalApiGetters();
 // add all minimal api routes for creating or updating the basic enum-like types
-app.AddMinimalApiSetters();
+apiEnums.AddMinimalApiSetters();
 // add all minimal api routes for deleting the basic enum-like types
-app.AddMinimalApiDeleters();
+apiEnums.AddMinimalApiDeleters();
 
 // all enums
 app.MapGet("api/enum/All/list", ([FromServices] UnideskDbContext db, [FromServices] IMapper mapper) => new EnumsDto
@@ -181,5 +210,10 @@ app.MapGet("api/enum/Cache/reset", async ([FromServices] IOutputCacheStore cache
     await cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
     return new SimpleJsonResponse { Success = true, Message = "Ok" };
 }).Produces<SimpleJsonResponse>();
+
+if (isDev && generateModel)
+{
+    ModelGeneration.ShutDownAfterModelGenerated(app);
+}
 
 app.Run();

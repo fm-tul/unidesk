@@ -1,6 +1,6 @@
 ﻿using System;
-using AutoMapper;
 using FluentAssertions;
+using MapsterMapper;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Server;
@@ -10,17 +10,11 @@ namespace Unidesk.UnitTests.Dtos;
 
 public class Dtos
 {
-    [Fact]
-    public void Test_Should_Have_Valid_AutoMapper_Configuration()
-    {
-        var configuration = new MapperConfiguration(options => options.CreateMappingConfiguration());
-        configuration.AssertConfigurationIsValid();
-    }
     
     [Fact]
     public void Test_Should_Convert_Department_To_DepartmentDto()
     {
-        var mapper = new MapperConfiguration(options => options.CreateMappingConfiguration()).CreateMapper();
+        var mapper = new Mapper(MapsterConfiguration.CreateMapsterConfig());
         
         var Id = Guid.NewGuid();
         var department = new Department { Id  = Id, NameEng = "Department", NameCze = "Department2", DescriptionCze = "Foobar" };
@@ -37,7 +31,7 @@ public class Dtos
     [Fact]
     public void Test_Should_Convert_Faculty_To_FacultyDto()
     {
-        var mapper = new MapperConfiguration(options => options.CreateMappingConfiguration()).CreateMapper();
+        var mapper = new Mapper(MapsterConfiguration.CreateMapsterConfig());
         
         var Id = Guid.NewGuid();
         var item = new Faculty { Id = Id, NameEng = "Faculty", NameCze = "Faculty2", DescriptionCze = "Foobar", Code = "AAA"};
@@ -55,7 +49,7 @@ public class Dtos
     [Fact]
     public void Test_Should_Convert_ThesisType_To_ThesisTypeDto()
     {
-        var mapper = new MapperConfiguration(options => options.CreateMappingConfiguration()).CreateMapper();
+        var mapper = new Mapper(MapsterConfiguration.CreateMapsterConfig());
         
         var Id = Guid.NewGuid();
         var item = new ThesisType { Id = Id, NameEng = "ThesisType", NameCze = "ThesisType2", DescriptionCze = "Foobar", Code = "AAA" };
@@ -73,7 +67,7 @@ public class Dtos
     [Fact]
     public void Test_Should_Convert_ThesisOutcome_To_ThesisOutcomeDto()
     {
-        var mapper = new MapperConfiguration(options => options.CreateMappingConfiguration()).CreateMapper();
+        var mapper = new Mapper(MapsterConfiguration.CreateMapsterConfig());
         
         var Id = Guid.NewGuid();
         var item = new ThesisOutcome { Id = Id, NameEng = "ThesisOutcome", NameCze = "ThesisOutcome2", DescriptionCze = "Foobar" };
@@ -90,7 +84,7 @@ public class Dtos
     [Fact]
     public void Test_Should_Convert_StudyProgramme_To_StudyProgrammeDto()
     {
-        var mapper = new MapperConfiguration(options => options.CreateMappingConfiguration()).CreateMapper();
+        var mapper = new Mapper(MapsterConfiguration.CreateMapsterConfig());
         
         var Id = Guid.NewGuid();
         var item = new StudyProgramme { Id = Id, NameEng = "StudyProgramme", NameCze = "StudyProgramme2", DescriptionCze = "Foobar", Code = "AAA" };

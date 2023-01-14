@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Unidesk.Db;
 using Unidesk.Server.ServiceFilters;
 using Unidesk.ServiceFilters;
@@ -53,8 +55,9 @@ public static class ServiceCollectionExtensions
     {
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<UnideskDbContext>();
+        var firstTime = !await (context.Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator)!.ExistsAsync();
         await context.Database.MigrateAsync();
-        await context.SeedDbAsync();
+        await context.SeedDbAsync(firstTime);
 
         return app;
     }

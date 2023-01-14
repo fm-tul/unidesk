@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using AutoMapper;
-using FluentValidation;
+using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
@@ -45,10 +44,23 @@ public class TeamController : ControllerBase
         return Ok(response);
     }
     
-    [HttpGet, Route("get-one")]
-    [SwaggerOperation(OperationId = nameof(GetOne))]
+    [HttpPost, Route("find-simple")]
+    [SwaggerOperation(OperationId = nameof(FindSimple))]
+    [ProducesResponseType(typeof(PagedResponse<TeamLookupDto>), 200)]
+    public async Task<IActionResult> FindSimple([FromBody] TeamFilter filter)
+    {
+        var query = _teamService.WhereFilter(filter);
+        var response = await query
+           .OrderBy(i => i.Name)
+           .ToListWithPagingAsync<Team, TeamLookupDto>(filter.Filter, _mapper);
+
+        return Ok(response);
+    }
+    
+    [HttpGet, Route("get/{id:guid}")]
+    [SwaggerOperation(OperationId = nameof(Get))]
     [ProducesResponseType(typeof(TeamDto), 200)]
-    public async Task<IActionResult> GetOne(Guid id)
+    public async Task<IActionResult> Get(Guid id)
     {
         var team = await _teamService.GetOneAsync(id);
         if (team == null)

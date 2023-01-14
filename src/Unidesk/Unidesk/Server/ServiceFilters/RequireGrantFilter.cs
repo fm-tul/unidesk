@@ -30,7 +30,7 @@ public class RequireGrantFilter : IActionFilter
         }
 
         var requiredGrants = requiredAttributes.Select(x => x.Grant).ToList();
-        var userGrants = _userProvider!.CurrentUser?.Grants.ToList() ?? new List<Grant>();
+        var userGrants = _userProvider!.CurrentUser.Grants.ToList() ?? new List<Grant>();
         var result = HasAccess(requiredGrants, userGrants);
 
         if (!result.Granted)
@@ -39,7 +39,7 @@ public class RequireGrantFilter : IActionFilter
                 {
                     Success = false,
                     Message = "Access denied",
-                    DebugMessage = $"Access denied for user {_userProvider!.CurrentUser?.Username} " +
+                    DebugMessage = $"Access denied for user {_userProvider!.CurrentUser.Username} " +
                                    $"to {context.ActionDescriptor.DisplayName} because of missing grants: " +
                                    $"{string.Join(", ", requiredGrants.Select(i => $"{i.Name} ({i.Id}"))}",
                     Errors = new[] { new ValidationFailure("Grants", "Access denied") }
@@ -60,7 +60,7 @@ public class RequireGrantFilter : IActionFilter
         return (granted, null, StatusCodes.Status200OK);
     }
 
-    public static (bool Granted, string? Error, int StatusCode) HasAccess(List<RequireGrantAttribute> requireGrantAttributes, List<Grant> userGrants)
+    public static (bool Granted, string? Error, int StatusCode) HasAccess(IEnumerable<RequireGrantAttribute> requireGrantAttributes, List<Grant> userGrants)
     {
         return HasAccess(requireGrantAttributes.Select(i => i.Grant).ToList(), userGrants);
     }

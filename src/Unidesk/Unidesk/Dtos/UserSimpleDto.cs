@@ -1,5 +1,7 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
+﻿using System.ComponentModel.DataAnnotations;
+using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db.Core;
+using Unidesk.Dtos.ReadOnly;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Dtos;
@@ -16,4 +18,8 @@ public class UserSimpleDto : TrackedEntityDto, ISimpleUser
     public string? MiddleName { get; set; }
     public string? TitleBefore { get; set; }
     public string? TitleAfter { get; set; }
+    
+    [Required]
+    
+    public List<UserLookupDto> Aliases { get; set; } = new();
 }

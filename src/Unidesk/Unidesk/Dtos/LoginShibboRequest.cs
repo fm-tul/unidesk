@@ -1,8 +1,14 @@
-﻿namespace Unidesk.Dtos;
+﻿using System.Text.Json.Serialization;
+
+namespace Unidesk.Dtos;
 
 public class LoginShibboRequest : ILoginRequest
 {
-    public string Username { get; set; }
+    [JsonPropertyName("eppn")]
+    public string Eppn { get; set; }
+    
+    [JsonPropertyName("affiliation")]
+    public string Affiliation { get; set; }
     
     
     public float Time { get; set; }

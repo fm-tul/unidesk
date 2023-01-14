@@ -38,7 +38,8 @@ public class CryptographyUtils
 
     public string DecryptText(string base64Text)
     {
-        var cipherText = Convert.FromBase64String(base64Text);
+        var safeBase64 = base64Text.Replace(":", "/");
+        var cipherText = Convert.FromBase64String(safeBase64);
         var decryptor = CreateAesCipherInstance().CreateDecryptor();
         var bytes = decryptor.TransformFinalBlock(cipherText, 0, cipherText.Length);
         
@@ -62,7 +63,7 @@ public class CryptographyUtils
         // using AES-256-CBC with a 256-bit key and a 128-bit IV and PKCS7 padding
         var cipher = Aes.Create();
         cipher.Mode = CipherMode.CBC;
-        cipher.Padding = PaddingMode.PKCS7;
+        cipher.Padding = PaddingMode.Zeros;
         cipher.Key = Encoding.UTF8.GetBytes(_appOptions.AesKey);
         cipher.IV = Encoding.UTF8.GetBytes(_appOptions.AesIV);
         return cipher;

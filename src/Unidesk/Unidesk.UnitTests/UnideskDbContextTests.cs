@@ -10,6 +10,7 @@ using NSubstitute;
 using Unidesk.Db;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
+using Unidesk.Db.Models.Reports;
 using Unidesk.Db.Seeding;
 using Unidesk.Security;
 using Unidesk.Services;
@@ -35,7 +36,7 @@ public class UnideskDbContextTests
         db.Documents.Should().BeEmpty();
         db.Users.Should().BeEmpty();
 
-        await db.SeedDbAsync();
+        await db.SeedDbAsync(false);
 
         db.Departments.Should().NotBeEmpty();
         db.Faculties.Should().NotBeEmpty();
@@ -54,7 +55,7 @@ public class UnideskDbContextTests
         var userProviderSubstitute = Substitute.For<IUserProvider>();
         userProviderSubstitute.CurrentUser.Returns(new User
         {
-            Email = "example@unittest.com"
+            Email = "example@unittest.com",
         });
 
         // initially empty
@@ -71,7 +72,7 @@ public class UnideskDbContextTests
         info.TotalRows.Should().Be(0);
 
         // seed db
-        var seedInfo = InitialSeed.Seed(db);
+        var seedInfo = InitialSeed.Seed(db, false);
         seedInfo.TotalRows.Should().NotBe(0);
 
         // interceptors should find some change logs
@@ -88,7 +89,7 @@ public class UnideskDbContextTests
         // change logs should not be empty since we called SaveChanges
         db.ChangeLogs.Should().NotBeEmpty();
 
-        // interceptors should find correct currrent user
+        // interceptors should find correct current user
         db.ChangeLogs.All(i => i.User == "example@unittest.com").Should().BeTrue();
 
         // interceptors should all have some EntityId set
@@ -111,7 +112,7 @@ public class UnideskDbContextTests
         });
         var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
         var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute, new DefaultDateTimeService());
-        await db.SeedDbAsync();
+        await db.SeedDbAsync(false);
 
         var schoolYear = db.SchoolYears.First();
         var faculty = db.Faculties.First();
@@ -161,13 +162,12 @@ public class UnideskDbContextTests
 
         var document = new Document { Name = "foo.pdf", Extension = "pdf", Size = 1024, ContentType = "application/pdf" };
         var documentContent = new DocumentContent { Document = document };
-        var reportUser = new ReportUser();
 
         var thesisReport = new ThesisReport
         {
             Relation = ThesisReportRelation.Supervisor,
             Thesis = thesis,
-            ReportUser = reportUser,
+            ReportUser = userC,
         };
 
         // TODO: add to db

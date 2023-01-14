@@ -8,8 +8,8 @@ namespace Unidesk.Client;
 public static class ModelGenerator
 {
     
-    // regex mathing GENERATED ON 2022-08-07 18:15:21
-    private static readonly Regex _generatedOnRegex = new(@"GENERATED ON (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", RegexOptions.Multiline);
+    // regex matching GENERATED ON 2022-08-07 18:15:21
+    private static readonly Regex GeneratedOnRegex = new(@"GENERATED ON (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", RegexOptions.Multiline);
     
     public static IEnumerable<string> Generate(Type root, string outputDir)
     {
@@ -67,23 +67,34 @@ public static class ModelGenerator
                     }
                 }
 
-                if (attr.GenerateAggreation)
+                if (attr.GenerateAggregation)
                 {
                     output.AppendLine();
-                    output.AppendLine($"export const All = [");
+                    output.AppendLine("export const All = [");
                     foreach (var field in fields)
                     {
                         output.AppendLine($"    {field.Name},");
                     }
 
-                    output.AppendLine($"];");
+                    output.AppendLine("];");
+                }
+
+                if (attr.GenerateMap)
+                {
+                    output.AppendLine();
+                    output.AppendLine($"export const {name} = {{");
+                    foreach (var field in fields)
+                    {
+                        output.AppendLine($"    {field.Name}: {field.Name},");
+                    }
+                    output.AppendLine("};");
                 }
 
                 if (File.Exists(outputFile))
                 {
                     var existing = File.ReadAllText(outputFile);
-                    var existingCleared = _generatedOnRegex.Replace(existing, string.Empty);
-                    var outputCleared = _generatedOnRegex.Replace(output.ToString(), string.Empty);
+                    var existingCleared = GeneratedOnRegex.Replace(existing, string.Empty);
+                    var outputCleared = GeneratedOnRegex.Replace(output.ToString(), string.Empty);
                     if (existingCleared == outputCleared)
                     {
                         Console.WriteLine($"{outputFile} is up to date");

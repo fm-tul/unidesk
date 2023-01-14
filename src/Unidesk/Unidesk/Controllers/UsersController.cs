@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -9,9 +7,12 @@ using Unidesk.Configurations;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Dtos.ReadOnly;
 using Unidesk.Dtos.Requests;
+using Unidesk.Security;
 using Unidesk.Services;
 using Unidesk.Utils;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Controllers;
 
@@ -42,7 +43,7 @@ public partial class UsersController : ControllerBase
     }
 
 
-    [HttpGet, Route("get/{id}")]
+    [HttpGet, Route("get/{id:guid}")]
     [SwaggerOperation(OperationId = nameof(Get))]
     [ProducesResponseType(typeof(UserDto), 200)]
     public async Task<IActionResult> Get(Guid id)
@@ -62,17 +63,56 @@ public partial class UsersController : ControllerBase
         return Ok(dto);
     }
     
+    [HttpPost, Route("update")]
+    [SwaggerOperation(OperationId = nameof(Update))]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    public async Task<IActionResult> Update([FromBody] UserDto userDto)
+    {
+        var user = await _userService.FindAsync(userDto.Id)
+            ?? throw new Exception("User not found");
+
+        var canUpdate = _userProvider.CurrentUser.Id == user.Id
+                     || _userProvider.HasGrant(UserGrants.User_Admin);
+
+        if (!canUpdate)
+        {
+            return Forbid();
+        }
+
+        var userInTeams = userDto.Teams
+           .Select(i => new UserInTeam { TeamId = i.Team.Id, UserId = user.Id, Role = i.Role, Status = i.Status })
+           .ToList();
+        
+        user = _mapper.Map(userDto, user);
+        user.UserInTeams.SynchronizeCollection(userInTeams, UserInTeam.Compare);
+        _db.Users.Update(user);
+
+        var userAliases = _mapper.Map<List<User>>(userDto.Aliases)
+           .Where(i => i.Id != user.Id)
+           .Select(i => i.Id);
+        
+        var userAliasesFromDb = _db.Users.Where(i => userAliases.Contains(i.Id)).ToList();
+        user.Aliases.SynchronizeCollection(userAliasesFromDb, Unidesk.Db.Models.User.Compare);
+        
+        await _db.SaveChangesAsync();
+
+        var dto = _mapper.Map<UserDto>(
+            await _userService.FindAsync(userDto.Id)
+        );
+        return Ok(dto);
+    }
+
     [HttpPost, Route("find")]
     [SwaggerOperation(OperationId = nameof(Find))]
-    [ProducesResponseType(typeof(PagedResponse<UserDto>), 200)]
+    [ProducesResponseType(typeof(PagedResponse<UserLookupDto>), 200)]
     public async Task<IActionResult> Find([FromBody] UserFilter? query = null)
     {
         var response = await _userService
             .Where(query)
             .Include(i => i.Theses)
             .OrderByDescending(i => i.Theses.Count)
-            .ToListWithPagingAsync<User, UserDto>(query?.Filter, _mapper);
-
+            .ToListWithPagingAsync<User, UserLookupDto>(query?.Filter, _mapper);
+    
         return Ok(response);
     }
     

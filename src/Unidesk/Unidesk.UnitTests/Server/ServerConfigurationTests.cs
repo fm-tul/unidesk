@@ -15,8 +15,9 @@ public class ServerConfigurationTests
     [Fact]
     public async Task Server_Configuration_Is_Valid()
     {
-        var webApplication = WebApplication.Create();
-        var app = webApplication
+        var app = WebApplication.Create();
+        var api = app
+            .MapGroup("/api/enums")
             .AddMinimalApiGetters()
             .AddMinimalApiSetters()
             .AddMinimalApiDeleters(); 

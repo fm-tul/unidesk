@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
 using Unidesk.Db.Models;
@@ -73,9 +73,10 @@ public class TeamService
         }
 
         // TODO: use mapper for this
-        var userInTeamOther = _mapper.Map<List<UserInTeam>>(dto.UserInTeams)
+        var userInTeamOther = new List<UserInTeam>();
+            /* _mapper.Map<List<UserInTeam>>(dto.UserInTeams)
            .Select(i => i.StripToGuids())
-           .ToList();
+           .ToList();*/
 
         if (isNew)
         {

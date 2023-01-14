@@ -1,6 +1,5 @@
-﻿using System.Data.Entity;
-using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
+using MapsterMapper;
 using Microsoft.AspNetCore.OutputCaching;
 using Unidesk.Db;
 using Unidesk.Db.Core;
@@ -55,7 +54,7 @@ public class SimpleEnumService
     public async Task<SimpleJsonResponse> Delete<TItem>(Guid id, CancellationToken ct) where TItem : TrackedEntity
     {
         var dbSet = _db.Set<TItem>();
-        var item = dbSet.Find(id)
+        var item = await dbSet.FindAsync(id)
                    ?? throw new Exception($"Item of type {typeof(TItem)} with id {id} not found");
         dbSet.Remove(item);
         await _db.SaveChangesAsync(ct);

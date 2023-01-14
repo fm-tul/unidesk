@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Controllers;
 using Unidesk.Db;
+using Unidesk.Db.Functions;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
@@ -25,7 +26,7 @@ public class UserService
 
     public Task<User?> FindAsync(ILoginRequest request)
     {
-        return _db.Users.FirstOrDefaultAsync(x => x.Username == request.Username);
+        return _db.Users.FirstOrDefaultAsync(x => x.Username == request.Eppn);
     }
 
     public Task<User?> FindAsync(Guid id)
@@ -38,8 +39,8 @@ public class UserService
     public Task<List<User>> FindAllAsync(UserFilter keyword)
     {
         return this
-            .Where(keyword)
-            .ToListAsync();
+           .Where(keyword)
+           .ToListAsync();
     }
 
     public IQueryable<User> Where(UserFilter? filter)
@@ -58,7 +59,7 @@ public class UserService
 
         if (filter.Keyword.IsNotNullOrEmpty())
         {
-            var keyword = filter.Keyword;
+            var keyword = filter.Keyword.Trim();
             var isGuid = Guid.TryParse(keyword, out var guid);
             if (isGuid)
             {
@@ -66,14 +67,27 @@ public class UserService
             }
             else
             {
-                query = query.Where(x =>
-                    (isGuid && x.Id == guid) ||
-                    (x.Username != null && x.Username.Contains(keyword)) ||
-                    (x.Email != null && x.Email.Contains(keyword)) ||
-                    (x.FirstName != null && x.FirstName.Contains(keyword)) ||
-                    (x.LastName != null && x.LastName.Contains(keyword)) ||
-                    (x.MiddleName != null && x.MiddleName.Contains(keyword))
-                );
+                if (keyword.Contains(' '))
+                {
+                    var parts = keyword.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length == 2)
+                    {
+                        var firstName = parts[0];
+                        var lastName = parts[1];
+                        query = query.Where(x => (x.FirstName == firstName && x.LastName == lastName) ||
+                                                 (x.FirstName == lastName && x.LastName == firstName));
+                    }
+                }
+                else
+                {
+                    query = query.Where(x =>
+                        (x.Username != null && x.Username.Contains(keyword)) ||
+                        (x.Email != null && x.Email.Contains(keyword)) ||
+                        (x.LastName != null && x.LastName.Contains(keyword) || SQL.Levenshtein(x.LastName, keyword, 1) <= 1) ||
+                        (x.FirstName != null && x.FirstName.Contains(keyword) || SQL.Levenshtein(x.FirstName, keyword, 1) <= 1) ||
+                        (x.MiddleName != null && x.MiddleName.Contains(keyword))
+                    );
+                }
             }
         }
 
@@ -83,30 +97,31 @@ public class UserService
     public async Task GetUsersRatio(UserFunction userFunction = UserFunction.Supervisor, ThesisStatus thesisStatus = ThesisStatus.Finished_Susccessfully)
     {
         var teachers = await _db.ThesisUsers
-            .Where(i => i.Function == userFunction)
-            .Select(i => new { i.User, i.Thesis.Status })
-            .ToListAsync();
+           .Where(i => i.Function == userFunction)
+           .Select(i => new { i.User, i.Thesis.Status })
+           .ToListAsync();
 
         var grouped = teachers
-            .GroupBy(i => i.User, (i, j) =>
+           .GroupBy(i => i.User, (i, j) =>
             {
                 var statuses = j
-                    .Select(k => k.Status)
-                    .ToList();
-                
+                   .Select(k => k.Status)
+                   .ToList();
+
                 return new { User = i, Ratio = statuses.Count(k => k == thesisStatus) / (double)statuses.Count(), Total = statuses.Count };
             })
-            .Where(i => i.Total >= 10)
-            .OrderByDescending(i => i.Ratio)
-            .ToList();
+           .Where(i => i.Total >= 10)
+           .OrderByDescending(i => i.Ratio)
+           .ToList();
     }
-    
-    public async Task<(double? Ratio, int? Total)> GetUserRatio(User user, UserFunction userFunction = UserFunction.Supervisor, ThesisStatus thesisStatus = ThesisStatus.Finished_Susccessfully)
+
+    public async Task<(double? Ratio, int? Total)> GetUserRatio(User user, UserFunction userFunction = UserFunction.Supervisor,
+        ThesisStatus thesisStatus = ThesisStatus.Finished_Susccessfully)
     {
         var statuses = await _db.ThesisUsers
-            .Where(i => i.Function == userFunction && i.UserId == user.Id)
-            .Select(i => i.Thesis.Status)
-            .ToListAsync();
+           .Where(i => i.Function == userFunction && i.UserId == user.Id)
+           .Select(i => i.Thesis.Status)
+           .ToListAsync();
 
         if (!statuses.Any())
         {
@@ -115,7 +130,7 @@ public class UserService
 
         var total = statuses.Count;
         var ratio = statuses.Count(i => i == thesisStatus) / (double)total;
-        
+
         return (ratio, total);
     }
 
@@ -147,9 +162,9 @@ public class UserService
         }
 
         var props = principal.Claims
-            .ToList()
-            .ToDictionary(i => i.Type, i => i.Value)
-            .ToList();
+           .ToList()
+           .ToDictionary(i => i.Type, i => i.Value)
+           .ToList();
 
         var fingerprint = principal.FindFirstValue("Fingerprint");
 
@@ -195,11 +210,11 @@ public class UserService
     {
         var user = new User
         {
-            Username = request.Username,
-            Email = $"{request.Username}@unidesk.tul",
+            Username = request.Eppn,
+            Email = $"{request.Eppn}@unidesk.tul",
         };
 
-        if (request.Username.Contains("admin"))
+        if (request.Eppn.Contains("admin"))
         {
             user.Roles = new List<UserRole>
             {
@@ -213,5 +228,23 @@ public class UserService
     public async Task SignOutAsync(HttpContext httpContext)
     {
         await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    }
+
+    public async Task<User> CreateFromShibboRequestAsync(LoginShibboRequest shibboRequest)
+    {
+        var user = new User
+        {
+            Username = shibboRequest.Eppn.UsernameFromEmail(),
+            Email = shibboRequest.Eppn.ValidEmailOrDefault(),
+            FirstName = shibboRequest.Eppn.FirstnameFromEmail(),
+            LastName = shibboRequest.Eppn.LastnameFromEmail(),
+            MiddleName = null,
+            Roles = new List<UserRole>(),
+        };
+
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        return user;
     }
 }

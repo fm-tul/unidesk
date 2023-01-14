@@ -54,7 +54,7 @@ public class UserServiceTests
         user.Should().NotBeNull();
         user.Id.Should().Be(StaticUsers.ImportUser.Id);
 
-        var userByRequest = (await userService.FindAsync(new LoginRequest { Username = StaticUsers.ImportUser.Username! }))!;
+        var userByRequest = (await userService.FindAsync(new LoginRequest { Eppn = StaticUsers.ImportUser.Username! }))!;
         userByRequest.Should().NotBeNull();
         userByRequest.Id.Should().Be(StaticUsers.ImportUser.Id);
     }

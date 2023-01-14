@@ -22,7 +22,7 @@ public partial class UsersController
 
         var dbUser = _userService.FromLoginRequest(request);
         await _userService.SignInAsync(httpContext, dbUser);
-        _logger.LogInformation("User {Email} logged in at {Time}", request.Username, DateTime.UtcNow);
+        _logger.LogInformation("User {Email} logged in at {Time}", request.Eppn, DateTime.UtcNow);
 
         return Ok(new LoginResponse
         {
@@ -32,7 +32,7 @@ public partial class UsersController
         });
     }
 
-    [HttpGet, Route("login.sso/{*path}")]
+    [HttpGet, Route("/login.sso/{*path}")]
     [SwaggerOperation(OperationId = nameof(LoginSSO))]
     [ProducesResponseType(typeof(LoginResponse), 200)]
     public async Task<IActionResult> LoginSSO(string path)
@@ -44,7 +44,7 @@ public partial class UsersController
         var shibboRequest = JsonSerializer.Deserialize<LoginShibboRequest>(plainText)
                             ?? throw new ArgumentNullException(nameof(plainText));
 
-        if (string.IsNullOrEmpty(shibboRequest.Username))
+        if (string.IsNullOrEmpty(shibboRequest.Eppn))
         {
             return BadRequest();
         }
@@ -52,7 +52,11 @@ public partial class UsersController
         var dbUser = await _userService.FindAsync(shibboRequest);
         if (dbUser is null)
         {
-            if (_appOptions.AllowLocalAccounts)
+            if (_appOptions.AllowRegistrations)
+            {
+                dbUser = await _userService.CreateFromShibboRequestAsync(shibboRequest);
+            }
+            else if (_appOptions.AllowLocalAccounts)
             {
                 dbUser = _userService.FromLoginRequest(shibboRequest);
             }
@@ -63,7 +67,7 @@ public partial class UsersController
         }
 
         await _userService.SignInAsync(httpContext, dbUser);
-        _logger.LogInformation("User {Email} logged in at {Time}", shibboRequest.Username, DateTime.UtcNow);
+        _logger.LogInformation("User {Email} logged in at {Time}", shibboRequest.Eppn, DateTime.UtcNow);
 
         return Ok(new LoginResponse
         {

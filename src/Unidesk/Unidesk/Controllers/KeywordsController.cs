@@ -1,6 +1,5 @@
-﻿using AutoMapper;
+﻿using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
 using Unidesk.Db.Models;
@@ -9,8 +8,6 @@ using Unidesk.Dtos.Requests;
 using Unidesk.Security;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
-using Unidesk.Utils;
-using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Controllers;
 
@@ -50,7 +47,7 @@ public class KeywordsController : ControllerBase
     [ProducesResponseType(typeof(List<KeywordDto>), 200)]
     public async Task<IActionResult> Find(string keyword)
     {
-        var pageSize = 30;
+        var pageSize = 50;
         var keywords = await _keywordsService.FindAsync(keyword, pageSize, includeUsage: true);
 
         var keywordsDto = _mapper

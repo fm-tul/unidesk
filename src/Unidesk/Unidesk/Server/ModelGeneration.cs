@@ -9,6 +9,13 @@ public class ModelGeneration
     private bool _shouldStop { get; set; } = false;
     private const string SwaggerUrl = "http://localhost:5222/swagger/v1/swagger.json";
     private readonly string NpmCommand = "/C npm run generate-api";
+    private static WebApplication _app;
+
+    public static void ShutDownAfterModelGenerated(WebApplication app)
+    {
+        _app = app;
+    }
+    
     public ModelGeneration()
     {
         _thread = new Thread(async () =>
@@ -50,6 +57,14 @@ public class ModelGeneration
             
            await process.WaitForExitAsync();
            Console.WriteLine($"Exit code: {process.ExitCode}");
+           
+           if (process.ExitCode == 0 && _app != null)
+           {
+               Console.WriteLine("Shutting down...");
+               await _app.StopAsync();
+               Console.WriteLine("Shutdown complete");
+           }
+           
         }
     }
 }

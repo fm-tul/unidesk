@@ -43,7 +43,7 @@ public static class EnumerableExtensions
         return (same, sameNew, toBeAdded, toBeDeleted);
     }
     
-    public static (List<T> Same, List<T> SameNew, List<T> ToBeAdded, List<T> ToBeDeleted) SynchronizeWithAction<T>(this List<T> items, List<T> other, Func<T, T, bool> comparer, Action<T, T> action)
+    public static (List<T> Same, List<T> SameNew, List<T> ToBeAdded, List<T> ToBeDeleted) SynchronizeWithAction<T>(this List<T> items, List<T> other, Func<T, T, bool> comparer, Action<T, T> updateAction)
     {
         var (same, sameNew, toBeAdded, toBeDeleted) = items.Synchronize(other, comparer);
         if (same.Count != sameNew.Count)
@@ -53,9 +53,17 @@ public static class EnumerableExtensions
         
         for (var i = 0; i < same.Count; i++)
         {
-            action(same[i], sameNew[i]);
+            updateAction(same[i], sameNew[i]);
         }
         
         return (same, sameNew, toBeAdded, toBeDeleted);
+    }
+    
+    public static List<T> SynchronizeCollection<T>(this List<T> items, List<T> other, Func<T, T, bool> comparer)
+    {
+        var (_, _, toBeAdded, toBeDeleted) = items.Synchronize(other, comparer);
+        items.AddRange(toBeAdded);
+        items.RemoveAll(x => toBeDeleted.Contains(x));
+        return items;
     }
 }

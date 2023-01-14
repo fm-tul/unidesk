@@ -9,7 +9,9 @@ public class GenerateModelAttribute : Attribute
 
     public Type ForType { get; set; }
 
-    public bool GenerateAggreation { get; set; }
+    public bool GenerateAggregation { get; set; }
+    
+    public bool GenerateMap { get; set; }
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]

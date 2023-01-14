@@ -32,7 +32,8 @@ public class ModelGeneratorTests
         model2.Should().Contain("\"baz\":true");
         model2.Should().Contain("\"bar\":2");
         
-        // seconds call should not generate anything
+        // second
+        // call should not generate anything
         ModelGenerator.Generate(typeof(ModelGeneratorTests), "./tmp").ToList()
             .Should().HaveCount(0);
     }
@@ -45,8 +46,8 @@ public class Foobar
     public bool Baz { get; set; }
 }
 
-[GenerateModel(Name = nameof(Foo), GenerateAggreation = true, ForType = typeof(string))]
-[GenerateModel(Name = nameof(Foo), GenerateAggreation = false, ForType = typeof(Foobar))]
+[GenerateModel(Name = "Foo.strings", GenerateAggregation = true, ForType = typeof(string))]
+[GenerateModel(Name = "Foo.Foobar", GenerateAggregation = false, ForType = typeof(Foobar))]
 public static class Foo
 {
     public readonly static string A = "A";
