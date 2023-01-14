@@ -12,10 +12,15 @@ interface ButtonProps extends ComplexComponentProps {
   tabIndex?: number;
   title?: string;
   justify?: "justify-start" | "justify-center" | "justify-end" | "justify-between" | "justify-around";
+  if?: boolean;
 }
 export const Button = (props: PropsWithChildren<ButtonProps> & HtmlHTMLAttributes<HTMLButtonElement>) => {
-  const { loading, disabled, disableClass="disabled", fullWidth = false, component, to, tabIndex, title } = props;
-  const { children, onClick, className: classNameOverride="", style, justify="justify-center" } = props;
+  if (props.if === false) {
+    return null;
+  }
+
+  const { loading, disabled, disableClass = "disabled", fullWidth = false, component, to, tabIndex, title } = props;
+  const { children, onClick, className: classNameOverride = "", style, justify = "justify-center" } = props;
 
   const size = getSize(props);
   const color = getColor(props);
@@ -26,17 +31,17 @@ export const Button = (props: PropsWithChildren<ButtonProps> & HtmlHTMLAttribute
   const variantCss = VARIANTS[variant];
 
   const loadingCss = loading ? "loading" : "";
-  const disabledCss = loading || disabled ? `${disableClass} i-disabled`: "";
+  const disabledCss = loading || disabled ? `${disableClass} i-disabled` : "";
   const fullWidthCss = fullWidth ? "w-full" : "";
   const className = `btn ${colorCss} ${sizeCss} ${variantCss} ${disabledCss} ${fullWidthCss} ${classNameOverride} ${loadingCss}`;
 
   if (component) {
-    return createElement(component, { className:`inline-flex ${className} ${justify}`, to, title }, children);
+    return createElement(component, { className: `inline-flex ${className} ${justify}`, to, title }, children);
   }
 
   return (
     <button className={className} onClick={onClick} tabIndex={tabIndex} disabled={disabled} title={title} style={style}>
-      <div role={"button"} className={`inline-flex items-center gap-1 relative w-full ${justify}`} >
+      <div role={"button"} className={`relative inline-flex w-full items-center gap-1 ${justify}`}>
         {children}
         {loading && <span className="spinner2"></span>}
       </div>

@@ -6,11 +6,8 @@ import { KeywordDto } from "@models/KeywordDto";
 import { KeywordFilter } from "@models/KeywordFilter";
 import { KeywordUsedCount } from "@models/KeywordUsedCount";
 import { QueryFilter } from "@models/QueryFilter";
-import { UserDto } from "@models/UserDto";
-import { UserFilter } from "@models/UserFilter";
-import { UserFunction } from "@models/UserFunction";
 import { useContext, useEffect } from "react";
-import { MdClear, MdClearAll } from "react-icons/md";
+import { MdClear } from "react-icons/md";
 
 import { FilterBar } from "components/FilterBar";
 import { Paging } from "components/Paging";

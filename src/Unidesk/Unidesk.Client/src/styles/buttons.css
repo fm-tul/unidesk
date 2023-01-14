@@ -1,26 +1,26 @@
 .btn {
-  @apply min-w-[60px] cursor-pointer select-none rounded px-2 py-1 font-roboto font-medium
-   uppercase shadow-md shadow-black/20  transition hover:shadow-black/40
-   inline-flex items-center;
+  @apply inline-flex min-w-[60px] cursor-pointer select-none items-center rounded px-2 py-1
+   font-roboto font-medium uppercase  shadow-md shadow-black/20
+   transition hocus:shadow-black/40;
 }
 
 /* btn-info | btn-success | btn-warning | btn-error */
 .btn-info {
-  @apply bg-info-600 text-white hover:bg-info-700;
+  @apply bg-info-600 text-white hocus:bg-info-700;
 }
 .btn-success {
-  @apply bg-success-700 text-white hover:bg-success-800;
+  @apply bg-success-700 text-white hocus:bg-success-800;
 }
 .btn-warning {
-  @apply bg-warning-600 text-white hover:bg-warning-700;
+  @apply bg-warning-600 text-white hocus:bg-warning-700;
 }
 .btn-error {
-  @apply bg-error-600 text-white hover:bg-error-700;
+  @apply bg-error-600 text-white hocus:bg-error-700;
 }
 
 /* btn-sm | btn-md | btn-lg */
 .btn-sm {
-  @apply px-2 py-1 text-xs min-w-fit;
+  @apply min-w-fit px-2 py-1 text-xs;
   --size: 16px;
   --border: 3px;
 }
@@ -37,44 +37,48 @@
 
 /* btn-outlined | btn-text */
 .btn-outlined {
-  @apply border border-solid bg-transparent shadow-none hover:shadow-none;
+  @apply border border-solid bg-transparent shadow-none hocus:shadow-none;
 }
 
 .btn-outlined.btn-info {
-  @apply border-info-500 text-info-600 hover:border-info-600 hover:bg-info-100 hover:text-info-800 active:bg-info-200;
+  @apply border-info-500 text-info-600 active:bg-info-200 hocus:border-info-600 hocus:bg-info-100 hocus:text-info-800;
   --color-spinner-a: var(--color-info-600-rgb);
 }
 .btn-outlined.btn-success {
-  @apply border-success-500 text-success-600 hover:border-success-600 hover:bg-success-100 hover:text-success-800 active:bg-success-200;
+  @apply border-success-500 text-success-600 active:bg-success-200 hocus:border-success-600 hocus:bg-success-100 hocus:text-success-800;
   --color-spinner-a: var(--color-success-500-rgb);
 }
 .btn-outlined.btn-warning {
-  @apply border-warning-500 text-warning-600 hover:border-warning-600 hover:bg-warning-100 hover:text-warning-800 active:bg-warning-200;
+  @apply border-warning-500 text-warning-600 active:bg-warning-200 hocus:border-warning-600 hocus:bg-warning-100 hocus:text-warning-800;
   --color-spinner-a: var(--color-warning-600-rgb);
 }
 .btn-outlined.btn-error {
-  @apply border-error-500 text-error-600 hover:border-error-600 hover:bg-error-100 hover:text-error-800 active:bg-error-200;
+  @apply border-error-500 text-error-600 active:bg-error-200 hocus:border-error-600 hocus:bg-error-100 hocus:text-error-800;
   --color-spinner-a: var(--color-error-500-rgb);
 }
 
 .btn-text {
-  @apply bg-transparent shadow-none hover:shadow-none;
+  @apply bg-transparent shadow-none hocus:shadow-none;
 }
 .btn-text.btn-info {
-  @apply text-info-600 hover:bg-info-100 hover:text-info-800 active:bg-info-200 selected:bg-info-600/40 selected:text-black;
+  @apply text-info-600 active:bg-info-200 hocus:bg-info-100 hocus:text-info-800 selected:bg-info-600/40 selected:text-black;
   --color-spinner-a: var(--color-info-500-rgb);
 }
 .btn-text.btn-success {
-  @apply text-success-600 hover:bg-success-100 hover:text-success-800 active:bg-success-200 selected:bg-success-600/40 selected:text-black;
+  @apply text-success-600 active:bg-success-200 hocus:bg-success-100 hocus:text-success-800 selected:bg-success-600/40 selected:text-black;
   --color-spinner-a: var(--color-success-700-rgb);
 }
 .btn-text.btn-warning {
-  @apply text-warning-600 hover:bg-warning-100 hover:text-warning-800 active:bg-warning-200 selected:bg-warning-600/40 selected:text-black;
+  @apply text-warning-600 active:bg-warning-200 hocus:bg-warning-100 hocus:text-warning-800 selected:bg-warning-600/40 selected:text-black;
   --color-spinner-a: var(--color-warning-600-rgb);
 }
 .btn-text.btn-error {
-  @apply text-error-600 hover:bg-error-100 hover:text-error-800 active:bg-error-200 selected:bg-error-600/40 selected:text-black;
+  @apply text-error-600 active:bg-error-200 hocus:bg-error-100 hocus:text-error-800 selected:bg-error-600/40 selected:text-black;
   --color-spinner-a: var(--color-error-500-rgb);
+}
+.btn-text.btn-neutral {
+  @apply text-neutral-600 active:bg-neutral-200 hocus:bg-neutral-100 hocus:text-neutral-800 hocus:ring-2 hocus:ring-gray-500/50 selected:bg-neutral-600/40 selected:text-black;
+  --color-spinner-a: var(--color-neutral-500-rgb);
 }
 
 /* spinner options */
@@ -118,4 +122,3 @@
 .btn.with-progress::before {
   width: var(--progress);
 }
-

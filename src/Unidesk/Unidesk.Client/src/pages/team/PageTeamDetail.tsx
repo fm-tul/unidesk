@@ -1,7 +1,7 @@
+import { UnideskComponent } from "components/UnideskComponent";
+
 export const PageTeamDetail = () => {
-    return (
-        <div>detail</div>
-    );
+  return <UnideskComponent name="PageTeamDetail">detail</UnideskComponent>;
 };
 
 export default PageTeamDetail;

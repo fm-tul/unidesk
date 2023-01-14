@@ -26,8 +26,8 @@ export const thesisInitialValues: Partial<ThesisDto> = {
   studyProgrammeId: "",
 
   // advanced section
-  guidelinesList: ["", "", ""],
-  literatureList: ["", "", ""],
+  guidelines: ["", "", ""],
+  literature: ["", "", ""],
 
   authors: [],
   supervisors: [],

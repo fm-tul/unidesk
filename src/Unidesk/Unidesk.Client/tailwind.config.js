@@ -1,6 +1,7 @@
 const colors = require('tailwindcss/colors');
 const plugin = require('tailwindcss/plugin');
 
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -50,6 +51,18 @@ module.exports = {
         success: colors.green,
         warning: colors.amber,
         error: colors.red,
+        status: {
+          draft: colors.gray,
+          new: colors.lime,
+          reserved: colors.violet,
+          assigned: colors.fuchsia,
+          submitted: colors.blue,
+          finished_susccessfully: colors.green,
+          finished_unsuccessfully: colors.red,
+          finished: colors.yellow,
+          abandoned: colors.orange,
+          unknown: colors.gray,
+        },
       },
       minWidth: {
         xxs: '160px',
@@ -105,7 +118,19 @@ module.exports = {
             success: colors.green,
             warning: colors.amber,
             error: colors.red,
-          }
+          },
+          status: {
+            draft: colors.gray,
+            new: colors.lime,
+            reserved: colors.violet,
+            assigned: colors.fuchsia,
+            submitted: colors.blue,
+            finished_susccessfully: colors.green,
+            finished_unsuccessfully: colors.red,
+            finished: colors.yellow,
+            abandoned: colors.orange,
+            unknown: colors.gray,
+          },
         }
       }
     }
@@ -118,7 +143,7 @@ module.exports = {
 
     plugin(function ({ addVariant }) {
       addVariant('optional', '&:optional');
-      addVariant('hocus', ['&:hover', '&:focus']);
+      addVariant('hocus', ['&:hover', '&:focus', '&.selected']);
       addVariant('selected', '&.selected');
       addVariant('loading', '&.loading');
       addVariant('peer-loading', '.peer.loading &');

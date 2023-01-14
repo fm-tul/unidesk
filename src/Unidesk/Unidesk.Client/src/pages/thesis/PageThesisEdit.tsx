@@ -1,4 +1,17 @@
-import { DepartmentDto, FacultyDto, SchoolYearDto, Severity, SimpleJsonResponse, StudyProgrammeDto, TeamDto, ThesisOutcomeDto, ThesisTypeDto } from "@api-client";
+import {
+  DepartmentDto,
+  FacultyDto,
+  SchoolYearDto,
+  Severity,
+  SimpleJsonResponse,
+  StudyProgrammeDto,
+  TeamDto,
+  TeamLookupDto,
+  ThesisOutcomeDto,
+  ThesisTypeDto,
+  UserFunction,
+  UserLookupDto,
+} from "@api-client";
 import { GUID_EMPTY } from "@core/config";
 import { guestHttpClient, httpClient } from "@core/init";
 import { EnKeys, LanguagesId } from "@locales/all";
@@ -24,7 +37,7 @@ import { useOpenClose } from "hooks/useOpenClose";
 import { useStepper } from "hooks/useStepper";
 import { renderTeam } from "models/cellRenderers/TeamRenderer";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
-import { renderUser } from "models/cellRenderers/UserRenderer";
+import { renderUser, renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { link_pageThesisDetail, link_pageThesisEdit } from "routes/links";
 import { Button } from "ui/Button";
 import { CreateConfirmDialog as confirmWith } from "ui/Confirm";
@@ -40,6 +53,8 @@ import { toCamelCase } from "utils/stringUtils";
 
 import { ClipboardFromBpDp } from "./plugins/ClipboardFromBpDp";
 import { thesisValidationSchema as schema, thesisInitialValues } from "./thesisSchema";
+import { Debug } from "components/Debug";
+import { UnideskComponent } from "components/UnideskComponent";
 
 type T = ThesisDto;
 type errorObj = { message: string; severity?: Severity };
@@ -146,7 +161,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
       httpClient.thesis
         .upsert({ requestBody: dto })
         .then(i => {
-          if(isNew) {
+          if (isNew) {
             navigate(link_pageThesisEdit.navigate(i.id));
           } else {
             setDto(i);
@@ -169,11 +184,199 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
   };
 
   return (
-    <LoadingWrapper isLoading={isLoading} error="">
-      <Menu className="absolute top-0 right-0" link="menu">
-        <>
+    <UnideskComponent name="ThesisEdit">
+      <LoadingWrapper isLoading={isLoading} error="">
+        {/* <Menu className="absolute top-0 right-0 bg-white" link="menu">
+          <>
+            {!!persistentObject && (
+              <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-end">
+                <div className="flex flex-col">
+                  {R("restore-work")}
+                  <span className="text-xxs normal-case italic text-neutral-600">
+                    <Moment date={persistentObject.date} />
+                  </span>
+                </div>
+              </Button>
+            )}
+          </>
+          <Button sm text onClick={open} justify="justify-end">
+            Paste from clipboard
+          </Button>
+
+          <Button
+            disabled={dto.id === GUID_EMPTY}
+            sm
+            text
+            justify="justify-end"
+            component={Link}
+            to={link_pageThesisDetail.navigate(dto.id)}
+          >
+            Go to thesis detail
+          </Button>
+        </Menu> */}
+
+        {!!dto.adipidno && (
+          <div className="flex items-center gap-1">
+            {RR("thesis-from-stag-id", language)}
+            <Link className="code rounded bg-rose-50 text-sm text-rose-600" to={link_pageThesisDetail.navigate(dto.adipidno)}>
+              {dto.adipidno}
+            </Link>
+          </div>
+        )}
+        {dto.id !== GUID_EMPTY && (
+          <div className="flex items-center gap-1">
+            <Button component={Link} text color="success" sm to={link_pageThesisDetail.navigate(dto.id)}>
+              Go to thesis detail
+            </Button>
+          </div>
+        )}
+        <Stepper step={step} setStep={setStep}>
+          <Step label={R("basic-information")} error={step0Invalid !== undefined}>
+            <div className="grid grid-cols-2 gap-4">
+              {/* row 1 - names */}
+              <FormField as={TextField} required {...getProps(form, "nameCze")} />
+              <FormField as={TextField} required {...getProps(form, "nameEng")} />
+
+              {/* row 2 - abstracts */}
+              <FormField as={TextField} multiline {...getProps(form, "abstractCze")} sm />
+              <FormField as={TextField} multiline {...getProps(form, "abstractEng")} sm />
+
+              {/* row 3 - school year, department, study programme */}
+              <div className="col-span-2 grid grid-cols-3 items-start gap-4">
+                <FormField
+                  as={Select<SchoolYearDto>}
+                  {...getPropsS(form, "schoolYearId", schoolYears)}
+                  optionRender={(i: SchoolYearDto) => i.name}
+                />
+                <FormField
+                  as={Select<DepartmentDto>}
+                  {...getPropsS(form, "departmentId", departments)}
+                  optionRender={getName}
+                  textSize="sm"
+                />
+                <FormField
+                  as={Select<StudyProgrammeDto>}
+                  {...getPropsS(form, "studyProgrammeId", studyProgrammes)}
+                  optionRender={getName}
+                />
+              </div>
+
+              {/* row 4 - thesis type, outcome, status */}
+              <div className="col-span-2 grid grid-cols-4 items-start gap-4">
+                <FormField
+                  as={Select<ThesisTypeDto>}
+                  optionRender={getName}
+                  classNameField="col-span-1"
+                  {...(!!dto.thesisTypeId
+                    ? getPropsS(form, "thesisTypeId", thesisTypes)
+                    : { ...getPropsM(form, "thesisTypeCandidateIds", thesisTypes), clearable: true })}
+                />
+
+                <FormField
+                  as={Select<FacultyDto>}
+                  optionRender={getName}
+                  classNameField="col-span-2"
+                  {...getPropsS(form, "facultyId", faculties)}
+                />
+
+                <FormField
+                  as={Select<ThesisStatus>}
+                  {...getPropsS(form, "status", isNew ? allowedStatusesNewThesis : allowedStatusesEditThesis)}
+                  classNameField="col-span-1"
+                  optionRender={(i: ThesisStatus) => renderThesisStatus(i, language)}
+                />
+
+                <FormField
+                  as={Select<ThesisOutcomeDto>}
+                  {...getPropsM(form, "outcomeIds", thesisOutcomes)}
+                  optionRender={getName}
+                  clearable
+                  classNameField="col-span-4"
+                />
+              </div>
+
+              {/* row 5-6 - keywords */}
+              <div className="col-span-2 flex items-baseline gap-2">
+                <span className="font-medium">{RR("keywords", language)}:</span>
+                <FormField
+                  as={KeywordSelector}
+                  onChange={updateKeywords}
+                  max={20}
+                  keywords={dto.keywords}
+                  helperText={errors.keywords?.message}
+                  classNameField="grow"
+                  helperColor="error"
+                />
+              </div>
+            </div>
+          </Step>
+          <Step label="Guidlines &amp; Literature">
+            <div className="grid grid-cols-2 gap-4">
+              <ArrayField label="Guidelines" value={form.dto.guidelines} setValue={v => form.setDto({ ...form.dto, guidelines: v })} />
+              <ArrayField label="Literature" value={form.dto.literature} setValue={v => form.setDto({ ...form.dto, literature: v })} />
+              <div className="prose">
+                <ol>
+                  {form.dto.guidelines.map((i, index) => (
+                    <li key={index}>
+                      <Latex throwOnError={false}>{i}</Latex>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <div className="prose break-all">
+                <ul>
+                  {form.dto.literature.map((i, index) => (
+                    <li key={index}>
+                      <Latex throwOnError={false}>{i}</Latex>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Step>
+          <Step label="Authors">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                as={Select<UserLookupDto>}
+                searchable
+                clearable
+                multiple
+                label={R("authors")}
+                optionRender={renderUserLookup}
+                options={(keyword: string) => toPromiseArray(httpClient.users.find({ requestBody: { keyword } }))}
+                value={dto.authors.map(i => i.user)}
+                onMultiValue={authors =>
+                  form.setDto({ ...form.dto, authors: authors.map(user => ({ user, function: UserFunction.AUTHOR })) })
+                }
+              />
+              <FormField
+                as={Select<TeamLookupDto>}
+                searchable
+                clearable
+                multiple
+                label={R("teams")}
+                optionRender={renderTeam}
+                options={(keyword: string) => toPromiseArray(httpClient.team.findSimple({ requestBody: { keyword } }))}
+                value={dto.teams}
+                onMultiValue={teams => form.setDto({ ...form.dto, teams })}
+              />
+            </div>
+          </Step>
+        </Stepper>
+
+        <div className="mt-auto flex justify-between">
+          <div className="flex">
+            <Button onClick={prevStep} disabled={!hasPrevStep} text>
+              Prev
+            </Button>
+
+            <Button onClick={nextStep} disabled={!hasNextStep} text>
+              Next
+            </Button>
+          </div>
+
           {!!persistentObject && (
-            <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-end">
+            <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-start">
               <div className="flex flex-col">
                 {R("restore-work")}
                 <span className="text-xxs normal-case italic text-neutral-600">
@@ -182,201 +385,23 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
               </div>
             </Button>
           )}
-        </>
-        <Button sm text onClick={open} justify="justify-end">
-          Paste from clipboard
-        </Button>
 
-        <Button disabled={dto.id === GUID_EMPTY} sm text justify="justify-end" component={Link} to={link_pageThesisDetail.navigate(dto.id)}>
-          Go to thesis detail
-        </Button>
-      </Menu>
-      {!!dto.adipidno && (
-        <div className="flex items-center gap-1">
-          {RR("thesis-from-stag-id", language)}
-          <Link className="code rounded bg-rose-50 text-sm text-rose-600" to={link_pageThesisDetail.navigate(dto.adipidno)}>
-            {dto.adipidno}
-          </Link>
-        </div>
-      )}
-      {dto.id !== GUID_EMPTY && (
-        <div className="flex items-center gap-1">
-          <Button component={Link} text color="success" sm to={link_pageThesisDetail.navigate(dto.id)}>
-            Go to thesis detail
-          </Button>
-        </div>
-      )}
-      <Stepper step={step} setStep={setStep}>
-        <Step label={R("basic-information")} error={step0Invalid !== undefined}>
-          <div className="grid grid-cols-2 gap-4">
-            {/* row 1 - names */}
-            <FormField as={TextField} required {...getProps(form, "nameCze")} />
-            <FormField as={TextField} required {...getProps(form, "nameEng")} />
-
-            {/* row 2 - abstracts */}
-            <FormField as={TextField} multiline {...getProps(form, "abstractCze")} sm />
-            <FormField as={TextField} multiline {...getProps(form, "abstractEng")} sm />
-
-            {/* row 3 - school year, department, study programme */}
-            <div className="col-span-2 grid grid-cols-3 items-start gap-4">
-              <FormField
-                as={Select<SchoolYearDto>}
-                {...getPropsS(form, "schoolYearId", schoolYears)}
-                optionRender={(i: SchoolYearDto) => i.name}
-              />
-              <FormField
-                as={Select<DepartmentDto>}
-                {...getPropsS(form, "departmentId", departments)}
-                optionRender={getName}
-                textSize="sm"
-              />
-              <FormField as={Select<StudyProgrammeDto>} {...getPropsS(form, "studyProgrammeId", studyProgrammes)} optionRender={getName} />
-            </div>
-
-            {/* row 4 - thesis type, outcome, status */}
-            <div className="col-span-2 grid grid-cols-4 items-start gap-4">
-              <FormField
-                as={Select<ThesisTypeDto>}
-                optionRender={getName}
-                classNameField="col-span-1"
-                {...(!!dto.thesisTypeId
-                  ? getPropsS(form, "thesisTypeId", thesisTypes)
-                  : { ...getPropsM(form, "thesisTypeCandidateIds", thesisTypes), clearable: true })}
-              />
-
-              <FormField
-                as={Select<FacultyDto>}
-                optionRender={getName}
-                classNameField="col-span-2"
-                {...getPropsS(form, "facultyId", faculties)}
-              />
-
-              <FormField
-                as={Select<ThesisStatus>}
-                {...getPropsS(form, "status", isNew ? allowedStatusesNewThesis : allowedStatusesEditThesis)}
-                classNameField="col-span-1"
-                optionRender={(i: ThesisStatus) => renderThesisStatus(i, language)}
-              />
-
-              <FormField
-                as={Select<ThesisOutcomeDto>}
-                {...getPropsM(form, "outcomeIds", thesisOutcomes)}
-                optionRender={getName}
-                clearable
-                classNameField="col-span-4"
-              />
-            </div>
-
-            {/* row 5-6 - keywords */}
-            <div className="col-span-2 flex gap-2 items-baseline">
-              <span className="font-medium">{RR("keywords", language)}:</span>
-              <FormField as={KeywordSelector} onChange={updateKeywords} max={20} keywords={dto?.keywords ?? []} classNameField="grow" />
-            </div>
-          </div>
-        </Step>
-        <Step label="Guidlines &amp; Literature">
-          <div className="grid grid-cols-2 gap-4">
-            <ArrayField
-              label="Guidelines"
-              value={form.dto.guidelinesList ?? []}
-              setValue={v => form.setDto({ ...form.dto, guidelinesList: v })}
-            />
-            <ArrayField
-              label="Literature"
-              value={form.dto.literatureList ?? []}
-              setValue={v => form.setDto({ ...form.dto, literatureList: v })}
-            />
-            <div className="prose">
-              <ol>
-                {form.dto.guidelinesList.map((i, index) => (
-                  <li key={index}>
-                    <Latex throwOnError={false}>{i}</Latex>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="prose break-all">
-              <ul>
-                {form.dto.literatureList.map((i, index) => (
-                  <li key={index}>
-                    <Latex throwOnError={false}>{i}</Latex>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </Step>
-        <Step label="Authors">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              as={Select<UserDto>}
-              searchable
-              clearable
-              multiple
-              label={R("authors")}
-              optionRender={renderUser}
-              options={(keyword: string) => toPromiseArray(httpClient.users.find({ requestBody: { keyword } }))}
-              value={dto.authors}
-              onMultiValue={(authors: UserDto[]) => form.setDto({ ...form.dto, authors })}
-            />
-            <FormField
-              as={Select<TeamDto>}
-              searchable
-              clearable
-              multiple
-              label={R("teams")}
-              optionRender={renderTeam}
-              options={(keyword: string) => toPromiseArray(httpClient.team.find({ requestBody: { keyword } }))}
-              value={dto.teams}
-              onMultiValue={(teams: TeamDto[]) => form.setDto({ ...form.dto, teams })}
-            />
-          </div>
-        </Step>
-      </Stepper>
-
-      <div className="mt-auto flex justify-between">
-        <div className="flex">
-          <Button onClick={prevStep} disabled={!hasPrevStep} text>
-            Prev
-          </Button>
-
-          <Button onClick={nextStep} disabled={!hasNextStep} text>
-            Next
-          </Button>
+          <Button onClick={handleSubmit}>{isNew ? RR("create", language) : RR("update", language)}</Button>
         </div>
 
-        {!!persistentObject && (
-          <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-start">
-            <div className="flex flex-col">
-              {R("restore-work")}
-              <span className="text-xxs normal-case italic text-neutral-600">
-                <Moment date={persistentObject.date} />
-              </span>
-            </div>
-          </Button>
+        {isOpen && (
+          <Modal open={isOpen} onClose={close} width="md" className="rounded-md bg-neutral-200 p-6">
+            <ClipboardFromBpDp setThesis={setDto} thesis={dto} />
+          </Modal>
         )}
 
-        <Button onClick={handleSubmit}>{isNew ? RR("create", language) : RR("update", language)}</Button>
-      </div>
-
-      {isOpen && (
-        <Modal open={isOpen} onClose={close} width="md" className="rounded-md bg-neutral-200 p-6">
-          <ClipboardFromBpDp setThesis={setDto} thesis={dto} />
-        </Modal>
-      )}
-
-      <div>
-        {/* <pre className="text-xs">
-          <code>{JSON.stringify(dto, null, 2)}</code>
-        </pre>
-        <pre>
-          <code>{JSON.stringify(errors, null, 2)}</code>
-        </pre> */}
-        {/* <pre>
-          <code>{JSON.stringify(touched, null, 2)}</code>
-        </pre> */}
-      </div>
-    </LoadingWrapper>
+        <div>
+          <Debug value={dto} title="dto" noRoot />
+          <Debug value={errors} title="errors" noRoot />
+          <Debug value={touched} title="touched" noRoot />
+        </div>
+      </LoadingWrapper>
+    </UnideskComponent>
   );
 };
 
@@ -465,15 +490,19 @@ const generateOptions = <T extends INameDto>(items: T[] | null | undefined, lang
   }));
 };
 
-export const PageThesisEdit = () => {
-  const { id } = useParams<{ id: string }>();
+export interface PageThesisEditProps {
+  id?: string;
+}
+export const PageThesisEdit = (props: PageThesisEditProps) => {
+  const params = useParams<{ id: string }>();
+  const id = params.id ?? props.id;
   const isNew = id === undefined;
 
   if (isNew) {
-    return <ThesisEdit initialValues={thesisInitialValues as ThesisDto} />
+    return <ThesisEdit initialValues={thesisInitialValues as ThesisDto} />;
   }
 
-  const { data: thesis, isLoading, error, loadData } = useSingleQuery<ThesisDto|undefined>(undefined);
+  const { data: thesis, isLoading, error, loadData } = useSingleQuery<ThesisDto | undefined>(undefined);
   useEffect(() => {
     loadData(httpClient.thesis.getOne({ id }));
   }, [id]);

@@ -7,7 +7,7 @@ import { UserDto } from "@models/UserDto";
 import { UserFilter } from "@models/UserFilter";
 import { UserFunction } from "@models/UserFunction";
 import { useContext, useEffect } from "react";
-import { MdClear, MdClearAll } from "react-icons/md";
+import { MdClear } from "react-icons/md";
 
 import { FilterBar } from "components/FilterBar";
 import { Paging } from "components/Paging";
@@ -17,22 +17,22 @@ import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
 import { generatePrimitive, Select } from "ui/Select";
 import { TextField } from "ui/TextField";
+import { UserLookupDto } from "@models/UserLookupDto";
 
 const userFunctionOptions = generatePrimitive(Object.values(UserFunction));
 type UserFilterOnly = Omit<UserFilter, "filter">;
 interface UserFilterBarProps {
-  onChange?(data: UserDto[]): void;
+  onChange?(data: UserLookupDto[]): void;
+  filter: UserFilterOnly;
+  setFilter: (value: UserFilterOnly) => void;
+  debounceFilter: UserFilterOnly;
 }
 export const UserFilterBar = (props: UserFilterBarProps) => {
-  const { onChange } = props;
+  const { onChange, filter, setFilter, debounceFilter } = props;
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
 
-  const { paging, isLoading, refreshIndex, refresh, loadData, setPaging } = useQuery<UserDto>({ pageSize: 80 });
-  const [filter, setFilter, debounceFilter] = useDebounceLocalStorageState<UserFilterOnly>("main.user-filter-bar", {
-    keyword: "",
-    userFunctions: [],
-  });
+  const { paging, isLoading, refreshIndex, refresh, loadData, setPaging } = useQuery<UserLookupDto>({ pageSize: 80 });
 
   const updatePagination = (filter: QueryFilter) => {
     setPaging({ ...filter });
@@ -64,14 +64,13 @@ export const UserFilterBar = (props: UserFilterBarProps) => {
         placeholder={translate("user-function")}
         clearable
         multiple
+        searchable
       />
 
       <Paging className="ml-auto" filter={paging} onValue={updatePagination} />
 
       <FilterBar type="btn-group">
-        <Button onClick={refresh}>
-          {translate("search")}
-        </Button>
+        <Button onClick={refresh}>{translate("search")}</Button>
 
         <Button size="sm" color="warning" variant="contained" onClick={() => setFilter({ keyword: "", userFunctions: [] })}>
           <MdClear />

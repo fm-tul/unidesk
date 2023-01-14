@@ -5,12 +5,14 @@
 @import "./styles/spinners.css";
 @import "./styles/table.css";
 @import "./styles/textfields.css";
+@import "./styles/thesis-states.css";
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import "https://cdn.jsdelivr.net/npm/pretty-print-json@1.3/dist/pretty-print-json.css";
 
 .fade {
-  @apply duration-500 animate-in fade-in-0;
+  @apply animate-in fade-in-0 duration-500;
 }
 
 .no-pagination .MuiDataGrid-footerContainer {
@@ -55,5 +57,5 @@
 }
 
 .flow {
-  @apply flex gap-1 items-center
+  @apply flex items-center gap-1;
 }

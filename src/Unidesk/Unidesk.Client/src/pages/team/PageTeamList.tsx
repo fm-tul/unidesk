@@ -2,6 +2,7 @@ import { httpClient } from "@core/init";
 import { QueryFilter } from "@models/QueryFilter";
 import { TeamDto } from "@models/TeamDto";
 import { FilterBar } from "components/FilterBar";
+import { UnideskComponent } from "components/UnideskComponent";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { useDebounceState } from "hooks/useDebounceState";
 import { useQuery } from "hooks/useFetch";
@@ -10,7 +11,16 @@ import { Link } from "react-router-dom";
 import { link_pageTeamEdit } from "routes/links";
 
 export const PageTeamList = () => {
-  const { paging: filter, data, error, isLoading, loadData, setPaging: setFilter, refresh, refreshIndex } = useQuery<TeamDto>({ pageSize: 100 });
+  const {
+    paging: filter,
+    data,
+    error,
+    isLoading,
+    loadData,
+    setPaging: setFilter,
+    refresh,
+    refreshIndex,
+  } = useQuery<TeamDto>({ pageSize: 100 });
   const [searchText, setSearchText, debouceSearch] = useDebounceState<string>("");
 
   const doSearch = async () => {
@@ -33,7 +43,7 @@ export const PageTeamList = () => {
   }, [refreshIndex, debouceSearch]);
 
   return (
-    <div>
+    <UnideskComponent name="PageTeamList">
       <FilterBar></FilterBar>
       <LoadingWrapper isLoading={isLoading} error={error}>
         {data.length > 0 && (
@@ -47,7 +57,7 @@ export const PageTeamList = () => {
           </div>
         )}
       </LoadingWrapper>
-    </div>
+    </UnideskComponent>
   );
 };
 

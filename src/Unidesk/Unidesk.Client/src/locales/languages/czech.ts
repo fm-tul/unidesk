@@ -11,6 +11,8 @@ export const cs: ILocale = {
   login: "Přihlásit",
   logout: "Odhlásit",
 
+  "accept": "Přijmout",
+
   // stag import
   "stag-sync": "Stag Sync",
   "imported-thesis-new": "nová práce",

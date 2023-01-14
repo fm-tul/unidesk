@@ -20,6 +20,7 @@ import { TextField } from "ui/TextField";
 import { HistoryInfoIcon } from "../../components/HistoryInfo";
 import { useQuery } from "../../hooks/useFetch";
 import { KeywordMerger } from "./KeywordMerger";
+import { UnideskComponent } from "components/UnideskComponent";
 
 const usedCountOptions = [
   { label: ">1", key: "moreThan1", value: KeywordUsedCount.MORE_THAN1 },
@@ -37,36 +38,38 @@ export const PageKeywordList = () => {
   const theMostFrequentWidth = (value: number) => (value / theMostFrequent) * barWidth;
 
   return (
-    <LoadingWrapper error={""} isLoading={false}>
-      <h1>Keywords</h1>
-      <Button onClick={open}>Merge Keywords...</Button>
+    <UnideskComponent name="PageKeywordList">
+      <LoadingWrapper error={""} isLoading={false}>
+        <h1>Keywords</h1>
+        <Button onClick={open}>Merge Keywords...</Button>
 
-      {isOpen && (
-        <Modal open={isOpen} onClose={close} height="xl" className="rounded bg-white p-6">
-          <KeywordMerger />
-        </Modal>
-      )}
+        {isOpen && (
+          <Modal open={isOpen} onClose={close} height="xl" className="rounded bg-white p-6">
+            <KeywordMerger />
+          </Modal>
+        )}
 
-      <KeywordsFilterBar onChange={setData} />
+        <KeywordsFilterBar onChange={setData} />
 
-      {data && (
-        <div className="flex flex-col gap-1">
-          {data
-            .filter(i => i.locale === language)
-            .map(keyword => (
-              <div key={keyword.id} className="flex items-center gap-1">
-                <div className="flex h-[14px] justify-end overflow-hidden rounded-xl bg-blue-200" style={{ width: barWidth }}>
-                  <div className="bg-blue-500/40" style={{ width: theMostFrequentWidth(keyword.used ?? 0) }}></div>
+        {data && (
+          <div className="flex flex-col gap-1">
+            {data
+              .filter(i => i.locale === language)
+              .map(keyword => (
+                <div key={keyword.id} className="flex items-center gap-1">
+                  <div className="flex h-[14px] justify-end overflow-hidden rounded-xl bg-blue-200" style={{ width: barWidth }}>
+                    <div className="bg-blue-500/40" style={{ width: theMostFrequentWidth(keyword.used ?? 0) }}></div>
+                  </div>
+                  <Button component={Link} to={link_pageKeywordDetail.navigate(keyword.id)} text sm>
+                    {keyword.value} ({keyword.used}×)
+                  </Button>
+                  <HistoryInfoIcon item={keyword as any} />
                 </div>
-                <Button component={Link} to={link_pageKeywordDetail.navigate(keyword.id)} text sm>
-                  {keyword.value} ({keyword.used}×)
-                </Button>
-                <HistoryInfoIcon item={keyword as any} />
-              </div>
-            ))}
-        </div>
-      )}
-    </LoadingWrapper>
+              ))}
+          </div>
+        )}
+      </LoadingWrapper>
+    </UnideskComponent>
   );
 };
 

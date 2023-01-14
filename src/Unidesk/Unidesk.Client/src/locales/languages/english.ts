@@ -21,11 +21,11 @@ export const en = {
   // account-settings
   "account-settings": "Account Settings",
   "my-profile": "My Profile",
-  "firstName": "Firstname",
-  "lastName": "Lastname",
-  "middleName": "Middlename",
-  "titleBefore": "Title Before",
-  "titleAfter": "Title After",
+  firstName: "Firstname",
+  lastName: "Lastname",
+  middleName: "Middlename",
+  titleBefore: "Title Before",
+  titleAfter: "Title After",
 
   // general
   ok: "Ok",
@@ -46,7 +46,7 @@ export const en = {
   loading: "Loading",
   "import-successful": "Import successful",
   "type-to-search": "Type to search...",
-  "search": "Search",
+  search: "Search",
   create: "Create",
   update: "Update",
   clear: "Clear",
@@ -54,6 +54,7 @@ export const en = {
   "add-new": "Add New",
 
   teams: "Teams",
+  "user-roles": "User Roles",
   accept: "Accept",
   decline: "Decline",
 
@@ -70,11 +71,16 @@ export const en = {
   "thesis-type": "Thesis type",
   name: "Name",
   authors: "Authors",
+  supervisor: "Supervisor",
+  supervisors: "Supervisors",
+  opponent: "Opponent",
+  opponents: "Opponents",
   keywords: "Keywords",
   "name-lang": (lang: string) => `Name (${lang})`,
   "multiple-types": "Multiple types",
   abstract: "Abstract",
   "abstract-lang": (lang: string) => `Abstract (${lang})`,
+  "abstract-missing": "Abstract is missing",
   "school-year": "School year",
   department: "Department",
   outcomes: "Expected Outcomes",
@@ -84,6 +90,17 @@ export const en = {
   "no-keywords-found": "No keywords found",
   "create-new-keyword-for-x": (x: string) => `Create new keyword for ${x}`,
 
+  nameCze: "Name (Czech)",
+  nameEng: "Name (English)",
+  abstractCze: "Abstract (Czech)",
+  abstractEng: "Abstract (English)",
+  schoolYearId: "School year",
+  departmentId: "Department",
+  studyProgrammeId: "Study programme",
+  thesisTypeCandidateIds: "Type",
+  facultyId: "Faculty",
+  outcomeIds: "Expected Outcomes",
+
   // errors
   required: "Required",
   "min-3": "Select at least 3 values",
@@ -91,6 +108,7 @@ export const en = {
 
   //admin
   "administration-menu": "Administration",
+  "administration-actions": "Administration Actions",
   "admin-manage-x": (x: string) => `Manage ${x}`,
 
   // paging
@@ -99,17 +117,17 @@ export const en = {
   // keywords
   "keyword-used-count": "Used count",
 
-
   // links
-  "link.import": "Import",
+  "link.import": "Stag Import",
   "link.styles": "Styles",
   "link.go-home": "Go home",
-  
+
   "link.thesis": "Thesis",
   "link.theses": "Theses",
+  "link.my-theses": "My Theses",
   "link.edit-thesis": "Edit Thesis",
   "link.create-thesis": "Create new Thesis",
-  
+
   "link.keywords": "Keywords",
   "link.keyword": "Keyword",
 
@@ -123,6 +141,12 @@ export const en = {
   "link.edit-team": "Edit Team",
 
   "link.admin": "Admin",
+
+  "no-grants": "No grants",
+
+  //settings
+  "link.settings": "Settings",
+  "settings.roles-and-grants": "Roles & Grants",
 
   // select component
   "select-component.type-to-search": "Type to search...",

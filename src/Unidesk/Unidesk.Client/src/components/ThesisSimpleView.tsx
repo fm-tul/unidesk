@@ -1,32 +1,30 @@
-import { ThesisDto, UserDto } from "@api-client";
+import { ThesisLookupDto } from "@api-client";
 import { LanguageContext } from "@locales/LanguageContext";
-import { Translate } from "@locales/R";
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useOpenClose } from "hooks/useOpenClose";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { ThesisEdit } from "pages/thesis/PageThesisEdit";
+import { link_pageKeywordDetail, link_pageThesisDetail, link_pageUserDetail } from "routes/links";
 import { Modal } from "ui/Modal";
 
 import { DualLanguage } from "./DualLanguage";
 import { HistoryInfoIcon } from "./HistoryInfo";
-import { link_pageKeywordDetail, link_pageThesisDetail, link_pageUserDetail } from "routes/links";
 
 interface IThesisSimpleViewProps {
-  thesis: ThesisDto;
-  onClick?: (thesis: ThesisDto) => void;
+  thesis: ThesisLookupDto;
+  onClick?: (thesis: ThesisLookupDto) => void;
   withEdit?: boolean;
   withDetail?: boolean;
 }
 export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
-  const navigate = useNavigate();
   const { language } = useContext(LanguageContext);
   const { thesis, onClick, withEdit, withDetail } = props;
   const { status, adipidno } = thesis;
 
   const { open, close, isOpen } = useOpenClose(false);
-  const [selectedThesis, setSelectedThesis] = useState<ThesisDto>();
+  const [selectedThesis, setSelectedThesis] = useState<ThesisLookupDto>();
 
   const handleClick = () => {
     onClick?.(thesis);
@@ -64,9 +62,9 @@ export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
           {thesis.authors.length > 0 && (
             <span className="italic">
               -
-              {thesis.authors.map((user, index) => (
-                <Link key={user.id} to={link_pageUserDetail.navigate(user.id)}>
-                  {user.lastName} {user.firstName}
+              {thesis.authors.map((dto, index) => (
+                <Link key={dto.user.id} to={link_pageUserDetail.navigate(dto.user.id)}>
+                  {dto.user.fullName}
                   {index < thesis.authors.length - 1 && ", "}
                 </Link>
               ))}
@@ -95,9 +93,7 @@ export const ThesisSimpleView = (props: IThesisSimpleViewProps) => {
 
       {withEdit === true && isOpen && (
         <Modal open={isOpen} onClose={close} y="top" height="lg" className="bg-slate-100 p-6">
-          <div className="flex h-full flex-col content-between">
-            <ThesisEdit initialValues={selectedThesis} />
-          </div>
+          <div className="flex h-full flex-col content-between">{/* <ThesisEdit initialValues={selectedThesis} /> */}</div>
         </Modal>
       )}
     </div>

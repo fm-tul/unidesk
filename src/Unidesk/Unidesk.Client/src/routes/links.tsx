@@ -1,19 +1,20 @@
 import { User_Admin, User_SuperAdmin } from "@api-client/constants/UserGrants";
 
 import { link_admin, link_adminManageEnum } from "./admin/links";
+import { PageStagImportComponent } from "./admin/links.pageStagImport";
 import { ExtraRouteProps, ExtraRoutePropsWithGoto } from "./core";
 import { PageHomeComponent } from "./links.pageHome";
 import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
-import { PageStagImportComponent } from "./links.pageStagImport";
 import { PageStylesComponent } from "./links.pageStyles";
 import { PageTeamDetailComponent, PageTeamEditComponent, PageTeamListComponent } from "./links.pageTeam";
-import { PageThesisDetailComponent, PageThesisEditComponent, PageThesisListComponent } from "./links.pageThesis";
+import { PageMyThesisListComponent, PageThesisDetailComponent, PageThesisEditComponent, PageThesisListComponent } from "./links.pageThesis";
 import { PageUserDetailComponent, PageUserListComponent, PageUserProfileComponent } from "./links.pageUser";
+import { link_settings, link_settingsManageSettings } from "./settings/links";
 
 export const link_stagImport: ExtraRouteProps = {
   title: "link.import",
-  path: "/stag-import",
-  visible: true,
+  path: "/admin/stag-import",
+  visible: false,
   element: PageStagImportComponent,
   requiredGrants: [User_Admin.id],
 };
@@ -40,6 +41,12 @@ export const link_pageThesisDetail: ExtraRoutePropsWithGoto = {
   navigate: (id: string) => `/theses/${id}`,
 };
 
+export const link_pageMyThesisList: ExtraRouteProps = {
+  title: "link.my-theses",
+  path: "/my-theses",
+  element: PageMyThesisListComponent,
+};
+
 export const link_pageThesisEdit: ExtraRoutePropsWithGoto = {
   title: "link.edit-thesis",
   path: "/theses/:id/edit",
@@ -59,9 +66,8 @@ export const link_styles: ExtraRouteProps = {
   visible: false,
   path: "/styles",
   element: PageStylesComponent,
-  requiredGrants: [User_SuperAdmin.id],
+  requiredGrants: [], // User_SuperAdmin.id
 };
-
 
 // keywords
 export const link_pageKeywordDetail: ExtraRoutePropsWithGoto = {
@@ -146,6 +152,7 @@ export const links = [
   link_pageKeywordList,
 
   link_pageThesisList,
+  link_pageMyThesisList,
   link_pageThesisDetail,
   link_pageThesisEdit,
   link_pageThesisCreate,
@@ -158,4 +165,7 @@ export const links = [
 
   link_admin,
   link_adminManageEnum,
+
+  link_settings,
+  link_settingsManageSettings,
 ];

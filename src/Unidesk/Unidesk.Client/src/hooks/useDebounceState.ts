@@ -16,10 +16,13 @@ export const useDebounceState = <T>(initialValue: T, delay: number = 500) => {
   return [value, setValue, debouncedValue, setDebouncedValue] as [T, (value: T) => void, T, (value: T) => void];
 };
 
-
 export const useDebounceLocalStorageState = <T>(key: string, initialValue: T, delay: number = 500) => {
   const [value, setValue] = useLocalStorage(key, initialValue);
   const [debouncedValue, setDebouncedValue] = useState(initialValue);
+
+  const clearStorage = () => {
+    localStorage.removeItem(key);
+  };
 
   useEffect(() => {
     const debouncedSetDebouncedValue = debounce(delay, setDebouncedValue);
@@ -27,5 +30,5 @@ export const useDebounceLocalStorageState = <T>(key: string, initialValue: T, de
     return debouncedSetDebouncedValue.cancel;
   }, [value, delay]);
 
-  return [value, setValue, debouncedValue, setDebouncedValue] as [T, (value: T) => void, T, (value: T) => void];
-}
+  return [value, setValue, debouncedValue, setDebouncedValue, clearStorage] as [T, (value: T) => void, T, (value: T) => void, () => void];
+};

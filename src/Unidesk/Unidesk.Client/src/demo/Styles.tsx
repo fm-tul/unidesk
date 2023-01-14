@@ -1,11 +1,15 @@
 import { httpClient } from "@core/init";
 import { UserDto } from "@models/UserDto";
-import { Key, useState } from "react";
+import { UserLookupDto } from "@models/UserLookupDto";
+import { UserRoleDto } from "@models/UserRoleDto";
+import { Key, useEffect, useState } from "react";
 
-import { renderUser } from "models/cellRenderers/UserRenderer";
+import { FilterBar } from "components/FilterBar";
+import { renderUser, renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
 import { Select, SelectOption } from "ui/Select";
+import { SelectField, SelectFieldLive } from "ui/SelectField";
 import { UiColors, UiSizes, UiVariants } from "ui/shared";
 import { Step, Stepper } from "ui/Stepper";
 import { TextField } from "ui/TextField";
@@ -84,11 +88,11 @@ const Selects = () => {
   const disabled = [false, true] as any;
   const combinations = true ? [] : ([...product([colors, sizes, variants, disabled])] as [UiColors, UiSizes, UiVariants, boolean][]);
 
-  const [users, setUsers] = useState<UserDto[]>([]);
+  const [users, setUsers] = useState<UserLookupDto[]>([]);
   const findUsers = (keyword: string) => {
-    return new Promise<SelectOption<UserDto>[]>(async resolve => {
+    return new Promise<SelectOption<UserLookupDto>[]>(async resolve => {
       const users = await httpClient.users.find({ requestBody: { keyword } });
-      resolve(users.items.map(u => ({ key: u.id, value: u, label: u.firstName + " " + u.lastName })));
+      resolve(users.items.map(u => ({ key: u.id, value: u, label: u.fullName })));
     });
   };
 
@@ -127,8 +131,8 @@ const Selects = () => {
         {/* <Select onValue={setItems} value={items} options={longItems} searchable clearable helperColor={items.length > 2} helperText={items.length === 0 ? "" : "asdcsa"}  />
         <Select onValue={setItems} value={items} options={longItems} searchable clearable multiple helperColor={items.length > 2 ? "success" : "warning"} helperText={items.length === 0 ? "" : "asdcsa"}  /> */}
         <hr />
-        <Select onValue={setUsers} value={users} options={findUsers} optionRender={renderUser} searchable clearable />
-        <Select onValue={setUsers} value={users} options={findUsers} optionRender={renderUser} searchable clearable multiple />
+        <Select onValue={setUsers} value={users} options={findUsers} optionRender={renderUserLookup} searchable clearable />
+        <Select onValue={setUsers} value={users} options={findUsers} optionRender={renderUserLookup} searchable clearable multiple />
       </div>
     </div>
   );
@@ -224,14 +228,103 @@ const Steppers = () => {
   );
 };
 
+interface ComplexValue {
+  id: string;
+  name: string;
+  key: string;
+  value: string;
+  label: string;
+}
 export const Styles = () => {
+  const [value, setValue] = useState([1, 2]);
+  const options = [0, 1, 2, 3, 4, 5, 99];
+
+  const [complexValue, setComplexValue] = useState<ComplexValue[]>([{ id: "1", name: "Beer", key: "1", value: "Beer", label: "Beer" }]);
+  const complexOptions = [
+    { id: "1", name: "Beer", key: "1", value: "Beer", label: "Beer" },
+    { id: "2", name: "Wine", key: "2", value: "Wine", label: "Wine" },
+    { id: "3", name: "Long Cocktail", key: "3", value: "Long Cocktail", label: "Long Cocktail" },
+  ];
+
+  const [userRoles, setUserRoles] = useState<UserRoleDto[]>([]);
+  const [userRoleOptions, setUserRoleOptions] = useState<UserRoleDto[]>([]);
+
+  const handleOptionClick = (option: number) => {
+    if (value.includes(option)) {
+      setValue(value.filter(v => v !== option));
+    } else {
+      setValue([...value, option]);
+    }
+  };
+
+  const handleComplexOptionClick = (option: ComplexValue) => {
+    if (complexValue.includes(option)) {
+      setComplexValue(complexValue.filter(v => v !== option));
+    } else {
+      setComplexValue([...complexValue, option]);
+    }
+  };
+
+  const searchUserRoles = async (search: string) => {
+    const userRoles = await httpClient.enums.userRoleGetAll();
+    return userRoles.filter(userRole => userRole.name.toLowerCase().includes(search.toLowerCase()));
+  };
+
+  useEffect(() => {
+    httpClient.enums.userRoleGetAll().then(setUserRoleOptions);
+  }, []);
+
+  console.table(complexValue);
+
   return (
-    <div className="">
-      <FormFields />
-      {/* <Selects /> */}
-      {/* <TextFields />
-      <Buttons />
-      <Steppers />  */}
+    <div>
+      <h1 className="text-2xl">Select</h1>
+
+      <FilterBar>
+        {/* <FormField as={SelectField<number>} value={value} options={options} onValue={setValue} multiple searchable /> */}
+
+        <FormField
+          as={SelectField<UserRoleDto>}
+          value={userRoles}
+          options={userRoleOptions}
+          onValue={setUserRoles}
+          multiple
+          clearable
+          searchable
+        />
+
+        <FormField
+          as={SelectFieldLive<UserRoleDto>}
+          value={userRoles}
+          label="User Roles"
+          options={searchUserRoles}
+          onValue={setUserRoles}
+          multiple
+          clearable
+          searchable
+        />
+{/* 
+        <FormField as={Select<any>} value={complexValue} options={complexOptions} onValue={setComplexValue} multiple clearable searchable />
+
+        <FormField
+          as={SelectField<ComplexValue>}
+          value={complexValue}
+          options={complexOptions}
+          onValue={setComplexValue}
+          multiple
+          clearable
+          searchable
+        />
+
+        <FormField
+          as={SelectField<ComplexValue>}
+          value={complexValue}
+          options={complexOptions}
+          onValue={setComplexValue}
+          clearable
+          searchable
+        /> */}
+      </FilterBar>
     </div>
   );
 };

@@ -1,4 +1,8 @@
-export const IdRenderer = (params: any) => {
+interface IdRendererProps {
+  id: string;
+}
+
+export const IdRenderer = (params: IdRendererProps) => {
   // something like this: 52ffd7b8-98cb-4857-bd06-174bb2844afb
   const { id } = params;
 

@@ -4,5 +4,5 @@ import { ThesisStatus } from "@models/ThesisStatus";
 
 export const renderThesisStatus = (status: ThesisStatus, locale: LanguagesId) => {
     const item = All.find(i => i.value === status);
-    return <span>{item?.[locale] ?? status}</span>;
+    return item?.[locale] ?? status;
 }

@@ -14,7 +14,7 @@ import { UserContext } from "./user/UserContext";
 
 const renderMenu = (available_links: ExtraRouteProps[]) => {
   return (
-    <div className="bg-white/80 border-b border-solid border-neutral-300 has-backdrop:bg-white/60 has-backdrop:backdrop-blur-md relative z-10">
+    <div className="relative z-10 border-b border-solid border-neutral-300 bg-white/80 has-backdrop:bg-white/60 has-backdrop:backdrop-blur-md">
       <div className="container mx-auto print:hidden">
         <div className="flex items-center gap-2 p-4">
           {/* name and logo */}
@@ -54,9 +54,7 @@ export const App = () => {
   // min-w-max
   return (
     <>
-      <div
-        className="fixed inset-0 -z-10 root-bg"
-      ></div>
+      <div className="root-bg fixed inset-0 -z-10"></div>
 
       <div className="min-h-screen bg-neutral-200/50">
         {renderMenu(available_links)}

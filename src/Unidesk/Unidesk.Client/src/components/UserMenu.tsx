@@ -1,5 +1,5 @@
-import { All, User_SuperAdmin } from "@api-client/constants/UserGrants";
-import { GUID_EMPTY } from "@core/config";
+import { User_SuperAdmin } from "@api-client/constants/UserGrants";
+import { GUID_EMPTY, VITE_DEBUG_LOGIN } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { R, RR } from "@locales/R";
@@ -18,15 +18,17 @@ export function UserMenu() {
   const { user, setUser, resetUser } = useContext(UserContext);
   const { language } = useContext(LanguageContext);
 
-  const authUser = async () => {
-    const response = await httpClient.users.login({
-      requestBody: {
-        password: "admin",
-        username: "admin",
-      },
-    });
+  const authUser = async (admin: boolean) => {
+    const loginPath = admin ? "" : VITE_DEBUG_LOGIN;
+    const response = loginPath
+      ? await httpClient.users.loginSso({ path: loginPath })
+      : await httpClient.users.login({
+          requestBody: {
+            password: "admin",
+            eppn: "admin",
+          },
+        });
 
-    debugger;
     if (response.isAuthenticated && response.user) {
       setUser(response.user);
     } else {
@@ -66,9 +68,14 @@ export function UserMenu() {
 
         {/* not logged in */}
         {!loggedIn && (
-          <Button sm text onClick={authUser} justify="justify-start">
-            {R("login")}
-          </Button>
+          <>
+            <Button sm text onClick={() => authUser(true)} justify="justify-start">
+              {R("login")} (admin)
+            </Button>
+            <Button sm text onClick={() => authUser(false)} justify="justify-start">
+              {R("login")} (user)
+            </Button>
+          </>
         )}
 
         {/* logged in */}
@@ -78,8 +85,7 @@ export function UserMenu() {
               {R("my-profile")}
             </Button>
 
-            {grantsIds.includes(User_SuperAdmin.id) && <SwitchUser />
-            }
+            {grantsIds.includes(User_SuperAdmin.id) && <SwitchUser />}
 
             <Button text warning onClick={logoutUser} justify="justify-start">
               {R("logout")}

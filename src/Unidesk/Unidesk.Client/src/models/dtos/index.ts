@@ -34,7 +34,7 @@ export const propertiesThesisOutcomeDto: EditorPropertiesOf<ThesisOutcomeDto> = 
   descriptionEng: { value: "", required: false },
 };
 
-export const propertiesSchoolYearDto: EditorPropertiesOf<SchoolYearDto> = {
+export const propertiesSchoolYearDto: Partial<EditorPropertiesOf<SchoolYearDto>> = {
   id: { value: GUID_EMPTY, required: true, hidden: true },
 
   start: { value: "", required: true, type: "date" },

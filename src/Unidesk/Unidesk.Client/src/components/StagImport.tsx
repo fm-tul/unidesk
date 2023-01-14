@@ -1,7 +1,8 @@
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR, Translate } from "@locales/R";
-import { ThesisDto } from "@models/ThesisDto";
+import { ThesisLookupDto } from "@models/ThesisLookupDto";
+import { ThesisListRenderer } from "models/itemRenderers/ThesisRenderer";
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -10,22 +11,21 @@ import { Select, SelectOption } from "ui/Select";
 import { TextField } from "ui/TextField";
 
 import { FilterBar } from "./FilterBar";
-import { ThesisSimpleView } from "./ThesisSimpleView";
 
 export const StagImport = () => {
-  const language = useContext(LanguageContext);
+  const { language } = useContext(LanguageContext);
   const currentYear = new Date().getFullYear();
   const years = [...new Set([2021, 2019, 2020, 2022, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, currentYear])]
     .sort((a, b) => b - a)
     .map(String)
     .map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
-  const departments = ["NTI", "MTI", "ITE"].map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
 
+  const departments = ["NTI", "MTI", "ITE"].map(i => ({ key: i, label: i, value: i })) as SelectOption<string>[];
   const [textData, setTextData] = useState<string>("");
   const [year, setYear] = useState(currentYear.toString());
   const [department, setDepartment] = useState(departments[0].value);
   const [isLoading, setIsLoading] = useState(false);
-  const [resposeData, setResponseData] = useState<ThesisDto[]>();
+  const [resposeData, setResponseData] = useState<ThesisLookupDto[]>();
   const [error, setError] = useState<string>("");
   const [batchIndex, setBatchIndex] = useState(0);
   const totalBatches = years.length * departments.length;
@@ -102,7 +102,7 @@ export const StagImport = () => {
           <Button
             loading={isLoading}
             disableClass=""
-            className="with-progress ml-auto h-full before:bg-gradient-to-l before:from-lime-600 before:to-lime-400 min-w-xs"
+            className="with-progress ml-auto h-full min-w-xs before:bg-gradient-to-l before:from-lime-600 before:to-lime-400"
             onClick={importAllFromStag}
             style={{ "--progress": batchIndex > 0 ? `${(batchIndex / totalBatches) * 100}%` : "0" } as any}
           >
@@ -128,12 +128,13 @@ export const StagImport = () => {
             <Translate value="imported-thesis" />: {resposeData.length}
           </div>
 
-          <div className="flex flex-col gap-1 text-sm">
+          {/* <div className="flex flex-col gap-1 text-sm">
             {resposeData
               .map(thesis => (
                 <ThesisSimpleView thesis={thesis} key={thesis.id} withEdit />
               ))}
-          </div>
+          </div> */}
+          <ThesisListRenderer rows={resposeData} clientSort />
         </div>
       )}
 

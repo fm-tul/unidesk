@@ -1,26 +1,36 @@
-import { ThesisDto } from "@api-client";
+import { ThesisLookupDto, ThesisTypeDto } from "@api-client";
+import { httpClient } from "@core/init";
+import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
-import { R } from "@locales/R";
-import { useContext, useState } from "react";
+import { R, RR } from "@locales/R";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { ThesisFilterBar } from "filters/ThesisFilterBar";
+import { useSingleQuery } from "hooks/useFetch";
 import { useOpenClose } from "hooks/useOpenClose";
-import { Button } from "ui/Button";
-import { Menu } from "ui/Menu";
+import { ThesisTypeRendererFactory } from "models/cellRenderers/ThesisTypeRenderer";
+import { link_pageThesisCreate } from "routes/links";
 import { Modal } from "ui/Modal";
 
-import { ThesisSimpleView } from "../../components/ThesisSimpleView";
-import { ThesisEdit } from "./PageThesisEdit";
-import { Link } from "react-router-dom";
-import { link_pageThesisCreate } from "routes/links";
+import PageThesisEdit from "./PageThesisEdit";
+import { UnideskComponent } from "components/UnideskComponent";
+import { ThesisListRenderer, ThesisRendererFactory } from "models/itemRenderers/ThesisRenderer";
+import { FloatingAction } from "components/mui/FloatingAction";
 
-export const PageThesisList = () => {
-  const [selectedThesis, setSelectedThesis] = useState<ThesisDto>();
+export interface PageThesisListProps {
+  myThesis?: boolean;
+}
+export const PageThesisList = (props: PageThesisListProps) => {
+  const { myThesis } = props;
+  const { language } = useContext(LanguageContext);
+  const translate = (value: EnKeys, ...args: any[]) => RR(value, language, ...args);
+  const [selectedThesis, setSelectedThesis] = useState<ThesisLookupDto>();
   const { open, close, isOpen } = useOpenClose(false);
-  const [data, setData] = useState<ThesisDto[]>([]);
+  const [data, setData] = useState<ThesisLookupDto[]>([]);
 
-  const editThesis = (thesis: ThesisDto) => {
+  const editThesis = (thesis: ThesisLookupDto) => {
     setSelectedThesis(thesis);
     open();
   };
@@ -31,38 +41,25 @@ export const PageThesisList = () => {
   };
 
   return (
-    <LoadingWrapper error={null} isLoading={false}>
-      {isOpen && (
-        <Modal open={isOpen} onClose={close} y="top" height="xl" className="bg-slate-100 p-6">
-          <div className="flex h-full flex-col content-between">
-            <ThesisEdit initialValues={selectedThesis} />
+    <UnideskComponent name="PageThesisList">
+      <LoadingWrapper error={null} isLoading={false}>
+        {isOpen && (
+          <Modal open={isOpen} onClose={close} y="top" height="xl" className="bg-slate-100 p-6">
+            <div className="flex h-full flex-col content-between">
+              <PageThesisEdit id={selectedThesis?.id} />
+            </div>
+          </Modal>
+        )}
+
+        {data && (
+          <div>
+            <ThesisFilterBar onChange={setData} initialFilter={{ myThesis: !!myThesis }} />
+            <FloatingAction component={Link} to={link_pageThesisCreate.path} tooltip={R("link.create-thesis")} />
+            <ThesisListRenderer onRowClick={editThesis} rows={data} />
           </div>
-        </Modal>
-      )}
-
-      {data && (
-        <div>
-          <ThesisFilterBar onChange={setData} />
-          {/* <div className="flex justify-end">
-            <Menu link="menu" pop="right">
-              <Button text justify="justify-start" onClick={newThesis}>
-                Create new thesis
-              </Button>
-            </Menu>
-          </div> */}
-
-          <Button component={Link} to={link_pageThesisCreate.path}>
-            {R("link.create-thesis")}
-          </Button>
-
-
-          <h1>{R("topics")}</h1>
-          {data.map(thesis => (
-            <ThesisSimpleView thesis={thesis} key={thesis.id} onClick={editThesis} />
-          ))}
-        </div>
-      )}
-    </LoadingWrapper>
+        )}
+      </LoadingWrapper>
+    </UnideskComponent>
   );
 };
 

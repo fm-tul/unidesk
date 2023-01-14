@@ -14,11 +14,17 @@
 </head>
 
 <body>
-      <div id="root"
-           class="min-w-max"></div>
+      <div class="flex">
+            <div id="root"
+                 class="min-w-max grow"></div>
+            <div id="debug-root"
+                 class="z-[200] max-w-[480px]"></div>
+      </div>
+
       <div id="modal-root"
            class="z-[100] relative"></div>
       <script type="module"
+              defer
               src="/src/main.tsx"></script>
 </body>
 

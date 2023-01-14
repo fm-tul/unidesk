@@ -10,6 +10,12 @@ export const PageThesisListComponent = (
   </Suspense>
 );
 
+export const PageMyThesisListComponent = (
+  <Suspense>
+    <PageThesisList myThesis />
+  </Suspense>
+);
+
 export const PageThesisDetailComponent = (
   <Suspense>
     <PageThesisDetail />

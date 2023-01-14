@@ -13,11 +13,14 @@ interface ToolbarProps extends SizeProps, VariantProps {
 }
 
 export const FilterBar: React.FC<ToolbarProps> = props => {
-  const { disabled, className = "", children, type = "btn-bar", loading=false } = props;
+  const { disabled, className = "", children, type = "btn-bar", loading = false } = props;
   const size = getSize(props);
   const variant = getVariant(props);
 
   const clonedChildren = React.Children.map(children, child => {
+    if (!React.isValidElement(child)) {
+      return child;
+    }
     return React.cloneElement(child as any, {
       variant: (child as any).props.variant ?? variant,
       size: (child as any).props.size ?? size,

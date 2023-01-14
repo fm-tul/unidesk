@@ -3,13 +3,23 @@ import { httpClient } from "@core/init";
 import { R } from "@locales/R";
 import { Link, useParams } from "react-router-dom";
 
-import { propertiesDepartmentDto, propertiesFacultyDto, propertiesSchoolYearDto, propertiesStudyProgrammeDto, propertiesThesisOutcomeDto, propertiesThesisTypeDto } from "models/dtos";
+import {
+  propertiesDepartmentDto,
+  propertiesFacultyDto,
+  propertiesSchoolYearDto,
+  propertiesStudyProgrammeDto,
+  propertiesThesisOutcomeDto,
+  propertiesThesisTypeDto,
+} from "models/dtos";
+import { link_adminManageEnum } from "routes/admin/links";
+import { link_stagImport } from "routes/links";
 import { Button } from "ui/Button";
 import { classnames } from "ui/shared";
 import { toKV, toKVWithCode } from "utils/transformUtils";
 
 import { SimpleEntityEditor } from "./SimpleEntityEditor";
-import { link_adminManageEnum } from "routes/admin/links";
+import { UnideskComponent } from "components/UnideskComponent";
+import { EditorPropertiesOf } from "models/typing";
 
 export const PageAdministrator = () => {
   const { enumName } = useParams();
@@ -49,7 +59,7 @@ export const PageAdministrator = () => {
       component: (
         <SimpleEntityEditor
           key="school-years"
-          schema={propertiesSchoolYearDto}
+          schema={propertiesSchoolYearDto as EditorPropertiesOf<SchoolYearDto>}
           getAll={() => httpClient.enums.schoolYearGetAll()}
           upsertOne={i => httpClient.enums.schoolYearUpsert({ requestBody: i as SchoolYearDto })}
           deleteOne={id => httpClient.enums.schoolYearDelete({ id })}
@@ -104,7 +114,7 @@ export const PageAdministrator = () => {
   const validEnum = enumsList.find(e => e.path === enumName);
 
   return (
-    <div>
+    <UnideskComponent name="PageAdministrator">
       {!validEnum && <h1 className="text-xl">{R("administration-menu")}</h1>}
       <div
         className={classnames(
@@ -118,9 +128,23 @@ export const PageAdministrator = () => {
           </Button>
         ))}
       </div>
+
+      <div>
+        <h1 className="text-xl">{R("administration-actions")}</h1>
+        <div
+          className={classnames(
+            "grid gap-4",
+            validEnum ? "mb-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]" : "grid-cols-[repeat(auto-fit,minmax(250px,1fr))]"
+          )}
+        >
+          <Button lg outlined component={Link} to={link_stagImport.path} className="max-w-[250px]">
+            <span className={classnames("p-1")}>{R(link_stagImport.title)}</span>
+          </Button>
+        </div>
+      </div>
       {validEnum && <h1 className="text-xl">{R("admin-manage-x", validEnum.name)}</h1>}
       {validEnum && <>{validEnum.component}</>}
-    </div>
+    </UnideskComponent>
   );
 };
 

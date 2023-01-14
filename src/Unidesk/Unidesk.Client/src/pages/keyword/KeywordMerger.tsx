@@ -1,6 +1,7 @@
 import { httpClient } from "@core/init";
 import { locales } from "@locales/all";
 import { SimilarKeywordDto } from "@models/SimilarKeywordDto";
+import { UnideskComponent } from "components/UnideskComponent";
 import { useState } from "react";
 import { Button } from "ui/Button";
 import { TextField } from "ui/TextField";
@@ -53,7 +54,7 @@ export const KeywordMerger = (props: KeywordMergerProps) => {
   };
 
   return (
-    <div>
+    <UnideskComponent name="KeywordMerger">
       <div className="flex gap-2">
         <Button loading={duplicates === null} onClick={handleFindDuplicatesButtonClick}>
           Find&nbsp;Duplicates
@@ -65,8 +66,8 @@ export const KeywordMerger = (props: KeywordMergerProps) => {
           </Button>
         )}
       </div>
-      {error && <div className="text-red-500 p-4">{error}</div>}
-      {!!duplicates && !error &&(
+      {error && <div className="p-4 text-red-500">{error}</div>}
+      {!!duplicates && !error && (
         <div className="flex flex-col gap-1">
           {locales.map(locale => (
             <div key={locale}>
@@ -119,6 +120,6 @@ export const KeywordMerger = (props: KeywordMergerProps) => {
           ))}
         </div>
       )}
-    </div>
+    </UnideskComponent>
   );
 };

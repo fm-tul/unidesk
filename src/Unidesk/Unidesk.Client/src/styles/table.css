@@ -1,8 +1,7 @@
-.table th {
+.table :is(th, .th) {
   @apply cursor-pointer select-none text-sm font-bold text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-600;
 }
-.table th,
-.table td {
+.table :is(th, td, .th, .td) {
   @apply px-3 py-2 text-sm;
 }
 .table.dense th,
@@ -21,6 +20,6 @@
   @apply border-x border-solid border-black/10;
 }
 
-.table tr.table-body {
+.table .table-body {
   @apply cursor-pointer transition hover:bg-info-200/30;
 }

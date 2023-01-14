@@ -1,0 +1,91 @@
+/*
+    draft,
+    new,
+    reserved,
+    assigned,
+    submitted,
+    finished_susccessfully,
+    finished_unsuccessfully,
+    finished,
+    abandoned,
+    unknown,
+*/
+
+/* pill like tags */
+.thesis-status {
+  @apply inline-flex w-fit items-center justify-center rounded-md border border-gray-300 px-1 text-center text-xs font-medium;
+}
+
+.status-draft {
+  @apply border-gray-300 bg-gray-100 text-gray-800;
+}
+.status-draft-color {
+  --status-color: var(--status-draft-300-rgb);
+}
+
+.status-new {
+  @apply border-lime-300 bg-lime-100 text-lime-800;
+}
+.status-new-color {
+  --status-color: var(--status-new-300-rgb);
+}
+
+.status-reserved {
+  @apply border-violet-300 bg-violet-100 text-violet-800;
+}
+.status-reserved-color {
+  --status-color: var(--status-reserved-300-rgb);
+}
+
+.status-assigned {
+  @apply border-fuchsia-300 bg-fuchsia-100 text-fuchsia-800;
+}
+.status-assigned-color {
+  --status-color: var(--status-assigned-300-rgb);
+}
+
+.status-submitted {
+  @apply border-blue-300 bg-blue-100 text-blue-800;
+}
+.status-submitted-color {
+  --status-color: var(--status-submitted-300-rgb);
+}
+
+.status-finished_susccessfully {
+  @apply border-green-300 bg-green-100 text-green-800;
+}
+.status-finished_susccessfully-color {
+  --status-color: var(--status-finished-susccessfully-300-rgb);
+}
+
+.status-finished_unsuccessfully {
+  @apply border-red-300 bg-red-100 text-red-800;
+}
+.status-finished_unsuccessfully-color {
+  --status-color: var(--status-finished-unsuccessfully-300-rgb);
+}
+
+.status-finished {
+  @apply border-yellow-300 bg-yellow-100 text-yellow-800;
+}
+.status-finished-color {
+  --status-color: var(--status-finished-300-rgb);
+}
+
+.status-abandoned {
+  @apply border-orange-300 bg-orange-100 text-orange-800;
+}
+.status-abandoned-color {
+  --status-color: var(--status-abandoned-300-rgb);
+}
+
+.status-unknown {
+  @apply border-gray-300 bg-gray-100 text-gray-800;
+}
+.status-unknown-color {
+  --status-color: var(--status-unknown-300-rgb);
+}
+
+.status-gradient-bg {
+  background-image: linear-gradient(90deg, rgba(var(--status-color), 0.2) 0%, rgba(var(--status-color), 0) 100%);
+}

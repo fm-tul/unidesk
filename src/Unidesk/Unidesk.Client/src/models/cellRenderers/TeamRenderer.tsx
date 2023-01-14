@@ -1,7 +1,6 @@
-import { TeamDto } from "@models/TeamDto";
-import { TeamSimpleDto } from "@models/TeamSimpleDto";
+import { TeamLookupDto } from "@models/TeamLookupDto";
 
-export const renderTeam = (team: TeamDto | TeamSimpleDto) => {
+export const renderTeam = (team: TeamLookupDto) => {
   const { name, id } = team;
   return (
     <span key={id} className="inline-flex items-center gap-1">
