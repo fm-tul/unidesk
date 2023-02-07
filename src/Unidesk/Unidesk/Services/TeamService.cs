@@ -1,9 +1,12 @@
-﻿using MapsterMapper;
+﻿using System.Text;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
+using Unidesk.Exceptions;
+using Unidesk.Security;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Services;
@@ -46,45 +49,29 @@ public class TeamService
            .Query()
            .FirstAsync(id);
     }
-    
+
     public async Task<UserInTeam?> GetOneUserInTeamAsync(Guid teamId, Guid userId)
     {
         return await _db.UserInTeams
+           .Include(i => i.Team)
+           .Include(i => i.User)
            .FirstAsync(x => x.TeamId == teamId && x.UserId == userId);
     }
 
     public async Task<Team> UpsertAsync(TeamDto dto)
     {
-        var isNew = dto.Id.IsEmpty();
-        var item = isNew
-            ? new Team()
-            : await _db.Teams
-                 .Query()
-                 .FirstOrDefaultAsync(dto.Id)
-           ?? throw new Exception("Team not found");
-
-        item = isNew
-            ? _mapper.Map<Team>(dto)
-            : _mapper.Map(dto, item);
-
+        var (isNew, item) = await _db.Teams.Query().GetOrCreateFromDto(_mapper, dto);
+        NotFoundException.ThrowIfNullOrEmpty(item);
+        
         if (isNew)
         {
-            item.Id = Guid.NewGuid();
-        }
-
-        // TODO: use mapper for this
-        var userInTeamOther = new List<UserInTeam>();
-            /* _mapper.Map<List<UserInTeam>>(dto.UserInTeams)
-           .Select(i => i.StripToGuids())
-           .ToList();*/
-
-        if (isNew)
-        {
-            item.UserInTeams = userInTeamOther;
+            // newly created team should have the creator as admin only
+            item.UserInTeams = new List<UserInTeam>();
             _db.Teams.Add(item);
         }
         else
         {
+            var userInTeamOther = dto.Users.Select(i => UserInTeam.Convert(i.User.Id, item.Id, i.Status, i.Role)).ToList();
             var (same, sameNew, toBeAdded, toBeDeleted) = item.UserInTeams.SynchronizeWithAction(
                 userInTeamOther,
                 (x, y) => x.UserId == y.UserId,
@@ -100,9 +87,81 @@ public class TeamService
             _db.Teams.Update(item);
             _logger.LogInformation("Removed {Count} users from team {TeamId}", toBeDeleted.Count, item.Id);
         }
+        
+        // manual mapping
+        item.Avatar = dto.Avatar.IsNotNullOrEmpty() 
+            ? Encoding.ASCII.GetBytes(dto.Avatar)
+            : Array.Empty<byte>();
 
+        MakeSureOwnerIsValid(item);
         await _db.SaveChangesAsync();
 
-        return item;
+        var fresh = await _db.Teams.Query().FirstOrDefaultAsync(item.Id);
+        NotFoundException.ThrowIfNullOrEmpty(fresh);
+        return fresh;
+    }
+    
+    public TeamDto ToDto(Team item)
+    {
+        var dto = _mapper.Map<TeamDto>(item);
+        dto.Avatar = item.Avatar.Any()
+            ? Encoding.ASCII.GetString(item.Avatar)
+            : null;
+        
+        return dto;
+    }
+
+    public void MakeSureOwnerIsValid(Team item)
+    {
+        // make sure the team has a owner
+        if (item.UserInTeams.All(x => x.Role != TeamRole.Owner))
+        {
+            var newOwner = item.UserInTeams.MinBy(i => (int)i.Role);
+            if (newOwner != null)
+            {
+                newOwner.Role = TeamRole.Owner;
+            }
+        }
+        
+        // multiple owners are not allowed
+        if (item.UserInTeams.Count(x => x.Role == TeamRole.Owner) > 1)
+        {
+            throw new NotAllowedException($"There can only be one owner of a team. Please assign other roles such as {nameof(TeamRole.Editor)} or {nameof(TeamRole.Viewer)} to other users.");
+        }
+    }
+
+    public async Task<Team> ChangeStatus(UserInTeam userInTeam, UserInTeamStatus status)
+    {
+        var team = await _db.Teams.Query().FirstOrDefaultAsync(userInTeam.TeamId);
+        NotFoundException.ThrowIfNullOrEmpty(team);
+        
+        switch (status)
+        {
+            case UserInTeamStatus.Removed:
+                team.UserInTeams.Remove(userInTeam);
+                break;
+            case UserInTeamStatus.Unknown:
+            case UserInTeamStatus.Accepted:
+            case UserInTeamStatus.Declined:
+            case UserInTeamStatus.Pending:
+            case UserInTeamStatus.Requested:
+            default:
+                userInTeam.Status = status;
+                break;
+        }
+
+        MakeSureOwnerIsValid(team);
+        await _db.SaveChangesAsync();
+        return team;
+    }
+    
+    public async Task<bool> DeleteAsync(Team team)
+    {
+        _db.UserInTeams.RemoveRange(team.UserInTeams);
+        _db.Teams.Remove(team);
+        // TODO: soft delete?
+        
+        await _db.SaveChangesAsync();
+        return true;
     }
 }

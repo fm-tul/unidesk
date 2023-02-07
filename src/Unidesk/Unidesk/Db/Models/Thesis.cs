@@ -162,5 +162,5 @@ public class Thesis : TrackedEntity
     ///List of teams who are assigned to the thesis, after the thesis is accepted must contain at least one user (or one team)
     /// </summary>
     public List<Team> Teams { get; set; } = new();
-    // public List<Review> Reviews { get; set; }
+    public List<ThesisEvaluation> ThesisEvaluations { get; set; } = new();
 }

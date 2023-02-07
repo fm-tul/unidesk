@@ -24,7 +24,7 @@ public class AdminController : ControllerBase
         _mapper = mapper;
     }
 
-    [RequireGrant(UserGrants.User_Admin_Id)]
+    [RequireGrant(Grants.User_Admin)]
     [HttpPost, Route("action")]
     [SwaggerOperation(OperationId = nameof(Action))]
     public async Task<object> Action(AdminActions action, CancellationToken ct)
@@ -32,7 +32,7 @@ public class AdminController : ControllerBase
         return await _adminService.RunActionAsync(action, Request, Response, ct);
     }
     
-    [RequireGrant(UserGrants.User_SuperAdmin_Id)]
+    [RequireGrant(Grants.User_SuperAdmin)]
     [HttpGet, Route("switch-user")]
     [SwaggerOperation(OperationId = nameof(SwitchUser))]
     public async Task<object> SwitchUser(string username, CancellationToken ct)

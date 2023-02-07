@@ -15,6 +15,11 @@ public static class StringExtensions
     {
         return !string.IsNullOrWhiteSpace(value);
     }
+    
+    public static bool IsNullOrEmpty([NotNullWhen(false)] this string? value)
+    {
+        return string.IsNullOrWhiteSpace(value);
+    }
 
     public static string? ValidEmailOrDefault(this string? email)
     {

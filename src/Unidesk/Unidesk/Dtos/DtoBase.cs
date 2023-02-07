@@ -7,6 +7,7 @@ public class DtoBase
     #if DEBUG
     // return name of the class with namespace (classes inheriting from DtoBase will have a different name)
     public string? _DtoType => GetFullNameSecure(GetType());
+    #endif
 
     static string? GetFullNameSecure(Type t)
     {
@@ -37,5 +38,4 @@ public class DtoBase
 
         return sb.ToString();
     }
-    #endif
 }

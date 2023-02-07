@@ -24,7 +24,7 @@ public class HelloWorldController : ControllerBase
 
     [HttpGet]
     [Route("helloworld")]
-    [RequireGrant(UserGrants.User_SuperAdmin_Id)]
+    [RequireGrant(Grants.User_SuperAdmin)]
     public string HelloWorld()
     {
         return $"Hello {_userProvider.CurrentUser?.Email}";

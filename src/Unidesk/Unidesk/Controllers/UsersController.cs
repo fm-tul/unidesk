@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Configurations;
 using Unidesk.Db;
+using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.ReadOnly;
@@ -55,11 +56,14 @@ public partial class UsersController : ControllerBase
         }
 
         var dto = _mapper.Map<UserDto>(user);
-        if ((user.UserFunction & UserFunction.Supervisor) > 0)
-        {
-            (dto.SupervisionsRatio, dto.SupervisionsTotal) = await _userService.GetUserRatio(user);
-        }
-
+        var aliases = user.Aliases.Select(i => i.Id).Concat(new[] { user.Id }).ToList();
+        var aliasThesis = _db.ThesisUsers
+           .Include(i => i.Thesis)
+           .Where(i => aliases.Contains(i.UserId))
+           .ToList();
+        
+        dto.AllThesis = _mapper.Map<List<ThesisSimpleWithUserDto>>(aliasThesis);
+        
         return Ok(dto);
     }
     
@@ -72,33 +76,43 @@ public partial class UsersController : ControllerBase
             ?? throw new Exception("User not found");
 
         var canUpdate = _userProvider.CurrentUser.Id == user.Id
-                     || _userProvider.HasGrant(UserGrants.User_Admin);
+                     || _userProvider.HasSomeOfGrants(Grants.User_Admin, Grants.User_SuperAdmin);
 
         if (!canUpdate)
         {
             return Forbid();
         }
 
-        var userInTeams = userDto.Teams
-           .Select(i => new UserInTeam { TeamId = i.Team.Id, UserId = user.Id, Role = i.Role, Status = i.Status })
-           .ToList();
         
         user = _mapper.Map(userDto, user);
+        
+        var userInTeams = userDto.Teams
+           .Select(i => UserInTeam.Convert(user.Id, i.Team.Id, i.Status, i.Role))
+           .ToList();
+        
+        if (_userProvider.HasSomeOfGrants(Grants.User_Admin, Grants.User_SuperAdmin, Grants.Action_ManageRolesAndGrants))
+        {
+            var userRolesId = userDto.Roles.Select(i => i.Id).Distinct().ToList();
+            var userRoles = _db.UserRoles.Where(i => userRolesId.Contains(i.Id)).ToList();
+            user.Roles.SynchronizeCollection(userRoles);
+        }
+        
         user.UserInTeams.SynchronizeCollection(userInTeams, UserInTeam.Compare);
-        _db.Users.Update(user);
+        // _db.Users.Update(user);
 
         var userAliases = _mapper.Map<List<User>>(userDto.Aliases)
            .Where(i => i.Id != user.Id)
            .Select(i => i.Id);
         
-        var userAliasesFromDb = _db.Users.Where(i => userAliases.Contains(i.Id)).ToList();
-        user.Aliases.SynchronizeCollection(userAliasesFromDb, Unidesk.Db.Models.User.Compare);
+        var userAliasesFromDb = _db.Users.IgnoreQueryFilters().Where(i => userAliases.Contains(i.Id)).ToList();
+        var (_, addedAliases, removedAliases) = user.Aliases.SynchronizeCollection(userAliasesFromDb, Unidesk.Db.Models.User.Compare);
+        addedAliases.ForEach(i => i.State = StateEntity.Hidden);
+        removedAliases.Where(i => i.State == StateEntity.Hidden).ForEach(i => i.State = StateEntity.Active).ToList();
         
+        var props = _db.ModifiedPropertiesFor(user).ToList();
         await _db.SaveChangesAsync();
 
-        var dto = _mapper.Map<UserDto>(
-            await _userService.FindAsync(userDto.Id)
-        );
+        var dto = _mapper.Map<UserDto>((await _userService.FindAsync(userDto.Id))!);
         return Ok(dto);
     }
 
@@ -109,8 +123,7 @@ public partial class UsersController : ControllerBase
     {
         var response = await _userService
             .Where(query)
-            .Include(i => i.Theses)
-            .OrderByDescending(i => i.Theses.Count)
+            .ApplyOrderBy(query?.Filter)
             .ToListWithPagingAsync<User, UserLookupDto>(query?.Filter, _mapper);
     
         return Ok(response);
@@ -139,6 +152,27 @@ public partial class UsersController : ControllerBase
             .OrderByDescending(i => i.Ratio)
             .ToList();
         
+        return Ok();
+    }
+    
+    [HttpDelete, Route("delete/{id:guid}")]
+    [SwaggerOperation(OperationId = nameof(DeleteOne))]
+    public async Task<IActionResult> DeleteOne(Guid id)
+    {
+        var user = await _userService.FindAsync(id);
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        if (!_userProvider.HasSomeOfGrants(Grants.User_Admin, Grants.User_SuperAdmin))
+        {
+            return Forbid();
+        }
+
+        _db.Users.Remove(user);
+        await _db.SaveChangesAsync();
+
         return Ok();
     }
 }

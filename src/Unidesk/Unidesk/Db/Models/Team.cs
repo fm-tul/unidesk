@@ -9,17 +9,18 @@ namespace Unidesk.Db.Models;
 
 public class Team : TrackedEntity
 {
-
     [NotMapped]
     public List<TeamUserLookupDto> Users { get; set; } = new();
-    
+
     [IgnoreMapping]
     public List<UserInTeam> UserInTeams { get; set; } = new();
-    
+
 
     public string Name { get; set; }
     public string Description { get; set; }
-    public string? Avatar { get; set; }
+
+    public string? Email { get; set; }
+    public byte[] Avatar { get; set; } = Array.Empty<byte>();
     public TeamType Type { get; set; }
 }
 
@@ -32,4 +33,3 @@ public enum TeamType
     Team,
     Organization,
 }
-

@@ -12,11 +12,11 @@ public class ThesisDtoValidator : AbstractValidator<ThesisDto>
     {
         RuleFor(x => x.NameCze).NotEmpty();
         RuleFor(x => x.NameEng).NotEmpty();
-        RuleFor(x => x.AbstractCze).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-cze");
-        RuleFor(x => x.AbstractEng).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-eng");
-
-        RuleFor(x => x.Keywords).NotEmpty();
-        RuleFor(x => x.Authors).NotEmpty();
+        // RuleFor(x => x.AbstractCze).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-cze");
+        // RuleFor(x => x.AbstractEng).NotEmpty().WithSeverity(Severity.Warning).WithMessage("missing-abstract-eng");
+        //
+        // RuleFor(x => x.Keywords).NotEmpty();
+        // RuleFor(x => x.Authors).NotEmpty();
         RuleFor(x => x.ThesisTypeCandidateIds)
            .Must((x, y) =>
             {
@@ -32,7 +32,10 @@ public class ThesisDtoValidator : AbstractValidator<ThesisDto>
                     case ThesisStatus.Finished:
                     case ThesisStatus.Assigned:
                         return y.Count == 0 && x.ThesisTypeId.HasValue;
-                    
+
+                    case ThesisStatus.Reserved:
+                    case ThesisStatus.Abandoned:
+                    case ThesisStatus.Unknown:
                     default:
                         return true;
                 }

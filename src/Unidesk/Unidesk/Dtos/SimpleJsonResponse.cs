@@ -2,7 +2,7 @@
 
 namespace Unidesk.Dtos;
 
-public class SimpleJsonResponse
+public class SimpleJsonResponse : DtoBase
 {
     public bool Success { get; set; } = true;
     public string Message { get; set; }

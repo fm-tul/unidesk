@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Controllers;
 
@@ -18,7 +20,7 @@ public partial class UsersController
         }
 
         var httpContext = _httpContextAccessor.HttpContext
-                          ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
+                       ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
 
         var dbUser = _userService.FromLoginRequest(request);
         await _userService.SignInAsync(httpContext, dbUser);
@@ -39,31 +41,37 @@ public partial class UsersController
     {
         var plainText = _cryptography.DecryptText(path);
         var httpContext = _httpContextAccessor.HttpContext
-                          ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
+                       ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
 
         var shibboRequest = JsonSerializer.Deserialize<LoginShibboRequest>(plainText)
-                            ?? throw new ArgumentNullException(nameof(plainText));
+                         ?? throw new ArgumentNullException(nameof(plainText));
 
         if (string.IsNullOrEmpty(shibboRequest.Eppn))
         {
             return BadRequest();
         }
 
-        var dbUser = await _userService.FindAsync(shibboRequest);
-        if (dbUser is null)
+        var candidates = await _userService.FindAsync(shibboRequest);
+        User? dbUser = null;
+        await candidates.HandleCountAsync(
+            singleItem => Task.FromResult(dbUser = singleItem),
+            _ => throw new ArgumentException("Multiple users found with the same email! Email: {Email}", shibboRequest.Eppn),
+            async () =>
+            {
+                if (_appOptions.AllowRegistrations)
+                {
+                    dbUser = await _userService.CreateFromShibboRequestAsync(shibboRequest);
+                }
+                else if (_appOptions.AllowLocalAccounts)
+                {
+                    dbUser = _userService.FromLoginRequest(shibboRequest);
+                }
+            }
+        );
+
+        if (dbUser == null)
         {
-            if (_appOptions.AllowRegistrations)
-            {
-                dbUser = await _userService.CreateFromShibboRequestAsync(shibboRequest);
-            }
-            else if (_appOptions.AllowLocalAccounts)
-            {
-                dbUser = _userService.FromLoginRequest(shibboRequest);
-            }
-            else
-            {
-                return Forbid();
-            }
+            return Forbid();
         }
 
         await _userService.SignInAsync(httpContext, dbUser);
@@ -85,7 +93,7 @@ public partial class UsersController
         var user = _userProvider.CurrentUser ?? throw new ArgumentNullException(nameof(_userProvider.CurrentUser));
 
         var httpContext = _httpContextAccessor.HttpContext
-                          ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
+                       ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
         await _userService.SignOutAsync(httpContext);
         _logger.LogInformation("User {Email} logged out at {Time}", user.Email, DateTime.UtcNow);
 

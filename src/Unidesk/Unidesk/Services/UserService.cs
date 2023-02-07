@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Controllers;
 using Unidesk.Db;
+using Unidesk.Db.Core;
 using Unidesk.Db.Functions;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
@@ -24,28 +25,28 @@ public class UserService
         _db = db;
     }
 
-    public Task<User?> FindAsync(ILoginRequest request)
+    public Task<List<User>> FindAsync(ILoginRequest request)
     {
-        return _db.Users.FirstOrDefaultAsync(x => x.Username == request.Eppn);
+        return  _db.Users
+           .Query()
+           .Where(u => u.Email == request.Eppn).ToListAsync();
     }
 
     public Task<User?> FindAsync(Guid id)
     {
         return _db.Users
            .Query()
+           .IgnoreQueryFilters()
            .FirstOrDefaultAsync(x => x.Id == id);
-    }
-
-    public Task<List<User>> FindAllAsync(UserFilter keyword)
-    {
-        return this
-           .Where(keyword)
-           .ToListAsync();
     }
 
     public IQueryable<User> Where(UserFilter? filter)
     {
-        var query = _db.Users.AsQueryable();
+        var query =
+            filter?.IncludeHidden == true
+                ? _db.Users.IgnoreQueryFilters().Where(i => States.ActiveOrHidden.Contains(i.State))
+                : _db.Users.AsQueryable();
+            
         if (filter == null)
         {
             return query;
@@ -55,6 +56,13 @@ public class UserService
         {
             var combinedFunctions = filter.UserFunctions.Combine();
             query = query.Where(x => (x.UserFunction & combinedFunctions) != 0);
+        }
+
+        if (filter.LinkedWithStag.HasValue)
+        {
+            query = filter.LinkedWithStag == true 
+                ? query.Where(x => x.StagId != null) 
+                : query.Where(x => x.StagId == null);
         }
 
         if (filter.Keyword.IsNotNullOrEmpty())
@@ -83,8 +91,8 @@ public class UserService
                     query = query.Where(x =>
                         (x.Username != null && x.Username.Contains(keyword)) ||
                         (x.Email != null && x.Email.Contains(keyword)) ||
-                        (x.LastName != null && x.LastName.Contains(keyword) || SQL.Levenshtein(x.LastName, keyword, 1) <= 1) ||
-                        (x.FirstName != null && x.FirstName.Contains(keyword) || SQL.Levenshtein(x.FirstName, keyword, 1) <= 1) ||
+                        (x.LastName != null && (x.LastName.Contains(keyword) || SQL.Levenshtein(x.LastName, keyword, 1) <= 1)) ||
+                        (x.FirstName != null && (x.FirstName.Contains(keyword) || SQL.Levenshtein(x.FirstName, keyword, 1) <= 1)) ||
                         (x.MiddleName != null && x.MiddleName.Contains(keyword))
                     );
                 }

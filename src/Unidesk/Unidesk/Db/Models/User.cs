@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Unidesk.Db.Core;
+using Unidesk.Security;
 using Unidesk.Server;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Db.Models;
 
-public class User : TrackedEntity, ISimpleUser
+public class User : TrackedEntity, ISimpleUser, IStateEntity
 {
     public string? Username { get; set; }
     public string? StagId { get; set; }
@@ -41,9 +42,9 @@ public class User : TrackedEntity, ISimpleUser
     
     public List<ThesisUser> Theses { get; set; } = new();
 
-    public bool HasGrant(string grantName)
+    public bool HasGrant(Grants grant)
     {
-        return Roles.Any(r => r.Grants.Any(g => g.Name == grantName)); 
+        return Roles.Any(r => r.Grants.Any(g => g.Id == grant.GrantId())); 
     }
     
     public List<User> Aliases { get; set; } = new();
@@ -52,4 +53,6 @@ public class User : TrackedEntity, ISimpleUser
     {
         return user1?.Id == user2?.Id;
     }
+
+    public StateEntity State { get; set; }
 }

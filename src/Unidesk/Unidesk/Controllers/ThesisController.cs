@@ -149,7 +149,7 @@ public class ThesisController : Controller
     [SwaggerOperation(OperationId = nameof(Upsert))]
     [ProducesResponseType(typeof(ThesisDto), 200)]
     [ProducesResponseType(typeof(SimpleJsonResponse), 500)]
-    [RequireGrant(UserGrants.Entity_Thesis_Edit_Id)]
+    [RequireGrant(Grants.Entity_Thesis_Edit)]
     public async Task<IActionResult> Upsert([FromBody] ThesisDto dto)
     {
         ThesisDtoValidator.ValidateAndThrow(dto);

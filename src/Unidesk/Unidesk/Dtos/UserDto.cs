@@ -21,10 +21,9 @@ public class UserDto : UserSimpleDto
     [Required]
     public UserFunction UserFunction { get; set; }
     
-    public double? SupervisionsRatio { get; set; }
-    
-    public int? SupervisionsTotal { get; set; }
-
     [Required]
     public List<UserTeamLookupDto> Teams { get; set; } = new();
+
+    [Required]
+    public List<ThesisSimpleWithUserDto> AllThesis { get; set; } = new();
 }

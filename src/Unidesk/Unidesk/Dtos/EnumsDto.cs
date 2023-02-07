@@ -21,4 +21,7 @@ public class EnumsDto : DtoBase
 
     [Required]
     public List<StudyProgrammeDto> StudyProgrammes { get; set; } = new();
+
+    [Required]
+    public List<UserRoleDto> Roles { get; set; } = new();
 }

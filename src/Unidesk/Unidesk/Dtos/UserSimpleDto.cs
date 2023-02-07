@@ -20,6 +20,5 @@ public class UserSimpleDto : TrackedEntityDto, ISimpleUser
     public string? TitleAfter { get; set; }
     
     [Required]
-    
     public List<UserLookupDto> Aliases { get; set; } = new();
 }

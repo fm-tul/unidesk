@@ -2,6 +2,8 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Unidesk.Security;
+using Unidesk.Services;
 
 namespace Unidesk.Client;
 
@@ -18,11 +20,6 @@ public static class ModelGenerator
             .GetTypes()
             .Where(t => t.GetCustomAttributes(typeof(GenerateModelAttribute), false).Length > 0)
             .ToList();
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
 
         foreach (var cls in classes)
         {
@@ -52,17 +49,26 @@ public static class ModelGenerator
                     var multiLangAttributes = field
                         .GetCustomAttributes<MultiLangAttribute>()
                         .ToList();
+
+                    var grantInfoAttribute = field
+                       .GetCustomAttributes<GrantInfoAttribute>()
+                       .FirstOrDefault();
                     
                     if (multiLangAttributes.Any())
                     {
                         var multiLangDict = multiLangAttributes.Combine();
                         multiLangDict["value"] = value!;
-                        var str = JsonSerializer.Serialize(multiLangDict, options);
+                        var str = WebJsonSerializer.Serialize(multiLangDict);
+                        output.AppendLine($"export const {field.Name} = {str};");
+                    }
+                    else if (grantInfoAttribute is not null)
+                    {
+                        var str = WebJsonSerializer.Serialize(grantInfoAttribute.AsGrant());
                         output.AppendLine($"export const {field.Name} = {str};");
                     }
                     else
                     {
-                        var str = JsonSerializer.Serialize(value, options);
+                        var str = WebJsonSerializer.Serialize(value);
                         output.AppendLine($"export const {field.Name} = {str};");
                     }
                 }
@@ -70,13 +76,14 @@ public static class ModelGenerator
                 if (attr.GenerateAggregation)
                 {
                     output.AppendLine();
-                    output.AppendLine("export const All = [");
+                    var fieldsStr = new StringBuilder();
                     foreach (var field in fields)
                     {
-                        output.AppendLine($"    {field.Name},");
+                        fieldsStr.AppendLine($"    {field.Name},");
                     }
 
-                    output.AppendLine("];");
+                    output.AppendLine($"export const All = [\n{fieldsStr}\n]");
+                    output.AppendLine($"export const {name}All = All;");
                 }
 
                 if (attr.GenerateMap)

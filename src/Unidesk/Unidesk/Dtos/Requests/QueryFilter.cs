@@ -65,4 +65,16 @@ public static class IQueryableExtensions
 
         return response;
     }
+    
+    public static IQueryable<T> ApplyOrderBy<T>(this IQueryable<T> query, QueryFilter? queryFilter)
+    {
+        if (queryFilter is null || string.IsNullOrWhiteSpace(queryFilter.OrderBy))
+        {
+            return query;
+        }
+        
+        return queryFilter.OrderAscending
+            ? query.OrderBy(x => EF.Property<T>(x!, queryFilter.OrderBy))
+            : query.OrderByDescending(x => EF.Property<T>(x!, queryFilter.OrderBy));
+    }
 }

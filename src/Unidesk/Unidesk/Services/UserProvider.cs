@@ -10,8 +10,7 @@ public class UserProvider : IUserProvider
     public User CurrentUser { get; set; } = null!;
     public Guid CurrentUserId => CurrentUser.Id;
 
-    public bool HasGrant(Grant grantId) => CurrentUser.HasGrant(grantId.Name);
-    public bool HasGrant(string grantName) => CurrentUser.HasGrant(grantName);
+    public bool HasGrant(Grants grant) => CurrentUser.HasGrant(grant);
     public void ValidateAndThrow(Action<UserRoleDto> validateAndThrow, UserRoleDto dto)
     {
         try
@@ -21,7 +20,7 @@ public class UserProvider : IUserProvider
         catch (ValidationException e)
         {
             var allIsWarning = e.Errors.All(x => x.Severity == Severity.Warning);
-            var userHasGrant = HasGrant(UserGrants.Validation_Ignore_Warnings);
+            var userHasGrant = HasGrant(Grants.Validation_Ignore_Warnings);
             if (allIsWarning && userHasGrant)
             {
                 return;
@@ -30,4 +29,6 @@ public class UserProvider : IUserProvider
             throw;
         }
     }
+    
+    
 }

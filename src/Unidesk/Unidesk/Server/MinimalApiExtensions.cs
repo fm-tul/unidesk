@@ -17,44 +17,47 @@ public static class ApiConfig
 
 public static class MinimalApiExtensions
 {
-    public static RouteGroupBuilder AddMinimalApiGetters(this RouteGroupBuilder app)
+    public static RouteGroupBuilder AddMinimalApiGetters(this RouteGroupBuilder route)
     {
+        var getRoute = route.MapGroup("")
+           .AllowAnonymous();
+        
         // Faculty
-        app.MapGet("FacultyGetAll",
+        getRoute.MapGet("FacultyGetAll",
                 ([FromServices] SimpleEnumService s) => s.GetAll<Faculty, FacultyDto>())
             .UseEnumsCachedEndpoint<List<FacultyDto>>($"{nameof(Faculty)}{ApiConfig.GET_ALL}");
 
         // Department
-        app.MapGet("DepartmentGetAll",
+        getRoute.MapGet("DepartmentGetAll",
                 ([FromServices] SimpleEnumService s) => s.GetAll<Department, DepartmentDto>())
             .UseEnumsCachedEndpoint<List<DepartmentDto>>($"{nameof(Department)}{ApiConfig.GET_ALL}");
 
         // SchoolYear
-        app.MapGet("SchoolYearGetAll",
+        getRoute.MapGet("SchoolYearGetAll",
                 ([FromServices] SimpleEnumService s) => s.GetAll<SchoolYear, SchoolYearDto>().OrderBy(i => i.Start))
             .UseEnumsCachedEndpoint<List<SchoolYearDto>>($"{nameof(SchoolYear)}{ApiConfig.GET_ALL}");
 
         // ThesisOutcome
-        app.MapGet("ThesisOutcomeGetAll",
+        getRoute.MapGet("ThesisOutcomeGetAll",
                 ([FromServices] SimpleEnumService s) => s.GetAll<ThesisOutcome, ThesisOutcomeDto>())
             .UseEnumsCachedEndpoint<List<ThesisOutcomeDto>>($"{nameof(ThesisOutcome)}{ApiConfig.GET_ALL}");
 
         // ThesisType
-        app.MapGet("ThesisTypeGetAll",
+        getRoute.MapGet("ThesisTypeGetAll",
                 ([FromServices] SimpleEnumService s) => s.GetAll<ThesisType, ThesisTypeDto>())
             .UseEnumsCachedEndpoint<List<ThesisTypeDto>>($"{nameof(ThesisType)}{ApiConfig.GET_ALL}");
 
         // StudyProgramme
-        app.MapGet("StudyProgrammeGetAll",
+        getRoute.MapGet("StudyProgrammeGetAll",
                 ([FromServices] SimpleEnumService s) => s.GetAll<StudyProgramme, StudyProgrammeDto>())
             .UseEnumsCachedEndpoint<List<StudyProgrammeDto>>($"{nameof(StudyProgramme)}{ApiConfig.GET_ALL}");
         
         // UserRole
-        app.MapGet("UserRoleGetAll",
+        getRoute.MapGet("UserRoleGetAll",
                 ([FromServices] SimpleEnumService s) => s.GetAll<UserRole, UserRoleDto>())
             .UseEnumsCachedEndpoint<List<UserRoleDto>>($"{nameof(UserRole)}{ApiConfig.GET_ALL}");
 
-        return app;
+        return getRoute;
     }
 
     public static RouteGroupBuilder AddMinimalApiSetters(this RouteGroupBuilder app)

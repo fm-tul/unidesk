@@ -12,9 +12,10 @@ public class TeamDto : TrackedEntityDto
     [Required]
     public List<TeamUserLookupDto> Users { get; set; } = new();
 
+    [Required]
     public string Name { get; set; }
     public string Description { get; set; }
-
+    public string? Email { get; set; }
     public string? Avatar { get; set; }
     public TeamType Type { get; set; }
 

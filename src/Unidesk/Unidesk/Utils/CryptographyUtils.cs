@@ -7,7 +7,7 @@ namespace Unidesk.Utils;
 
 public class CryptographyUtils
 {
-    private static char[] paddingCharacters = Enumerable.Range(0, 16).Select(i => (char) i).ToArray();
+    private static readonly char[] PaddingCharacters = Enumerable.Range(0, 16).Select(i => (char) i).ToArray();
     private readonly AppOptions _appOptions;
     
     public CryptographyUtils(AppOptions appOptions)
@@ -44,7 +44,7 @@ public class CryptographyUtils
         var bytes = decryptor.TransformFinalBlock(cipherText, 0, cipherText.Length);
         
         var plainText = Encoding.UTF8.GetString(bytes)
-            .TrimEnd(paddingCharacters)
+            .TrimEnd(PaddingCharacters)
             .Trim();
         
         return plainText;

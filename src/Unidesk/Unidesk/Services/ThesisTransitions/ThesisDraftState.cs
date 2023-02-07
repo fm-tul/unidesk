@@ -21,7 +21,7 @@ public class ThesisDraftState : IThesisStateTransitionService
     public async Task<OneOf<ThesisStatus, TransitionError>> ChangeStateAsync(TransitionContext context)
     {
         // super user can change state to any state
-        if (context.CurrentUser.HasGrant(UserGrants.User_SuperAdmin_Id))
+        if (context.CurrentUser.HasGrant(Grants.User_SuperAdmin))
         {
             return context.TargetStatus;
         }
@@ -44,7 +44,7 @@ public class ThesisDraftState : IThesisStateTransitionService
             return ThesisStatus.New;
         }
 
-        if (_userProvider.HasGrant(UserGrants.User_Admin))
+        if (_userProvider.HasGrant(Grants.User_Admin))
         {
             return ThesisStatus.New;
         }

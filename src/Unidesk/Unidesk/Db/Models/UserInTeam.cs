@@ -19,6 +19,17 @@ public class UserInTeam
     {
         return a.UserId == b.UserId && a.TeamId == b.TeamId;
     }
+
+    public static UserInTeam Convert(Guid userId, Guid teamId, UserInTeamStatus status, TeamRole role)
+    {
+        return new UserInTeam
+        {
+            UserId = userId,
+            TeamId = teamId,
+            Status = status,
+            Role = role,
+        };
+    }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]

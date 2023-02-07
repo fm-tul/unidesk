@@ -7,8 +7,8 @@ public class RequireGrantAttribute : Attribute
 {
     public Grant Grant { get; }
 
-    public RequireGrantAttribute(string grant)
+    public RequireGrantAttribute(Grants grant)
     {
-        Grant = UserGrants.GetGrant(grant);
+        Grant = grant.AsGrant();
     }
 }

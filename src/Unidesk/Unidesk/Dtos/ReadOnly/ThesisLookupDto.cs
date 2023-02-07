@@ -26,6 +26,9 @@ public class ThesisLookupDto : TrackedEntityDto
     public ThesisStatus Status { get; set; }
     
     [Required]
+    public Guid SchoolYearId { get; set; }
+    
+    [Required]
     public List<Guid> ThesisTypeCandidateIds { get; set; } = new();
     public Guid? ThesisTypeId { get; set; }
     

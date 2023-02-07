@@ -68,7 +68,7 @@ public class TeamController : ControllerBase
             return NotFound();
         }
 
-        var dto = _mapper.Map<TeamDto>(team);
+        var dto = _teamService.ToDto(team);
         return Ok(dto);
     }
 
@@ -76,13 +76,13 @@ public class TeamController : ControllerBase
     [SwaggerOperation(OperationId = nameof(Upsert))]
     [ProducesResponseType(typeof(TeamDto), 200)]
     [ProducesResponseType(typeof(SimpleJsonResponse), 500)]
-    [RequireGrant(UserGrants.Entity_Team_Edit_Id)]
+    [RequireGrant(Grants.Entity_Team_Edit)]
     public async Task<IActionResult> Upsert([FromBody] TeamDto dto)
     {
         TeamDto.ValidateAndThrow(dto);
         
-        var result = await _teamService.UpsertAsync(dto);
-        var newDto = _mapper.Map<TeamDto>(result);
+        var team = await _teamService.UpsertAsync(dto);
+        var newDto = _teamService.ToDto(team);
         return Ok(newDto);
     }
     
@@ -96,14 +96,37 @@ public class TeamController : ControllerBase
             ?? throw new Exception("User not found in team");
         
         // check access
-        if (!_userProvider.CurrentUser.HasGrant(UserGrants.Entity_Team_Edit_Id) && userInTeam.UserId != _userProvider.CurrentUser.Id)
+        if (!_userProvider.CurrentUser.HasGrant(Grants.Entity_Team_Edit) && userInTeam.UserId != _userProvider.CurrentUser.Id)
         {
             return Forbid();
-        } 
+        }
 
-        userInTeam.Status = status;
-        await _db.SaveChangesAsync();
+        await _teamService.ChangeStatus(userInTeam, status);
         return Ok(new SimpleJsonResponse());
     }
     
+    [HttpDelete, Route("delete")]
+    [SwaggerOperation(OperationId = nameof(DeleteOne))]
+    [ProducesResponseType(typeof(SimpleJsonResponse), 200)]
+    [ProducesResponseType(typeof(SimpleJsonResponse), 500)]
+    public async Task<IActionResult> DeleteOne(Guid id)
+    {
+        var team = await _teamService.GetOneAsync(id);
+        if (team == null)
+        {
+            return NotFound();
+        }
+        
+        // check access
+        var owner = team.UserInTeams.FirstOrDefault(i => i.Role == TeamRole.Owner);
+        var hasAccess = _userProvider.HasSomeOfGrants(Grants.User_Admin, Grants.User_SuperAdmin);
+        hasAccess |= _userProvider.HasGrant(Grants.Entity_Team_Edit) && owner?.UserId == _userProvider.CurrentUser.Id;
+        if (!hasAccess)
+        {
+            return Forbid();
+        }
+
+        await _teamService.DeleteAsync(team);
+        return Ok(new SimpleJsonResponse());
+    }
 }

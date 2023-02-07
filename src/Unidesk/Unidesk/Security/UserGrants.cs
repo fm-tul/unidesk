@@ -1,50 +1,63 @@
-﻿using System.Reflection;
+﻿using System.Text.Json.Serialization;
 using Unidesk.Client;
 using Unidesk.Db.Models;
 
 namespace Unidesk.Security;
 
-[GenerateModel(Name = nameof(UserGrants), ForType = typeof(Grant), GenerateAggregation = true, GenerateMap = true)]
 public static class UserGrants
 {
-    public const string User_SuperAdmin_Id = "User_SuperAdmin";
-    public static readonly Grant User_SuperAdmin = new() { Name = User_SuperAdmin_Id, Description = "Super Admin", Id =  new Guid("4BFFEF59-A0F2-428D-921A-A4E55CEF7CA0")};
+    public static readonly List<Grant> All = Enum.GetValues<Grants>()
+       .Select(i => new Grant
+        {
+            Name = i.GrantName(),
+            Description = i.GrantDescription(),
+            Id = i.GrantId(),
+        })
+       .ToList();
 
-    public const string User_Admin_Id = "User_Admin";
-    public static readonly Grant User_Admin = new() { Name = User_Admin_Id, Description = "Admin", Id = new Guid("6D38D901-B11E-47F3-BC7E-B6D0F57D776D")};
+    public static Grant GetGrant(Guid id) => All.First(i => i.Id == id);
+}
 
-    public const string User_Teacher_Id = "User_Teacher";
-    public static readonly Grant User_Teacher = new() { Name = User_Teacher_Id, Description = "Teacher", Id = new Guid("908F82E0-F5B2-41AC-9C62-60D25B49C99B")};
+[JsonConverter(typeof(JsonStringEnumConverter))]
+[GenerateModel(ForType = typeof(Grants), Name = nameof(Grants), GenerateAggregation = true, GenerateMap = true)]
+public enum Grants
+{
+    [GrantInfo("4BFFEF59-A0F2-428D-921A-A4E55CEF7CA0", nameof(User_SuperAdmin), "Super Admin")]
+    User_SuperAdmin = 1,
 
-    public const string User_Student_Id = "User_Student";
-    public static readonly Grant User_Student = new() { Name = User_Student_Id, Description = "Student", Id = new Guid("2870ECA9-EE10-4406-A3A0-AD23F8A03185")};
+    [GrantInfo("6D38D901-B11E-47F3-BC7E-B6D0F57D776D", nameof(User_Admin), "Admin")]
+    User_Admin = 2,
 
-    public const string User_Guest_Id = "User_Guest";
-    public static readonly Grant User_Guest = new() { Name = User_Guest_Id, Description = "Guest", Id = new Guid("07E6E5B4-8E31-411A-9ED9-26EC462984CC")};
-    
-    public const string Action_Merge_Keywords_Id = "Action_Merge_Keywords";
-    public static readonly Grant Action_Merge_Keywords = new() { Name = Action_Merge_Keywords_Id, Description = "Merge Keywords", Id = new Guid("10018290-58EF-4BC9-B5B8-3D93DCB07805")};
-    
-    public const string Action_Import_From_Stag_Id = "Action_Import_From_Stag";
-    public static readonly Grant Action_Import_From_Stag = new() { Name = Action_Import_From_Stag_Id, Description = "Import From Stag", Id = new Guid("2E4C247E-1F1D-4B3B-8960-222894F65C9D")};
-    
-    
-    public const string Entity_Thesis_Edit_Id = "Entity_Thesis_Edit";
-    public static readonly Grant Entity_Thesis_Edit = new() { Name = Entity_Thesis_Edit_Id, Description = "Edit Thesis", Id = new Guid("4C7B8395-9EE2-4E96-9C95-6120FFCB0092")};
-    
-    public const string Entity_Team_Edit_Id = "Entity_Team_Edit";
-    public static readonly Grant Entity_Team_Edit = new() { Name = Entity_Team_Edit_Id, Description = "Edit Team", Id = new Guid("9950097C-8FC5-4414-9B99-8F26A6C4F29F")};
-    
-    public const string Validation_Ignore_Warnings_Id = "Action_Ignore_Warnings";
-    public static readonly Grant Validation_Ignore_Warnings = new() { Name = Validation_Ignore_Warnings_Id, Description = "Ignore Warnings", Id = new Guid("5472C129-8FDA-49CB-81B6-1C68243640DD")};
+    [GrantInfo("908F82E0-F5B2-41AC-9C62-60D25B49C99B", nameof(User_Teacher), "Teacher")]
+    User_Teacher = 3,
 
-    // get all grants via reflection
-    public static IEnumerable<Grant> All =>
-        typeof(UserGrants).GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(i => i.FieldType == typeof(Grant))
-            .Select(i => i.GetValue(null))
-            .Cast<Grant>()
-            .ToList();
+    [GrantInfo("2870ECA9-EE10-4406-A3A0-AD23F8A03185", nameof(User_Student), "Student")]
+    User_Student = 4,
 
-    public static Grant GetGrant(string id) => All.First(i => i.Name == id);
+    [GrantInfo("07E6E5B4-8E31-411A-9ED9-26EC462984CC", nameof(User_Guest), "Guest")]
+    User_Guest = 5,
+
+    [GrantInfo("10018290-58EF-4BC9-B5B8-3D93DCB07805", nameof(Action_Merge_Keywords), "Merge Keywords")]
+    Action_Merge_Keywords = 6,
+
+    [GrantInfo("2E4C247E-1F1D-4B3B-8960-222894F65C9D", nameof(Action_Import_From_Stag), "Import From Stag")]
+    Action_Import_From_Stag = 7,
+
+    [GrantInfo("4C7B8395-9EE2-4E96-9C95-6120FFCB0092", nameof(Entity_Thesis_Edit), "Edit Thesis")]
+    Entity_Thesis_Edit = 8,
+
+    [GrantInfo("9950097C-8FC5-4414-9B99-8F26A6C4F29F", nameof(Entity_Team_Edit), "Edit Team")]
+    Entity_Team_Edit = 9,
+
+    [GrantInfo("5472C129-8FDA-49CB-81B6-1C68243640DD", nameof(Validation_Ignore_Warnings), "Ignore Warnings")]
+    Validation_Ignore_Warnings = 10,
+
+    [GrantInfo("93D3E148-F14E-478B-9AE6-A2139532DFE3", nameof(Action_ThesisEvaluation_Manage), "Manage Thesis Evaluation")]
+    Action_ThesisEvaluation_Manage = 11,
+
+    [GrantInfo("FE04208C-F591-41BC-BC07-1DD161CC0754", nameof(Action_ManageRolesAndGrants), "Manage Roles And Grants")]
+    Action_ManageRolesAndGrants = 12,
+    
+    [GrantInfo("98449DF2-4DF6-4B38-A751-A08DB3BB8300", nameof(Action_Create_Team), "Create Team")]
+    Action_Create_Team = 13,
 }

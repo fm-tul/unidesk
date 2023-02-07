@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Internal;
 using Unidesk.Db.Core;
 using Unidesk.Db.Functions;
 using Unidesk.Db.Models;
@@ -30,36 +31,61 @@ public class UnideskDbContext : DbContext
     public DbSet<Department> Departments { get; set; }
     public DbSet<StudyProgramme> StudyProgrammes { get; set; }
 
-    public DbSet<Document> Documents { get; set; }
-    public DbSet<DocumentContent> DocumentContents { get; set; }
+    public  DbSet<Document> Documents { get; set; }
+    public  DbSet<DocumentContent> DocumentContents { get; set; }
 
-    public DbSet<Thesis> Theses { get; set; }
-    public DbSet<ThesisOutcome> ThesisOutcomes { get; set; }
-    public DbSet<ThesisReport> ThesisReports { get; set; }
-    public DbSet<ThesisType> ThesisTypes { get; set; }
-    public DbSet<Keyword> Keywords { get; set; }
-    public DbSet<KeywordThesis> KeywordThesis { get; set; }
-    public DbSet<ThesisUser> ThesisUsers { get; set; }
+    public  DbSet<Thesis> Theses { get; set; }
+    public  DbSet<ThesisOutcome> ThesisOutcomes { get; set; }
+    public  DbSet<ThesisReport> ThesisReports { get; set; }
+    public  DbSet<ThesisType> ThesisTypes { get; set; }
+    public  DbSet<Keyword> Keywords { get; set; }
+    public  DbSet<KeywordThesis> KeywordThesis { get; set; }
+    public  DbSet<ThesisUser> ThesisUsers { get; set; }
 
-    public DbSet<User> Users { get; set; }
-    public DbSet<UserRole> UserRoles { get; set; }
-    public DbSet<ReportUser> ReportUsers { get; set; }
+    public  DbSet<User> Users { get; set; }
+    public  DbSet<UserRole> UserRoles { get; set; }
+    public  DbSet<ReportUser> ReportUsers { get; set; }
 
-    public DbSet<Team> Teams { get; set; }
-    public DbSet<UserInTeam> UserInTeams { get; set; }
+    public  DbSet<Team> Teams { get; set; }
+    public  DbSet<UserInTeam> UserInTeams { get; set; }
+    
+    public DbSet<ThesisEvaluation> ThesisEvaluations { get; set; }
 
 
-    public DbSet<ChangeLog> ChangeLogs { get; set; }
+    public  DbSet<ChangeLog> ChangeLogs { get; set; }
 
-    private bool _iterceptorsEnabled = true;
+    private bool _interceptorsEnabled = true;
+
+    public IEnumerable<string> ModifiedPropertiesFor<TEntity>(TEntity entity) where TEntity: IdEntity
+    {
+        var changesToEntity = ChangeTracker.Entries<TEntity>()
+           .FirstOrDefault(e => e.State == EntityState.Modified && e.Entity.Id == entity.Id);
+
+        if (changesToEntity == null)
+        {
+            return Array.Empty<string>();
+        }
+        
+        var changedProperties = changesToEntity.Properties
+            .Where(p => p.IsModified)
+            .Select(p => p.Metadata.Name)
+            .ToList();
+        
+        return changedProperties;
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.UseCollation("SQL_Latin1_General_CP1_CI_AI");
+        foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        {
+            relationship.DeleteBehavior = DeleteBehavior.Restrict;
+        }
+        
         /*
          ALTER DATABASE Unidesk_dev
             COLLATE SQL_Latin1_General_CP1_CI_AI
          */
+        modelBuilder.UseCollation("SQL_Latin1_General_CP1_CI_AI");
         base.OnModelCreating(modelBuilder);
 
         // register functions
@@ -67,6 +93,9 @@ public class UnideskDbContext : DbContext
            .HasDbFunction(SQL.LevenshteinMethodInfo())
            .HasName(nameof(SQL.Levenshtein));
 
+        modelBuilder.Entity<User>()
+           .HasQueryFilter(i => i.State == StateEntity.Active);
+        
         // backing fields
         modelBuilder.Entity<SchoolYear>().Property(e => e._start);
         modelBuilder.Entity<SchoolYear>().Property(e => e._end);
@@ -87,7 +116,6 @@ public class UnideskDbContext : DbContext
 
     public async Task<OperationInfo> SeedDbAsync(bool firstTime)
     {
-        _userProvider.CurrentUser = _userProvider.CurrentUser ?? StaticUsers.InitialSeedUser;
         var info = InitialSeed.Seed(this, firstTime);
 
         if (info.TotalRows > 0)
@@ -106,7 +134,7 @@ public class UnideskDbContext : DbContext
 
     public OperationInfo HandleInterceptors()
     {
-        if (!_iterceptorsEnabled)
+        if (!_interceptorsEnabled)
         {
             return new OperationInfo("Interceptors: disabled");
         }
@@ -154,13 +182,13 @@ public class UnideskDbContext : DbContext
 
     public UnideskDbContext DisableInterceptors()
     {
-        _iterceptorsEnabled = false;
+        _interceptorsEnabled = false;
         return this;
     }
 
     public UnideskDbContext EnableInterceptors()
     {
-        _iterceptorsEnabled = true;
+        _interceptorsEnabled = true;
         return this;
     }
 }
