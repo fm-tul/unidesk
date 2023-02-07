@@ -56,7 +56,7 @@ public class UserServiceTests
 
         var userByRequest = (await userService.FindAsync(new LoginRequest { Eppn = StaticUsers.ImportUser.Username! }))!;
         userByRequest.Should().NotBeNull();
-        userByRequest.Id.Should().Be(StaticUsers.ImportUser.Id);
+        userByRequest.First().Id.Should().Be(StaticUsers.ImportUser.Id);
     }
 
     [Fact]

@@ -45,8 +45,8 @@ public class MappingTests
         Name = "RoleA",
         Grants = new List<Grant>
         {
-            UserGrants.User_Admin,
-            UserGrants.User_Guest,
+            Grants.User_Admin.AsGrant(),
+            Grants.User_Guest.AsGrant(),
         }
     };
         
@@ -56,8 +56,8 @@ public class MappingTests
         Name = "RoleB",
         Grants = new List<Grant>
         {
-            UserGrants.User_Admin,
-            UserGrants.User_Guest,
+            Grants.User_Admin.AsGrant(),
+            Grants.User_Guest.AsGrant(),
         }
     };
     

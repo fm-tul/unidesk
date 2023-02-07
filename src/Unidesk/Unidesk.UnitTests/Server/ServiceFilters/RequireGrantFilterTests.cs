@@ -14,9 +14,9 @@ public class RequireGrantFilterTests
     [Fact]
     public void Test_Should_Fail_If_Grant_Requirements_Are_Not_Met()
     {
-        var requiredGrants = new List<Grant> { UserGrants.User_SuperAdmin };
-        var userGrants = new List<Grant> { UserGrants.User_SuperAdmin };
-        var (granted, error, status) = RequireGrantFilter.HasAccess(requiredGrants, userGrants);
+        var requiredGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
+        var userGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
+        var (granted, error, status) = GrantCheck.HasAccess(requiredGrants, userGrants);
 
         granted.Should().BeTrue();
         error.Should().BeNullOrEmpty();
@@ -28,11 +28,11 @@ public class RequireGrantFilterTests
     {
         var requiredAttributes = new List<RequireGrantAttribute>
         {
-            new(UserGrants.User_SuperAdmin_Id)
+            new(Grants.User_SuperAdmin)
         };
 
-        var userGrants = new List<Grant> { UserGrants.User_SuperAdmin };
-        var (granted, error, status) = RequireGrantFilter.HasAccess(requiredAttributes, userGrants);
+        var userGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
+        var (granted, error, status) = GrantCheck.HasAccess(requiredAttributes, userGrants);
 
         granted.Should().BeTrue();
         error.Should().BeNullOrEmpty();
@@ -42,10 +42,10 @@ public class RequireGrantFilterTests
     [Fact]
     public void Test_Shoudl_Fail_If_Grant_Is_Missing()
     {
-        var requiredGrants = new List<Grant> { UserGrants.User_SuperAdmin };
-        var userGrants = new List<Grant> { UserGrants.User_Admin, UserGrants.User_Teacher };
+        var requiredGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
+        var userGrants = new List<Grant> { Grants.User_Admin.AsGrant(), Grants.User_Teacher.AsGrant() };
         
-        var (granted, error, status) = RequireGrantFilter.HasAccess(requiredGrants, userGrants);
+        var (granted, error, status) = GrantCheck.HasAccess(requiredGrants, userGrants);
         granted.Should().BeFalse();
         error.Should().Contain("You don't have permission to access this resource, required grants:");
         status.Should().Be(StatusCodes.Status403Forbidden);

@@ -27,4 +27,19 @@ public class EnumerableExtensionsTests
         enumerable.ToList();
         counter.Should().Be(items.Count);
     }
+    
+    [Fact]
+    public void ContainsOnly_Should_Be_True_When_Contains_All()
+    {
+        var items = new List<string> { "a", "b" };
+        items.ContainsOnly("a", "b").Should().BeTrue();
+        items.ContainsOnly("a", "b", "c").Should().BeTrue();
+        
+        items.ContainsOnly("a").Should().BeFalse();
+        items.ContainsOnly().Should().BeFalse();
+        
+        var empty = new List<string>();
+        empty.ContainsOnly().Should().BeTrue();
+        empty.ContainsOnly("a").Should().BeTrue();
+    }
 }
