@@ -129,7 +129,7 @@ public class UnideskDbContextTests
         var userA = new User { Email = "userA@unidesk.com" };
         var userB = new User { Email = "userB@unidesk.com" };
         var userC = new User { Email = "userC@unidesk.com", Roles = new List<UserRole> { userRole } };
-        var team = new Team { Name = "Team A", Avatar = string.Empty, Description = string.Empty };
+        var team = new Team { Name = "Team A", Description = string.Empty };
         var userInTeamA = new UserInTeam { User = userA, Team = team, Status = UserInTeamStatus.Accepted };
         var userInTeamB = new UserInTeam { User = userB, Team = team, Status = UserInTeamStatus.Accepted };
 
