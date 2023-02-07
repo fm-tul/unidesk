@@ -1,6 +1,5 @@
 import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
-import { locales } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
 import { KeywordDto } from "@models/KeywordDto";
@@ -15,6 +14,7 @@ import { Modal } from "ui/Modal";
 import { classnames } from "ui/shared";
 import { TextField } from "ui/TextField";
 import { groupBy, sortBy } from "utils/arrays";
+import { locales } from "@locales/common";
 
 interface KeywordSelectorProps {
   keywords?: KeywordDto[];

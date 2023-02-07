@@ -1,59 +1,100 @@
-import { TeamLookupDto, TeamRole, UserDto, UserFunction, UserInTeamStatus, UserLookupDto, UserRoleDto } from "@api-client";
-import { All as UserFunctionAll, UserFunction as UserFunctionMap } from "@api-client/constants/UserFunction";
-import { All as UserGrantsAll } from "@api-client/constants/UserGrants";
+import {
+  TeamLookupDto,
+  TeamRole,
+  UserDto,
+  UserFunction,
+  UserInTeamStatus,
+  UserLookupDto,
+  UserRoleDto,
+  UserTeamLookupDto,
+} from "@api-client";
+import { All as UserFunctionAll } from "@api-client/constants/UserFunction";
 import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
 import { useContext, useEffect, useState } from "react";
 import { MdEdit } from "react-icons/md";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { FilterBar } from "components/FilterBar";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
-import { castPromise, toPromiseArray, useSingleQuery, useSingleQueryDefault } from "hooks/useFetch";
 import { renderTeam } from "models/cellRenderers/TeamRenderer";
 import { renderUserFull, renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
-import { Select } from "ui/Select";
 import { SelectField, SelectFieldLive } from "ui/SelectField";
 import { classnames } from "ui/shared";
 import { TextField } from "ui/TextField";
 import { UserContext } from "user/UserContext";
 import { Debug } from "components/Debug";
-import { compact, except, exceptIf } from "utils/arrays";
+import { compact, exceptIf } from "utils/arrays";
 import { toast } from "react-toastify";
 import { UnideskComponent } from "components/UnideskComponent";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { Grants, GrantsAll } from "@api-client/constants/Grants";
+import { Section } from "components/mui/Section";
+import { hasSomeGrant } from "utils/grants";
+import { RowField } from "components/mui/RowField";
+import { EnumsContext } from "models/EnumsContext";
+import { Table } from "ui/Table";
+import { link_pageTeamDetail } from "routes/links";
+import { Collapse } from "components/mui/Collapse";
+import { UserInTeamStatusRenderer } from "models/itemRenderers/UserInTeamStatusRenderer";
 
+type StatusUpdate = {
+  status: UserInTeamStatus;
+  teamId: string;
+};
 export const PageUserProfile = () => {
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
+  const { enums } = useContext(EnumsContext);
 
   const { user: me } = useContext(UserContext);
-  const { data: user, isLoading, error, loadData, setData } = useSingleQueryDefault<UserDto>();
-  const { data: userRoles, loadData: loadUserRoles } = useSingleQuery<UserRoleDto[]>([]);
   const { id } = useParams();
+  const [user, setUser] = useState<UserDto | null>(null);
+  const queryClient = useQueryClient();
+
+  const { isLoading } = useQuery({
+    queryKey: ["user", id ?? me.id],
+    queryFn: () => httpClient.users.get({ id: id ?? me.id }),
+    onSuccess: setUser,
+  });
+
+  const { data: aliases } = useQuery({
+    queryKey: ["user", "aliases", user?.id],
+    queryFn: () =>
+      httpClient.users.find({
+        requestBody: {
+          keyword: user!.fullName,
+          includeHidden: true,
+        },
+      }),
+    enabled: !!user,
+  });
+
   const [isEditing, setIsEditing] = useState(false);
-  const [aliasOptions, setAliasOptions] = useState<UserLookupDto[]>([]);
 
   const getProps = (key: keyof UserDto) => ({
     label: translate(key as any),
     value: (user![key] as string) ?? "",
     onValue: (value: string) => {
       (user as any)![key as any] = value;
-      setData({ ...user! });
+      setUser({ ...user! });
     },
   });
 
   const handleSave = async () => {
-    const result = await httpClient.users.update({ requestBody: user! }).catch(e => {
+    const userWithoutTheses = { ...user! };
+    userWithoutTheses.allThesis = [];
+    const result = await httpClient.users.update({ requestBody: userWithoutTheses }).catch(e => {
       return null;
     });
     if (result) {
       toast.success("Saved");
       setIsEditing(false);
-      setData(result);
+      setUser(result);
     }
   };
 
@@ -64,28 +105,30 @@ export const PageUserProfile = () => {
       status: UserInTeamStatus.REQUESTED,
     }));
 
-    setData({ ...user!, teams });
+    setUser({ ...user!, teams });
   };
 
-  useEffect(() => {
-    const idOrMe = id ?? me.id;
-    loadData(httpClient.users.get({ id: idOrMe }));
-    loadUserRoles(httpClient.enums.userRoleGetAll());
-    httpClient.users
-      .find({
-        requestBody: {
-          keyword: me.fullName,
-        },
-      })
-      .then(i => setAliasOptions(i.items));
-  }, [id]);
-
   const userFunctions = (user?.userFunction.split(",").map(i => i.trim()) ?? []) as UserFunction[];
-  const pendingTeams = (user?.teams ?? []).filter(i => i.status === UserInTeamStatus.PENDING);
+  const userTeams = user?.teams ?? [];
+  const hasAccessToRoles = hasSomeGrant(me, Grants.User_Admin, Grants.User_SuperAdmin, Grants.Action_ManageRolesAndGrants);
+  const isSuperAdminOrIsMe = hasSomeGrant(me, Grants.User_SuperAdmin) || me.id === user?.id;
+
+  const changeStatusMutation = useMutation(
+    (statusUpdate: StatusUpdate) => httpClient.team.changeStatus({ ...statusUpdate, userId: user!.id }),
+    {
+      onSuccess: () => {
+        toast.success("Status changed");
+        queryClient.invalidateQueries(["user", id ?? me.id]);
+      },
+      onError: (e: any) => {
+        toast.error("Error");
+      },
+    }
+  );
 
   return (
     <UnideskComponent name="PageUserProfile">
-      <LoadingWrapper isLoading={isLoading} error={error}>
+      <LoadingWrapper isLoading={isLoading}>
         {!!user && (
           <>
             <div className={classnames(isEditing && "animate-pulse")}>
@@ -107,52 +150,96 @@ export const PageUserProfile = () => {
               <div className="flow">
                 {user.grantIds.map(i => (
                   <span key={i} className="flow rounded-full bg-gray-200 px-2 py-1">
-                    <span className="text-xs">{UserGrantsAll.find(j => j.id === i)?.name}</span>
+                    <span className="text-xs">{GrantsAll.find(j => j.id === i)?.name}</span>
                   </span>
                 ))}
               </div>
             </div>
 
-            {pendingTeams.length > 0 && (
-              <div>
-                Team invitations
-                {pendingTeams
-                  .map(i => i.team)
-                  .map(i => (
-                    <div key={i.id} className="flow">
-                      <div className="font-bold">{renderTeam(i)}</div>
-                      <FilterBar type="btn-group" className="items-center" size="sm">
-                        <Button
-                          onClick={() => httpClient.team.changeStatus({ teamId: i.id, userId: user.id, status: UserInTeamStatus.ACCEPTED })}
-                        >
-                          {translate("accept")}
-                        </Button>
-                        <Button
-                          error
-                          onClick={() => httpClient.team.changeStatus({ teamId: i.id, userId: user.id, status: UserInTeamStatus.DECLINED })}
-                        >
-                          {translate("decline")}
-                        </Button>
-                      </FilterBar>
-                    </div>
-                  ))}
-              </div>
-            )}
+            <Section title="section.teams-and-groups" />
+            <RowField
+              title={"section.teams"}
+              description={"help.teams"}
+              Field={
+                <Table
+                  EmptyContent={<div className="text-center italic text-gray-600">-- {translate("no-teams")} --</div>}
+                  rows={userTeams}
+                  columns={[
+                    {
+                      id: "team",
+                      headerName: translate("team-name"),
+                      className: "w-xs",
+                      field: i => (
+                        <div className="flex justify-between">
+                          <div className="font-bold">{renderTeam(i.team)}</div>
+                          <Button text sm component={Link} to={link_pageTeamDetail.navigate(i.team.id)}>
+                            go to profile
+                          </Button>
+                        </div>
+                      ),
+                    },
+                    {
+                      id: "status",
+                      headerName: <div className="text-center w-full">Status</div>,
+                      className: "w-xxs",
+                      field: i => UserInTeamStatusRenderer(i.status),
+                    },
+                    {
+                      id: "role",
+                      headerName: translate("team-role"),
+                      field: i => i.role,
+                    },
+                    {
+                      id: "actions",
+                      headerName: translate("actions"),
+                      field: i => (
+                        <FilterBar type="btn-group" outlined sm>
+                          <Button
+                            if={i.status == UserInTeamStatus.PENDING}
+                            disabled={!isSuperAdminOrIsMe}
+                            onClick={() => changeStatusMutation.mutate({ teamId: i.team.id, status: UserInTeamStatus.ACCEPTED })}
+                          >
+                            {translate("accept")}
+                          </Button>
+                          <Button
+                            if={i.status == UserInTeamStatus.PENDING || i.status == UserInTeamStatus.ACCEPTED}
+                            error
+                            disabled={!isSuperAdminOrIsMe}
+                            onClick={() => changeStatusMutation.mutate({ teamId: i.team.id, status: UserInTeamStatus.DECLINED })}
+                          >
+                            {translate(i.status == UserInTeamStatus.PENDING ? "decline" : "leave")}
+                          </Button>
+                        </FilterBar>
+                      ),
+                    },
+                  ]}
+                />
+              }
+            />
 
-            {isEditing === true && (
-              <div className="flex flex-col gap-2 p-2">
-                <div className="flow">
-                  <FormField as={TextField} {...getProps("titleBefore")} />
-                </div>
-                <div className="flow">
-                  <FormField as={TextField} {...getProps("firstName")} />
-                  <FormField as={TextField} {...getProps("middleName")} />
-                  <FormField as={TextField} {...getProps("lastName")} />
-                </div>
-                <div className="flow">
-                  <FormField as={TextField} {...getProps("titleAfter")} />
-                </div>
-                <div className="flow">
+            <Collapse open={isEditing} className="flex flex-col gap-2">
+              <Section title="section.personal-information" />
+
+              <div className="flow">
+                <FormField as={TextField} {...getProps("titleBefore")} />
+              </div>
+              <div className="flow">
+                <FormField as={TextField} {...getProps("firstName")} />
+                <FormField as={TextField} {...getProps("middleName")} />
+                <FormField as={TextField} {...getProps("lastName")} />
+              </div>
+              <div className="flow">
+                <FormField as={TextField} {...getProps("titleAfter")} />
+              </div>
+              <div className="flow">
+                <FormField as={TextField} {...getProps("email")} />
+              </div>
+
+              <Section title="section.functions-and-aliases" />
+              <RowField
+                title="user-function"
+                description="help.user-function"
+                Field={
                   <FormField
                     as={SelectField<UserFunction>}
                     options={Object.values(UserFunction)}
@@ -161,57 +248,75 @@ export const PageUserProfile = () => {
                     multiple
                     clearable
                     searchable
-                    width="min-w-sm"
-                    onValue={items => setData({ ...user!, userFunction: compact(items, UserFunction.NONE).join(", ") as UserFunction })}
+                    onValue={items => setUser({ ...user!, userFunction: compact(items, UserFunction.NONE).join(", ") as UserFunction })}
                   />
-                </div>
-                <div className="flow">
+                }
+              />
+              <RowField
+                title="user-aliases"
+                description="help.user-aliases"
+                Field={
                   <FormField
                     as={SelectField<UserLookupDto>}
                     value={user.aliases}
                     searchable
                     clearable
                     multiple
-                    options={aliasOptions}
+                    options={aliases?.items ?? []}
                     getTitle={i => renderUserLookup(i, true)}
                     getValue={i => i.fullName}
-                    onValue={v => setData({ ...user, aliases: v })}
-                    width="min-w-xs"
+                    onValue={v => setUser({ ...user, aliases: v })}
                   />
-                </div>
-                {/* <div className="flow">
-                <FormField
-                  as={Select<TeamLookupDto>}
-                  width="min-w-sm"
-                  label={translate("teams")}
-                  searchable
-                  clearable
-                  multiple
-                  optionRender={renderTeam}
-                  options={(keyword: string) =>
-                    castPromise<TeamLookupDto[]>(toPromiseArray(httpClient.team.findSimple({ requestBody: { keyword } })))
-                  }
-                  value={user.teams.map(i => i.team)}
-                  onMultiValue={updateUserTeams}
-                />
-              </div>
-              <div className="flow">
-                <FormField
-                  as={SelectFieldLive<UserRoleDto>}
-                  label={translate("user-roles")}
-                  width="min-w-sm"
-                  searchable
-                  clearable
-                  multiple
-                  options={() => httpClient.enums.userRoleGetAll()}
-                  value={user.roles}
-                  onValue={(i: UserRoleDto[]) => setData({ ...user, roles: i })}
-                />
-              </div> */}
-                <Button onClick={handleSave}>Save</Button>
-                <Debug value={user} />
-              </div>
-            )}
+                }
+              />
+
+              {hasAccessToRoles && (
+                <>
+                  <Section title="section.roles-and-grants" />
+                  <RowField
+                    title="user-roles"
+                    description="help.user-roles"
+                    Field={
+                      <div>
+                        {enums.roles.map(i => (
+                          <div key={i.id} className="grid grid-cols-2 rounded p-2 transition-colors hocus:bg-black/5">
+                            <div className="flex items-stretch gap-2">
+                              <div className="inline-flex cursor-pointer items-start">
+                                <input
+                                  id={i.id}
+                                  type="checkbox"
+                                  className="h-5 w-5"
+                                  checked={user.roles.some(j => j.id === i.id)}
+                                  onChange={e => {
+                                    if (e.target.checked) {
+                                      setUser({ ...user, roles: [...user.roles, i] });
+                                    } else {
+                                      setUser({ ...user, roles: user.roles.filter(j => j.id !== i.id) });
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <label className="inline-flex w-full cursor-pointer items-start" htmlFor={i.id}>
+                                <span>{i.name}</span>
+                              </label>
+                            </div>
+                            <div className="text-xs">
+                              {i.grants.map(j => (
+                                <div key={j.id}>
+                                  <span>{j.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    }
+                  />
+                </>
+              )}
+              <Button onClick={handleSave}>Save</Button>
+              <Debug value={user} />
+            </Collapse>
           </>
         )}
       </LoadingWrapper>

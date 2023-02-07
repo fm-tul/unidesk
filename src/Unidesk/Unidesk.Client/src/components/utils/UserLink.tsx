@@ -12,7 +12,7 @@ export const UserLink = ({ user }: UserLinkProps) => {
   if (stagId) {
     return (
       <>
-        User is linked with Stag via id
+        User is linked with Stag via id {''}
         <Link className="text-rose-700 hover:underline" to={link_pageUserProfile.navigate(user.id)}>
           {stagId}
         </Link>
@@ -22,7 +22,7 @@ export const UserLink = ({ user }: UserLinkProps) => {
 
   return (
     <>
-      User is not linked with Stag:
+      User is not linked with Stag:{''}
       <Link className="text-rose-700 hover:underline" to={link_pageUserProfile.navigate(user.id)}>
         {user.fullName}
         <FaLink className="ml-1 inline-block" />

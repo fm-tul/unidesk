@@ -12,7 +12,7 @@ export const PageHome = () => {
 
   return (
     <UnideskComponent name="PageHome">
-      <h1 className="text-xl">Homee</h1>
+      <h1 className="text-xl">Home</h1>
       <Debug value={me} />
       {/* <SelectField options={["sm", "md", "lg"]} value={size} onValue={i => setSize(i[0] as any)} />
       <SelectField options={["info", "success", "warning", "error", "neutral"]} value={color} onValue={i => setColor(i[0] as any)} /> */}

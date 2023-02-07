@@ -8,7 +8,7 @@ export const UnideskComponent = (props: React.PropsWithChildren<UnideskComponent
   return (
     <div {...rest}>
       {children}
-      <Debug value={name} title="component" />
+      {/* <Debug value={name} title="component" /> */}
     </div>
   );
 };

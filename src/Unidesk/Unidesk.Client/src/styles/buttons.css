@@ -25,7 +25,7 @@
   --border: 3px;
 }
 .btn-md {
-  @apply px-4 py-2 text-sm;
+  @apply px-4 py-2 text-sm min-w-[20px];
   --size: 20px;
   --border: 4px;
 }
@@ -96,6 +96,11 @@
 }
 
 .btn.btn-text.disabled {
+  @apply pointer-events-none cursor-not-allowed border-neutral-400 bg-transparent text-neutral-400 opacity-80;
+  --color-spinner-a: var(--color-neutral-400-rgb);
+}
+
+.btn.btn-outlined.disabled {
   @apply pointer-events-none cursor-not-allowed border-neutral-400 bg-transparent text-neutral-400 opacity-80;
   --color-spinner-a: var(--color-neutral-400-rgb);
 }

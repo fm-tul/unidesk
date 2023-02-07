@@ -4,14 +4,14 @@ import { httpClient } from "@core/init";
 import { TeamDto } from "@models/TeamDto";
 import { TeamType } from "@models/TeamType";
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { fakePromise, toPromiseArray, useSingleQuery } from "hooks/useFetch";
 import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { Table } from "ui/Table";
 import { UserContext } from "user/UserContext";
-import { UserGrants } from "@api-client/constants/UserGrants";
+import { Grants } from "@api-client/constants/Grants";
 import { TeamRole } from "@models/TeamRole";
 import { Button } from "ui/Button";
 import { FilterBar } from "components/FilterBar";
@@ -26,6 +26,21 @@ import { classnames } from "ui/shared";
 import { IsNew } from "utils/IsNew";
 import { TeamUserLookupDto } from "@models/TeamUserLookupDto";
 import { UnideskComponent } from "components/UnideskComponent";
+import { hasSomeGrant } from "utils/grants";
+import { TextField } from "ui/TextField";
+import { LanguageContext } from "@locales/LanguageContext";
+import { useTranslation } from "@locales/translationHooks";
+import { Section } from "components/mui/Section";
+import { RowField } from "components/mui/RowField";
+import { TextArea } from "ui/TextArea";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { toast } from "react-toastify";
+import { extractErrors, FormErrors, getPropsFactory } from "utils/forms";
+import { link_pageTeamEdit, link_pageTeamList, link_pageUserProfile } from "routes/links";
+import { UserInTeamStatusRenderer } from "models/itemRenderers/UserInTeamStatusRenderer";
+import { Cropper } from "react-cropper";
+import "cropperjs/dist/cropper.css";
+import { ImageEditor } from "components/mui/ImageEditor";
 
 const teamInitialValue: Partial<TeamDto> = {
   id: GUID_EMPTY,
@@ -47,78 +62,83 @@ interface TeamDetailsProps {
 const TeamDetail = (props: TeamDetailsProps) => {
   const { user: me } = useContext(UserContext);
   const { team, onChange } = props;
-  const canEdit =
-    me.grantIds.includes(UserGrants.User_Admin.id) ||
-    me.grantIds.includes(UserGrants.User_SuperAdmin.id) ||
-    team.users.some(u => u.user.id === me.id && u.role === TeamRole.OWNER);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">{team.name}</h1>
+      <div className="text-2xl font-bold">{team.name}</div>
       <div className="text-sm italic">{team.description}</div>
-
-      <h2 className="text-xl font-bold">Users</h2>
-      <Table
-        clientSort
-        rows={team.users.map(i => ({ ...i, id: i.user.id }))}
-        columns={[
-          {
-            id: "fullname",
-            headerName: "User",
-            field: i => <span className={classnames((i as IsNew<any>).isNew && "text-green-600")}>{renderUserLookup(i.user, true)}</span>,
-            sortFunc: (a, b) => a.user.fullName.localeCompare(b.user.fullName),
-          },
-          {
-            id: "role",
-            headerName: "Role",
-            field: i => i.role,
-          },
-          {
-            id: "status",
-            headerName: "Status",
-            field: i => i.status,
-          },
-          {
-            id: "actions",
-            headerName: "Actions",
-            visible: canEdit,
-            field: teamUser => (
-              <FilterBar outlined sm>
-                <Button if={teamUser.status === UserInTeamStatus.ACCEPTED} error>
-                  Kick
-                </Button>
-
-                <Button if={teamUser.status !== UserInTeamStatus.ACCEPTED} warning>
-                  Cancel
-                </Button>
-
-                <Button if={teamUser.status === UserInTeamStatus.PENDING && teamUser.user.id === me.id} success>
-                  Accept
-                </Button>
-
-                <SelectField<TeamRole>
-                  value={teamUser.role}
-                  options={TeamRoleAll.filter(i => i.value !== "Unknown").map(i => i.value as TeamRole)}
-                  width="min-w-xxs"
-                  onValue={v => {
-                    teamUser.role = v[0];
-                    team.users[team.users.map(i => i.user.id).indexOf(teamUser.user.id)] = teamUser;
-                    onChange({ ...team });
-                  }}
-                />
-              </FilterBar>
-            ),
-          },
-        ]}
-      />
     </div>
   );
 };
 
+type StatusUpdate = {
+  status: UserInTeamStatus;
+  userId: string;
+};
 export const TeamEdit = (props: PageTeamNewProps) => {
   const { initialValues } = props;
-  const [dto, setDto] = useState<TeamDto>(initialValues || (teamInitialValue as TeamDto));
+  const { language } = useContext(LanguageContext);
+  const { user: me } = useContext(UserContext);
+  const { translateName, translateVal, translate } = useTranslation(language);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [newUser, setNewUser] = useState<UserLookupDto>();
+  const [errors, setErrors] = useState<FormErrors<TeamDto>>();
+  const [dto, setDto] = useState<TeamDto>(initialValues || (teamInitialValue as TeamDto));
+
+  const canAddNewUser = newUser && !dto.users.some(i => i.user.id === newUser.id);
+  const canEdit =
+    hasSomeGrant(me, Grants.User_Admin, Grants.User_SuperAdmin, Grants.Entity_Team_Edit) ||
+    dto.users.some(u => u.user.id === me.id && u.role === TeamRole.OWNER);
+
+  useQuery({
+    queryKey: ["team", dto.id],
+    queryFn: () => httpClient.team.get({ id: dto.id }),
+    enabled: dto.id !== GUID_EMPTY,
+    onSuccess: data => {
+      setDto(data);
+    },
+  });
+
+  const propsFactory = getPropsFactory(dto, setDto, errors);
+  const getProps = (key: keyof TeamDto) => ({
+    ...propsFactory(key),
+    label: translate(key as any),
+  });
+
+  const updateTeamMutation = useMutation((dto: TeamDto) => httpClient.team.upsert({ requestBody: dto }), {
+    onSuccess: data => {
+      toast.success("Team saved");
+      setErrors(undefined);
+      if (dto.id === GUID_EMPTY) {
+        navigate(link_pageTeamEdit.navigate(data.id));
+        setDto(data);
+      } else {
+        setDto(data);
+      }
+    },
+    onError: (e: any) => {
+      setErrors(extractErrors(e));
+      console.log(errors);
+    },
+  });
+
+  const deleteTeamMutation = useMutation((id: string) => httpClient.team.deleteOne({ id }), {
+    onSuccess: () => {
+      toast.success("Team deleted");
+      navigate(link_pageTeamList.path);
+    },
+  });
+
+  const handleSaveClick = () => {
+    updateTeamMutation.mutate(dto);
+  };
+
+  const handleDeleteClick = () => {
+    if (window.confirm("Are you sure you want to delete this team?")) {
+      deleteTeamMutation.mutate(dto.id);
+    }
+  };
 
   const addNewUser = () => {
     if (!newUser) {
@@ -134,210 +154,198 @@ export const TeamEdit = (props: PageTeamNewProps) => {
     setNewUser(undefined);
   };
 
-  const canAddNewUser = newUser && !dto.users.some(i => i.user.id === newUser.id);
+  const changeStatusMutation = useMutation(
+    (statusUpdate: StatusUpdate) => httpClient.team.changeStatus({ ...statusUpdate, teamId: dto.id }),
+    {
+      onSuccess: () => {
+        toast.success("Status changed");
+        queryClient.invalidateQueries(["team", dto.id]);
+      },
+    }
+  );
 
   return (
     <div>
-      <TeamDetail team={dto} onChange={setDto} />
+      {/* <TeamDetail team={dto} onChange={setDto} /> */}
 
-      <div className="flow ">
-        <FormField
-          as={SelectFieldLive<UserLookupDto>}
-          value={newUser}
-          searchable
-          clearable
-          options={keyword => toPromiseArray(httpClient.users.find({ requestBody: { keyword, filter: { page: 1, pageSize: 10 } } }))}
-          getTitle={i => renderUserLookup(i, true)}
-          getValue={i => i.fullName}
-          onValue={v => setNewUser(v[0])}
-          width="min-w-xs"
+      <Section title="section.team-information" />
+      <div className="grid grid-cols-1">
+        <RowField title="name" Field={<FormField as={TextField} {...getProps("name")} />} />
+        <RowField title="description" Field={<FormField as={TextArea} {...getProps("description")} minRows={2} maxRows={5} />} />
+        <RowField
+          title="team.contact-email"
+          Field={
+            <FormField
+              as={SelectField<string>}
+              options={dto.users.filter(i => !!i.user.email).map(i => i.user.email!)}
+              searchable
+              onAddNew={v => setDto({ ...dto, email: v })}
+              clearable
+              onValue={v => setDto({ ...dto, email: v[0] ?? null })}
+              {...getProps("email")}
+            />
+          }
         />
-        <FormField
-          as={Button}
-          outlined
-          onClick={addNewUser}
-          disabled={!canAddNewUser}
-          helperText={!canAddNewUser && !!newUser ? "User already added" : ""}
-          helperColor={canAddNewUser ? "success" : "error"}
-        >
-          <IoPersonAdd className="text-base" />
-          Invite user
-        </FormField>
+        <RowField
+          title="abstract"
+          Field={
+            <ImageEditor
+              className="max-h-sm"
+              style={{ width: "100%", height: 200 }}
+              value={dto.avatar}
+              onValue={v => setDto({ ...dto, avatar: v })}
+            />
+          }
+        />
+      </div>
+
+      {dto.id !== GUID_EMPTY && (
+        <>
+          <Section title="section.team-composition" />
+
+          <RowField
+            title="team.members"
+            Field={
+              <Table
+                rows={dto.users.sort(sortByRole).map(i => ({ ...i, id: i.user.id }))}
+                columns={[
+                  {
+                    id: "fullname",
+                    headerName: "User",
+                    className: "w-sm",
+                    field: i => (
+                      <div className="flex justify-between">
+                        <span className={classnames((i as IsNew<any>).isNew && "text-green-600")}>{renderUserLookup(i.user, true)}</span>
+                        <Button text sm component={Link} to={link_pageUserProfile.navigate(i.user.id)}>
+                          go to profile
+                        </Button>
+                      </div>
+                    ),
+                    sortFunc: (a, b) => a.user.fullName.localeCompare(b.user.fullName),
+                  },
+                  {
+                    id: "role",
+                    headerName: "Role",
+                    className: "w-xxs",
+                    field: teamUser =>
+                      canEdit ? (
+                        <SelectField<TeamRole>
+                          value={teamUser.role}
+                          options={TeamRoleAll.filter(i => i.value !== "Unknown").map(i => i.value as TeamRole)}
+                          size="sm"
+                          onValue={v => {
+                            teamUser.role = v[0];
+                            dto.users[dto.users.map(i => i.user.id).indexOf(teamUser.user.id)] = teamUser;
+                            setDto({ ...dto });
+                          }}
+                        />
+                      ) : (
+                        <span>{teamUser.role}</span>
+                      ),
+                  },
+                  {
+                    id: "status",
+                    headerName: <div className="w-full text-center">Status</div>,
+                    className: "w-xxs",
+                    field: i => UserInTeamStatusRenderer(i.status),
+                  },
+                  {
+                    id: "actions",
+                    headerName: "Actions",
+                    visible: canEdit,
+                    field: teamUser => (
+                      <div className="flow">
+                        <FilterBar outlined sm if={(teamUser as any).isNew !== true}>
+                          <Button
+                            error
+                            if={canEdit && teamUser.status === UserInTeamStatus.ACCEPTED}
+                            onClick={i => changeStatusMutation.mutate({ userId: teamUser.id, status: UserInTeamStatus.DECLINED })}
+                          >
+                            {translate(teamUser.user.id === me.id ? "leave" : "decline")}
+                          </Button>
+
+                          <Button
+                            warning
+                            if={canEdit && teamUser.status !== UserInTeamStatus.ACCEPTED}
+                            onClick={i => changeStatusMutation.mutate({ userId: teamUser.id, status: UserInTeamStatus.REMOVED })}
+                          >
+                            {translate("remove")}
+                          </Button>
+
+                          <Button
+                            success
+                            if={
+                              canEdit &&
+                              (teamUser.status === UserInTeamStatus.PENDING || teamUser.status === UserInTeamStatus.REMOVED) &&
+                              teamUser.user.id === me.id
+                            }
+                            onClick={i => changeStatusMutation.mutate({ userId: teamUser.id, status: UserInTeamStatus.ACCEPTED })}
+                          >
+                            {translate("accept")}
+                          </Button>
+                        </FilterBar>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            }
+          />
+
+          <RowField
+            title="team.invite-new-user"
+            Field={
+              <div className="flow">
+                <FormField
+                  as={SelectFieldLive<UserLookupDto>}
+                  value={newUser}
+                  searchable
+                  clearable
+                  options={keyword =>
+                    toPromiseArray(httpClient.users.find({ requestBody: { keyword, filter: { page: 1, pageSize: 10 } } }))
+                  }
+                  getTitle={i => renderUserLookup(i, true)}
+                  getValue={i => i.fullName}
+                  onValue={v => setNewUser(v[0])}
+                  width="min-w-xs"
+                />
+                <FormField
+                  as={Button}
+                  outlined
+                  onClick={addNewUser}
+                  disabled={!canAddNewUser}
+                  helperText={!canAddNewUser && !!newUser ? "User already added" : ""}
+                  helperColor={canAddNewUser ? "success" : "error"}
+                >
+                  <IoPersonAdd className="text-base" />
+                  Invite user
+                </FormField>
+              </div>
+            }
+          />
+        </>
+      )}
+
+      <div className="flex justify-center">
+        <FilterBar type="btn-group" className="mt-16" size="lg">
+          <Button onClick={handleSaveClick} loading={updateTeamMutation.isLoading}>
+            {translate(dto.id === GUID_EMPTY ? "create" : "update")}
+          </Button>
+          <Button if={canEdit && dto.id !== GUID_EMPTY} onClick={handleDeleteClick} error loading={deleteTeamMutation.isLoading}>
+            {translate("delete")}
+          </Button>
+        </FilterBar>
       </div>
     </div>
   );
-  // const { language } = useContext(LanguageContext);
-  // const [dto, setDto] = useState<TeamDto>((initialValues ?? teamInitialValue) as TeamDto);
-  // const { data, isLoading, error, loadData } = useSingleQuery<TeamDto | undefined>(undefined);
-  // const translate = (value: EnKeys) => RR(value, language);
-  // const isNew = dto.id === GUID_EMPTY;
-
-  // const getProps = (key: keyof TeamDto) => {
-  //   const { errorText, errorColor } = getErrorValue(error?.errors ?? [], key.toLocaleLowerCase() as keyof TeamDto);
-
-  //   return {
-  //     helperText: errorText,
-  //     helperColor: errorColor,
-  //     label: translate(key as any),
-  //     value: (dto![key] as string) ?? "",
-  //     onValue: (value: string) => {
-  //       (dto as any)![key as any] = value;
-  //       setDto({ ...dto! });
-  //     },
-  //   };
-  // };
-
-  // const handleSave = async () => {
-  //   await toast.promise(loadData(httpClient.team.upsert({ requestBody: dto })), {
-  //     pending: translate("saving"),
-  //     success: translate("saved"),
-  //     error: translate("error-saving"),
-  //   });
-  // };
-
-  // const updateUserInTeam = async (userInTeam: any, props: Partial<any>) => {
-  //   // setDto({
-  //   //   ...dto,
-  //   //   userInTeams: dto.userInTeams.map(i => (i.id === userInTeam.id ? { ...i, ...props } : i)),
-  //   // });
-  // };
-
-  // const addNewUser = (user: UserLookupDto | undefined) => {
-  //   if (!user || dto.users?.some(i => i.id === user.id)) {
-  //     return;
-  //   }
-
-  //   // setDto({
-  //   //   ...dto,
-  //   //   userInTeams: [
-  //   //     ...dto.userInTeams,
-  //   //     {
-  //   //       id: `${user.id}_${dto.id}`,
-  //   //       user,
-  //   //       team: { id: dto.id, name: dto.name!, userTeamRoles: [] },
-  //   //       userId: user.id,
-  //   //       teamId: dto.id,
-  //   //       role: dto.userInTeams.length === 0 ? TeamRole.OWNER : TeamRole.MEMBER,
-  //   //       status: dto.userInTeams.length === 0 ? UserInTeamStatus.ACCEPTED : UserInTeamStatus.PENDING,
-  //   //     },
-  //   //   ],
-  //   //   users: [...dto.users, user],
-  //   // });
-  // };
-
-  // const removeUser = (user: UserInTeamDto) => {
-  //   setDto({
-  //     ...dto,
-  //     userInTeams: dto.userInTeams.filter(i => i.id !== user.id),
-  //     users: dto.users.filter(i => i.id !== user.userId),
-  //   });
-  // };
-
-  // const teamRoleOptions = generatePrimitive(
-  //   TeamRoleAll.map(i => i.value),
-  //   i => TeamRoleAll.find(j => j.value === i)?.[language] ?? i
-  // );
-  // const userInTeamStatusOptions = generatePrimitive(
-  //   UserInTeamStatusAll.map(i => i.value),
-  //   i => UserInTeamStatusAll.find(j => j.value === i)?.[language] ?? i
-  // );
-
-  // return (
-  //   <div>
-  //     <h1>Team Edit</h1>
-  //     <div className="flex flex-col gap-4">
-  //       <div className="grid grid-cols-3 items-stretch gap-2">
-  //         <FormField as={TextField} {...getProps("name")} />
-  //         <FormField as={TextField} {...getProps("description")} />
-  //         <FormField
-  //           as={Select<string>}
-  //           options={teamTypeOptions}
-  //           value={dto.type}
-  //           onSingleValue={(value?: string) => setDto({ ...dto, type: value as TeamType })}
-  //         />
-  //       </div>
-  //       <div className="grid grid-cols-3 items-center gap-2">
-  //         <Table
-  //           className="col-span-3"
-  //           rows={dto.userInTeams}
-  //           columns={[
-  //             { id: "id", headerName: "Id", field: i => IdRenderer({ id: i.userId }) },
-  //             { id: "userId", headerName: "Name", field: i => i.user?.fullName! },
-  //             {
-  //               id: "role",
-  //               headerName: "Role",
-  //               field: i => (
-  //                 <Select
-  //                   sm
-  //                   value={i.role!}
-  //                   options={teamRoleOptions}
-  //                   optionRender={i => TeamRoleAll.find(j => j.value === i)?.[language] ?? i}
-  //                   onSingleValue={value => updateUserInTeam(i, { role: value as TeamRole })}
-  //                 />
-  //               ),
-  //             },
-  //             {
-  //               id: "status",
-  //               headerName: "Status",
-  //               field: i => (
-  //                 <Select
-  //                   sm
-  //                   value={i.status!}
-  //                   options={userInTeamStatusOptions}
-  //                   optionRender={i => UserInTeamStatusAll.find(j => j.value === i)?.[language] ?? i}
-  //                   onSingleValue={value => updateUserInTeam(i, { status: value as UserInTeamStatus })}
-  //                 />
-  //               ),
-  //             },
-  //             {
-  //               id: "actions" as any,
-  //               headerName: "",
-  //               field: i => (
-  //                 <Button sm error outlined onClick={() => removeUser(i)}>
-  //                   Remove
-  //                 </Button>
-  //               ),
-  //             },
-  //           ]}
-  //         />
-
-  //         <span className="col-span-2 items-center text-right">{translate("add-new")}</span>
-  //         <FormField
-  //           sm
-  //           success
-  //           as={Select<UserLookupDto>}
-  //           classNameField="col-span-1"
-  //           clearable
-  //           searchable
-  //           options={(keyword: string) => toPromiseArray(httpClient.users.find({ requestBody: { keyword } }))}
-  //           filter={i => dto.users.some(j => j.id === i.id) === false}
-  //           value={undefined}
-  //           onSingleValue={value => addNewUser(value)}
-  //           optionRender={renderUserLookup}
-  //         />
-  //       </div>
-  //       <div className="grid grid-cols-3 items-stretch gap-2">
-  //         <FormField as={Button} onClick={handleSave} loading={isLoading}>
-  //           {isNew ? translate("create") : translate("update")}
-  //         </FormField>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-
-  return <div>Team Edit</div>;
 };
 
 export const PageTeamEdit = () => {
   const { id } = useParams();
-  const { data, isLoading, error, loadData } = useSingleQuery<TeamDto | undefined>(undefined);
-  useEffect(() => {
-    if (id === "new") {
-      loadData(fakePromise(teamInitialValue as TeamDto));
-    } else {
-      loadData(httpClient.team.get({ id: id! }));
-    }
-  }, [id]);
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["team", id],
+    queryFn: () => (id === "new" ? fakePromise(teamInitialValue as TeamDto) : httpClient.team.get({ id: id! })),
+  });
 
   return (
     <UnideskComponent name="PageTeamEdit">
@@ -349,3 +357,10 @@ export const PageTeamEdit = () => {
 };
 
 export default PageTeamEdit;
+
+const teamRolesList = Object.keys(TeamRole).map(i => TeamRole[i as keyof typeof TeamRole]);
+const sortByRole = (a: TeamUserLookupDto, b: TeamUserLookupDto) => {
+  const roleAInt = teamRolesList.indexOf(a.role);
+  const roleBInt = teamRolesList.indexOf(b.role);
+  return roleAInt - roleBInt;
+};

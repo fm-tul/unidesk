@@ -7,19 +7,20 @@ interface FloatingActionProps extends ColorProps, SizeProps {
   component?: React.ElementType;
   to?: string;
   tooltip?: string;
+  onClick?: () => void;
 }
 export const FloatingAction = (props: FloatingActionProps) => {
-  const { fixed = true, component, to } = props;
+  const { fixed = true, component, to, onClick } = props;
   const colorCss = COLORS[getColor(props, "info")];
   const sizeCss = SIZES[getSize(props, "md")];
-  const className = classnames("rounded-full shadow-lg transition-all", fixed && "fixed bottom-12 right-12", colorCss, sizeCss);
+  const className = classnames("rounded-full shadow-lg transition", fixed && "fixed bottom-12 right-12", colorCss, sizeCss);
 
   if (component) {
     return createElement(component, { className, to }, <FaPlus />);
   }
 
   return (
-    <button className={className}>
+    <button className={className} onClick={onClick}>
       <FaPlus />
     </button>
   );

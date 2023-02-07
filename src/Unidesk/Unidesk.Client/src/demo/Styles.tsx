@@ -2,7 +2,7 @@ import { httpClient } from "@core/init";
 import { UserDto } from "@models/UserDto";
 import { UserLookupDto } from "@models/UserLookupDto";
 import { UserRoleDto } from "@models/UserRoleDto";
-import { Key, useEffect, useState } from "react";
+import { Key, useEffect, useRef, useState } from "react";
 
 import { FilterBar } from "components/FilterBar";
 import { renderUser, renderUserLookup } from "models/cellRenderers/UserRenderer";
@@ -15,6 +15,8 @@ import { Step, Stepper } from "ui/Stepper";
 import { TextField } from "ui/TextField";
 
 import { product } from "../utils/product";
+import { useCollape } from "hooks/useCollapse";
+import { Collapse } from "components/mui/Collapse";
 
 const Buttons = () => {
   const colors = [
@@ -274,16 +276,15 @@ export const Styles = () => {
     httpClient.enums.userRoleGetAll().then(setUserRoleOptions);
   }, []);
 
-  console.table(complexValue);
-
   return (
     <div>
       <h1 className="text-2xl">Select</h1>
 
+      <Test />
       <FilterBar>
         {/* <FormField as={SelectField<number>} value={value} options={options} onValue={setValue} multiple searchable /> */}
 
-        <FormField
+        {/* <FormField
           as={SelectField<UserRoleDto>}
           value={userRoles}
           options={userRoleOptions}
@@ -302,8 +303,8 @@ export const Styles = () => {
           multiple
           clearable
           searchable
-        />
-{/* 
+        /> */}
+        {/* 
         <FormField as={Select<any>} value={complexValue} options={complexOptions} onValue={setComplexValue} multiple clearable searchable />
 
         <FormField
@@ -329,3 +330,45 @@ export const Styles = () => {
   );
 };
 export default Styles;
+
+const Test = () => {
+  const [collaped, setCollaped] = useState(false);
+  const divRef = useRef<HTMLDivElement>(null);
+  useCollape(divRef.current, collaped);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Button onClick={() => setCollaped(!collaped)}>we are now {collaped ? "collapsed" : "expanded"}</Button>
+
+      <Collapse open={!collaped}>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo maxime deleniti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, consectetur porro. Nisi euti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, com explicabo dolorum dicta assumenda veniam architecto!
+
+        <br />
+        <br />
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo maxime deleniti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, coti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, coti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, consectetur porro. Nisi eum explicabo dolorum dicta assumenda veniam architecto!
+
+        <br />
+        <br />
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo maxime deleniti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, consectetur porro.ti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, co Nisi eum explicabo dolorum dicta assumenda veniam architecto!
+
+        Lorem ipsum ti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, codolor sit amet consectetur adipisicing elit. Nemo maxime deleniti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, consectetur porro. Nisi eum explicabo dolorum dicta assumenda veniam architecto!
+
+        <br />
+        <br />
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Nemo maxime deleniti voluptate excepturi ipsam, consequatur temporibus
+        neque accti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, cousamus optio unde, consectetur porro. Nisi eum explicabo dolorum dicta assumendti voluptate excepturi ipsam, consequatur temporibus
+        neque accusamus optio unde, coa veniam architecto!
+      </Collapse>
+    </div>
+  );
+};

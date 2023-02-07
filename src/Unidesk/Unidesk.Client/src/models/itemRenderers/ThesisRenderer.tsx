@@ -10,6 +10,7 @@ import { IdRenderer } from "models/cellRenderers/IdRenderer";
 import { MetadataRenderer } from "models/cellRenderers/MetadataRenderer";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { ThesisTypeRendererFactory } from "models/cellRenderers/ThesisTypeRenderer";
+import { EnumsContext } from "models/EnumsContext";
 import { useMemo, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { link_pageKeywordDetail, link_pageUserDetail } from "routes/links";
@@ -135,16 +136,12 @@ interface ThesisListRendererProps extends ItemListProps<ThesisLookupDto> {
   onEvent?: (type: string, payload: ThesisLookupDto) => void;
 }
 export const ThesisListRenderer = (props: Omit<ThesisListRendererProps, "columns" | "renderItem">) => {
+  const { enums } = useContext(EnumsContext);
   const { rows, listClassName = "gap-1", clientSort = true, ...rest } = props;
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
-  const { data, loadData } = useSingleQuery<ThesisTypeDto[]>([]);
-  const typeFactory = useMemo(() => ThesisTypeRendererFactory(data), [data]);
+  const typeFactory = useMemo(() => ThesisTypeRendererFactory(enums.thesisTypes), [enums.thesisTypes]);
   const { renderItem, columns } = useMemo(() => ThesisRendererFactory({ translate, language, typeFactory }), [language, typeFactory]);
-
-  useEffect(() => {
-    loadData(httpClient.enums.thesisTypeGetAll());
-  }, []);
 
   return <ItemList {...rest} renderItem={renderItem} columns={columns} rows={rows} listClassName={listClassName} clientSort={clientSort} />;
 };

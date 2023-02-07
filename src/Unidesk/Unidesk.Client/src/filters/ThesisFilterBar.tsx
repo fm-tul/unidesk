@@ -4,7 +4,6 @@ import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
 import { QueryFilter } from "@models/QueryFilter";
-import { ThesisDto } from "@models/ThesisDto";
 import { ThesisFilter } from "@models/ThesisFilter";
 import { ThesisLookupDto } from "@models/ThesisLookupDto";
 import { ThesisStatus } from "@models/ThesisStatus";
@@ -29,19 +28,23 @@ interface ThesisFilterBarProps {
 }
 export const ThesisFilterBar = (props: ThesisFilterBarProps) => {
   const { initialFilter = {} } = props;
+  const { myThesis = false } = initialFilter;
   const { enums } = useContext(EnumsContext);
   const { onChange } = props;
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
 
   const { paging, isLoading, refreshIndex, refresh, loadData, setPaging } = useQuery<ThesisLookupDto>({ pageSize: 20 });
-  const [filter, setFilter, debounceFilter, _, clearLS] = useDebounceLocalStorageState<ThesisFilterOnly>("main.user-filter-bar", {
-    keyword: "",
-    ...initialFilter,
-  });
+  const [filter, setFilter, debounceFilter, _, clearLS] = useDebounceLocalStorageState<ThesisFilterOnly>(
+    `main.user-filter-bar.${myThesis ? "my" : "all"}`,
+    {
+      keyword: "",
+      ...initialFilter,
+    }
+  );
 
   const clearFilter = () => {
-    setFilter({ keyword: "" });
+    setFilter({ keyword: "", ...initialFilter });
     clearLS();
   };
 
@@ -51,7 +54,6 @@ export const ThesisFilterBar = (props: ThesisFilterBarProps) => {
   };
 
   useEffect(() => {
-    console.log(filter, initialFilter);
     loadData(httpClient.thesis.find({ requestBody: { ...filter, filter: paging } })).then(onChange);
   }, [debounceFilter, refreshIndex]);
 

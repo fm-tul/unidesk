@@ -6,11 +6,12 @@ interface DebugProps {
   value: any;
   title?: string;
   noRoot?: boolean;
+  show?: boolean;
 }
 export const Debug = (props: DebugProps) => {
-  const { value, title = "Debug", noRoot = false } = props;
+  const { value, title = "Debug", noRoot = false, show=false } = props;
   const debugRoot = document.getElementById("debug-root");
-  if (!IS_DEV || true) {
+  if (!IS_DEV || !show) {
     return null;
   }
 

@@ -1,4 +1,4 @@
-import { User_Admin } from "@api-client/constants/UserGrants";
+import { User_Admin } from "@api-client/constants/Grants";
 
 import { ExtraRouteProps, ExtraRoutePropsWithGoto } from "routes/core";
 

@@ -10,12 +10,17 @@ interface ToolbarProps extends SizeProps, VariantProps {
   children?: React.ReactNode;
   loading?: boolean;
   type?: "btn-bar" | "btn-group";
+  if?: boolean;
 }
 
 export const FilterBar: React.FC<ToolbarProps> = props => {
   const { disabled, className = "", children, type = "btn-bar", loading = false } = props;
   const size = getSize(props);
   const variant = getVariant(props);
+
+  if (!(props.if ?? true)) {
+    return null;
+  }
 
   const clonedChildren = React.Children.map(children, child => {
     if (!React.isValidElement(child)) {
@@ -25,7 +30,7 @@ export const FilterBar: React.FC<ToolbarProps> = props => {
       variant: (child as any).props.variant ?? variant,
       size: (child as any).props.size ?? size,
       loading: (child as any).props.loading ?? loading,
-      disabled,
+      disabled: (child as any).props.disabled ?? disabled,
     });
   });
 

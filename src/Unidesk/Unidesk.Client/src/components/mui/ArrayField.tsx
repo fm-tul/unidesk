@@ -53,19 +53,17 @@ export const ArrayField = (props: ArrayFieldProps) => {
   );
 };
 
-interface TextAreaProps extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {
-}
+interface TextAreaProps extends React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> {}
 export const TextArea = (props: TextAreaProps) => {
   const { rows = 1, className = "", ...rest } = props;
   const textAreaRef = createRef<HTMLTextAreaElement>();
 
   const updateHeight = () => {
     if (textAreaRef.current) {
-      console.log(textAreaRef.current, rest.value);
       textAreaRef.current.style.height = `0px`;
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
-  }
+  };
 
   const handleOnInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     updateHeight();
@@ -75,5 +73,7 @@ export const TextArea = (props: TextAreaProps) => {
     updateHeight();
   }, [rest.value]);
 
-  return <textarea ref={textAreaRef} onInput={handleOnInput} rows={1} className={`resize-none min-h-[30px] max-h-md ${className}`} {...rest} />;
+  return (
+    <textarea ref={textAreaRef} onInput={handleOnInput} rows={1} className={`max-h-md min-h-[30px] resize-none ${className}`} {...rest} />
+  );
 };

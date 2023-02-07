@@ -5,12 +5,24 @@ export const en = {
 
   // users
   "user-function": "User Function",
+  "linked-with-stag": "Linked with STAG",
+  "delete-user": "Delete User",
+  deleted: "Deleted",
+  delete: "Delete",
+  "user-aliases": "User Aliases",
+
+  // report 
+  "report.section.general": "General",
+  "report.section.evaluation": "Evaluation",
+  "report.section.overall-evaluation": "Overall Evaluation",
 
   // navbar
   import: "Import",
   styles: "Styles",
   login: "Login",
   logout: "Logout",
+  "sort-by": "Sort by",
+  "no-thesis-found": "No thesis found",
 
   // stag import
   "stag-sync": "Stag Sync",
@@ -26,6 +38,10 @@ export const en = {
   middleName: "Middlename",
   titleBefore: "Title Before",
   titleAfter: "Title After",
+  submit: "Submit",
+  "update-draft": "Save draft",
+  "evalution-submitted": "Evaluation submitted",
+  "evalution-submitted-error": "Error while submitting evaluation",
 
   // general
   ok: "Ok",
@@ -39,6 +55,8 @@ export const en = {
   no: "No",
   "has-keywords": "Has keywords",
   "restore-work": "Restore work",
+  "restore-work-from": "Restore work from",
+  "clear-history": "Clear history",
   saved: "Saved",
   saving: "Saving...",
   "error-saving": "Error while saving",
@@ -55,8 +73,16 @@ export const en = {
 
   teams: "Teams",
   "user-roles": "User Roles",
+  "team-name": "Team Name",
+  "team-role": "Team Role",
+  "no-teams": "No teams",
   accept: "Accept",
   decline: "Decline",
+  leave: "Leave",
+  remove: "Remove",
+  "team.members": "Team Members",
+  "team.invite-new-user": "Invite new user",
+  "team.contact-email": "Contact email",
 
   // history
   created: "Created",
@@ -66,10 +92,12 @@ export const en = {
   "created-by-user-at-time": (user: string, time: string) => `Created by ${user} (${time})`,
   "modified-by-user-at-time": (user: string, time: string) => `Modified by ${user} (${time})`,
   at: "at",
+  actions: "Actions",
 
   // thesis
   "thesis-type": "Thesis type",
   name: "Name",
+  description: "Description",
   authors: "Authors",
   supervisor: "Supervisor",
   supervisors: "Supervisors",
@@ -103,6 +131,7 @@ export const en = {
 
   // errors
   required: "Required",
+  from: "From",
   "min-3": "Select at least 3 values",
   "basic-information": "Basic information",
 
@@ -110,12 +139,19 @@ export const en = {
   "administration-menu": "Administration",
   "administration-actions": "Administration Actions",
   "admin-manage-x": (x: string) => `Manage ${x}`,
+  proceed: "Proceed",
 
   // paging
   "page-of": "of",
 
   // keywords
   "keyword-used-count": "Used count",
+
+  // evaluations
+  "evaluation.manage": "Manage Evaluations",
+  "evaluation.unlocked": "Unlocked",
+  "link.evaluation-detail": "Evaluation Detail",
+  "evaluation.error-already-sent": "Cannot edit evaluation, the invitation has already been sent",
 
   // links
   "link.import": "Stag Import",
@@ -127,6 +163,7 @@ export const en = {
   "link.my-theses": "My Theses",
   "link.edit-thesis": "Edit Thesis",
   "link.create-thesis": "Create new Thesis",
+  "link.evaluation-edit": "Edit Evaluation",
 
   "link.keywords": "Keywords",
   "link.keyword": "Keyword",
@@ -151,6 +188,23 @@ export const en = {
   // select component
   "select-component.type-to-search": "Type to search...",
   "select-component.no-results-found": "No results found",
+  
+
+  // form
+  "section.personal-information": "Personal Information",
+  "section.functions-and-aliases": "Functions & Aliases",
+  "section.roles-and-grants": "Roles & Grants",
+  "section.teams-and-groups": "Teams & Groups",
+  "section.teams": "Teams",
+
+  "section.team-information": "Team Information",
+  "section.team-composition": "Team Composition",
+
+  // help
+  "help.user-function": "User Functions serves as a guide for users of the system. Please select all the functions which are applicable to this user.",
+  "help.user-aliases": "User Aliases are used to connect your main account with other originating from STAG. Please select all the aliases which are applicable to this user.",
+  "help.user-roles": "User Roles are used to grant you access to certain parts of the system. Please select all the roles which are applicable to this user.",
+  "help.teams": "Teams are used to group users together. Please select all the teams which are applicable to this user.",
 };
 
 export default en;

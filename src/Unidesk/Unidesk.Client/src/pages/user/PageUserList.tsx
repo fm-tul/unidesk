@@ -15,6 +15,11 @@ import { UserFilter } from "@models/UserFilter";
 import { UserFunction } from "@models/UserFunction";
 import { distinct } from "utils/arrays";
 
+const orderByOptions = [
+  { value: "LastName", label: "lastname" },
+  { value: "FirstName", label: "firstname" },
+];
+
 type UserFilterOnly = Omit<UserFilter, "filter">;
 export const PageUserList = () => {
   const { language } = useContext(LanguageContext);

@@ -14,6 +14,7 @@ export const defaultEnumsContext: IEnumsContext = {
     studyProgrammes: [],
     thesisOutcomes: [],
     thesisTypes: [],
+    roles: [],
   },
   setEnums: () => {},
 };

@@ -8,6 +8,8 @@ import { useDebounceState } from "hooks/useDebounceState";
 import { useOpenClose } from "hooks/useOpenClose";
 
 import { classnames, UiColors } from "./shared";
+import { useQuery } from "react-query";
+import { Button } from "./Button";
 
 type Primitive = string | number | boolean | null | undefined;
 type IdLike = { id: string };
@@ -69,6 +71,7 @@ interface SelectFieldProps<T> {
   clearable?: boolean;
   searchable?: boolean;
   loading?: boolean;
+  disabled?: boolean;
   onValue?: (value: T[]) => void;
   getKey?: (value: T) => Primitive;
   getTitle?: (value: T) => Primitive | JSX.Element;
@@ -79,12 +82,23 @@ interface SelectFieldProps<T> {
   width?: string;
   color?: UiColors;
   clientFilter?: boolean;
+  onAddNew?: (value: string) => void;
 }
 export const SelectField = <T,>(props: SelectFieldProps<T>) => {
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
 
-  const { value, multiple = false, clearable = false, searchable = false, loading = false, label, options } = props;
+  const {
+    value,
+    multiple = false,
+    clearable = false,
+    searchable = false,
+    loading = false,
+    label,
+    disabled = false,
+    onAddNew,
+    options,
+  } = props;
   const { size = "md", width = "w-full min-w-[200px]", color = "info" } = props;
   const { onValue, getTitle, getKey, getValue, onSearch, clientFilter = true } = props;
   const values = value == undefined ? [] : Array.isArray(value) ? value : [value];
@@ -101,7 +115,16 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
   const theme = THEME[color];
   const sizeTheme = SIZES_THEME[size];
 
+  const onValueConditionally = (value: T[]) => {
+    if (onValue && !disabled) {
+      onValue(value);
+    }
+  };
+
   const handleOptionClick = (option: T, event?: React.MouseEvent<any, MouseEvent>) => {
+    if (disabled) {
+      return;
+    }
     event?.stopPropagation();
     setSearchText("");
     if (onValue == undefined) {
@@ -114,30 +137,36 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
       const includesOption = selectedValues.some(v => keyFunc(v) === keyFunc(option));
 
       if (includesOption) {
-        onValue(selectedValues.filter(v => keyFunc(v) !== keyFunc(option)));
+        onValueConditionally(selectedValues.filter(v => keyFunc(v) !== keyFunc(option)));
       } else {
-        onValue([...selectedValues, option]);
+        onValueConditionally([...selectedValues, option]);
       }
     } else {
       if (clearable && selectedValues.length > 0 && keyFunc(selectedValues[0]) === keyFunc(option)) {
-        onValue([]);
+        onValueConditionally([]);
       } else {
-        onValue([option]);
+        onValueConditionally([option]);
       }
       onClose();
     }
   };
 
   const handleSelectClick = () => {
+    if (disabled) {
+      return;
+    }
     inputRef.current?.focus();
     open();
   };
 
   const handleClearClick = (e: React.MouseEvent) => {
+    if (disabled) {
+      return;
+    }
     e.stopPropagation();
     setSearchText("");
     if (selectedValues.length > 0) {
-      onValue?.([]);
+      onValueConditionally?.([]);
     } else {
       onClose();
     }
@@ -148,8 +177,18 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
   }, [debouncedSearchText]);
 
   const handleSearchTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) {
+      return;
+    }
     setSearchText(e.target.value);
     open();
+  };
+
+  const onAddNewClick = () => {
+    if (onAddNew) {
+      onAddNew(searchText);
+      onClose();
+    }
   };
 
   const someValue = options[0] ?? selectedValues[0];
@@ -168,6 +207,9 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
   });
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (disabled) {
+      return;
+    }
     // arrow down?
     const isArrowDownOrUp = e.key === "ArrowDown" || e.key === "ArrowUp";
     if (isArrowDownOrUp) {
@@ -187,6 +229,7 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
   const onClose = () => {
     close();
     inputRef.current?.focus();
+    setSearchText("");
   };
 
   const hasValue = selectedValues.length > 0;
@@ -196,12 +239,13 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
       <div
         onClick={handleSelectClick}
         className={classnames(
+          disabled && "cursor-not-allowed bg-neutral-200 opacity-80",
           "select-wrapper flex h-full justify-between rounded border border-solid border-neutral-400 bg-white/80 ring-0 transition-all focus-within:ring-2",
           theme.ring
         )}
       >
         {/* options */}
-        <div className={classnames("flex w-full flex-wrap items-center gap-1", sizeTheme)} onClick={open}>
+        <div className={classnames("flex w-full flex-wrap items-center gap-1", sizeTheme)} onClick={handleSelectClick}>
           {selectedValues.map(i => {
             return (
               <span
@@ -215,18 +259,19 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
               </span>
             );
           })}
-          {searchable && (
+          {searchable && (multiple || !hasValue) && (
             <div className="grid grid-cols-[10px_max-content]">
               <input
                 ref={inputRef}
                 spellCheck={false}
                 value={searchText}
+                disabled={disabled}
                 type="text"
-                className="pointer-events-none absolute col-start-2 row-start-1 min-w-[10px] max-w-[100px] select-text bg-transparent outline-none"
+                className={classnames("pointer-events-none absolute col-start-2 row-start-1 min-w-[10px] select-text bg-transparent outline-none", multiple && "max-w-[100px]")}
                 onChange={handleSearchTextChange}
                 onKeyDown={e => {
                   if (e.key === "Backspace" && searchText === "") {
-                    onValue?.(selectedValues.slice(0, -1));
+                    onValueConditionally?.(selectedValues.slice(0, -1));
                   } else {
                     handleKeyDown(e);
                   }
@@ -292,9 +337,15 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
                   theme.border
                 )}
               >
-                {debouncedSearchText.length === 0
-                  ? translate("select-component.type-to-search")
-                  : translate("select-component.no-results-found")}
+                {(onAddNew && !hasValue) ? (
+                  <Button fullWidth onClick={onAddNewClick}>{translate("add-new")}</Button>
+                ) : (
+                  <>
+                    {debouncedSearchText.length === 0
+                      ? translate("select-component.type-to-search")
+                      : translate("select-component.no-results-found")}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -404,13 +455,27 @@ const SIZES_THEME = {
 // SelectField with dynamic options
 type SekectFieldLiveProps<T> = Omit<SelectFieldProps<T>, "options"> & {
   options: (searchText: string) => Promise<T[]>;
+  loadAll?: boolean;
 };
 export const SelectFieldLive = <T,>(props: SekectFieldLiveProps<T>) => {
-  const { options: searchFunc, onSearch, ...rest } = props;
+  const { options: searchFunc, onSearch, loadAll = false, ...rest } = props;
   const [liveOptions, setLiveOptions] = useState<T[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  if (loadAll) {
+    useQuery({
+      queryFn: () => searchFunc(""),
+      onSuccess: data => {
+        setLiveOptions(data);
+      },
+    });
+  }
+
   const handleSearch = async (searchText: string) => {
+    if (loadAll) {
+      return;
+    }
+
     if (searchText.length === 0) {
       setLiveOptions([]);
       return;
@@ -422,5 +487,5 @@ export const SelectFieldLive = <T,>(props: SekectFieldLiveProps<T>) => {
     setIsLoading(false);
   };
 
-  return <SelectField {...rest} clientFilter={false} options={liveOptions} loading={isLoading} onSearch={onSearch ?? handleSearch} />;
+  return <SelectField {...rest} clientFilter={loadAll} options={liveOptions} loading={isLoading} onSearch={onSearch ?? handleSearch} />;
 };

@@ -1,5 +1,5 @@
 import { IS_PROD } from "@core/config";
-import { languages, LanguagesId } from "@locales/all";
+import { languages } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
@@ -20,7 +20,17 @@ import "react-toastify/dist/ReactToastify.css";
 import { defaultEnumsContext, EnumsContext } from "models/EnumsContext";
 import { EnumsDto } from "./api-client";
 import { httpClient } from "@core/init";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { LanguagesId } from "@locales/common";
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 const AppWithProviders = () => {
   const [language, setLanguage] = useLocalStorage<LanguagesId>("locale", languages[0].id as LanguagesId);
   const [user, setUser] = useLocalStorage("user", userGuest);
@@ -36,34 +46,36 @@ const AppWithProviders = () => {
   }, []);
 
   return (
-    <EnumsContext.Provider value={{ enums, setEnums }}>
-      <LanguageContext.Provider value={{ language, setLanguage }}>
-        <UserContext.Provider value={{ user, setUser, resetUser }}>
-          <BrowserRouter>
-            <App />
-            <ToastContainer
-              position="bottom-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop
-              closeOnClick
-              pauseOnFocusLoss
-              draggable={false}
-              pauseOnHover
-            />
-          </BrowserRouter>
-          <ModalContainer />
-        </UserContext.Provider>
-      </LanguageContext.Provider>
-    </EnumsContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <EnumsContext.Provider value={{ enums, setEnums }}>
+        <LanguageContext.Provider value={{ language, setLanguage }}>
+          <UserContext.Provider value={{ user, setUser, resetUser }}>
+            <BrowserRouter>
+              <App />
+              <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable={false}
+                pauseOnHover
+              />
+            </BrowserRouter>
+            <ModalContainer />
+          </UserContext.Provider>
+        </LanguageContext.Provider>
+      </EnumsContext.Provider>
+    </QueryClientProvider>
   );
 };
 
-if (IS_PROD) {
+if (!IS_PROD) {
   ReactDOM.createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
+    // <React.StrictMode>
       <AppWithProviders />
-    </React.StrictMode>
+    // </React.StrictMode>
   );
 } else {
   ReactDOM.createRoot(document.getElementById("root")!).render(<AppWithProviders />);

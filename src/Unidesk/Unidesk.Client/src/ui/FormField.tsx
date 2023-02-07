@@ -1,3 +1,4 @@
+import { Collapse } from "components/mui/Collapse";
 import { classnames, getHelperColor, HelperProps } from "./shared";
 
 interface FormFieldProps<T> extends HelperProps {
@@ -16,10 +17,13 @@ export const FormField = <T,>(props: FormFieldProps<T> & T) => {
 
   return (
     <div className={classnames("inline-flex flex-col gap-1", classNameField)}>
-      <div className="min-h-[36px] h-full">
+      <div className="h-full min-h-[36px]">
         <Component {...propsToPass} />
       </div>
-      {!!helperText && <div className={classnames("animate-reveal-var text-sm", theme, helperClassName)}>{helperText}</div>}
+
+      <Collapse open={!!helperText} className={classnames("text-sm", theme, helperClassName)}>
+        {helperText}
+      </Collapse>
     </div>
   );
 };

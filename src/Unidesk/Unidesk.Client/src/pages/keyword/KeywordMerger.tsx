@@ -1,5 +1,5 @@
 import { httpClient } from "@core/init";
-import { locales } from "@locales/all";
+import { locales } from "@locales/common";
 import { SimilarKeywordDto } from "@models/SimilarKeywordDto";
 import { UnideskComponent } from "components/UnideskComponent";
 import { useState } from "react";

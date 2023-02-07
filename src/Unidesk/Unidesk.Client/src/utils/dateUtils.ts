@@ -1,7 +1,7 @@
 import { getMoment } from "@core/momentProvider";
 
-type formatTypes = "smart" | "short" | "long" | "full";
-export const formatDate = (date: string | Date | moment.Moment, format: formatTypes = "smart") => {
+export type DateFormatTypes = "smart" | "short" | "long" | "full";
+export const formatDate = (date: string | Date | moment.Moment, format: DateFormatTypes = "smart") => {
   const momentDate = getMoment(date);
   switch (format) {
     case "full":

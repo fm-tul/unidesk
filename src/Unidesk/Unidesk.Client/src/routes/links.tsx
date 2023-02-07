@@ -1,8 +1,9 @@
-import { User_Admin, User_SuperAdmin } from "@api-client/constants/UserGrants";
+import { User_Admin, User_SuperAdmin } from "@api-client/constants/Grants";
 
 import { link_admin, link_adminManageEnum } from "./admin/links";
 import { PageStagImportComponent } from "./admin/links.pageStagImport";
 import { ExtraRouteProps, ExtraRoutePropsWithGoto } from "./core";
+import { PageEvaluationManageComponent, PageEvaluationDetailComponent } from "./links.pageEvaluation";
 import { PageHomeComponent } from "./links.pageHome";
 import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
 import { PageStylesComponent } from "./links.pageStyles";
@@ -139,6 +140,22 @@ export const link_pageTeamEdit: ExtraRoutePropsWithGoto = {
   navigate: (id: string) => `/teams/${id}/edit`,
 };
 
+export const link_pageEvaluationManage: ExtraRoutePropsWithGoto = {
+  title: "link.evaluation-edit",
+  path: "/evaluations/:id",
+  visible: false,
+  element: PageEvaluationManageComponent,
+  navigate: (id: string) => `/evaluations/${id}`,
+};
+
+export const link_pageEvaluationDetailComponent: ExtraRoutePropsWithGoto = {
+  title: "link.evaluation-detail",
+  path: "/evaluation/:id",
+  visible: false,
+  element: PageEvaluationDetailComponent,
+  navigate: (id: string) => `/evaluation/${id}`,
+};
+
 export const links = [
   link_pageHome,
   link_stagImport,
@@ -168,4 +185,7 @@ export const links = [
 
   link_settings,
   link_settingsManageSettings,
+
+  link_pageEvaluationManage,
+  link_pageEvaluationDetailComponent,
 ];

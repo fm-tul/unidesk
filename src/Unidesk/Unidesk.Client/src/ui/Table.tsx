@@ -21,7 +21,7 @@ export interface ColumnDefinition<TValue> {
   visible?: boolean;
 }
 
-export type TableProps<TValue extends TId> = HTMLAttributes<HTMLDivElement> & {
+export type TableProps<TValue> = HTMLAttributes<HTMLDivElement> & {
   rows?: TValue[];
   columns: ColumnDefinition<TValue>[];
   onRowClick?: (value: TValue) => void;
@@ -29,14 +29,16 @@ export type TableProps<TValue extends TId> = HTMLAttributes<HTMLDivElement> & {
   fullWidth?: boolean;
   clientSort?: boolean;
   selected?: Key;
+  idGetter?: (value: TValue) => string;
+  EmptyContent?: JSX.Element;
 };
 
-interface SortBy<TValue extends TId> {
+interface SortBy<TValue> {
   col: ColumnDefinition<TValue>;
   direction: "asc" | "desc";
 }
 
-const applySort = <TValue extends TId>(rows: TValue[], sortBy: SortBy<TValue>): TValue[] => {
+const applySort = <TValue,>(rows: TValue[], sortBy: SortBy<TValue>): TValue[] => {
   const newRows = rows.sort((a, b) => {
     if (sortBy.col.sortFunc) {
       return sortBy.col.sortFunc(a, b);
@@ -59,8 +61,10 @@ const applySort = <TValue extends TId>(rows: TValue[], sortBy: SortBy<TValue>): 
   return newRows;
 };
 
-export const Table = <TValue extends TId>(props: TableProps<TValue>) => {
-  const { rows = [], columns, onRowClick, autoHeight, fullWidth = true, clientSort = false, selected, className, ...rest } = props;
+const defaultIdGetter = <TValue,>(value: TValue) => (value as any).id ?? JSON.stringify(value);
+
+export const Table = <TValue, >(props: TableProps<TValue>) => {
+  const { rows = [], columns, onRowClick, autoHeight, fullWidth = true, clientSort = false, selected, className, idGetter=defaultIdGetter, EmptyContent, ...rest } = props;
   const fullWidthCss = fullWidth ? "w-full" : "";
   const visibleColumns = columns.filter(i => i.visible !== false);
 
@@ -110,9 +114,9 @@ export const Table = <TValue extends TId>(props: TableProps<TValue>) => {
           {sortedRows.map(item => (
             <tr
               className={`table-tr table-body ${
-                item.id === selected ? "selected" : ""
+                idGetter(item) === selected ? "selected" : ""
               } selected:bg-gradient-to-r selected:from-info-500/30`}
-              key={item.id}
+              key={idGetter(item)}
               onClick={() => onRowClick?.(item)}
             >
               {visibleColumns.map((col, index) => (
@@ -120,6 +124,12 @@ export const Table = <TValue extends TId>(props: TableProps<TValue>) => {
               ))}
             </tr>
           ))}
+          
+          {!!EmptyContent && sortedRows.length === 0 && (
+            <tr className="table-tr table-body">
+              <td colSpan={visibleColumns.length}>{EmptyContent}</td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

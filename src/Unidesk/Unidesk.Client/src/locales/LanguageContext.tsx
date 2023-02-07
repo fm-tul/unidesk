@@ -1,5 +1,6 @@
 import { createContext } from "react";
-import { languages, LanguagesId } from "./all";
+import { languages } from "./all";
+import { LanguagesId } from "./common";
 
 export interface ILanguageContext {
   language: LanguagesId;

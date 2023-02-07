@@ -11,13 +11,13 @@ export const PageThesisListComponent = (
 );
 
 export const PageMyThesisListComponent = (
-  <Suspense>
+  <Suspense key={"my-thesis"}>
     <PageThesisList myThesis />
   </Suspense>
 );
 
 export const PageThesisDetailComponent = (
-  <Suspense>
+  <Suspense key={"thesis-detail"}>
     <PageThesisDetail />
   </Suspense>
 );

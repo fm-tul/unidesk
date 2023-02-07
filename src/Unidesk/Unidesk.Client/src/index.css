@@ -59,3 +59,15 @@
 .flow {
   @apply flex items-center gap-1;
 }
+
+.flow-col {
+  @apply flex flex-col gap-2;
+}
+
+.help-text {
+  @apply m-2 ml-4 border-l-2 border-gray-300 pl-2 text-sm text-gray-500;
+}
+
+.form-section {
+  @apply font-light text-2xl text-gray-700 border-b border-gray-300 my-4;
+}

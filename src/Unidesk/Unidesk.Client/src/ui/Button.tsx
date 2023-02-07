@@ -31,7 +31,7 @@ export const Button = (props: PropsWithChildren<ButtonProps> & HtmlHTMLAttribute
   const variantCss = VARIANTS[variant];
 
   const loadingCss = loading ? "loading" : "";
-  const disabledCss = loading || disabled ? `${disableClass} i-disabled` : "";
+  const disabledCss = (loading || disabled) ? `${disableClass} i-disabled` : "";
   const fullWidthCss = fullWidth ? "w-full" : "";
   const className = `btn ${colorCss} ${sizeCss} ${variantCss} ${disabledCss} ${fullWidthCss} ${classNameOverride} ${loadingCss}`;
 

@@ -3,7 +3,7 @@ export type UiColors = "info" | "success" | "warning" | "error" | "neutral";
 export type UiVariants = "contained" | "outlined" | "text";
 
 export interface HelperProps {
-  helperText?: string;
+  helperText?: string | JSX.Element;
   helperColor?: UiColors | boolean;
   helperClassName?: string;
 }

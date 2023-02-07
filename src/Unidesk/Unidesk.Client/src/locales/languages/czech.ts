@@ -11,7 +11,11 @@ export const cs: ILocale = {
   login: "Přihlásit",
   logout: "Odhlásit",
 
-  "accept": "Přijmout",
+  accept: "Přijmout",
+  from: "z",
+  "restore-work": "Obnovit práci",
+  "restore-work-from": "Obnovit práci z",
+  "clear-history": "Vymazat historii",
 
   // stag import
   "stag-sync": "Stag Sync",
@@ -30,7 +34,6 @@ export const cs: ILocale = {
   keywords: "Klíčová slova",
   "school-year": "Školní rok",
 
-  
   // paging
   "page-of": "z",
 

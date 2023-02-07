@@ -1,4 +1,4 @@
-import { All as UserGrantsAll } from "@api-client/constants/UserGrants";
+import { All as GrantsAll } from "@api-client/constants/Grants";
 import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
@@ -68,12 +68,12 @@ const RolesAndGrants = () => {
 
   const { data, loadData } = useSingleQuery<UserRoleDto[]>([]);
   const [item, setItem] = useState<UserRoleDto>();
-  const renderGrant = (id: string) => UserGrantsAll.find(i => i.id === id)?.name;
+  const renderGrant = (id: string) => GrantsAll.find(i => i.id === id)?.name;
 
   const GrantRenderer = (params: UserRoleDto) => {
     const { grants } = params;
     return (
-      <div>
+      <div className="flow flex-wrap">
         {grants.length === 0 ? (
           <em>{translate("no-grants")}</em>
         ) : (
@@ -107,7 +107,7 @@ const RolesAndGrants = () => {
   }, []);
 
   const userGrantsOtions = generatePrimitive(
-    UserGrantsAll.map(i => i.id),
+    GrantsAll.map(i => i.id),
     renderGrant
   );
 
@@ -142,6 +142,7 @@ const RolesAndGrants = () => {
               id: "grants",
               field: GrantRenderer,
               headerName: "Grants",
+              className: "max-w-xs"
             },
             {
               id: "created",
@@ -172,7 +173,7 @@ const RolesAndGrants = () => {
       </div>
 
       {item != null && (
-        <div className="flow mt-4">
+        <div className="flex gap-1 items-baseline mt-4">
           <FormField as={TextField} value={item.name} label="Name" onValue={(name: string) => setItem({ ...item, name })} />
           <FormField
             as={TextField}
@@ -181,7 +182,7 @@ const RolesAndGrants = () => {
             onValue={(description: string) => setItem({ ...item, description })}
           />
           <FormField
-            classNameField="min-w-[200px]"
+            classNameField="min-w-[200px] max-w-md"
             as={Select<string>}
             value={item.grants.map(i => i.id)}
             options={userGrantsOtions}
@@ -189,7 +190,7 @@ const RolesAndGrants = () => {
             multiple
             clearable
             searchable
-            onMultiValue={(grants: string[]) => setItem({ ...item, grants: grants.map(i => UserGrantsAll.find(j => j.id === i)!) })}
+            onMultiValue={(grants: string[]) => setItem({ ...item, grants: grants.map(i => GrantsAll.find(j => j.id === i)!) })}
             optionRender={renderGrant}
           />
           <Button className="ml-auto" success onClick={handleSave}>

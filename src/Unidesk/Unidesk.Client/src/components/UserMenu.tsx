@@ -1,4 +1,4 @@
-import { User_SuperAdmin } from "@api-client/constants/UserGrants";
+import { User_SuperAdmin } from "@api-client/constants/Grants";
 import { GUID_EMPTY, VITE_DEBUG_LOGIN } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";

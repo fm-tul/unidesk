@@ -24,8 +24,6 @@ export interface PageThesisListProps {
 }
 export const PageThesisList = (props: PageThesisListProps) => {
   const { myThesis } = props;
-  const { language } = useContext(LanguageContext);
-  const translate = (value: EnKeys, ...args: any[]) => RR(value, language, ...args);
   const [selectedThesis, setSelectedThesis] = useState<ThesisLookupDto>();
   const { open, close, isOpen } = useOpenClose(false);
   const [data, setData] = useState<ThesisLookupDto[]>([]);

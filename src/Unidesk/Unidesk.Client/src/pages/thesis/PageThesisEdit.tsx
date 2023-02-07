@@ -38,7 +38,7 @@ import { useStepper } from "hooks/useStepper";
 import { renderTeam } from "models/cellRenderers/TeamRenderer";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { renderUser, renderUserLookup } from "models/cellRenderers/UserRenderer";
-import { link_pageThesisDetail, link_pageThesisEdit } from "routes/links";
+import { link_pageEvaluationManage, link_pageThesisDetail, link_pageThesisEdit } from "routes/links";
 import { Button } from "ui/Button";
 import { CreateConfirmDialog as confirmWith } from "ui/Confirm";
 import { FormField } from "ui/FormField";
@@ -386,7 +386,12 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
             </Button>
           )}
 
-          <Button onClick={handleSubmit}>{isNew ? RR("create", language) : RR("update", language)}</Button>
+          <div className="flow">
+            <Button onClick={handleSubmit}>{isNew ? RR("create", language) : RR("update", language)}</Button>
+            <Button if={dto.status === ThesisStatus.SUBMITTED} component={Link} to={link_pageEvaluationManage.navigate(dto.id)}>
+              {RR("evaluation.manage", language)}
+            </Button>
+          </div>
         </div>
 
         {isOpen && (

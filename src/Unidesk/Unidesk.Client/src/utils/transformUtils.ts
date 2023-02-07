@@ -1,4 +1,4 @@
-import { LanguagesId } from "@locales/all";
+import { LanguagesId } from "@locales/common";
 import { KeyValue } from "./KeyValue";
 
 interface MultilangItem {

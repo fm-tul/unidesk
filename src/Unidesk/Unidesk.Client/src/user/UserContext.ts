@@ -12,6 +12,7 @@ export const userGuest: UserDto = {
   userFunction: UserFunction.NONE,
   teams: [],
   aliases: [],
+  allThesis: [],
 };
 
 export interface IUserContext {
