@@ -12,8 +12,8 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    [Migration("20221215011504_User_Aliases")]
-    partial class UserAliases
+    [Migration("20230207104456_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -485,8 +485,9 @@ namespace Unidesk.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Avatar")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("Avatar")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -496,6 +497,9 @@ namespace Unidesk.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Modified")
@@ -602,6 +606,72 @@ namespace Unidesk.Migrations
                     b.HasIndex("ThesisTypeId");
 
                     b.ToTable("Theses");
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.ThesisEvaluation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Format")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Language")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassphraseHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Response")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ThesisId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserFunction")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("ThesisId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ThesisEvaluations");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.ThesisOutcome", b =>
@@ -757,6 +827,9 @@ namespace Unidesk.Migrations
                     b.Property<string>("StagId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
                     b.Property<string>("TitleAfter")
                         .HasColumnType("nvarchar(max)");
 
@@ -866,7 +939,7 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.Document", "Document")
                         .WithOne("DocumentContent")
                         .HasForeignKey("Unidesk.Db.Models.DocumentContent", "DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Document");
@@ -877,13 +950,13 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.Keyword", "Keyword")
                         .WithMany("KeywordThesis")
                         .HasForeignKey("KeywordId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
                         .WithMany("KeywordThesis")
                         .HasForeignKey("ThesisId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Keyword");
@@ -895,7 +968,8 @@ namespace Unidesk.Migrations
                 {
                     b.HasOne("Unidesk.Db.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
                 });
@@ -905,19 +979,19 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.ReportTemplate", "ReportTemplate")
                         .WithMany()
                         .HasForeignKey("ReportTemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.User", "ReportUser")
                         .WithMany()
                         .HasForeignKey("ReportUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
                         .WithMany()
                         .HasForeignKey("ThesisId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ReportTemplate");
@@ -931,7 +1005,8 @@ namespace Unidesk.Migrations
                 {
                     b.HasOne("Unidesk.Db.Models.Thesis", null)
                         .WithMany("Teams")
-                        .HasForeignKey("ThesisId");
+                        .HasForeignKey("ThesisId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.Thesis", b =>
@@ -939,28 +1014,30 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.Faculty", "Faculty")
                         .WithMany()
                         .HasForeignKey("FacultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.SchoolYear", "SchoolYear")
                         .WithMany()
                         .HasForeignKey("SchoolYearId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.StudyProgramme", "StudyProgramme")
                         .WithMany()
-                        .HasForeignKey("StudyProgrammeId");
+                        .HasForeignKey("StudyProgrammeId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Unidesk.Db.Models.ThesisType", "ThesisType")
                         .WithMany()
-                        .HasForeignKey("ThesisTypeId");
+                        .HasForeignKey("ThesisTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Department");
 
@@ -973,18 +1050,46 @@ namespace Unidesk.Migrations
                     b.Navigation("ThesisType");
                 });
 
+            modelBuilder.Entity("Unidesk.Db.Models.ThesisEvaluation", b =>
+                {
+                    b.HasOne("Unidesk.Db.Models.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
+                        .WithMany("ThesisEvaluations")
+                        .HasForeignKey("ThesisId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Unidesk.Db.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Thesis");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Unidesk.Db.Models.ThesisOutcome", b =>
                 {
                     b.HasOne("Unidesk.Db.Models.Thesis", null)
                         .WithMany("Outcomes")
-                        .HasForeignKey("ThesisId");
+                        .HasForeignKey("ThesisId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.ThesisType", b =>
                 {
                     b.HasOne("Unidesk.Db.Models.Thesis", null)
                         .WithMany("ThesisTypeCandidates")
-                        .HasForeignKey("ThesisId");
+                        .HasForeignKey("ThesisId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.ThesisUser", b =>
@@ -992,13 +1097,13 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.Thesis", "Thesis")
                         .WithMany("ThesisUsers")
                         .HasForeignKey("ThesisId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.User", "User")
                         .WithMany("Theses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Thesis");
@@ -1010,11 +1115,13 @@ namespace Unidesk.Migrations
                 {
                     b.HasOne("Unidesk.Db.Models.Document", "Avatar")
                         .WithMany()
-                        .HasForeignKey("AvatarId");
+                        .HasForeignKey("AvatarId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Unidesk.Db.Models.User", null)
                         .WithMany("Aliases")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Avatar");
                 });
@@ -1024,13 +1131,13 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.Team", "Team")
                         .WithMany("UserInTeams")
                         .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.User", "User")
                         .WithMany("UserInTeams")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Team");
@@ -1043,13 +1150,13 @@ namespace Unidesk.Migrations
                     b.HasOne("Unidesk.Db.Models.UserRole", null)
                         .WithMany()
                         .HasForeignKey("RolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Unidesk.Db.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -1076,6 +1183,8 @@ namespace Unidesk.Migrations
                     b.Navigation("Outcomes");
 
                     b.Navigation("Teams");
+
+                    b.Navigation("ThesisEvaluations");
 
                     b.Navigation("ThesisTypeCandidates");
 
