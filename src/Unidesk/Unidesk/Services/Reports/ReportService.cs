@@ -40,7 +40,7 @@ public class ReportService
 
         return templateEngine.Render(template);
     }
-
+    
     public async Task<byte[]?> GenerateReportAsync(ReportModel model)
     {
         var template = LoadTemplate();

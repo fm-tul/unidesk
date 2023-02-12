@@ -236,6 +236,7 @@ public class UserService
     public async Task SignOutAsync(HttpContext httpContext)
     {
         await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        httpContext.Response.Cookies.Delete($".AspNetCore.{CookieAuthenticationDefaults.AuthenticationScheme}");
     }
 
     public async Task<User> CreateFromShibboRequestAsync(LoginShibboRequest shibboRequest)

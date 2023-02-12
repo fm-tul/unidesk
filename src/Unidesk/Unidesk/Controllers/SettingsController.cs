@@ -1,4 +1,5 @@
 ﻿using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db.Models;
@@ -8,6 +9,7 @@ using Unidesk.Services;
 namespace Unidesk.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 public class SettingsController : Controller
 {
     private readonly SettingsService _settingsService;

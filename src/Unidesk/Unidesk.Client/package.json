@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite --port 3000",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --sourcemap --emptyOutDir",
     "preview": "vite preview",
     "generate-api": "npx openapi-typescript-codegen -i http://localhost:5222/swagger/v1/swagger.json -c axios -o src/api-client --name ApiClient --useOptions"
   },

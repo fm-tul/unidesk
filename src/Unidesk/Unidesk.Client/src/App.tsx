@@ -1,4 +1,5 @@
 import { UserDto } from "@api-client";
+import { GUID_EMPTY } from "@core/config";
 import { EnKeys } from "@locales/all";
 import { R } from "@locales/R";
 import { useContext } from "react";
@@ -49,7 +50,7 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
 
 export const App = () => {
   const { user } = useContext(UserContext);
-  const available_links = links.filter(i => has_access(i, user));
+  const available_links = links.filter(i => hasAccess(i, user));
 
   // min-w-max
   return (
@@ -76,11 +77,11 @@ export const App = () => {
 
 export default App;
 
-function has_access(i: ExtraRouteProps, user: UserDto): boolean {
+function hasAccess(i: ExtraRouteProps, user: UserDto): boolean {
+  const availToAll = i.allowAnonymous === true || user.id !== GUID_EMPTY;
   if (!i.requiredGrants || i.requiredGrants.length == 0) {
-    return true;
+    return availToAll;
   }
   const { grantIds } = user;
-  const has_access = i.requiredGrants.every(grant => grantIds?.includes(grant));
-  return has_access;
+  return i.requiredGrants.every(grant => grantIds?.includes(grant)) && availToAll;
 }

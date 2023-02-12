@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db.Models;
@@ -10,6 +11,7 @@ namespace Unidesk.Controllers;
 public partial class UsersController
 {
     [HttpPost, Route("login")]
+    [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(Login))]
     [ProducesResponseType(typeof(LoginResponse), 200)]
     public async Task<IActionResult> Login(LoginRequest request)
@@ -35,6 +37,7 @@ public partial class UsersController
     }
 
     [HttpGet, Route("/login.sso/{*path}")]
+    [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(LoginSSO))]
     [ProducesResponseType(typeof(LoginResponse), 200)]
     public async Task<IActionResult> LoginSSO(string path)
@@ -86,21 +89,23 @@ public partial class UsersController
     }
 
     [HttpGet, Route("logout")]
+    [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(Logout))]
     [ProducesResponseType(typeof(LoginResponse), 200)]
     public async Task<IActionResult> Logout()
     {
-        var user = _userProvider.CurrentUser ?? throw new ArgumentNullException(nameof(_userProvider.CurrentUser));
-
+        var user = (User?)_userProvider.CurrentUser;
         var httpContext = _httpContextAccessor.HttpContext
-                       ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
+                           ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
+        
         await _userService.SignOutAsync(httpContext);
-        _logger.LogInformation("User {Email} logged out at {Time}", user.Email, DateTime.UtcNow);
-
+        _logger.LogInformation("User {Email} logged out at {Time}", user?.Email, DateTime.UtcNow);
+        
+        
         return Ok(new LoginResponse
         {
             IsAuthenticated = false,
-            Message = "User logged out successfully"
+            Message = "User logged out successfully",
         });
     }
 }

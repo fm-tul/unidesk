@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -18,6 +19,7 @@ using Unidesk.Utils.Extensions;
 namespace Unidesk.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 [ExcludeFromCodeCoverage]
 public partial class UsersController : ControllerBase

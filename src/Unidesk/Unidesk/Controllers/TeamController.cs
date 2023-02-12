@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
@@ -13,6 +14,7 @@ using Unidesk.Services;
 namespace Unidesk.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 [ExcludeFromCodeCoverage]
 public class TeamController : ControllerBase

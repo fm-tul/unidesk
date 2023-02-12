@@ -2,6 +2,7 @@
 using FluentValidation.Results;
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
@@ -20,6 +21,7 @@ using Unidesk.Validations;
 namespace Unidesk.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 public class ThesisController : Controller
 {
     private readonly IMapper _mapper;

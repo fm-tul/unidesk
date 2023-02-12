@@ -6,6 +6,7 @@ export interface ExtraRouteProps extends PathRouteProps {
   visible?: boolean;
   requiredGrants?: string[];
   path: string;
+  allowAnonymous?: boolean;
 }
 
 export interface ExtraRoutePropsWithGoto extends ExtraRouteProps {

@@ -1,4 +1,5 @@
 ﻿using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
@@ -12,6 +13,7 @@ using Unidesk.Services.Stag.Models;
 namespace Unidesk.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class ImportController : ControllerBase
 {
