@@ -1,0 +1,31 @@
+﻿# yaml docker compose file for Unidesk
+# we have the applications unidesk-app:latest and microsoft-mssql-server:2022-latest
+version: "3.7"
+
+services:
+  
+  # unidesk-app:latest will be exposed on port 5222 for the web server during the development
+  # in production the port 443 will be used
+  unidesk:
+    image: unidesk-app:latest
+    container_name: unidesk
+    restart: always
+    volumes: []
+    environment:
+      - UNIDESK_CONNECTION_STRING=Server=mssql,1433; Database=unidesk; User Id=SA; Trust Server Certificate=true; Password=${MSSQL_SA_PASSWORD}
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    ports:
+      - "7222:443"
+      - "5222:80"
+    
+    
+  # mssql server will be exposed on port 14433 for the maintenance of the database    
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    restart: always
+    ports: ["14433:1433"]
+    volumes: []
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
