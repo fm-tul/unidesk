@@ -28,3 +28,19 @@
   5. Verify that the migration was created
   
      ```dotnet ef database update --project Unidesk```
+
+### Add a new migration
+
+  1. Run the following command to create a new migration
+  
+     ```dotnet ef migrations add  --project Unidesk <MigrationName>```
+  
+  2. Run the following command to update the database
+  
+     ```dotnet ef database update --project Unidesk```
+
+## Publish
+
+  1. Run the following command to publish the project in the Unidesk folder
+  
+     ```dotnet publish --os linux --arch x64 /t:PublishContainer -c Release```
