@@ -2,4 +2,8 @@
 
 namespace Unidesk.Reports.Elements;
 
-public class TextQuestion : ReportQuestion { }
+public class TextQuestion : ReportQuestion
+{
+    [Required]
+    public int Rows { get; init; } = 1;
+}

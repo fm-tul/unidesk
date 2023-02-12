@@ -72,7 +72,6 @@ public class ThesisEvaluation_Opponent_FM_Eng : IThesisEvaluation
     {
         Thesis thesis = context.Thesis;
         Language language = context.Language;
-        User user = context.Evaluator;
         UserFunction userFunction = context.UserFunction;
 
         if (!thesis.Status.In(ThesisStatus.Submitted, ThesisStatus.Finished))
@@ -103,7 +102,12 @@ public class ThesisEvaluation_Opponent_FM_Eng : IThesisEvaluation
     }
 }
 
-file class Model
+public interface IEvaluationModel
+{
+    public List<ReportAnswer> Answers { get; set; }
+}
+
+file class Model : IEvaluationModel
 {
     // Author name:
     public required string AuthorName { get; set; }
@@ -176,7 +180,7 @@ file class Model
            .ToList();
 
         // prefill some answers
-        answers.First(i => i.Id == Questions.TextQuestions.OpponentName.Id).Answer = context.Evaluator.FullName;
+        answers.First(i => i.Id == Questions.TextQuestions.OpponentName.Id).Answer = context.ThesisEvaluation.EvaluatorFullName;
 
         var model = new Model
         {

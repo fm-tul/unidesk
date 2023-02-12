@@ -211,15 +211,19 @@ public static class Questions
             Id = new Guid("174D13EE-EC91-443C-822F-0FA86BF0A6DB"),
             Question = "Comments, remarks",
             Description = "!! enter your comments or at least delete this text",
+            Rows = 10,
         };
 
         public static ReportQuestion OverallAssessment = new TextQuestion
         {
             Id = new Guid("7161BEF1-E8D6-4751-A404-6D48A42E025F"),
             Question = "Overall assessment",
-            Description = "for example: Additional comments to the above evaluation; Thesis topicality; Topic difficulty of theoretical knowledge, " +
-                          "level of processing, work with scientific literature; The benefits of work; Experiments and their evaluation; " +
-                          "The importance for the practice / theory.",
+            Description = """
+                For example: Additional comments to the above evaluation; Thesis topicality; Topic difficulty of theoretical knowledge, 
+                level of processing, work with scientific literature; The benefits of work; 
+                Experiments and their evaluation; The importance for the practice / theory.
+                """,
+            Rows = 10,
         };
 
         public static ReportQuestion QuestionsForTheDefense = new TextQuestion
@@ -227,6 +231,7 @@ public static class Questions
             Id = new Guid("72952548-732D-4E6E-90D9-440E47C6B221"),
             Question = "Questions for the defense",
             Description = "1., 2., …",
+            Rows = 10,
         };
 
         /*
@@ -247,15 +252,19 @@ public static class Questions
             Id = new Guid("BC49FA15-9448-4EBD-AC3A-56A362FB40D8"),
             Question = "Komentáře či připomínky",
             Description = "!! vepište případný komentář, doplnění výše uvedené klasifikace, nebo smažte",
+            Rows = 10,
         };
 
         public static ReportQuestion OverallAssessment_CZ = new TextQuestion
         {
             Id = new Guid("55E1FD69-7618-40C2-A64C-E2BC6B8A0C2F"),
             Question = "Celkové zhodnocení",
-            Description = "Např: komentář k výše uvedenému hodnocení, aktuálnost tématu, náročnost tématu na teoretické znalosti, " +
-                          "vyšší úroveň zpracování literární rešerše, práce s vědeckou literaturou, přínosy práce, " +
-                          "experimenty a jejich vyhodnocení, význam pro praxi/teorii",
+            Description = """
+                Např: komentář k výše uvedenému hodnocení, aktuálnost tématu, náročnost tématu na teoretické znalosti, 
+                vyšší úroveň zpracování literární rešerše, práce s vědeckou literaturou, přínosy práce, 
+                experimenty a jejich vyhodnocení, význam pro praxi/teorii
+                """,
+            Rows = 10,
         };
 
         public static ReportQuestion QuestionsForTheDefense_CZ = new TextQuestion
@@ -263,6 +272,7 @@ public static class Questions
             Id = new Guid("B5F5F5B9-5B9B-4F5B-8F5B-5B5B5B5B5B5B"),
             Question = "Otázky k obhajobě",
             Description = "1., 2., …",
+            Rows = 10,
         };
 
         /*
@@ -270,16 +280,18 @@ public static class Questions
          * Opponent workplace:
          */
 
-        public static ReportQuestion OpponentName = new ShortTextQuestion
+        public static ReportQuestion OpponentName = new TextQuestion
         {
             Id = new Guid("14A57F54-82DA-499E-978A-D8A79201FA76"),
             Question = "Opponent",
+            Rows = 1,
         };
 
-        public static ReportQuestion OpponentWorkplace = new ShortTextQuestion
+        public static ReportQuestion OpponentWorkplace = new TextQuestion
         {
             Id = new Guid("D6CB8878-67FE-4781-AC97-DC698EDE7D5C"),
             Question = "Opponent workplace",
+            Rows = 1,
         };
 
         /*
@@ -287,16 +299,18 @@ public static class Questions
          * Pracoviště oponenta:
          */
 
-        public static ReportQuestion OpponentName_CZ = new ShortTextQuestion
+        public static ReportQuestion OpponentName_CZ = new TextQuestion
         {
             Id = new Guid("D45802CC-3282-4353-9C92-E60CDDDFAD21"),
             Question = "Oponent práce",
+            Rows = 1,
         };
 
-        public static ReportQuestion OpponentWorkplace_CZ = new ShortTextQuestion
+        public static ReportQuestion OpponentWorkplace_CZ = new TextQuestion
         {
             Id = new Guid("C1187EE4-0762-4696-983E-5AA2DCD32B9F"),
             Question = "Pracoviště oponenta",
+            Rows = 1,
         };
     }
 

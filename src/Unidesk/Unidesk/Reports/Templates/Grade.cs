@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Extensions;
 using Unidesk.Client;
 
 namespace Unidesk.Reports.Templates;
@@ -30,4 +31,13 @@ public enum Grade
     // 4) - Failed
     [MultiLang("Failed (4)", "Nedostatečně (4)")]
     GradeD,
+}
+
+public static class GradeExtensions
+{
+    public static MultiLangAttribute? GetLangAttributeFromGradeValue(this string? value)
+    {
+        var hasValue = Enum.TryParse<Grade>(value, out var grade);
+        return !hasValue ? null : grade.GetAttributeOfType<MultiLangAttribute>();
+    }
 }

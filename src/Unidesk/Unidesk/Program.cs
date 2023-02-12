@@ -1,8 +1,5 @@
-using System.Linq.Expressions;
-using System.Net.Mime;
-using Mapster;
 using MapsterMapper;
-using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +17,15 @@ using Unidesk.Security;
 using Unidesk.Server;
 using Unidesk.Server.ServiceFilters;
 using Unidesk.Services;
+using Unidesk.Services.Email;
+using Unidesk.Services.Email.Templates;
 using Unidesk.Services.Enums;
 using Unidesk.Services.Reports;
 using Unidesk.Services.Stag;
 using Unidesk.Services.ThesisTransitions;
 using Unidesk.Utils;
+using Unidesk.Utils.Extensions;
+using OneOfExtensions = Unidesk.Utils.OneOfExtensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,9 +36,25 @@ var services = builder.Services;
 
 // optionally add appsettings.secret.{username}.json which is ignored
 var configuration = builder.Configuration
+   .AddJsonFile($"appsettings.secret.json", true)
    .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
    .Build();
 
+if (isDev)
+{
+    Console.WriteLine("Configuration values:");
+    foreach (var (key, value) in configuration.AsEnumerable()) Console.WriteLine($" - {key}={value.SafeSubstring(64)}");
+    Console.WriteLine("----------------------------------------------------------------");
+
+    Console.WriteLine("Configuration sources:");
+    foreach (var source in configuration.Providers) Console.WriteLine($" - {source}");
+    Console.WriteLine("----------------------------------------------------------------");
+
+    Console.WriteLine("Working directory: " + Environment.CurrentDirectory);
+    Console.WriteLine("----------------------------------------------------------------");
+    Console.WriteLine("Files in working directory:");
+    foreach (var file in Directory.GetFiles(Environment.CurrentDirectory)) Console.WriteLine($" - {file}");
+}
 
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen(options =>
@@ -45,6 +62,9 @@ services.AddSwaggerGen(options =>
     options.UseAllOfForInheritance();
     options.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
 });
+
+services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
+   .AddCertificate(options => { });
 
 // scoped
 services.AddScoped<CryptographyUtils>();
@@ -61,9 +81,11 @@ services.AddScoped<AdminService>();
 services.AddScoped<ReportService>();
 services.AddScoped<SettingsService>();
 services.AddScoped<ThesisEvaluationService>();
-services.AddSingleton<WordGeneratorService>();
+services.AddScoped<EmailService>();
 services.AddScoped<IThesisEvaluation, ThesisEvaluation_Opponent_FM_Eng>();
- 
+
+services.AddSingleton<WordGeneratorService>();
+services.AddSingleton<TemplateService>();
 
 
 // mapper
@@ -77,10 +99,13 @@ services.AddScoped<IMapper, ServiceMapper>();
 
 // configs
 var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>()!;
-var connectionString = configuration.GetConnectionString(nameof(UnideskDbContext))!;
+var emailOptions = configuration.GetSection(nameof(EmailOptions)).Get<EmailOptions>()!;
+var connectionString = configuration.GetValue<string>("UNIDESK_CONNECTION_STRING")
+                    ?? configuration.GetConnectionString(nameof(UnideskDbContext));
 
 // singleton
 services.AddSingleton(appOptions);
+services.AddSingleton(emailOptions!);
 
 // extra
 services.AddOutputCache();
@@ -90,6 +115,7 @@ services.AddHttpContextAccessor();
 services.AddCookieAuthentication();
 services.AddDbContext<UnideskDbContext>(options =>
 {
+    // options.UseNpgsql(connectionString, optionsBuilder => { optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery); });
     options.UseSqlServer(connectionString, optionsBuilder => { optionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery); });
     // https://stackoverflow.com/questions/70555317/multiple-level-properties-with-ef-core-6
     options.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored));
@@ -128,12 +154,12 @@ if (isDev)
     }
 }
 
+
 app.UseExceptionHandler();
 await app.MigrateDbAsync();
 
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+// app.UseHttpsRedirection();
 
 app.UseRouting();
 
@@ -147,6 +173,8 @@ app.MapControllers();
 app.UseExceptionHandler(exceptionHandlerApp
     => exceptionHandlerApp.Run(UnideskExceptionHandler.HandleException));
 
+// hello world / endpoint
+app.MapGet("/test", () => "Hello World!");
 
 var api = app.MapGroup("/api")
    .RequireAuthorization()
@@ -154,7 +182,6 @@ var api = app.MapGroup("/api")
 
 var apiEnums = api
    .MapGroup("/enums/")
-   .RequireAuthorization()
    .CacheOutput(policyBuilder =>
     {
         policyBuilder.Expire(TimeSpan.FromMinutes(15));
@@ -191,7 +218,7 @@ api.MapGet("enum/Cache/reset", async ([FromServices] IOutputCacheStore cache, Ca
 }).Produces<SimpleJsonResponse>();
 
 
-var evaluationApi = api.MapGroup("api/evaluation")
+var evaluationApi = api.MapGroup("evaluation")
    .WithTags("Evaluations")
    .RequireAuthorization();
 
@@ -217,18 +244,16 @@ evaluationApi.MapGet("/reject/{id:guid}", async ([FromServices] ThesisEvaluation
    .AllowAnonymous();
 
 evaluationApi.MapPost("/upsert", async ([FromServices] ThesisEvaluationService service, ThesisEvaluationDto dto, CancellationToken ct)
-        => await service
-           .Upsert(dto, ct)
-           .MatchAsync(i => i, e => throw e)
+        => await OneOfExtensions.MatchAsync(service
+           .Upsert(dto, ct), i => i, e => throw e)
     )
    .WithName("Upsert")
    .Produces<ThesisEvaluationDto>()
    .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
 
 evaluationApi.MapPost("/update-one", async ([FromServices] ThesisEvaluationService service, ThesisEvaluationDetailDto dto, string pass, CancellationToken ct)
-        => await service
-           .UpdateOne(dto, pass, ct)
-           .MatchAsync(i => i, e => throw e)
+        => await OneOfExtensions.MatchAsync(service
+           .UpdateOne(dto, pass, ct), i => i, e => throw e)
     )
    .WithName("UpdateOne")
    .Produces<ThesisEvaluationDetailDto>();
@@ -245,10 +270,26 @@ evaluationApi.MapPut("/change-status-pass", async ([FromServices] ThesisEvaluati
    .AllowAnonymous()
    .Produces<ThesisEvaluationDto>();
 
+evaluationApi.MapGet("/pdf-preview", async ([FromServices] ThesisEvaluationService service, Guid id, string pass, CancellationToken ct)
+        =>
+    {
+        var bytes = await service.PdfPreviewAsync(id, pass, ct);
+        return Results.Bytes(bytes, "application/pdf");
+    })
+   .WithName("GetPdfPreview")
+   .AllowAnonymous()
+   .Produces<IResult>();
+
 evaluationApi.MapDelete("/delete/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, CancellationToken ct)
         => await service.DeleteOne(id, ct))
    .WithName("DeleteOne")
    .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
+
+
+// if (!isDev || true)
+// {
+//     app.UseClientAppStaticFiles();
+// }
 
 if (isDev && generateModel)
 {

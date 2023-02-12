@@ -1,12 +1,22 @@
 ﻿using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Extensions;
+using QuestPDF.Elements;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using Unidesk.Client;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Exceptions;
 using Unidesk.Reports;
+using Unidesk.Reports.Elements;
+using Unidesk.Reports.Templates;
 using Unidesk.Security;
 using Unidesk.Services;
+using Unidesk.Services.Email;
+using Unidesk.Services.Email.Templates;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Server;
@@ -18,15 +28,19 @@ public class ThesisEvaluationService
     private readonly WordGeneratorService _wordGeneratorService;
     private readonly IUserProvider _userProvider;
     private readonly IEnumerable<IThesisEvaluation> _thesisEvaluations;
+    private readonly EmailService _emailService;
+    private readonly TemplateService _templateService;
 
     public ThesisEvaluationService(UnideskDbContext db, IMapper mapper, WordGeneratorService wordGeneratorService, IUserProvider userProvider,
-        IEnumerable<IThesisEvaluation> thesisEvaluations)
+        IEnumerable<IThesisEvaluation> thesisEvaluations, EmailService emailService, TemplateService templateService)
     {
         _db = db;
         _mapper = mapper;
         _wordGeneratorService = wordGeneratorService;
         _userProvider = userProvider;
         _thesisEvaluations = thesisEvaluations;
+        _emailService = emailService;
+        _templateService = templateService;
     }
 
     private async Task<ThesisEvaluation> GetWithPassword(Guid id, string pass, CancellationToken ct)
@@ -37,7 +51,7 @@ public class ThesisEvaluationService
                       .Include(i => i.Thesis)
                       .ThenInclude(i => i.ThesisUsers)
                       .ThenInclude(i => i.User)
-                      .Include(i => i.User)
+                      .Include(i => i.Evaluator)
                       .FirstOrDefaultAsync(i => i.Id == id, ct)
                 ?? throw new NotFoundException("Thesis evaluation not found");
 
@@ -62,7 +76,7 @@ public class ThesisEvaluationService
                   .Include(i => i.Thesis)
                   .ThenInclude(i => i.ThesisUsers)
                   .ThenInclude(i => i.User)
-                  .Include(i => i.User)
+                  .Include(i => i.Evaluator)
                   .FirstOrDefaultAsync(i => i.Id == id, ct)
             ?? throw new NotFoundException("Thesis evaluation not found");
     }
@@ -70,7 +84,7 @@ public class ThesisEvaluationService
     public async Task<List<ThesisEvaluationDto>> GetAllAsync(Guid id, CancellationToken ct)
     {
         var items = await _db.ThesisEvaluations
-           .Include(i => i.User)
+           .Include(i => i.Evaluator)
            .Where(i => i.ThesisId == id).ToListAsync(ct);
         var dtos = _mapper.Map<List<ThesisEvaluationDto>>(items);
         return dtos;
@@ -80,7 +94,7 @@ public class ThesisEvaluationService
     {
         var item = await GetWithPassword(id, pass, ct);
         // when first time opened, check status, set it to accepted if it is not already
-        await TryUpdateStatusWhenUnclockedAsync(ct, item);
+        await TryUpdateStatusWhenUnlockedAsync(ct, item);
 
         var dto = _mapper.Map<ThesisEvaluationDetailDto>(item);
 
@@ -96,12 +110,13 @@ public class ThesisEvaluationService
 
         return dto;
     }
-    
+
     private ThesisEvaluationContext GetContext(ThesisEvaluation item)
     {
         return new ThesisEvaluationContext
         {
-            Evaluator = _userProvider.CurrentUser,
+            Evaluator = item.Evaluator,
+            CurrentUser = _userProvider.CurrentUser,
             Language = item.Language,
             Thesis = item.Thesis,
             UserFunction = item.UserFunction,
@@ -109,12 +124,124 @@ public class ThesisEvaluationService
         };
     }
 
+    public async Task<byte[]> PdfPreviewAsync(Guid id, string pass, CancellationToken ct)
+    {
+        var item = await GetOneAsync(id, pass, ct);
+        var pdf = QuestPDF.Fluent.Document.Create(container =>
+        {
+            container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(1, Unit.Centimetre);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(style =>
+                    {
+                        style.FontSize(12);
+                        style.FontFamily("Fira Code");
+                        style.FontColor(Colors.Black);
+                        return style;
+                    });
+            
+                    page.Header()
+                       .Text("Thesis Evaluation")
+                       .SemiBold()
+                       .FontSize(36);
+            
+                    page.Content()
+                       .PaddingVertical(1, Unit.Centimetre)
+                       .Extend()
+                       .Column(y =>
+                        {
+                            y.Spacing(0.25f, Unit.Centimetre);
+                            
+                            foreach (var question in item.Questions)
+                            {
+                                var answer = (item.Response as IEvaluationModel)?.Answers
+                                   .FirstOrDefault(i => i.Id == question.Id);
+
+                                if (question is GradeQuestion gradeQuestion)
+                                {
+                                    y.Item().ExtendHorizontal().Row(x =>
+                                    {
+                                        x.AutoItem()
+                                           .Text(gradeQuestion.Question)
+                                           .FontColor(Colors.DeepOrange.Darken4)
+                                           .Bold()
+                                           .FontFamily("Calibri");
+                                           // .FontFamily("TUL Mono");
+
+                                           x.RelativeItem(1)
+                                              .PaddingHorizontal(5)
+                                              .DefaultTextStyle(s => s.FontColor(Colors.Grey.Darken1))
+                                              .Dynamic(new DashedLine());
+
+                                        var gradeAttribute = answer?.Answer?.ToString()?.GetLangAttributeFromGradeValue();
+                                           
+                                        x.AutoItem()
+                                           .Container()
+                                           .AlignRight()
+                                           .Text(gradeAttribute?.EngValue ?? "")
+                                           .FontFamily("Calibri");
+                                    });
+                                } 
+                                else if (question is TextQuestion textQuestion)
+                                {
+                                    if (textQuestion.Rows == 1)
+                                    {
+                                        y.Item().ExtendHorizontal().Row(x =>
+                                        {
+                                            x.AutoItem()
+                                               .Text(textQuestion.Question)
+                                               .FontColor(Colors.DeepOrange.Darken4)
+                                               .Bold()
+                                               .FontFamily("Calibri");
+                                            // .FontFamily("TUL Mono");
+
+                                            x.RelativeItem(1)
+                                               .PaddingHorizontal(5);
+                                               // .DefaultTextStyle(s => s.FontColor(Colors.Grey.Darken1))
+                                               // .Dynamic(new DashedLine());
+                                            
+                                            x.AutoItem()
+                                               .Container()
+                                               .AlignRight()
+                                               .Text(answer?.Answer?.ToString() ?? "")
+                                               .FontFamily("Calibri");
+                                        });
+                                    }
+                                    else
+                                    {
+                                        y.Item().ExtendHorizontal().Column(x =>
+                                        {
+                                            x.Spacing(0.15f, Unit.Centimetre);
+                                            x.Item()
+                                               .Text(textQuestion.Question)
+                                               .FontColor(Colors.DeepOrange.Darken4)
+                                               .Bold()
+                                               .FontFamily("Calibri");
+
+                                            x.Item()
+                                               .Text(answer?.Answer?.ToString() ?? "")
+                                               .FontFamily("Calibri");
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                }
+            );
+        });
+        var bytes = pdf.GeneratePdf();
+        return bytes;
+        // return Results.Bytes(bytes, "application/pdf", "report.pdf");
+    }
+
     private IThesisEvaluation? GetModel(string templateName)
     {
         return _thesisEvaluations.FirstOrDefault(i => i.TemplateName == templateName);
     }
 
-    private async Task TryUpdateStatusWhenUnclockedAsync(CancellationToken ct, ThesisEvaluation item)
+    private async Task TryUpdateStatusWhenUnlockedAsync(CancellationToken ct, ThesisEvaluation item)
     {
         var needsSave = false;
         if (item.Status.In(EvaluationStatus.Invited, EvaluationStatus.Reopened))
@@ -184,11 +311,11 @@ public class ThesisEvaluationService
         {
             var password = pass ?? throw new NotAllowedException("Passphrase is required");
             var item = await GetWithPassword(id, password, ct);
-            
+
             if (item.Status.In(EvaluationStatus.Accepted, EvaluationStatus.Draft, EvaluationStatus.Invited, EvaluationStatus.Reopened) && item.Format.IsNotNullOrEmpty())
             {
                 var model = GetModel(item.Format)
-                    ?? throw new NotAllowedException("Invalid format");
+                         ?? throw new NotAllowedException("Invalid format");
                 await model.ValidateAndThrowAsync(GetContext(item));
                 await ChangeStatusToSubmittedAsync(item, ct);
                 await _db.SaveChangesAsync(ct);
@@ -204,8 +331,25 @@ public class ThesisEvaluationService
         var passphrase = _wordGeneratorService.GeneratePassPhrase();
         item.PassphraseHash = BCrypt.Net.BCrypt.HashPassword(passphrase);
         item.Status = EvaluationStatus.Invited;
+        var user = item.Evaluator;
         // TODO: email service here
-        // TODO: save email to db
+        _templateService.LoadTemplate(ThesisEvaluationInviteTemplate.TemplateBody);
+        var body = _templateService.Render(new ThesisEvaluationInviteTemplate
+        {
+            SupervisorName = user?.FullName ?? "sir/madam",
+            StudentName = item.Thesis.Authors.FirstOrDefault()?.FullName ?? "student",
+            ThesisTitle = item.Thesis.NameEng,
+            ContactEmail = "viroco@tul.cz",
+            ThesisEvaluationDeadline = DateTime.Now.AddDays(14).ToLongDateString(),
+            ThesisEvaluationPassword = passphrase,
+            ThesisEvaluationUrl = $"https://localhost:3000/evaluation/{item.Id}",
+        });
+
+        await _emailService.SendTextEmailAsync(
+            to: item.Email,
+            subject: "Thesis evaluation invitation",
+            body: body
+        );
     }
 
     private async Task ChangeStatusToSubmittedAsync(ThesisEvaluation item, CancellationToken ct)
@@ -246,7 +390,7 @@ public class ThesisEvaluationService
     public async Task<ThesisEvaluationPeekDto> PeekAsync(Guid id, CancellationToken ct)
     {
         var item = await _db.ThesisEvaluations
-                      .Include(i => i.User)
+                      .Include(i => i.Evaluator)
                       .Include(i => i.Thesis)
                       .ThenInclude(i => i.ThesisType)
                       .FirstOrDefaultAsync(i => i.Id == id, ct)
@@ -268,5 +412,42 @@ public class ThesisEvaluationService
         item.RejectionReason = reason;
 
         await _db.SaveChangesAsync(ct);
+    }
+}
+
+public class DashedLine : IDynamicComponent<int>
+{
+    public int State { get; set; }
+    
+    private const int SpaceDotWidth = 5;
+    public DynamicComponentComposeResult Compose(DynamicContext context)
+    {
+        var content = context.CreateElement(container =>
+        {
+            var width = context.AvailableSize.Width;
+            var dashes = (int) Math.Floor(width / (SpaceDotWidth));
+            container.Row(x =>
+            {
+                for (var i = 0; i < dashes; i++)
+                {
+                    x.ConstantItem(SpaceDotWidth)
+                       .Text(" .");
+                       // .BorderBottom(1f);
+
+                    // if (i < dashes - 1)
+                    // {
+                    //     x.AutoItem()
+                    //        .Width(DashSpace)
+                    //        .BorderBottom(0f);
+                    // }
+                }
+            });
+        });
+
+        return new DynamicComponentComposeResult
+        {
+            Content = content,
+            HasMoreContent = false
+        };
     }
 }

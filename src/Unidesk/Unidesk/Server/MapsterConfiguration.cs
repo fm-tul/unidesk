@@ -79,11 +79,11 @@ public static class MapsterConfiguration
            .TwoWays();
 
         config.ForType<ThesisEvaluationDto, ThesisEvaluation>()
-           .Ignore(i => i.User)
+           .Ignore(i => i.Evaluator)
            .Ignore(i => i.Thesis);
         
         config.ForType<ThesisEvaluationDetailDto, ThesisEvaluation>()
-           .Ignore(i => i.User)
+           .Ignore(i => i.Evaluator)
            .Ignore(i => i.Thesis);
         
          config.ForType<TeamDto, Team>()

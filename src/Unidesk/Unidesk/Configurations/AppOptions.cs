@@ -1,4 +1,6 @@
-﻿namespace Unidesk.Configurations;
+﻿using Unidesk.Services.Email;
+
+namespace Unidesk.Configurations;
 
 public class AppOptions
 {
@@ -12,4 +14,7 @@ public class AppOptions
     // stag 
     public string StagUsername { get; set; } = null!;
     public string StagPassword { get; set; } = null!;
+    
+    // email options
+    public EmailOptions EmailOptions { get; set; } = null!;
 }

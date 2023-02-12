@@ -29,8 +29,9 @@ public class ThesisEvaluationDto : TrackedEntityDto
     public required UserFunction UserFunction { get; set; }
 
     // after the evaluation is done, user will exist in the system and we can link it here
-    public Guid? UserId { get; set; }
-    public UserLookupDto? User { get; set; }
+    public Guid? EvaluatorId { get; set; }
+    public UserLookupDto? Evaluator { get; set; }
+    public string EvaluatorFullName { get; set; }
 
     [Required]
     public Guid CreatedByUserId { get; set; }

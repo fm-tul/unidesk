@@ -35,7 +35,8 @@ public class ThesisEvaluation : TrackedEntity
     public required UserFunction UserFunction { get; set; }
 
     // after the evaluation is done, user will exist in the system and we can link it here
-    public Guid? UserId { get; set; }
-    public User? User { get; set; }
+    public Guid? EvaluatorId { get; set; }
+    public User? Evaluator { get; set; }
+    public string EvaluatorFullName { get; set; }
     public string? RejectionReason { get; set; }
 }
