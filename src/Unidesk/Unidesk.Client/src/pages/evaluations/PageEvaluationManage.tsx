@@ -30,6 +30,8 @@ import { classnames } from "ui/shared";
 import { SimpleJsonResponse } from "@models/SimpleJsonResponse";
 import { FormErrors, extractErrors, getPropsFactory } from "utils/forms";
 import { useTranslation } from "@locales/translationHooks";
+import { Section } from "components/mui/Section";
+import { RowField } from "components/mui/RowField";
 
 const supportedUserFunctions = [UserFunctions.Opponent, UserFunctions.Supervisor, UserFunctions.External];
 const initialDto = { id: GUID_EMPTY, status: EvaluationStatus.PREPARED } as ThesisEvaluationDto;
@@ -52,6 +54,11 @@ export const PageEvaluationManage = () => {
       setDto(item);
       setEditMode(true);
     }
+  };
+
+  const createNewEvaluation = () => {
+    setDto({ ...initialDto, thesisId: id! });
+    setEditMode(true);
   };
 
   const exitEditMode = () => {
@@ -146,42 +153,61 @@ export const PageEvaluationManage = () => {
           selected={dto.id}
         />
       )}
-      <FloatingAction onClick={() => setEditMode(true)} />
+      <FloatingAction onClick={createNewEvaluation} />
 
       {editMode && (
         <div>
-          <h3 className="text-xl font-bold">Add new evaluation</h3>
-          <div className={classnames("grid max-w-md grid-cols-2 gap-4")}>
-            <span>Try to find evalutator in the system</span>
-            <FormField
-              as={SelectFieldLive<UserLookupDto>}
-              value={dto.user}
-              searchable
-              clearable
-              options={keyword => toPromiseArray(httpClient.users.find({ requestBody: { keyword, filter: { page: 1, pageSize: 10 } } }))}
-              getTitle={i => renderUserLookup(i, true)}
-              getValue={i => i.fullName}
-              onValue={v => setDto({ ...dto!, user: v[0], userId: v[0]?.id, email: v[0]?.email || dto.email })}
-              width="min-w-xs"
+          <Section title={dto.id === GUID_EMPTY ? "evaluation.add-new-evalution" : "evaluation.edit-evalution"} />
+          <div className={classnames("flex flex-col gap-4")}>
+            <RowField
+              title="evaluation.find-existing-user"
+              Field={
+                <FormField
+                  as={SelectFieldLive<UserLookupDto>}
+                  value={dto.evaluator}
+                  searchable
+                  clearable
+                  options={keyword =>
+                    toPromiseArray(httpClient.users.find({ requestBody: { keyword, filter: { page: 1, pageSize: 10 } } }))
+                  }
+                  getTitle={i => renderUserLookup(i, true)}
+                  getValue={i => i.fullName}
+                  onValue={v => setDto({ 
+                    ...dto!, 
+                    evaluator: v[0], 
+                    evaluatorId: v[0]?.id, 
+                    email: v[0]?.email || dto.email,
+                    evaluatorFullName: v[0]?.fullName || dto.evaluatorFullName,
+                   })}
+                />
+              }
             />
 
-            <span>Email of the evaluator</span>
-            <FormField as={TextField} {...formProps("email")} />
+            <RowField title="evaluation.evaluator-name" Field={<FormField as={TextField} {...formProps("evaluatorFullName")} />} />
+            <RowField title="evaluation.evaluator-email" Field={<FormField as={TextField} {...formProps("email")} />} />
 
-            <span>Relation of the evaluator</span>
-            <FormField
-              as={SelectField<UserFunction>}
-              value={dto.userFunction}
-              options={supportedUserFunctions.map(i => i.value as UserFunction)}
-              onValue={v => setDto({ ...dto!, userFunction: v[0] })}
+            <RowField
+              title="evaluation.evaluator-relation"
+              Field={
+                <FormField
+                  as={SelectField<UserFunction>}
+                  value={dto.userFunction}
+                  options={supportedUserFunctions.map(i => i.value as UserFunction)}
+                  onValue={v => setDto({ ...dto!, userFunction: v[0] })}
+                />
+              }
             />
 
-            <span>Language of the evaluation</span>
-            <FormField
-              as={SelectField<Language>}
-              value={dto.language}
-              options={Object.values(Language)}
-              onValue={v => setDto({ ...dto!, language: v[0] })}
+            <RowField
+              title="evaluation.language"
+              Field={
+                <FormField
+                  as={SelectField<Language>}
+                  value={dto.language}
+                  options={Object.values(Language)}
+                  onValue={v => setDto({ ...dto!, language: v[0] })}
+                />
+              }
             />
 
             <div className="flow col-start-2">

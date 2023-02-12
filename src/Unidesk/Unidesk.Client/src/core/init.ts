@@ -1,5 +1,5 @@
 import { extractErrorMessage, makeMessage } from "@core/errors";
-import axios from "axios";
+import axios, { Axios } from "axios";
 import { toast } from "react-toastify";
 
 import { ApiClient } from "../api-client";
@@ -8,16 +8,30 @@ import { API_URL } from "./config";
 // spa reload
 (axios.interceptors.response as any).handlers = [];
 
+axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+
+// register global error
 axios.interceptors.response.use(
   response => response,
   error => {
-    const jsonResponse = extractErrorMessage(error?.response?.data);
-    toast.error(makeMessage(
-      jsonResponse?.message ?? error.message,
-      jsonResponse?.debugMessage ?? jsonResponse?.stackTrace?.join("\n") ?? ""
-    ), {
-      autoClose: false,
-    });
+    // detect 401 first
+    if (error?.response?.status === 401) {
+      toast.error(makeMessage(
+        "Unauthorized",
+        "You are not authorized to access this resource",
+        () => window.location.pathname = "/login"
+        ), {
+        toastId: "unauthorized",
+      });
+    } else {
+      const jsonResponse = extractErrorMessage(error?.response?.data);
+      toast.error(
+        makeMessage(jsonResponse?.message ?? error.message, jsonResponse?.debugMessage ?? jsonResponse?.stackTrace?.join("\n") ?? ""),
+        {
+          autoClose: false,
+        }
+      );
+    }
     return Promise.reject(error?.response?.data ?? error);
   }
 );
@@ -38,6 +52,10 @@ export const guestHttpClient = new ApiClient({
   WITH_CREDENTIALS: false,
 });
 
+export const rawAxiosClient = new Axios({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
 export const executeAdminAction = async (action: string, data: any = {}) => {
   return httpClient.admin.httpRequest.request({

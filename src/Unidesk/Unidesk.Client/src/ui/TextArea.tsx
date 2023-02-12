@@ -22,7 +22,7 @@ export interface TextAreaProps extends SimpleComponentProps, ColorProps {
 }
 export const TextArea = (props: TextAreaProps) => {
   const { label, value, name, onChange, onBlur, onValue, onEnter, onEscape } = props;
-  const { minRows, maxRows, rows, spellCheck } = props;
+  const { minRows, maxRows, rows, spellCheck, width, className  } = props;
   const [textAreaRef, setRef] = useState<HTMLTextAreaElement | null>(null);
   useAutosizeTextArea(textAreaRef, value ?? "", minRows, maxRows);
 
@@ -35,11 +35,10 @@ export const TextArea = (props: TextAreaProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange?.(e);
     onValue?.(e.target.value);
-    console.log(e);
   };
 
   return (
-    <div className={classnames("tf-wrapper", colorCss, sizeCss)}>
+    <div className={classnames("tf-wrapper", colorCss, sizeCss, className, width ?? "w-full")}>
       <textarea
         ref={setRef}
         className="tf resize-none"

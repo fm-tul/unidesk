@@ -40,6 +40,7 @@ export const en = {
   titleAfter: "Title After",
   submit: "Submit",
   "update-draft": "Save draft",
+  "pdf-preview": "PDF Preview",
   "evalution-submitted": "Evaluation submitted",
   "evalution-submitted-error": "Error while submitting evaluation",
 
@@ -70,6 +71,8 @@ export const en = {
   clear: "Clear",
   "click-to-edit": "Click to edit",
   "add-new": "Add New",
+  expand: "Expand",
+  collapse: "Collapse",
 
   teams: "Teams",
   "user-roles": "User Roles",
@@ -143,15 +146,23 @@ export const en = {
 
   // paging
   "page-of": "of",
-
+  
   // keywords
   "keyword-used-count": "Used count",
 
   // evaluations
   "evaluation.manage": "Manage Evaluations",
   "evaluation.unlocked": "Unlocked",
+  "evaluation.add-new-evalution": "Add new evaluation",
+  "evaluation.edit-evalution": "Edit evaluation",
   "link.evaluation-detail": "Evaluation Detail",
   "evaluation.error-already-sent": "Cannot edit evaluation, the invitation has already been sent",
+
+  "evaluation.find-existing-user": "Find existing user",
+  "evaluation.evaluator-email": "Email of evaluator",
+  "evaluation.evaluator-name": "Name of evaluator",
+  "evaluation.evaluator-relation": "Relation to evaluator",
+  "evaluation.language": "Language of evaluation",
 
   // links
   "link.import": "Stag Import",

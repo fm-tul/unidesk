@@ -29,8 +29,8 @@ export const extractErrorMessage = (error: unknown) => {
   return errorDto;
 };
 
-export const makeMessage = (title: string, message: string) => {
-  return <div>
+export const makeMessage = (title: string, message: string, onClick?: () => void) => {
+  return <div onClick={onClick}>
     <h3 className="text-xl">{title}</h3>
     <p className="text-sm opacity-70">{message}</p>
   </div>
