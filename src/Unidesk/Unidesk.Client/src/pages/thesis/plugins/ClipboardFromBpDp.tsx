@@ -3,7 +3,7 @@ import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
 import { ThesisDto } from "@models/ThesisDto";
 import { TextArea } from "components/mui/ArrayField";
-import { useFetch } from "hooks/useFetch";
+import { EnumsContext } from "models/EnumsContext";
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import { Button } from "ui/Button";
@@ -47,16 +47,12 @@ interface ClipboardFromBpDpProps {
   thesis: ThesisDto;
 }
 export const ClipboardFromBpDp = (props: ClipboardFromBpDpProps) => {
+  const {enums} = useContext(EnumsContext)
   const { thesis, setThesis } = props;
   const [value, setValue] = useState("");
-  const { data, isLoading } = useFetch(() => guestHttpClient.enums.allEnums());
   const language = useContext(LanguageContext);
 
   const handleSubmit = () => {
-    if (data == null) {
-      return;
-    }
-
     const lines = value.trim().split("\n");
     const [
       id,
@@ -87,9 +83,9 @@ export const ClipboardFromBpDp = (props: ClipboardFromBpDpProps) => {
       ...thesis,
       nameCze: nameVal,
       abstractCze: abstractVal.join("\n"),
-      schoolYearId: data.schoolYears!.find(x => x.name === academicYearVal)?.id ?? "",
-      thesisTypeCandidateIds: data.thesisTypes!.filter(x => x.code === thesisTypeVal).map(x => x.id),
-      departmentId: data.departments!.find(x => x.code === facultyVal)?.id ?? "",
+      schoolYearId: enums.schoolYears!.find(x => x.name === academicYearVal)?.id ?? "",
+      thesisTypeCandidateIds: enums.thesisTypes!.filter(x => x.code === thesisTypeVal).map(x => x.id),
+      departmentId: enums.departments!.find(x => x.code === facultyVal)?.id ?? "",
     });
     toast.success(RR("filled", language));
   };
@@ -98,7 +94,7 @@ export const ClipboardFromBpDp = (props: ClipboardFromBpDpProps) => {
     <div className="flex grow flex-col justify-between gap-1">
       <h3 className="text-center text-2xl font-bold">Paste from clipboard</h3>
       <TextArea value={value} className="font-mono text-xs" onChange={e => setValue(e.target.value)} rows={10}></TextArea>
-      <Button loading={isLoading} onClick={handleSubmit}>
+      <Button onClick={handleSubmit}>
         Fill data
       </Button>
     </div>

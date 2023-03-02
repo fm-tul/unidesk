@@ -1,7 +1,7 @@
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { useTranslation } from "@locales/translationHooks";
-import { QueryFilter } from "@models/QueryFilter";
+import { QueryPaging } from "@models/QueryPaging";
 import { TeamDto } from "@models/TeamDto";
 import { TrackedEntityDto } from "@models/TrackedEntityDto";
 import { FilterBar } from "components/FilterBar";
@@ -52,7 +52,7 @@ export const PageTeamList = () => {
   //   await loadData(httpClient.team.find({ requestBody }));
   // };
 
-  // const updateFilter = (filter: QueryFilter) => {
+  // const updateFilter = (filter: QueryPaging) => {
   //   setFilter({ ...filter });
   //   refresh();
   // };

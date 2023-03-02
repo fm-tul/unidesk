@@ -1,17 +1,14 @@
-import { httpClient } from "@core/init";
 import { EnKeys, LanguagesId } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
 import { ThesisDto } from "@models/ThesisDto";
 import { ThesisLookupDto } from "@models/ThesisLookupDto";
-import { ThesisTypeDto } from "@models/ThesisTypeDto";
-import { useSingleQuery } from "hooks/useFetch";
 import { IdRenderer } from "models/cellRenderers/IdRenderer";
 import { MetadataRenderer } from "models/cellRenderers/MetadataRenderer";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { ThesisTypeRendererFactory } from "models/cellRenderers/ThesisTypeRenderer";
 import { EnumsContext } from "models/EnumsContext";
-import { useMemo, useEffect, useContext } from "react";
+import { useMemo, useContext } from "react";
 import { Link } from "react-router-dom";
 import { link_pageKeywordDetail, link_pageUserDetail } from "routes/links";
 import { Button } from "ui/Button";

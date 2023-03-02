@@ -2,15 +2,15 @@ import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
-import { QueryFilter } from "@models/QueryFilter";
+import { QueryPaging } from "@models/QueryPaging";
 import { UserFilter } from "@models/UserFilter";
 import { UserFunction } from "@models/UserFunction";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { MdClear } from "react-icons/md";
 
 import { FilterBar } from "components/FilterBar";
 import { Paging } from "components/Paging";
-import { useQuery } from "hooks/useFetch";
+import { usePagedQuery } from "hooks/useFetch";
 import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
 import { generatePrimitive, Select } from "ui/Select";
@@ -18,6 +18,7 @@ import { TextField } from "ui/TextField";
 import { UserLookupDto } from "@models/UserLookupDto";
 import { SelectField } from "ui/SelectField";
 import { No as OptionNo, Yes as OptionYes } from "@api-client/constants/YesNo";
+import { usePaging } from "hooks/usePaging";
 
 const userFunctionOptions = generatePrimitive(Object.values(UserFunction));
 type UserFilterOnly = Omit<UserFilter, "filter">;
@@ -32,16 +33,20 @@ export const UserFilterBar = (props: UserFilterBarProps) => {
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
 
-  const { paging, isLoading, refreshIndex, refresh, loadData, setPaging } = useQuery<UserLookupDto>({ pageSize: 80 });
+  const pageModel = usePaging({ pageSize: 20 });
+  const { paging, setPaging } = pageModel;
+  const { isLoading, refresh } = usePagedQuery({
+    queryFn: (i) => httpClient.users.find(i),
+    queryKey: ["thesis", "find", debounceFilter],
+    pageModel,
+    filter,
+    onChange,
+  });
 
-  const updatePagination = (filter: QueryFilter) => {
+  const updatePagination = (filter: QueryPaging) => {
     setPaging({ ...filter });
     refresh();
   };
-
-  useEffect(() => {
-    loadData(httpClient.users.find({ requestBody: { ...filter, filter: paging } })).then(onChange);
-  }, [debounceFilter, refreshIndex]);
 
   const orderByOptions = [
     { value: "LastName", label: "lastname" },
@@ -87,7 +92,7 @@ export const UserFilterBar = (props: UserFilterBarProps) => {
           onEnter={refresh}
         />
 
-        <Paging className="ml-auto" filter={paging} onValue={updatePagination} />
+        <Paging className="ml-auto" paging={paging} onValue={updatePagination} />
 
         <FilterBar type="btn-group">
           <Button onClick={refresh}>{translate("search")}</Button>

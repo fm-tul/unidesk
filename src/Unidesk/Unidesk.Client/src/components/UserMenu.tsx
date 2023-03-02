@@ -1,5 +1,5 @@
 import { User_SuperAdmin } from "@api-client/constants/Grants";
-import { GUID_EMPTY, VITE_DEBUG_LOGIN } from "@core/config";
+import { GUID_EMPTY, VITE_DEBUG_LOGIN, VITE_DEBUG_LOGIN_ADMIN } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { R, RR } from "@locales/R";
@@ -19,18 +19,11 @@ export function UserMenu() {
   const { language } = useContext(LanguageContext);
 
   const authUser = async (admin: boolean) => {
-    const loginPath = admin ? "" : VITE_DEBUG_LOGIN;
-    const response = loginPath
-      ? await httpClient.users.loginSso({ path: loginPath })
-      : await httpClient.users.login({
-          requestBody: {
-            password: "admin",
-            eppn: "admin",
-          },
-        });
+    const loginPath = admin ? VITE_DEBUG_LOGIN_ADMIN : VITE_DEBUG_LOGIN;
+    const response = await httpClient.users.loginSso({ path: loginPath });
 
-    if (response.isAuthenticated && response.user) {
-      setUser(response.user);
+    if (!!response.data) {
+      setUser(response.data);
     } else {
       console.log("Login failed");
     }

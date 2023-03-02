@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 
 import { ApiClient } from "../api-client";
 import { API_URL } from "./config";
+import { getToastMessageOrDefault } from "./utils";
 
 // spa reload
 (axios.interceptors.response as any).handlers = [];
@@ -12,8 +13,20 @@ axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
 // register global error
 axios.interceptors.response.use(
-  response => response,
+  response => {
+    const toastMsg = getToastMessageOrDefault(response.data);
+    if (toastMsg) {
+      toast(makeMessage(toastMsg.title, toastMsg.message), {
+        type: toastMsg.type.toLowerCase() as any,
+      });
+    }
+    return response;
+  },
   error => {
+    if (error?.code === "ERR_CANCELED") {
+      return;
+    }
+
     // detect 401 first
     if (error?.response?.status === 401) {
       toast.error(makeMessage(

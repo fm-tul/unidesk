@@ -11,7 +11,7 @@ interface CollapeProps {
 export const Collapse = (props: CollapeProps) => {
   const { children, open, className, mountIfClosed = false } = props;
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
-  const [extraClassNames, canBeHidden] = useCollape(ref, open);
+  const [extraClassNames, canBeHidden, fullyOpen] = useCollape(ref, open);
 
   if (!mountIfClosed && canBeHidden && !open) {
     return null;

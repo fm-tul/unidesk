@@ -1,5 +1,5 @@
 import useAutosizeTextArea from "hooks/useAutosizeTextArea";
-import { FocusEventHandler, useEffect, useRef, useState } from "react";
+import { FocusEventHandler, useState } from "react";
 import { SimpleComponentProps, ColorProps, getColor, getSize, classnames } from "./shared";
 
 export interface TextAreaProps extends SimpleComponentProps, ColorProps {

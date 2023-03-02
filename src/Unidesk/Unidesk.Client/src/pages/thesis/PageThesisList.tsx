@@ -1,22 +1,17 @@
-import { ThesisLookupDto, ThesisTypeDto } from "@api-client";
-import { httpClient } from "@core/init";
-import { EnKeys } from "@locales/all";
-import { LanguageContext } from "@locales/LanguageContext";
-import { R, RR } from "@locales/R";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { ThesisLookupDto } from "@api-client";
+import { R } from "@locales/R";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { ThesisFilterBar } from "filters/ThesisFilterBar";
-import { useSingleQuery } from "hooks/useFetch";
 import { useOpenClose } from "hooks/useOpenClose";
-import { ThesisTypeRendererFactory } from "models/cellRenderers/ThesisTypeRenderer";
 import { link_pageThesisCreate } from "routes/links";
 import { Modal } from "ui/Modal";
 
 import PageThesisEdit from "./PageThesisEdit";
 import { UnideskComponent } from "components/UnideskComponent";
-import { ThesisListRenderer, ThesisRendererFactory } from "models/itemRenderers/ThesisRenderer";
+import { ThesisListRenderer } from "models/itemRenderers/ThesisRenderer";
 import { FloatingAction } from "components/mui/FloatingAction";
 
 export interface PageThesisListProps {

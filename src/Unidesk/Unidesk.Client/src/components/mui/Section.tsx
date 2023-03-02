@@ -4,16 +4,12 @@ import { useTranslation } from "@locales/translationHooks";
 import { useContext } from "react";
 
 interface SectionProps {
-    title: EnKeys
+  title: EnKeys | (() => string);
 }
 
 export const Section = ({ title }: SectionProps) => {
-    const {language} = useContext(LanguageContext);
-    const { translate } = useTranslation(language);
+  const { language } = useContext(LanguageContext);
+  const { translate } = useTranslation(language);
 
-    return (
-        <div className="form-section">
-            {translate(title)}
-        </div>
-    )
-}
+  return <div className="form-section">{typeof title === "function" ? title() : translate(title)}</div>;
+};

@@ -17,12 +17,13 @@ import { EnKeys } from "@locales/all";
 import { RR } from "@locales/R";
 import { Grants } from "@api-client/constants/Grants";
 import { Button } from "ui/Button";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useLocalStorage } from "hooks/useLocalStorage";
 import { FormField } from "ui/FormField";
 import { SelectField } from "ui/SelectField";
 import { EnumsContext } from "models/EnumsContext";
 import { ThesisTypeDto } from "@models/ThesisTypeDto";
+import { Section } from "components/mui/Section";
 
 type ViewMode = "all" | "by-status" | "by-function" | "by-year" | "by-thesis-type";
 
@@ -101,8 +102,8 @@ export const PageUserDetail = () => {
                 .sort((a, b) => b[1].length - a[1].length)
                 .map(([status, theses]) => (
                   <div key={status}>
-                    <h2 className="text-lg">{renderThesisStatus(status, language)}</h2>
-                    <ThesisListRenderer rows={theses} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} />
+                    <Section title={() => renderThesisStatus(status, language)}/>
+                    <ThesisListRenderer rows={theses} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8" />
                   </div>
                 ))}
             </>
@@ -113,8 +114,8 @@ export const PageUserDetail = () => {
                 .sort((a, b) => b[1].length - a[1].length)
                 .map(([functionName, theses]) => (
                   <div key={functionName}>
-                    <h2 className="text-lg">{functionName}</h2>
-                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} />
+                    <Section title={`user-function.${functionName.toLowerCase()}` as EnKeys} />
+                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8"  />
                   </div>
                 ))}
             </>
@@ -125,8 +126,8 @@ export const PageUserDetail = () => {
                 .sort((a, b) => b[1].length - a[1].length)
                 .map(([yearId, theses]) => (
                   <div key={yearId}>
-                    <h2 className="text-lg">{enums.schoolYears.find(i => i.id === yearId)?.name}</h2>
-                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} />
+                    <Section title={() => enums.schoolYears.find(i => i.id === yearId)?.name ?? "Year"}/>
+                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8" />
                   </div>
                 ))}
             </>
@@ -137,8 +138,8 @@ export const PageUserDetail = () => {
                 .sort((a, b) => b[1].length - a[1].length)
                 .map(([thesisTypeId, theses]) => (
                   <div key={thesisTypeId}>
-                    <h2 className="text-lg">{translateType(enums.thesisTypes.find(i => i.id === thesisTypeId))}</h2>
-                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} />
+                    <Section title={() => translateType(enums.thesisTypes.find(i => i.id === thesisTypeId)) ?? ""} />
+                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8"  />
                   </div>
                 ))}
             </>

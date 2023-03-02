@@ -1,6 +1,6 @@
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
-import { QueryFilter } from "@models/QueryFilter";
+import { QueryPaging } from "@models/QueryPaging";
 import { useContext } from "react";
 import { FaAngleDoubleLeft, FaAngleDoubleRight, FaAngleLeft, FaAngleRight } from "react-icons/fa";
 
@@ -9,12 +9,12 @@ import { generatePrimitive, Select } from "ui/Select";
 import { classnames } from "ui/shared";
 
 export interface PagedResponse<T> {
-  filter: QueryFilter;
+  paging: QueryPaging;
   items: Array<T>;
 }
 interface PagingProps<T> {
-  filter: QueryFilter;
-  onValue: (filter: QueryFilter) => void;
+  paging: QueryPaging;
+  onValue: (paging: QueryPaging) => void;
   className?: string;
 }
 
@@ -24,32 +24,32 @@ const getTotalPages = (total: number, pageSize: number) => Math.ceil(total / pag
 export const Paging = <T,>(props: PagingProps<T>) => {
   const { language } = useContext(LanguageContext);
 
-  const { filter, onValue, className } = props;
-  const total = filter.total ?? 0;
-  const totalPages = getTotalPages(total, filter.pageSize);
-  const startItem = (filter.page - 1) * filter.pageSize + 1;
-  const endItem = Math.min(filter.page * filter.pageSize, total);
+  const { paging, onValue, className } = props;
+  const total = paging.total ?? 0;
+  const totalPages = getTotalPages(total, paging.pageSize);
+  const startItem = (paging.page - 1) * paging.pageSize + 1;
+  const endItem = Math.min(paging.page * paging.pageSize, total);
 
   const setPageSize = (pageSize: string | number) => {
     const newPageSize = Number(pageSize);
     const newTotalPages = getTotalPages(total, newPageSize);
-    const newPage = newTotalPages < filter.page ? newTotalPages : filter.page;
-    onValue({ ...filter, page: newPage, pageSize: newPageSize });
+    const newPage = newTotalPages < paging.page ? newTotalPages : paging.page;
+    onValue({ ...paging, page: newPage, pageSize: newPageSize });
   };
 
-  const hasNextPage = filter.page < totalPages;
-  const hasPreviousPage = filter.page > 1;
+  const hasNextPage = paging.page < totalPages;
+  const hasPreviousPage = paging.page > 1;
 
   const setPage = (page: string | number) => {
     const newPage = Number(page);
-    const newFilter = { ...filter, page: newPage };
+    const newFilter = { ...paging, page: newPage };
     onValue(newFilter);
   };
   const nextPage = () => {
-    setPage(filter.page + 1);
+    setPage(paging.page + 1);
   };
   const prevPage = () => {
-    setPage(filter.page - 1);
+    setPage(paging.page - 1);
   };
 
   const firstPage = () => {
@@ -78,7 +78,7 @@ export const Paging = <T,>(props: PagingProps<T>) => {
           <FaAngleDoubleRight className="text-base" />
         </Button>
       </div>
-      <Select sm options={pageSizes} value={filter.pageSize.toString()} onValue={(_, v) => setPageSize(v!)} width="min-w-[5rem]" />
+      <Select sm options={pageSizes} value={paging.pageSize.toString()} onValue={(_, v) => setPageSize(v!)} width="min-w-[5rem]" />
     </div>
   );
 };

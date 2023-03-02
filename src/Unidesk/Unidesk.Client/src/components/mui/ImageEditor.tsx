@@ -21,9 +21,10 @@ export interface ImageEditorProps {
   style?: CSSProperties;
   ascpectRatio?: number;
   className?: string;
+  imgClassName?: string;
 }
 export const ImageEditor = (props: ImageEditorProps) => {
-  const { value, style, className, onValue, ascpectRatio = 16 / 9 } = props;
+  const { value, style, className, imgClassName, onValue, ascpectRatio = 16 / 9 } = props;
   const [cropperRef, setCropperRef] = useState<any>();
   const [editMode, setEditMode] = useState<boolean>(false);
   const [localValue, setLocalValue] = useState<string>();
@@ -96,7 +97,7 @@ export const ImageEditor = (props: ImageEditorProps) => {
       ) : (
         <>
           {value ? (
-            <img src={value} className={classnames(className)} />
+            <img src={value} className={classnames(imgClassName)} />
           ) : (
             <div
               className="flex h-32 items-center justify-center rounded-md bg-gray-200 transition-all selected:bg-gray-600"

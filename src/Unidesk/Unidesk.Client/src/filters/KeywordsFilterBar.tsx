@@ -5,18 +5,19 @@ import { RR } from "@locales/R";
 import { KeywordDto } from "@models/KeywordDto";
 import { KeywordFilter } from "@models/KeywordFilter";
 import { KeywordUsedCount } from "@models/KeywordUsedCount";
-import { QueryFilter } from "@models/QueryFilter";
-import { useContext, useEffect } from "react";
+import { QueryPaging } from "@models/QueryPaging";
+import { useContext } from "react";
 import { MdClear } from "react-icons/md";
 
 import { FilterBar } from "components/FilterBar";
 import { Paging } from "components/Paging";
 import { useDebounceLocalStorageState } from "hooks/useDebounceState";
-import { useQuery } from "hooks/useFetch";
+import { usePagedQuery } from "hooks/useFetch";
 import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
-import { generatePrimitive, Select } from "ui/Select";
+import { Select } from "ui/Select";
 import { TextField } from "ui/TextField";
+import { usePaging } from "hooks/usePaging";
 
 const usedCountOptions = [
   { label: ">1", key: "moreThan1", value: KeywordUsedCount.MORE_THAN1 },
@@ -24,7 +25,6 @@ const usedCountOptions = [
   { label: ">10", key: "moreThan10", value: KeywordUsedCount.MORE_THAN10 },
 ];
 
-type KeywordsFilterOnly = Omit<KeywordFilter, "filter">;
 interface KeywordsFilterBarProps {
   onChange?(data: KeywordDto[]): void;
 }
@@ -33,19 +33,21 @@ export const KeywordsFilterBar = (props: KeywordsFilterBarProps) => {
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
 
-  const { paging, isLoading, refreshIndex, refresh, loadData, setPaging } = useQuery<KeywordDto>({ pageSize: 80 });
-  const [filter, setFilter, debounceFilter] = useDebounceLocalStorageState<KeywordsFilterOnly>("main.keyword-filter-bar", {
-    keyword: "",
+  const pageModel = usePaging({ pageSize: 80 });
+  const { paging, setPaging } = pageModel;
+  const [filter, setFilter, debounceFilter] = useDebounceLocalStorageState<KeywordFilter>("main.keyword-filter-bar", { keyword: "" });
+  const { isLoading, refresh } = usePagedQuery({
+    queryFn: (i) => httpClient.keywords.getAll(i),
+    queryKey: ["keyword", "find", debounceFilter],
+    filter,
+    pageModel,
+    onChange,
   });
 
-  const updatePagination = (filter: QueryFilter) => {
+  const updatePagination = (filter: QueryPaging) => {
     setPaging({ ...filter });
     refresh();
   };
-
-  useEffect(() => {
-    loadData(httpClient.keywords.getAll({ requestBody: { ...filter, filter: paging } })).then(onChange);
-  }, [debounceFilter, refreshIndex]);
 
   return (
     <FilterBar disabled={isLoading}>
@@ -71,7 +73,7 @@ export const KeywordsFilterBar = (props: KeywordsFilterBarProps) => {
         placeholder={RR("keyword-used-count", language)}
       />
 
-      <Paging className="ml-auto" filter={paging} onValue={updatePagination} />
+      <Paging className="ml-auto" paging={paging} onValue={updatePagination} />
 
       <FilterBar type="btn-group">
         <Button onClick={refresh}>{translate("search")}</Button>

@@ -8,7 +8,7 @@ import { UserLookupDto } from "@models/UserLookupDto";
 import { UserFunction } from "@models/UserFunction";
 import { FloatingAction } from "components/mui/FloatingAction";
 import { UnideskComponent } from "components/UnideskComponent";
-import { toPromiseArray } from "hooks/useFetch";
+import { extractPagedResponse } from "hooks/useFetch";
 import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { useContext, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -168,7 +168,7 @@ export const PageEvaluationManage = () => {
                   searchable
                   clearable
                   options={keyword =>
-                    toPromiseArray(httpClient.users.find({ requestBody: { keyword, filter: { page: 1, pageSize: 10 } } }))
+                    extractPagedResponse(httpClient.users.find({ requestBody: { keyword, paging: { page: 1, pageSize: 10 } } }))
                   }
                   getTitle={i => renderUserLookup(i, true)}
                   getValue={i => i.fullName}

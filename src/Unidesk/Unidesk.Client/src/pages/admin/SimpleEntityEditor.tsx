@@ -17,7 +17,7 @@ import { MdAdd, MdDelete, MdSave } from "react-icons/md";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { getFormikProps as inputProps } from "hooks/getFormikProps";
-import { useGetSetDeleteFetch } from "hooks/useFetch";
+import { useListModel } from "hooks/useFetch";
 import { EditorPropertiesOf, extractColDefinition, extractInitialValues, extractYupSchema } from "models/typing";
 import { Button } from "ui/Button";
 import { Table } from "ui/Table";
@@ -46,24 +46,25 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
     },
   });
 
-  const { data, savedData, isLoading, isSaving, isDeleting, error, saveItem, deleteItem, loadData } = useGetSetDeleteFetch(
+  const model = useListModel<T>(
     () => getAll(),
     () => createOrUpdate(formik.values),
-    () => deleteOne(formik.values.id)
+    () => deleteOne(formik.values.id),
+    []
   );
+  const data = model.data ?? [] as T[];
+
   const dataKV = useMemo(() => toKV(language, data), [data, language]);
   const [itemId, setItemId] = useState<string>("");
 
   const handleSaveClick = async () => {
-    const item = await saveItem();
-    await loadData();
+    const item = await model.setQuery.mutateAsync(formik.values);
     setItemId(item.id);
     formik.setFieldValue("id", item.id);
   };
 
   const handleDeleteClick = async () => {
-    await deleteItem();
-    await loadData();
+    await model.deleteQuery.mutateAsync(formik.values.id);
     setItemId("");
   };
 
@@ -75,7 +76,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
 
   return (
     <UnideskComponent name="SimpleEntityEditor">
-      <LoadingWrapper className="flex flex-col gap-4" isLoading={isLoading || isSaving || isDeleting} error={error}>
+      <LoadingWrapper className="flex flex-col gap-4" isLoading={model.isLoading} error={model.error}>
         {dataKV.length > 0 && (
           <div className="flex flex-col gap-4 ">
             <Table
@@ -134,14 +135,14 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
             </div>
             <div className="flex justify-between">
               <div className="flex items-center gap-4">
-                <Button className="peer" onClick={handleSaveClick} loading={isSaving}>
+                <Button className="peer" onClick={handleSaveClick} loading={model.setQuery.isLoading}>
                   Save <MdSave className="text-base peer-loading:hidden" />
                 </Button>
-                {savedData && <span className="text-sm text-green-600 animate-in fade-in">Saved</span>}
+                {model.setQuery.isSuccess && <span className="text-sm text-green-600 animate-in fade-in">Saved</span>}
               </div>
               {itemId !== GUID_EMPTY && (
                 <div>
-                  <Button outlined error className="peer" onClick={handleDeleteClick} loading={isDeleting}>
+                  <Button outlined error className="peer" onClick={handleDeleteClick} loading={model.deleteQuery.isLoading}>
                     Delete <MdDelete className="text-base peer-loading:hidden" />
                   </Button>
                 </div>

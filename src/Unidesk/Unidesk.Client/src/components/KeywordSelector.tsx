@@ -3,11 +3,10 @@ import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
 import { KeywordDto } from "@models/KeywordDto";
-import { useContext, useEffect, useState } from "react";
-import { MdAdd, MdChecklist, MdClear } from "react-icons/md";
+import { useContext } from "react";
+import { MdAdd, MdClear } from "react-icons/md";
 
 import { useDebounceState } from "hooks/useDebounceState";
-import { useSingleQuery } from "hooks/useFetch";
 import { useOpenClose } from "hooks/useOpenClose";
 import { Button } from "ui/Button";
 import { Modal } from "ui/Modal";
@@ -15,6 +14,7 @@ import { classnames } from "ui/shared";
 import { TextField } from "ui/TextField";
 import { groupBy, sortBy } from "utils/arrays";
 import { locales } from "@locales/common";
+import { useQuery } from "react-query";
 
 interface KeywordSelectorProps {
   keywords?: KeywordDto[];
@@ -24,10 +24,15 @@ interface KeywordSelectorProps {
 }
 export const KeywordSelector = (props: KeywordSelectorProps) => {
   const { language } = useContext(LanguageContext);
-  const { keywords = [], onChange, max = 100, separateByLocale = false } = props;
+  const { keywords = [], onChange, max = 100 } = props;
   const [keyword, setKeyword, debounceKw] = useDebounceState<string>("");
 
-  const { data: keywordCandidates, isLoading, loadData } = useSingleQuery<KeywordDto[]>([]);
+  const {data, isLoading, refetch } = useQuery({
+    queryKey: ["keywords", debounceKw],
+    queryFn: () => httpClient.keywords.find({ keyword: debounceKw.trim() }),
+    enabled: debounceKw.trim() !== "",
+  })
+  const keywordCandidates = data ?? [];
   const { open, close, isOpen } = useOpenClose();
 
   const setKeyworsdWithChange = (value: KeywordDto[]) => {
@@ -35,18 +40,6 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
     onChange?.(unique);
   };
 
-  const doLoadData = async (keyword: string) => {
-    if (keyword.trim() === "" || isLoading) {
-      return;
-    }
-
-    await loadData(httpClient.keywords.find({ keyword: keyword.trim() }));
-    open();
-  };
-
-  useEffect(() => {
-    doLoadData(debounceKw);
-  }, [debounceKw]);
 
   const tryAddKeywordFromOtherLocale = (keyword: KeywordDto) => {
     const toAdd: KeywordDto[] = [];
@@ -130,7 +123,7 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
               value={keyword}
               onValue={setKeyword}
               className="grow"
-              onEnter={() => doLoadData(keyword)}
+              onEnter={refetch}
             />
           </div>
 

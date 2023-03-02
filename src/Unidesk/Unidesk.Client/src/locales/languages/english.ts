@@ -216,6 +216,18 @@ export const en = {
   "help.user-aliases": "User Aliases are used to connect your main account with other originating from STAG. Please select all the aliases which are applicable to this user.",
   "help.user-roles": "User Roles are used to grant you access to certain parts of the system. Please select all the roles which are applicable to this user.",
   "help.teams": "Teams are used to group users together. Please select all the teams which are applicable to this user.",
+
+  // user function
+  "user-function.none": "None",
+  "user-function.guest": "Guest",
+  "user-function.author": "Author",
+  "user-function.teacher": "Teacher",
+  "user-function.supervisor": "Supervisor",
+  "user-function.opponent": "Opponent",
+  "user-function.external": "External",
+
+  // operators
+  "operator.and-or": "And/Or",
 };
 
 export default en;

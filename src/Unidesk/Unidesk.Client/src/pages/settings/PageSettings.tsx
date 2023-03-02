@@ -5,12 +5,11 @@ import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
 import { UserRoleDto } from "@models/UserRoleDto";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { MdAdd, MdCalendarToday } from "react-icons/md";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import { useSingleQuery } from "hooks/useFetch";
 import { IdRenderer } from "models/cellRenderers/IdRenderer";
 import { MetadataRenderer } from "models/cellRenderers/MetadataRenderer";
 import { link_settingsManageSettings } from "routes/settings/links";
@@ -21,6 +20,7 @@ import { classnames } from "ui/shared";
 import { Table } from "ui/Table";
 import { TextField } from "ui/TextField";
 import { UnideskComponent } from "components/UnideskComponent";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 interface SettingsRoute {
   name: EnKeys;
@@ -66,7 +66,17 @@ const RolesAndGrants = () => {
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
 
-  const { data, loadData } = useSingleQuery<UserRoleDto[]>([]);
+  const queryClient = useQueryClient();
+  const saveMutation = useMutation(httpClient.settings.saveRole, {
+    onSuccess: () => {
+      toast.success(translate("saved"));
+      queryClient.invalidateQueries("roles-and-grants");
+    },
+  });
+  const { data } = useQuery({
+    queryKey: "roles-and-grants",
+    queryFn: httpClient.settings.getRolesAndGrants,
+  });
   const [item, setItem] = useState<UserRoleDto>();
   const renderGrant = (id: string) => GrantsAll.find(i => i.id === id)?.name;
 
@@ -86,25 +96,6 @@ const RolesAndGrants = () => {
       </div>
     );
   };
-
-  const handleSave = async () => {
-    if (!item) {
-      return;
-    }
-
-    const response = await httpClient.settings.saveRole({ requestBody: item }).catch(() => {
-      return null;
-    });
-
-    if (response !== null) {
-      toast.success(translate("saved"));
-      loadData(httpClient.settings.getRolesAndGrants());
-    }
-  };
-
-  useEffect(() => {
-    loadData(httpClient.settings.getRolesAndGrants());
-  }, []);
 
   const userGrantsOtions = generatePrimitive(
     GrantsAll.map(i => i.id),
@@ -142,7 +133,7 @@ const RolesAndGrants = () => {
               id: "grants",
               field: GrantRenderer,
               headerName: "Grants",
-              className: "max-w-xs"
+              className: "max-w-xs",
             },
             {
               id: "created",
@@ -173,7 +164,7 @@ const RolesAndGrants = () => {
       </div>
 
       {item != null && (
-        <div className="flex gap-1 items-baseline mt-4">
+        <div className="mt-4 flex items-baseline gap-1">
           <FormField as={TextField} value={item.name} label="Name" onValue={(name: string) => setItem({ ...item, name })} />
           <FormField
             as={TextField}
@@ -193,7 +184,7 @@ const RolesAndGrants = () => {
             onMultiValue={(grants: string[]) => setItem({ ...item, grants: grants.map(i => GrantsAll.find(j => j.id === i)!) })}
             optionRender={renderGrant}
           />
-          <Button className="ml-auto" success onClick={handleSave}>
+          <Button className="ml-auto" success onClick={() => saveMutation.mutate({ requestBody: item })}>
             {item.id === GUID_EMPTY ? RR("add-new", language) : RR("update", language)}
           </Button>
         </div>

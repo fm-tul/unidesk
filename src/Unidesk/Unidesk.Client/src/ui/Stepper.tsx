@@ -1,3 +1,4 @@
+import { Collapse } from "components/mui/Collapse";
 import React, { useEffect, useMemo } from "react";
 import { PropsWithChildren } from "react";
 
@@ -21,7 +22,6 @@ export const Stepper = (props: PropsWithChildren<StepperProps>) => {
   const { children, step, setStep } = props;
   const items = React.Children.toArray(children);
 
-
   return (
     <div className="stepper">
       {items.map((component, index) => {
@@ -37,9 +37,16 @@ export const Stepper = (props: PropsWithChildren<StepperProps>) => {
               </Button>
             </div>
 
-            <div className="ml-4 w-[calc(100%-16px)] border-l border-solid border-black pl-5">
-              {index === step && component}
-            </div>
+            <Collapse open={index === step}>
+              <div className="flex gap-2">
+                <div className="flex w-8  items-stretch justify-center rounded-full">
+                  <div className="rounded-full w-2 my-2 from-blue-500/10 via-blue-500/40 to-blue-500/10 bg-gradient-to-b">&nbsp;</div>
+                </div>
+                <div className="py-4">
+                  {component}
+                </div>
+              </div>
+            </Collapse>
           </div>
         );
       })}

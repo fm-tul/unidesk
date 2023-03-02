@@ -1,24 +1,16 @@
-import { KeywordDto, KeywordUsedCount, QueryFilter } from "@api-client";
-import { httpClient } from "@core/init";
+import { KeywordDto, KeywordUsedCount } from "@api-client";
 import { LanguageContext } from "@locales/LanguageContext";
-import { RR } from "@locales/R";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { FilterBar } from "components/FilterBar";
-import { Paging } from "components/Paging";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
 import { KeywordsFilterBar } from "filters/KeywordsFilterBar";
-import { useDebounceState } from "hooks/useDebounceState";
 import { useOpenClose } from "hooks/useOpenClose";
 import { link_pageKeywordDetail } from "routes/links";
 import { Button } from "ui/Button";
 import { Modal } from "ui/Modal";
-import { Select } from "ui/Select";
-import { TextField } from "ui/TextField";
 
 import { HistoryInfoIcon } from "../../components/HistoryInfo";
-import { useQuery } from "../../hooks/useFetch";
 import { KeywordMerger } from "./KeywordMerger";
 import { UnideskComponent } from "components/UnideskComponent";
 

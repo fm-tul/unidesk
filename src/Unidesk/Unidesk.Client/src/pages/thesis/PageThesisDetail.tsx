@@ -8,11 +8,11 @@ import Latex from "react-latex";
 import { Link, useParams } from "react-router-dom";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
-import { useFetch } from "hooks/useFetch";
 import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { link_pageThesisEdit } from "routes/links";
 import React from "react";
 import { UnideskComponent } from "components/UnideskComponent";
+import { EnumsContext } from "models/EnumsContext";
 
 interface PageThesisDetailProps {}
 export const PageThesisDetail = (props: PageThesisDetailProps) => {
@@ -22,7 +22,7 @@ export const PageThesisDetail = (props: PageThesisDetailProps) => {
   const [dto, setDto] = useState<ThesisDto>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
-  const { data: enums } = useFetch(() => httpClient.enums.allEnums());
+  const { enums } = useContext(EnumsContext);
 
   const loadItem = async (id: string) => {
     setIsLoading(true);

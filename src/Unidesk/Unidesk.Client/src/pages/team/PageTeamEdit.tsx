@@ -3,11 +3,11 @@ import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { TeamDto } from "@models/TeamDto";
 import { TeamType } from "@models/TeamType";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
-import { fakePromise, toPromiseArray, useSingleQuery } from "hooks/useFetch";
+import { extractPagedResponse } from "hooks/useFetch";
 import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { Table } from "ui/Table";
 import { UserContext } from "user/UserContext";
@@ -19,8 +19,7 @@ import { SelectField, SelectFieldLive } from "ui/SelectField";
 import { All as TeamRoleAll } from "@api-client/constants/TeamRole";
 import { UserInTeamStatus } from "@models/UserInTeamStatus";
 import { UserLookupDto } from "@models/UserLookupDto";
-import { FaPlus } from "react-icons/fa";
-import { IoAddCircle, IoAddCircleOutline, IoAddCircleSharp, IoAddSharp, IoPersonAdd } from "react-icons/io5";
+import { IoPersonAdd } from "react-icons/io5";
 import { FormField } from "ui/FormField";
 import { classnames } from "ui/shared";
 import { IsNew } from "utils/IsNew";
@@ -38,7 +37,6 @@ import { toast } from "react-toastify";
 import { extractErrors, FormErrors, getPropsFactory } from "utils/forms";
 import { link_pageTeamEdit, link_pageTeamList, link_pageUserProfile } from "routes/links";
 import { UserInTeamStatusRenderer } from "models/itemRenderers/UserInTeamStatusRenderer";
-import { Cropper } from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import { ImageEditor } from "components/mui/ImageEditor";
 
@@ -190,7 +188,8 @@ export const TeamEdit = (props: PageTeamNewProps) => {
           title="abstract"
           Field={
             <ImageEditor
-              className="max-h-sm"
+              className="max-h-md"
+              imgClassName="max-h-sm"
               style={{ width: "100%", height: 200 }}
               value={dto.avatar}
               onValue={v => setDto({ ...dto, avatar: v })}
@@ -302,7 +301,7 @@ export const TeamEdit = (props: PageTeamNewProps) => {
                   searchable
                   clearable
                   options={keyword =>
-                    toPromiseArray(httpClient.users.find({ requestBody: { keyword, filter: { page: 1, pageSize: 10 } } }))
+                    extractPagedResponse(httpClient.users.find({ requestBody: { keyword, paging: { page: 1, pageSize: 10 } } }))
                   }
                   getTitle={i => renderUserLookup(i, true)}
                   getValue={i => i.fullName}
@@ -344,13 +343,15 @@ export const PageTeamEdit = () => {
   const { id } = useParams();
   const { data, error, isLoading } = useQuery({
     queryKey: ["team", id],
-    queryFn: () => (id === "new" ? fakePromise(teamInitialValue as TeamDto) : httpClient.team.get({ id: id! })),
+    queryFn: () => httpClient.team.get({ id: id! }),
+    enabled: id !== "new",
   });
+  const team = id === "new" ? teamInitialValue : data;
 
   return (
     <UnideskComponent name="PageTeamEdit">
       <LoadingWrapper isLoading={isLoading} error={error}>
-        {!!data && <TeamEdit initialValues={data} />}
+        {!!team && <TeamEdit initialValues={team as TeamDto} />}
       </LoadingWrapper>
     </UnideskComponent>
   );

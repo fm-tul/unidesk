@@ -3,18 +3,24 @@ import { LanguageContext } from "@locales/LanguageContext";
 import { UnideskComponent } from "components/UnideskComponent";
 import { ThesisListRenderer } from "models/itemRenderers/ThesisRenderer";
 import { useContext } from "react";
+import { useQuery } from "react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { link_pageKeywordDetail, link_pageThesisDetail } from "routes/links";
 
 import { RequestInfo } from "../../components/utils/RequestInfo";
-import { useFetch } from "../../hooks/useFetch";
 
 export const PageKeywordDetail = () => {
   const { language } = useContext(LanguageContext);
   const { id } = useParams();
-  const { isLoading, error, data: response } = useFetch(() => httpClient.thesis.find({ requestBody: { keywords: [id!] } }), [id]);
-  const { data: related } = useFetch(() => httpClient.keywords.findRelated({ keywordId: id }), [id]);
   const navigate = useNavigate();
+  const { isLoading, error, data: response } = useQuery({
+    queryKey: ["keyword", id],
+    queryFn: () => httpClient.thesis.find({ requestBody: { keywords: [id!] } }),
+  })
+  const { data: related } = useQuery({
+    queryKey: ["keyword", id, "related"],
+    queryFn: () => httpClient.keywords.findRelated({ keywordId: id }),
+  })
 
   return (
     <UnideskComponent name="PageKeywordDetail">

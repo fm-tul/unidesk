@@ -5,7 +5,6 @@ import {
   Severity,
   SimpleJsonResponse,
   StudyProgrammeDto,
-  TeamDto,
   TeamLookupDto,
   ThesisOutcomeDto,
   ThesisTypeDto,
@@ -13,17 +12,16 @@ import {
   UserLookupDto,
 } from "@api-client";
 import { GUID_EMPTY } from "@core/config";
-import { guestHttpClient, httpClient } from "@core/init";
+import { httpClient } from "@core/init";
 import { EnKeys, LanguagesId } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { R, RR } from "@locales/R";
 import { KeywordDto } from "@models/KeywordDto";
 import { ThesisDto } from "@models/ThesisDto";
 import { ThesisStatus } from "@models/ThesisStatus";
-import { UserDto } from "@models/UserDto";
 import { useContext, useEffect, useState } from "react";
 import Latex from "react-latex";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { debounce } from "throttle-debounce";
 import * as Yup from "yup";
@@ -32,20 +30,18 @@ import { Moment } from "components/HistoryInfo";
 import { KeywordSelector } from "components/KeywordSelector";
 import { ArrayField } from "components/mui/ArrayField";
 import { LoadingWrapper } from "components/utils/LoadingWrapper";
-import { toPromiseArray, useFetch, useQuery, useSingleQuery } from "hooks/useFetch";
+import { extractPagedResponse } from "hooks/useFetch";
 import { useOpenClose } from "hooks/useOpenClose";
 import { useStepper } from "hooks/useStepper";
 import { renderTeam } from "models/cellRenderers/TeamRenderer";
 import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
-import { renderUser, renderUserLookup } from "models/cellRenderers/UserRenderer";
+import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { link_pageEvaluationManage, link_pageThesisDetail, link_pageThesisEdit } from "routes/links";
 import { Button } from "ui/Button";
 import { CreateConfirmDialog as confirmWith } from "ui/Confirm";
 import { FormField } from "ui/FormField";
-import { Menu } from "ui/Menu";
 import { Modal } from "ui/Modal";
 import { generatePrimitive, Select, SelectOption, SelectProps, TId } from "ui/Select";
-import { UiColors } from "ui/shared";
 import { Step, Stepper } from "ui/Stepper";
 import { TextField, TextFieldProps } from "ui/TextField";
 import { getPersistedObject, persistObject } from "utils/persistentUtils";
@@ -55,6 +51,8 @@ import { ClipboardFromBpDp } from "./plugins/ClipboardFromBpDp";
 import { thesisValidationSchema as schema, thesisInitialValues } from "./thesisSchema";
 import { Debug } from "components/Debug";
 import { UnideskComponent } from "components/UnideskComponent";
+import { EnumsContext } from "models/EnumsContext";
+import { useQuery } from "react-query";
 
 type T = ThesisDto;
 type errorObj = { message: string; severity?: Severity };
@@ -70,6 +68,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
   const { language } = useContext(LanguageContext);
   const { initialValues } = props;
   const persistentObject = getPersistedObject<ThesisDto>(PERSISTED_OBJECT_KEY);
+  const { enums } = useContext(EnumsContext);
 
   const [dto, _setDto] = useState<ThesisDto>((initialValues ?? thesisInitialValues) as ThesisDto);
   const isNew = dto.id === GUID_EMPTY;
@@ -79,9 +78,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
   const { open, close, isOpen } = useOpenClose(false);
   const navigate = useNavigate();
 
-  const { data: enums, isLoading: enumsLoading } = useFetch(() => guestHttpClient.enums.allEnums());
-  const [loading, setLoading] = useState(false);
-  const isLoading = enumsLoading || loading;
+  const [isLoading, setIsLoading] = useState(false);
   const departments = generateOptions(enums?.departments, language);
   const schoolYears = (enums?.schoolYears ?? []).map(i => ({ key: i.id, value: i, label: i.name }));
   const studyProgrammes = generateOptions(enums?.studyProgrammes, language);
@@ -157,7 +154,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
 
     const canSubmit = isValid || (await confirmWith({ title: "Form is not valid", message: "Do you want to continue anyway?" }));
     if (canSubmit) {
-      setLoading(true);
+      setIsLoading(true);
       httpClient.thesis
         .upsert({ requestBody: dto })
         .then(i => {
@@ -179,7 +176,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
             setErrors(errorDict as thesisErrorObject);
           }
         })
-        .finally(() => setLoading(false));
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -343,7 +340,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
                 multiple
                 label={R("authors")}
                 optionRender={renderUserLookup}
-                options={(keyword: string) => toPromiseArray(httpClient.users.find({ requestBody: { keyword } }))}
+                options={(keyword: string) => extractPagedResponse(httpClient.users.find({ requestBody: { keyword } }))}
                 value={dto.authors.map(i => i.user)}
                 onMultiValue={authors =>
                   form.setDto({ ...form.dto, authors: authors.map(user => ({ user, function: UserFunction.AUTHOR })) })
@@ -356,7 +353,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
                 multiple
                 label={R("teams")}
                 optionRender={renderTeam}
-                options={(keyword: string) => toPromiseArray(httpClient.team.findSimple({ requestBody: { keyword } }))}
+                options={(keyword: string) => extractPagedResponse(httpClient.team.findSimple({ requestBody: { keyword } }))}
                 value={dto.teams}
                 onMultiValue={teams => form.setDto({ ...form.dto, teams })}
               />
@@ -507,14 +504,14 @@ export const PageThesisEdit = (props: PageThesisEditProps) => {
     return <ThesisEdit initialValues={thesisInitialValues as ThesisDto} />;
   }
 
-  const { data: thesis, isLoading, error, loadData } = useSingleQuery<ThesisDto | undefined>(undefined);
-  useEffect(() => {
-    loadData(httpClient.thesis.getOne({ id }));
-  }, [id]);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["thesis", id],
+    queryFn: () => httpClient.thesis.getOne({ id }),
+  });
 
   return (
     <LoadingWrapper isLoading={isLoading} error={error}>
-      {!!thesis && <ThesisEdit initialValues={thesis} />}
+      {!!data && <ThesisEdit initialValues={data} />}
     </LoadingWrapper>
   );
 };
