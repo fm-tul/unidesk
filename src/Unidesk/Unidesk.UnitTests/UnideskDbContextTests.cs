@@ -108,7 +108,7 @@ public class UnideskDbContextTests
         var userProviderSubstitute = Substitute.For<IUserProvider>();
         userProviderSubstitute.CurrentUser.Returns(new User()
         {
-            Email = "example@unittest.com"
+            Email = "example@unittest.com",
         });
         var loggerSubstitute = Substitute.For<ILogger<UnideskDbContext>>();
         var db = new UnideskDbContext(contextOptions, userProviderSubstitute, loggerSubstitute, new DefaultDateTimeService());

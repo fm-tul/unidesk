@@ -30,7 +30,7 @@ public class QueryFilter
         Page = 1,
         PageSize = 20,
         OrderBy = null,
-        OrderAscending = true
+        OrderAscending = true,
     };
 }
 

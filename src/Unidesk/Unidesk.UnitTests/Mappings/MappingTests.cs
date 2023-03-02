@@ -47,7 +47,7 @@ public class MappingTests
         {
             Grants.User_Admin.AsGrant(),
             Grants.User_Guest.AsGrant(),
-        }
+        },
     };
         
     private UserRole roleB = new()
@@ -58,7 +58,7 @@ public class MappingTests
         {
             Grants.User_Admin.AsGrant(),
             Grants.User_Guest.AsGrant(),
-        }
+        },
     };
     
     [Fact]
@@ -68,7 +68,7 @@ public class MappingTests
 
         var user = new User
         {
-            Roles = new List<UserRole> { roleA, roleB }
+            Roles = new List<UserRole> { roleA, roleB },
         };
         
         _db.DisableInterceptors();
