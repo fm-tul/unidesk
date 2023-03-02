@@ -5,7 +5,7 @@ namespace Unidesk.Services.Reports;
 public enum LangType
 {
     EN,
-    CZ
+    CZ,
 }
 
 public class ReportService

@@ -87,13 +87,13 @@ public class ThesisController : Controller
                .Where(i => i.Value.Contains(requestFilter.Keyword))
                .Select(i => i.Id)
                .ToListAsync();
-            
+
             var pattern = $"%{requestFilter.Keyword}%";
             query = query.Where(i =>
                 EF.Functions.Like(i.NameCze, pattern)
              || EF.Functions.Like(i.NameEng, pattern)
-             // || (i.AbstractCze != null && EF.Functions.Like(i.AbstractCze, pattern))
-             // || (i.AbstractEng != null && EF.Functions.Like(i.AbstractEng, pattern))
+                // || (i.AbstractCze != null && EF.Functions.Like(i.AbstractCze, pattern))
+                // || (i.AbstractEng != null && EF.Functions.Like(i.AbstractEng, pattern))
              || (i.Adipidno != null && EF.Functions.Like(i.Adipidno.ToString()!, pattern))
              || (i.ThesisUsers.Any(j =>
                     (j.User.FirstName != null && EF.Functions.Like(j.User.FirstName, pattern))
@@ -102,23 +102,31 @@ public class ThesisController : Controller
              || (i.KeywordThesis.Any(j =>
                     top5SimilarKeywordsIds.Contains(j.KeywordId)
                 ))
-                || (i.KeywordThesis.Any(j =>
+             || (i.KeywordThesis.Any(j =>
                     EF.Functions.Like(j.Keyword.Value, pattern)
                 ))
             );
         }
 
-        if (requestFilter.Keywords.Any() && requestFilter.Keywords.Count == 1)
+        if (requestFilter.Keywords.Any())
         {
-            var kw = requestFilter.Keywords.First();
-            query = query.Where(i => i.KeywordThesis.Any(j => j.KeywordId == kw));
+            if (requestFilter.Operator == Operator.And)
+            {
+                foreach (var keywordId in requestFilter.Keywords)
+                {
+                    query = query.Where(i => i.KeywordThesis.Any(j => j.KeywordId == keywordId));
+                }
+            } else
+            {
+                query = query.Where(i => i.KeywordThesis.Any(j => requestFilter.Keywords.Contains(j.KeywordId)));
+            }
         }
 
         if (requestFilter.Status.HasValue)
         {
             query = query.Where(i => i.Status == requestFilter.Status.Value);
         }
-        
+
         if (requestFilter.SchoolYearId.HasValue)
         {
             query = query.Where(i => i.SchoolYearId == requestFilter.SchoolYearId.Value);
@@ -126,9 +134,10 @@ public class ThesisController : Controller
 
         if (requestFilter.MyThesis)
         {
-            var myIds = _userProvider.CurrentUser.Aliases.Select(i => i.Id).Concat(
-                new[] { _userProvider.CurrentUser.Id }
-            ).ToList();
+            var myIds = _userProvider.CurrentUser.Aliases
+               .Select(i => i.Id)
+               .Concat(new[] { _userProvider.CurrentUser.Id })
+               .ToList();
             query = query.Where(i => i.ThesisUsers.Any(j => myIds.Contains(j.UserId)));
         }
 
@@ -142,7 +151,7 @@ public class ThesisController : Controller
         var response = await query
            .OrderBy(i => i.Status)
            .ThenBy(i => i.Created)
-           .ToListWithPagingAsync<Thesis, ThesisLookupDto>(requestFilter.Filter, _mapper);
+           .ToListWithPagingAsync<Thesis, ThesisLookupDto>(requestFilter.Paging, _mapper);
 
         return Ok(response);
     }

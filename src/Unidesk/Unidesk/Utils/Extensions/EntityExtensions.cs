@@ -15,7 +15,7 @@ public static class EntityExtensions
         {
             UserId = thesisUser.UserId,
             ThesisId = thesisUser.ThesisId,
-            Function = thesisUser.Function
+            Function = thesisUser.Function,
         };
     }
 

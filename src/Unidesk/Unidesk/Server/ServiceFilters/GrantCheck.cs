@@ -24,7 +24,7 @@ public static class GrantCheck
                     DebugMessage = $"Access denied for user {user?.Username ?? "anonymous"} " +
                                    $"to {actionName} because of missing grants: " +
                                    $"{string.Join(", ", requiredGrants.Select(i => $"{i.Name} ({i.Id}"))}",
-                    Errors = new[] { new ValidationFailure("Grants", "Access denied") }
+                    Errors = new[] { new ValidationFailure("Grants", "Access denied") },
                 })
                 { StatusCode = result.StatusCode };
         }

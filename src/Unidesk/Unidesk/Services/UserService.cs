@@ -27,7 +27,7 @@ public class UserService
 
     public Task<List<User>> FindAsync(ILoginRequest request)
     {
-        return  _db.Users
+        return _db.Users
            .Query()
            .Where(u => u.Email == request.Eppn).ToListAsync();
     }
@@ -46,7 +46,7 @@ public class UserService
             filter?.IncludeHidden == true
                 ? _db.Users.IgnoreQueryFilters().Where(i => States.ActiveOrHidden.Contains(i.State))
                 : _db.Users.AsQueryable();
-            
+
         if (filter == null)
         {
             return query;
@@ -60,8 +60,8 @@ public class UserService
 
         if (filter.LinkedWithStag.HasValue)
         {
-            query = filter.LinkedWithStag == true 
-                ? query.Where(x => x.StagId != null) 
+            query = filter.LinkedWithStag == true
+                ? query.Where(x => x.StagId != null)
                 : query.Where(x => x.StagId == null);
         }
 
@@ -194,9 +194,9 @@ public class UserService
                 new()
                 {
                     Name = "Debug",
-                    Grants = claims.Grants
-                }
-            }
+                    Grants = claims.Grants,
+                },
+            },
         };
     }
 
@@ -222,14 +222,6 @@ public class UserService
             Email = $"{request.Eppn}@unidesk.tul",
         };
 
-        if (request.Eppn.Contains("admin"))
-        {
-            user.Roles = new List<UserRole>
-            {
-                new() { Name = "Admin", Grants = UserGrants.All.ToList() }
-            };
-        }
-
         return user;
     }
 
@@ -253,6 +245,23 @@ public class UserService
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
+
+        return user;
+    }
+
+    public async Task<User> FixRolesAsync(User user)
+    {
+        if (user.Email == "admin@unidesk.tul.cz")
+        {
+            user.Roles = new List<UserRole>
+            {
+                new() { Name = "Admin", Grants = UserGrants.All.ToList() },
+            };
+            if (_db.Entry(user).State == EntityState.Modified)
+            {
+                await _db.SaveChangesAsync();
+            }
+        }
 
         return user;
     }

@@ -20,7 +20,7 @@ public class ChangeLog : IdEntity
             User = user,
             State = entry.State,
             DateTime = DateTime.Now,
-            EntityId = entry.Entity is IdEntity entity ? entity.Id : Guid.Empty
+            EntityId = entry.Entity is IdEntity entity ? entity.Id : Guid.Empty,
         };
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.FileProviders;
 using Unidesk.Db;
+using Unidesk.Dtos;
 using Unidesk.Server.ServiceFilters;
+using Unidesk.Utils;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Server;
@@ -114,5 +117,21 @@ public static class ServiceCollectionExtensions
         }
 
         return app;
+    }
+
+    public static void GenerateAdminShibbo(this IHost app)
+    {
+        using var scope = app.Services.CreateScope();
+        var cryptography = scope.ServiceProvider.GetRequiredService<CryptographyUtils>();
+        var payload = new LoginShibboRequest
+        {
+            Affiliation = "admin",
+            Eppn = "admin@unidesk.tul.cz",
+            Rnd = new Random().Next(),
+            Time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        };
+        var payloadJson = JsonSerializer.Serialize(payload);
+        var base64 = cryptography.EncryptText(payloadJson);
+        Console.WriteLine(base64);
     }
 }

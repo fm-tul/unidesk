@@ -52,7 +52,7 @@ public class ModelGeneration
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
             }) ?? throw new Exception("Failed to start npm");
             
            await process.WaitForExitAsync();

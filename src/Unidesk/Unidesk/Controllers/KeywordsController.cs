@@ -38,7 +38,7 @@ public class KeywordsController : ControllerBase
 
         var response = await query
             .OrderByDescending(i => i.KeywordThesis.Count)
-            .ToListWithPagingAsync<Keyword, KeywordDto>(filter.Filter, _mapper);
+            .ToListWithPagingAsync<Keyword, KeywordDto>(filter.Paging, _mapper);
         
         return Ok(response);
     }

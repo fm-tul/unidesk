@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Mvc;
@@ -290,6 +291,7 @@ evaluationApi.MapDelete("/delete/{id:guid}", async ([FromServices] ThesisEvaluat
 // {
 //     app.UseClientAppStaticFiles();
 // }
+
 
 if (isDev && generateModel)
 {

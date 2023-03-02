@@ -30,7 +30,7 @@ public class ImportService
             .Select(i => new Keyword
             {
                 Value = i,
-                Locale = locale
+                Locale = locale,
             })
             .ToList();
 
@@ -168,7 +168,7 @@ public class ImportService
             "OPUBPOO" => ThesisStatus.Finished,
             "OPUNO" => ThesisStatus.Finished,
 
-            _ => ThesisStatus.Unknown
+            _ => ThesisStatus.Unknown,
         };
     }
 

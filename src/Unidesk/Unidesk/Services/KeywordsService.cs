@@ -69,7 +69,7 @@ public class KeywordsService
                 KeywordUsedCount.MoreThan1 => 1,
                 KeywordUsedCount.MoreThan5 => 5,
                 KeywordUsedCount.MoreThan10 => 10,
-                _ => 0
+                _ => 0,
             };
 
             query = query

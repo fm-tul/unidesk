@@ -20,7 +20,7 @@ public static class ProcessUtils
                 RedirectStandardOutput = redirectStandardOutput,
                 RedirectStandardError = redirectStandardError,
                 UseShellExecute = useShellExecute,
-                CreateNoWindow = createNoWindow
+                CreateNoWindow = createNoWindow,
             },
         };
 

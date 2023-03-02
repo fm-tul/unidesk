@@ -46,5 +46,5 @@ public enum KeywordThesisStatus
 {
     Official,
     Suggested,
-    Rejected
+    Rejected,
 }

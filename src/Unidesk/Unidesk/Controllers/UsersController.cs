@@ -125,8 +125,8 @@ public partial class UsersController : ControllerBase
     {
         var response = await _userService
             .Where(query)
-            .ApplyOrderBy(query?.Filter)
-            .ToListWithPagingAsync<User, UserLookupDto>(query?.Filter, _mapper);
+            .ApplyOrderBy(query?.Paging)
+            .ToListWithPagingAsync<User, UserLookupDto>(query?.Paging, _mapper);
     
         return Ok(response);
     }

@@ -41,7 +41,7 @@ public class TeamController : ControllerBase
         var query = _teamService.WhereFilter(filter);
         var response = await query
            .OrderBy(i => i.Name)
-           .ToListWithPagingAsync<Team, TeamDto>(filter.Filter, _mapper);
+           .ToListWithPagingAsync<Team, TeamDto>(filter.Paging, _mapper);
 
         return Ok(response);
     }
@@ -54,7 +54,7 @@ public class TeamController : ControllerBase
         var query = _teamService.WhereFilter(filter);
         var response = await query
            .OrderBy(i => i.Name)
-           .ToListWithPagingAsync<Team, TeamLookupDto>(filter.Filter, _mapper);
+           .ToListWithPagingAsync<Team, TeamLookupDto>(filter.Paging, _mapper);
 
         return Ok(response);
     }

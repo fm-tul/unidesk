@@ -132,7 +132,7 @@ public static class InitialSeed
                 "Admin",
                 "Teacher",
                 "Student",
-                "Guest"
+                "Guest",
             };
 
             info += db.UserRoles.AddRangeEnumerable(names.Select(name => new UserRole { Name = name }));

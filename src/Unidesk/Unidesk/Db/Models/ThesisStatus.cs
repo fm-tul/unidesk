@@ -35,5 +35,5 @@ public enum ThesisStatus
     Abandoned = 8,
     
     [MultiLang("Uknown", "Neznámý")]
-    Unknown = 666
+    Unknown = 666,
 }

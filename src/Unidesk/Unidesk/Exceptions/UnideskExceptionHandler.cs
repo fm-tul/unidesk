@@ -20,7 +20,7 @@ public static class UnideskExceptionHandler
             Success = false,
             Message = errorMessage,
             StackTrace = exception?.Error?.StackTrace?.Split('\n') ?? Enumerable.Empty<string>(),
-            DebugMessage = errorMessage
+            DebugMessage = errorMessage,
         };
 
         if (exception?.Error is DbUpdateException)

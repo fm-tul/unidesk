@@ -28,7 +28,7 @@ public static class StringExtensions
             return null;
         }
 
-        if (email.StartsWith("@") || !email.Contains("@"))
+        if (email.StartsWith("@") || !email.Contains('@'))
         {
             return null;
         }

@@ -447,7 +447,7 @@ public class DashedLine : IDynamicComponent<int>
         return new DynamicComponentComposeResult
         {
             Content = content,
-            HasMoreContent = false
+            HasMoreContent = false,
         };
     }
 }

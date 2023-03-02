@@ -13,7 +13,7 @@ public partial class UsersController
     [HttpPost, Route("login")]
     [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(Login))]
-    [ProducesResponseType(typeof(LoginResponse), 200)]
+    [ProducesResponseType(typeof(ToastResponse<UserDto>), 200)]
     public async Task<IActionResult> Login(LoginRequest request)
     {
         if (!_appOptions.AllowLocalAccounts)
@@ -28,18 +28,17 @@ public partial class UsersController
         await _userService.SignInAsync(httpContext, dbUser);
         _logger.LogInformation("User {Email} logged in at {Time}", request.Eppn, DateTime.UtcNow);
 
-        return Ok(new LoginResponse
+        return Ok(new ToastResponse<UserDto>
         {
-            IsAuthenticated = true,
             Message = "User logged in successfully",
-            User = _mapper.Map<UserDto>(dbUser)
+            Data = _mapper.Map<UserDto>(dbUser),
         });
     }
 
     [HttpGet, Route("/login.sso/{*path}")]
     [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(LoginSSO))]
-    [ProducesResponseType(typeof(LoginResponse), 200)]
+    [ProducesResponseType(typeof(ToastResponse<UserDto>), 200)]
     public async Task<IActionResult> LoginSSO(string path)
     {
         var plainText = _cryptography.DecryptText(path);
@@ -77,21 +76,21 @@ public partial class UsersController
             return Forbid();
         }
 
+        await _userService.FixRolesAsync(dbUser);
         await _userService.SignInAsync(httpContext, dbUser);
         _logger.LogInformation("User {Email} logged in at {Time}", shibboRequest.Eppn, DateTime.UtcNow);
 
-        return Ok(new LoginResponse
+        return Ok(new ToastResponse<UserDto>
         {
-            IsAuthenticated = true,
             Message = $"User {dbUser.Username} logged in successfully",
-            User = _mapper.Map<UserDto>(dbUser)
+            Data = _mapper.Map<UserDto>(dbUser),
         });
     }
 
     [HttpGet, Route("logout")]
     [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(Logout))]
-    [ProducesResponseType(typeof(LoginResponse), 200)]
+    [ProducesResponseType(typeof(ToastResponse<UserDto?>), 200)]
     public async Task<IActionResult> Logout()
     {
         var user = (User?)_userProvider.CurrentUser;
@@ -102,10 +101,10 @@ public partial class UsersController
         _logger.LogInformation("User {Email} logged out at {Time}", user?.Email, DateTime.UtcNow);
         
         
-        return Ok(new LoginResponse
+        return Ok(new ToastResponse<UserDto?>
         {
-            IsAuthenticated = false,
             Message = "User logged out successfully",
+            Data = null,
         });
     }
 }

@@ -21,9 +21,9 @@ public static class StaticUsers
                 Grants = new List<Grant>()
                 {
                     Grants.User_Guest.AsGrant(),
-                }
-            }
-        }
+                },
+            },
+        },
     };
     
     public static readonly User ImportUser = new()
@@ -41,10 +41,10 @@ public static class StaticUsers
                 Name = "Import",
                 Grants = new List<Grant>()
                 {
-                    Grants.User_SuperAdmin.AsGrant()
-                }
-            }
-        }
+                    Grants.User_SuperAdmin.AsGrant(),
+                },
+            },
+        },
     };
     
     public static readonly User InitialSeedUser = new()
@@ -62,9 +62,9 @@ public static class StaticUsers
                 Name = "InitialSeed",
                 Grants = new List<Grant>()
                 {
-                    Grants.User_SuperAdmin.AsGrant()
-                }
-            }
-        }
+                    Grants.User_SuperAdmin.AsGrant(),
+                },
+            },
+        },
     };
 }

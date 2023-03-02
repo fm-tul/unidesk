@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ExpressionDebugger;
-using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using Unidesk.Db.Models;
 
 namespace Unidesk.Dtos.Requests;
 
-public class QueryFilter
+public class QueryPaging
 {
     /// <summary>
     /// starting from 1
@@ -25,7 +22,7 @@ public class QueryFilter
     public int Total { get; set; }
     
     
-    public static readonly QueryFilter DefaultQueryFilter = new()
+    public static readonly QueryPaging DefaultQueryPaging = new()
     {
         Page = 1,
         PageSize = 20,
@@ -36,7 +33,7 @@ public class QueryFilter
 
 public static class IQueryableExtensions
 {
-    public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, QueryFilter? queryFilter)
+    public static IQueryable<T> ApplyPaging<T>(this IQueryable<T> query, QueryPaging? queryFilter)
     {
         if (queryFilter is null)
         {
@@ -52,7 +49,7 @@ public static class IQueryableExtensions
     }
 
 
-    public static async Task<PagedResponse<TDto>> ToListWithPagingAsync<TEntity, TDto>(this IQueryable<TEntity> query, QueryFilter? queryFilter, IMapper mapper)
+    public static async Task<PagedResponse<TDto>> ToListWithPagingAsync<TEntity, TDto>(this IQueryable<TEntity> query, QueryPaging? queryFilter, IMapper mapper)
         where TEntity : class
         where TDto : class
     {
@@ -66,7 +63,7 @@ public static class IQueryableExtensions
         return response;
     }
     
-    public static IQueryable<T> ApplyOrderBy<T>(this IQueryable<T> query, QueryFilter? queryFilter)
+    public static IQueryable<T> ApplyOrderBy<T>(this IQueryable<T> query, QueryPaging? queryFilter)
     {
         if (queryFilter is null || string.IsNullOrWhiteSpace(queryFilter.OrderBy))
         {

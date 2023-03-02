@@ -26,7 +26,7 @@ public class JsonExceptionMiddleware
 
         var error = new 
         {
-            message = ex.Message
+            message = ex.Message,
         };
 
         context.Response.ContentType = "application/json";
