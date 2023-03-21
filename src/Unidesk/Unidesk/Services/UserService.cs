@@ -160,7 +160,7 @@ public class UserService
 
         yield return new Claim("Fingerprint", CryptographyUtils.Hash(props));
     }
-
+    
     public bool IsPrincipalValid(ClaimsPrincipal? principal)
     {
         // no principal or no claims
@@ -253,11 +253,23 @@ public class UserService
     {
         if (user.Email == "admin@unidesk.tul.cz")
         {
-            user.Roles = new List<UserRole>
+            var superAdminRole = await _db.UserRoles.FirstOrDefaultAsync(UserRoles.SuperAdmin.Id);
+            var needsSave = false;
+            
+            if (superAdminRole is null)
             {
-                new() { Name = "Admin", Grants = UserGrants.All.ToList() },
-            };
-            if (_db.Entry(user).State == EntityState.Modified)
+                _db.UserRoles.Add(UserRoles.SuperAdmin);
+                superAdminRole = UserRoles.SuperAdmin;
+                needsSave = true;
+            }
+            
+            if (!user.Roles.Contains(superAdminRole))
+            {
+                user.Roles.Add(superAdminRole);
+                needsSave = true;
+            }
+
+            if (needsSave)
             {
                 await _db.SaveChangesAsync();
             }

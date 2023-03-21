@@ -41,3 +41,12 @@ public static class GradeExtensions
         return !hasValue ? null : grade.GetAttributeOfType<MultiLangAttribute>();
     }
 }
+
+public static class MultiLandExtensions
+{
+    public static MultiLangAttribute? GetLangAttributeFromEnumValue<T>(this string? value) where T : struct, Enum
+    {
+        var hasValue = Enum.TryParse<T>(value, out var enumValue);
+        return !hasValue ? null : enumValue.GetAttributeOfType<MultiLangAttribute>();
+    }
+}

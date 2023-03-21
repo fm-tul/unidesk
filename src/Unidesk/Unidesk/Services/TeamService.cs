@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Dtos.Documents;
 using Unidesk.Dtos.Requests;
 using Unidesk.Exceptions;
 using Unidesk.Security;
@@ -16,12 +17,14 @@ public class TeamService
     private readonly UnideskDbContext _db;
     private readonly IMapper _mapper;
     private readonly ILogger<TeamService> _logger;
+    private readonly DocumentService _documentService;
 
-    public TeamService(UnideskDbContext db, IMapper mapper, ILogger<TeamService> logger)
+    public TeamService(UnideskDbContext db, IMapper mapper, ILogger<TeamService> logger, DocumentService documentService)
     {
         _db = db;
         _mapper = mapper;
         _logger = logger;
+        _documentService = documentService;
     }
 
     public IQueryable<Team> WhereFilter(TeamFilter filter)
@@ -47,6 +50,8 @@ public class TeamService
     {
         return await _db.Teams
            .Query()
+           .Include(i => i.ProfileImage)
+           .ThenInclude(i => i.DocumentContent)
            .FirstAsync(id);
     }
 
@@ -89,9 +94,8 @@ public class TeamService
         }
         
         // manual mapping
-        item.Avatar = dto.Avatar.IsNotNullOrEmpty() 
-            ? Encoding.ASCII.GetBytes(dto.Avatar)
-            : Array.Empty<byte>();
+        var profileImage = await _documentService.UpdateDocumentAsync(item.ProfileImageId, dto.ProfileImage);
+        item.ProfileImageId = profileImage?.Id;
 
         MakeSureOwnerIsValid(item);
         await _db.SaveChangesAsync();
@@ -104,9 +108,10 @@ public class TeamService
     public TeamDto ToDto(Team item)
     {
         var dto = _mapper.Map<TeamDto>(item);
-        dto.Avatar = item.Avatar.Any()
-            ? Encoding.ASCII.GetString(item.Avatar)
-            : null;
+        if (dto.ProfileImage is not null && item.ProfileImage is not null)
+        {
+            dto.ProfileImage.DocumentContent = Encoding.ASCII.GetString(item.ProfileImage.DocumentContent.Content);
+        }
         
         return dto;
     }
@@ -158,6 +163,7 @@ public class TeamService
     public async Task<bool> DeleteAsync(Team team)
     {
         _db.UserInTeams.RemoveRange(team.UserInTeams);
+        _db.Documents.RemoveIfExists(team.ProfileImage);
         _db.Teams.Remove(team);
         // TODO: soft delete?
         

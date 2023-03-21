@@ -15,6 +15,8 @@ public class AppOptions
     public string StagUsername { get; set; } = null!;
     public string StagPassword { get; set; } = null!;
     
+    public string LianeLoginUrl { get; set; } = null!;
+    
     // email options
     public EmailOptions EmailOptions { get; set; } = null!;
 }

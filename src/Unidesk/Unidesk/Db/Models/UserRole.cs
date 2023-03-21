@@ -44,3 +44,11 @@ public class Grant : IdEntity
     public string Name { get; set; }
     public string Description { get; set; }
 }
+
+public static class UserRoles {
+    public static UserRole SuperAdmin = new() {
+        Id = new Guid("59DCEA80-1F2C-406E-A20D-2AEFA8DD4094"),
+        Name = "Admin",
+        Grants = UserGrants.All.ToList(),
+    };
+}

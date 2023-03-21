@@ -8,7 +8,7 @@ using Unidesk.Services;
 
 namespace Unidesk.Controllers;
 
-[Route("api/[controller]")]
+[Route("/api/[controller]")]
 [Authorize]
 public class SettingsController : Controller
 {

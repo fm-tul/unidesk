@@ -108,4 +108,14 @@ public static class EntityQueryExtensions
 
         return (isNew, item);
     }
+    
+    public static void RemoveIfExists<T>(this DbSet<T> dbSet, T? item) where T : class
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        dbSet.Remove(item);
+    }
 }

@@ -2,6 +2,7 @@
 using Mapster;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Dtos.Documents;
 using Unidesk.Dtos.ReadOnly;
 using Unidesk.Dtos.Resolvers;
 using Unidesk.Utils.Extensions;
@@ -26,6 +27,9 @@ public static class MapsterConfiguration
         config.ForType<TimeOnly, DateTime>()
            .MapWith(src => new DateTime(1, 1, 1, src.Hour, src.Minute, src.Second));
 
+        config.ForType<Document, DocumentDto>()
+          .Map(dto => dto.DocumentContent, src => src.DocumentContent.Content);
+
         // map only these 4 properties
         // config.ForType<UserInTeamDto, UserInTeam>()
         //    .BeforeMapping((src, dest) =>
@@ -37,23 +41,19 @@ public static class MapsterConfiguration
 
         config.ForType<UserInTeam, UserTeamLookupDto>();
         config.ForType<UserInTeam, TeamUserLookupDto>();
-        config.ForType<Team, TeamDto>()
-           .Map(i => i.Users, i => i.UserInTeams);
 
         // ignore roles
         config.ForType<UserDto, User>()
-          .Ignore(dest => dest.Roles)
-          .Ignore(dest => dest.Aliases)
-          .Ignore(dest => dest.UserInTeams);
+           .Ignore(dest => dest.Roles)
+           .Ignore(dest => dest.Aliases)
+           .Ignore(dest => dest.UserInTeams);
 
         config.ForType<User, UserDto>()
-          .Map(i => i.Teams, i => i.UserInTeams);
-
+           .Map(i => i.Teams, i => i.UserInTeams);
 
         config.ForType<Thesis, ThesisDto>()
-           .Map(dto => dto.Literature, type => StringListParser.Parse(type.Literature))
-           .Map(dto => dto.Guidelines, type => StringListParser.Parse(type.Guidelines))
-            ;
+          .Map(dto => dto.Literature, type => StringListParser.Parse(type.Literature))
+          .Map(dto => dto.Guidelines, type => StringListParser.Parse(type.Guidelines));
 
         config.ForType<Thesis, ThesisLookupDto>()
             // ReSharper disable once InvokeAsExtensionMethod
@@ -64,9 +64,10 @@ public static class MapsterConfiguration
 
         config.ForType<ThesisDto, Thesis>()
            .Ignore(i => i.ThesisUsers)
+           .Ignore(i => i.KeywordThesis)
+           .Ignore(i => i.Teams)
            .Map(dto => dto.Literature, type => StringListParser.Serialize(type.Literature))
-           .Map(dto => dto.Guidelines, type => StringListParser.Serialize(type.Guidelines))
-            ;
+           .Map(dto => dto.Guidelines, type => StringListParser.Serialize(type.Guidelines));
 
         // readonly dtos
         config.ForType<ThesisUser, ThesisLookupUserDto>();
@@ -81,18 +82,20 @@ public static class MapsterConfiguration
         config.ForType<ThesisEvaluationDto, ThesisEvaluation>()
            .Ignore(i => i.Evaluator)
            .Ignore(i => i.Thesis);
-        
+
         config.ForType<ThesisEvaluationDetailDto, ThesisEvaluation>()
            .Ignore(i => i.Evaluator)
            .Ignore(i => i.Thesis);
         
-         config.ForType<TeamDto, Team>()
-           .Ignore(i => i.Users)
-           .Ignore(i => i.UserInTeams);
+        config.ForType<Team, TeamDto>()
+          .Map(i => i.Users, i => i.UserInTeams);
 
-         config.ForType<TeamDto, Team>()
-           .Ignore(i => i.Avatar)
-           .TwoWays();
+        config.ForType<TeamDto, Team>()
+          .Ignore(i => i.Users)
+          .Ignore(i => i.UserInTeams)
+          .Ignore(i => i.ProfileImage)
+          .Ignore(i => i.ProfileImageId);
+
 
         return config;
     }

@@ -16,7 +16,6 @@ public static class ThesisUserExtensions
         {
             User = user,
             UserId = user.Id,
-            Thesis = thesis,
             ThesisId = thesis.Id,
             Function = function,
         };

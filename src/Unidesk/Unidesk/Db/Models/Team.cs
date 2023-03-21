@@ -20,8 +20,10 @@ public class Team : TrackedEntity
     public string Description { get; set; }
 
     public string? Email { get; set; }
-    public byte[] Avatar { get; set; } = Array.Empty<byte>();
     public TeamType Type { get; set; }
+    
+    public Document? ProfileImage { get; set; }
+    public Guid? ProfileImageId { get; set; }
 }
 
 [Flags]

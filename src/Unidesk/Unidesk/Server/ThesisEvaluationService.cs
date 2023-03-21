@@ -1,10 +1,13 @@
 ﻿using MapsterMapper;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
 using QuestPDF.Elements;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using QuestPDF.Previewer;
 using Unidesk.Client;
 using Unidesk.Db;
 using Unidesk.Db.Models;
@@ -18,6 +21,7 @@ using Unidesk.Services;
 using Unidesk.Services.Email;
 using Unidesk.Services.Email.Templates;
 using Unidesk.Utils.Extensions;
+using Document = Unidesk.Db.Models.Document;
 
 namespace Unidesk.Server;
 
@@ -30,9 +34,10 @@ public class ThesisEvaluationService
     private readonly IEnumerable<IThesisEvaluation> _thesisEvaluations;
     private readonly EmailService _emailService;
     private readonly TemplateService _templateService;
+    private readonly IServer _server;
 
     public ThesisEvaluationService(UnideskDbContext db, IMapper mapper, WordGeneratorService wordGeneratorService, IUserProvider userProvider,
-        IEnumerable<IThesisEvaluation> thesisEvaluations, EmailService emailService, TemplateService templateService)
+        IEnumerable<IThesisEvaluation> thesisEvaluations, EmailService emailService, TemplateService templateService, IServer server)
     {
         _db = db;
         _mapper = mapper;
@@ -41,6 +46,7 @@ public class ThesisEvaluationService
         _thesisEvaluations = thesisEvaluations;
         _emailService = emailService;
         _templateService = templateService;
+        _server = server;
     }
 
     private async Task<ThesisEvaluation> GetWithPassword(Guid id, string pass, CancellationToken ct)
@@ -90,9 +96,12 @@ public class ThesisEvaluationService
         return dtos;
     }
 
-    public async Task<ThesisEvaluationDetailDto> GetOneAsync(Guid id, string pass, CancellationToken ct)
+    public async Task<ThesisEvaluationDetailDto> GetOneAsync(Guid id, string? pass, CancellationToken ct)
     {
-        var item = await GetWithPassword(id, pass, ct);
+        var item = string.IsNullOrEmpty(pass)
+            ? await GetWithGrant(id, ct)
+            : await GetWithPassword(id, pass, ct);
+
         // when first time opened, check status, set it to accepted if it is not already
         await TryUpdateStatusWhenUnlockedAsync(ct, item);
 
@@ -124,85 +133,150 @@ public class ThesisEvaluationService
         };
     }
 
-    public async Task<byte[]> PdfPreviewAsync(Guid id, string pass, CancellationToken ct)
+    public async Task<byte[]> PdfPreviewAsync(Guid id, string? pass, CancellationToken ct)
     {
-        var item = await GetOneAsync(id, pass, ct);
+        var detailDto = await GetOneAsync(id, pass, ct);
         var pdf = QuestPDF.Fluent.Document.Create(container =>
         {
             container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(1, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(style =>
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(1, Unit.Centimetre);
-                    page.PageColor(Colors.White);
-                    page.DefaultTextStyle(style =>
+                    style.FontSize(12);
+                    style.FontFamily("Fira Code");
+                    style.FontColor(Colors.Black);
+                    return style;
+                });
+
+                page.Header()
+                   .Row(x =>
                     {
-                        style.FontSize(12);
-                        style.FontFamily("Fira Code");
-                        style.FontColor(Colors.Black);
-                        return style;
+                        x.ConstantItem(120, Unit.Millimetre)
+                           .Image("c:\\projects\\tul\\unidesk\\templates\\logo-fm-txt-en.png");
+
+                        x.RelativeItem().AlignRight();
+
+                        x.ConstantItem(70)
+                           .Image("c:\\projects\\tul\\unidesk\\templates\\symbol-fm.png");
+                        
                     });
-            
-                    page.Header()
-                       .Text("Thesis Evaluation")
-                       .SemiBold()
-                       .FontSize(36);
-            
-                    page.Content()
-                       .PaddingVertical(1, Unit.Centimetre)
-                       .Extend()
-                       .Column(y =>
+
+                page.Content()
+                   .Column(pageCol =>
                         {
-                            y.Spacing(0.25f, Unit.Centimetre);
-                            
-                            foreach (var question in item.Questions)
+                            pageCol.Item()
+                               .Column(c =>
+                                {
+                                    c.Spacing(-0.25f, Unit.Centimetre);
+                                    c.Item()
+                                       .Text("THESIS EVALUATION")
+                                       .FontFamily("Calibri")
+                                       .ExtraBold()
+                                       .FontSize(16);
+
+                                    c.Item()
+                                       .Text("OPPONENT EVALUATION")
+                                       .FontFamily("Calibri")
+                                       .SemiBold()
+                                       .FontSize(14);
+                                });
+
+
+                            pageCol.Spacing(0.25f, Unit.Centimetre);
+                            SectionQuestion? currentSection = null; 
+                            foreach (var questionRaw in detailDto.Questions)
                             {
-                                var answer = (item.Response as IEvaluationModel)?.Answers
+                                var question = Questions.All.FirstOrDefault(i => i.Id == questionRaw.Id)
+                                            ?? questionRaw;
+                                
+                                var answer = (detailDto.Response as IEvaluationModel)?.Answers
                                    .FirstOrDefault(i => i.Id == question.Id);
 
                                 if (question is GradeQuestion gradeQuestion)
                                 {
-                                    y.Item().ExtendHorizontal().Row(x =>
+                                    var section = currentSection;
+                                    var item = pageCol.Item()
+                                       .PaddingLeft(section?.Padding?.Left ?? 0f, Unit.Centimetre)
+                                       .PaddingRight(section?.Padding?.Right ?? 0f, Unit.Centimetre)
+                                       .PaddingTop(section?.Padding?.Top ?? 0f, Unit.Centimetre)
+                                       .PaddingBottom(section?.Padding?.Bottom ?? 0f, Unit.Centimetre);
+                                    
+                                    item.ExtendHorizontal().Row(x =>
                                     {
                                         x.AutoItem()
+                                           // .Background(Colors.Red.Darken1)
                                            .Text(gradeQuestion.Question)
-                                           .FontColor(Colors.DeepOrange.Darken4)
-                                           .Bold()
                                            .FontFamily("Calibri");
-                                           // .FontFamily("TUL Mono");
+                                        // .FontFamily("TUL Mono");
 
-                                           x.RelativeItem(1)
-                                              .PaddingHorizontal(5)
-                                              .DefaultTextStyle(s => s.FontColor(Colors.Grey.Darken1))
-                                              .Dynamic(new DashedLine());
+                                        x.RelativeItem(1)
+                                           // .Background(Colors.Green.Lighten1)
+                                           .PaddingHorizontal(5)
+                                           .DefaultTextStyle(s => s.FontColor(Colors.Grey.Darken1))
+                                           .Dynamic(new DashedLine(question.Question))
+                                            ;
 
                                         var gradeAttribute = answer?.Answer?.ToString()?.GetLangAttributeFromGradeValue();
-                                           
+
                                         x.AutoItem()
+                                           // .Background(Colors.Blue.Lighten1)
                                            .Container()
                                            .AlignRight()
                                            .Text(gradeAttribute?.EngValue ?? "")
                                            .FontFamily("Calibri");
                                     });
-                                } 
-                                else if (question is TextQuestion textQuestion)
+                                }
+                                else if (question is CustomChoiceQuestion<Questions.CustomChoiceQuestions.DefenseQuestionAnswer> customChoiceQuestion)
                                 {
-                                    if (textQuestion.Rows == 1)
-                                    {
-                                        y.Item().ExtendHorizontal().Row(x =>
+                                    var a = answer?.Answer?.ToString()?.GetLangAttributeFromEnumValue<Questions.CustomChoiceQuestions.DefenseQuestionAnswer>();
+                                    // answer is long so we use two rows
+                                    pageCol.Item()
+                                       .Column(x =>
                                         {
-                                            x.AutoItem()
-                                               .Text(textQuestion.Question)
-                                               .FontColor(Colors.DeepOrange.Darken4)
+                                            x.Spacing(0.25f, Unit.Centimetre);
+                                            x.Item()
+                                                // .Background(Colors.Red.Darken2)
+                                               .Text(customChoiceQuestion.Question)
                                                .Bold()
                                                .FontFamily("Calibri");
                                             // .FontFamily("TUL Mono");
 
+                                            x.Item()
+                                                // .Background(Colors.Blue.Lighten1)
+                                               .Container()
+                                               .Background("#f7f7f7")
+                                               .Border(1)
+                                               .BorderColor("#e0e0e0")
+                                               .Padding(5)
+                                               .AlignCenter()
+                                               .Text(a?.EngValue ?? "")
+                                               .FontFamily("Calibri");
+                                        });
+                                }
+                                else if (question is TextQuestion textQuestion)
+                                {
+                                    if (textQuestion.Rows == 1)
+                                    {
+                                        pageCol.Item().ExtendHorizontal().Row(x =>
+                                        {
+                                            x.AutoItem()
+                                               // .Background(Colors.Red.Darken2)
+                                               .Text(textQuestion.Question)
+                                               .FontFamily("Calibri");
+                                            // .FontFamily("TUL Mono");
+
                                             x.RelativeItem(1)
-                                               .PaddingHorizontal(5);
-                                               // .DefaultTextStyle(s => s.FontColor(Colors.Grey.Darken1))
-                                               // .Dynamic(new DashedLine());
+                                               // .Background(Colors.Green.Lighten5)
+                                               .PaddingHorizontal(5)
+                                               .DefaultTextStyle(s => s.FontColor(Colors.Grey.Darken1))
+                                               .Dynamic(new DashedLine(question.Question))
+                                                ;
                                             
                                             x.AutoItem()
+                                               // .Background(Colors.Blue.Lighten5)
                                                .Container()
                                                .AlignRight()
                                                .Text(answer?.Answer?.ToString() ?? "")
@@ -211,26 +285,44 @@ public class ThesisEvaluationService
                                     }
                                     else
                                     {
-                                        y.Item().ExtendHorizontal().Column(x =>
+                                        pageCol.Item()
+                                           .ShowEntire()
+                                           .ExtendHorizontal()
+                                           .PaddingTop(0.15f, Unit.Centimetre)
+                                           .Column(x =>
                                         {
-                                            x.Spacing(0.15f, Unit.Centimetre);
+                                            x.Spacing(0.25f, Unit.Centimetre);
                                             x.Item()
-                                               .Text(textQuestion.Question)
-                                               .FontColor(Colors.DeepOrange.Darken4)
-                                               .Bold()
+                                               .Text($"{textQuestion.Question}: ")
                                                .FontFamily("Calibri");
 
                                             x.Item()
-                                               .Text(answer?.Answer?.ToString() ?? "")
-                                               .FontFamily("Calibri");
+                                               .Background("#f7f7f7")
+                                               .Border(1)
+                                               .BorderColor("#e0e0e0")
+                                               .Padding(0.125f, Unit.Centimetre)
+                                               .MinHeight(4.0f, Unit.Centimetre)
+                                               .Text($"{answer?.Answer}")
+                                               .FontFamily("Calibri")
+                                               .FontSize(10);
                                         });
                                     }
+                                } 
+                                else if (question is SectionQuestion sectionQuestion)
+                                {
+                                    currentSection = sectionQuestion;
+                                    // simple margin filler
+                                    pageCol.Item()
+                                       .Container()
+                                       .PaddingBottom(0.25f, Unit.Centimetre);
                                 }
                             }
-                        });
-                }
-            );
+                        }
+                    );
+            });
         });
+
+        // await pdf.ShowInPreviewerAsync();
         var bytes = pdf.GeneratePdf();
         return bytes;
         // return Results.Bytes(bytes, "application/pdf", "report.pdf");
@@ -262,7 +354,7 @@ public class ThesisEvaluationService
         }
     }
 
-    public async Task<OneOf<ThesisEvaluationDto, Exception>> Upsert(ThesisEvaluationDto dto, CancellationToken ct)
+    public async Task<OneOf<ThesisEvaluationPeekDto, Exception>> Upsert(ThesisEvaluationDto dto, CancellationToken ct)
     {
         ThesisEvaluationDto.Validate(dto);
         var item = await _db.ThesisEvaluations.FirstOrDefaultAsync(i => i.Id == dto.Id, ct);
@@ -289,7 +381,7 @@ public class ThesisEvaluationService
         }
 
         await _db.SaveChangesAsync(ct);
-        return _mapper.Map<ThesisEvaluationDto>(item);
+        return await PeekAsync(item.Id, ct);
     }
 
     public async Task<ThesisEvaluationDto> ChangeStatus(Guid id, EvaluationStatus status, string? pass, CancellationToken ct)
@@ -328,6 +420,10 @@ public class ThesisEvaluationService
 
     private async Task ChangeToInvitedAsync(ThesisEvaluation item, CancellationToken ct)
     {
+        // prefer https
+        var address = _server.Features.Get<IServerAddressesFeature>()?.Addresses.MaxBy(i => i.StartsWith("https"))
+                     ?? "https://localhost:3000";
+        
         var passphrase = _wordGeneratorService.GeneratePassPhrase();
         item.PassphraseHash = BCrypt.Net.BCrypt.HashPassword(passphrase);
         item.Status = EvaluationStatus.Invited;
@@ -342,7 +438,7 @@ public class ThesisEvaluationService
             ContactEmail = "viroco@tul.cz",
             ThesisEvaluationDeadline = DateTime.Now.AddDays(14).ToLongDateString(),
             ThesisEvaluationPassword = passphrase,
-            ThesisEvaluationUrl = $"https://localhost:3000/evaluation/{item.Id}",
+            ThesisEvaluationUrl = $"{address}/evaluation/{item.Id}",
         });
 
         await _emailService.SendTextEmailAsync(
@@ -390,6 +486,7 @@ public class ThesisEvaluationService
     public async Task<ThesisEvaluationPeekDto> PeekAsync(Guid id, CancellationToken ct)
     {
         var item = await _db.ThesisEvaluations
+                      .Include(i => i.CreatedByUser)
                       .Include(i => i.Evaluator)
                       .Include(i => i.Thesis)
                       .ThenInclude(i => i.ThesisType)
@@ -417,31 +514,25 @@ public class ThesisEvaluationService
 
 public class DashedLine : IDynamicComponent<int>
 {
-    public int State { get; set; }
+    public DashedLine(string prop)
+    {
+        Prop = prop;
+    }
     
-    private const int SpaceDotWidth = 5;
+    public int State { get; set; }
+
+    public string Prop { get; set; }
+
     public DynamicComponentComposeResult Compose(DynamicContext context)
     {
         var content = context.CreateElement(container =>
         {
             var width = context.AvailableSize.Width;
-            var dashes = (int) Math.Floor(width / (SpaceDotWidth));
-            container.Row(x =>
-            {
-                for (var i = 0; i < dashes; i++)
-                {
-                    x.ConstantItem(SpaceDotWidth)
-                       .Text(" .");
-                       // .BorderBottom(1f);
+            var dashes = (int) Math.Floor(width / 4.8);
 
-                    // if (i < dashes - 1)
-                    // {
-                    //     x.AutoItem()
-                    //        .Width(DashSpace)
-                    //        .BorderBottom(0f);
-                    // }
-                }
-            });
+            container
+               .Unconstrained()
+               .Text(string.Join(" ", Enumerable.Repeat(".", dashes)));
         });
 
         return new DynamicComponentComposeResult

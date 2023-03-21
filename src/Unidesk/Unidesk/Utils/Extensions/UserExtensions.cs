@@ -9,7 +9,7 @@ public static class UserExtensions
     {
         if (string.IsNullOrEmpty(user.FirstName) || string.IsNullOrEmpty(user.LastName))
         {
-            return null;
+            return user.Email?.Split('@')[0];
         }
 
         return $"{user.LastName.ToUpper()} {user.FirstName}";

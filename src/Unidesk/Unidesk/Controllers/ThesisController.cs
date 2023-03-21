@@ -20,7 +20,7 @@ using Unidesk.Validations;
 
 namespace Unidesk.Controllers;
 
-[Route("api/[controller]")]
+[Route("/api/[controller]")]
 [Authorize]
 public class ThesisController : Controller
 {
@@ -194,31 +194,43 @@ public class ThesisController : Controller
 
         item.Outcomes = _db.ThesisOutcomes.Where(i => dto.OutcomeIds.Contains(i.Id)).ToList();
         item.ThesisTypeCandidates = _db.ThesisTypes.Where(i => dto.ThesisTypeCandidateIds.Contains(i.Id)).ToList();
-        item.KeywordThesis = dto.Keywords.Select(i => new KeywordThesis { ThesisId = item.Id, KeywordId = i.Id }).ToList();
+        
+        var newKeywordThesis = dto.Keywords
+           .Select(i => new KeywordThesis { ThesisId = item.Id, KeywordId = i.Id })
+           .ToList();
 
-        var studentsDto = _mapper.Map<List<User>>(dto.Authors).Select(i => i.InThesis(item, UserFunction.Author)!);
-        var supervisorsDto = _mapper.Map<List<User>>(dto.Supervisors).Select(i => i.InThesis(item, UserFunction.Supervisor)!);
-        var opponentsDto = _mapper.Map<List<User>>(dto.Opponents).Select(i => i.InThesis(item, UserFunction.Opponent)!);
-
-        var newThesisUsers = new List<ThesisUser>();
-        newThesisUsers.AddRange(studentsDto);
-        newThesisUsers.AddRange(supervisorsDto);
-        newThesisUsers.AddRange(opponentsDto);
+        var newThesisUsers = dto.Authors
+           .Concat(dto.Supervisors)
+           .Concat(dto.Opponents)
+           .Select(i => new ThesisUser { UserId = i.User.Id, ThesisId = item.Id, Function = i.Function })
+           .ToList();
+        
+        var newTeams = dto.Teams
+           .Select(i => new Team { Id = i.Id })
+           .ToList();
+        
+        if (newThesisUsers.GroupBy(i => i.UserId).Any(i => i.Count() > 1))
+        {
+            throw new ValidationException("Duplicate users", new[] { new ValidationFailure { ErrorMessage = "Duplicate users", PropertyName = nameof(item.ThesisUsers) } });
+        }
 
         if (isNew)
         {
             // new thesis, simple users
-            item.ThesisUsers = newThesisUsers.Select(i => i.StripToGuids()).ToList();
+            item.ThesisUsers = newThesisUsers;
+            item.KeywordThesis = newKeywordThesis;
+            item.Teams = newTeams;
             await _db.Theses.AddAsync(item);
         }
         else
         {
-            // handling students/authors/supervisors/opponents is bit more complicated
-            var (_, _, toBeAdded, toBeDeleted) = item.ThesisUsers.Synchronize(newThesisUsers, (i, j) => i.UserId == j.UserId);
-            _db.ThesisUsers.AddRange(toBeAdded.Select(i => i.StripToGuids()));
-            _db.ThesisUsers.RemoveRange(toBeDeleted);
+            // handling students/authors/supervisors/opponents and keywords and teams is bit more complicated
+            var (addThesisUsers, delThesisUsers) = item.ThesisUsers.SynchronizeDbSet(newThesisUsers, _db.ThesisUsers, (i, j) => i.UserId == j.UserId && i.Function == j.Function);
+            var (addKeywordThesis, delKeywordThesis) = item.KeywordThesis.SynchronizeDbSet(newKeywordThesis, _db.KeywordThesis, (i, j) => i.KeywordId == j.KeywordId);
+            var (_, _, a, b) = item.Teams.Synchronize(newTeams, (i, j) => i.Id == j.Id);
+            item.Teams.AddRange(_db.Teams.Where(i => a.Select(j => j.Id).Contains(i.Id)).ToList());
+            item.Teams.RemoveAll(i => b.Select(j => j.Id).Contains(i.Id));
 
-            _logger.LogInformation("Removed {Count} users from thesis {ThesisId}", toBeDeleted.Count, item.Id);
             _db.Theses.Update(item);
         }
 

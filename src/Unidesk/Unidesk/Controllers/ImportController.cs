@@ -14,7 +14,7 @@ namespace Unidesk.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("api/[controller]")]
+[Route("/api/[controller]")]
 public class ImportController : ControllerBase
 {
     

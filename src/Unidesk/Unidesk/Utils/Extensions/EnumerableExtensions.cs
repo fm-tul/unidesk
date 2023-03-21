@@ -1,4 +1,5 @@
-﻿using Unidesk.Db.Core;
+﻿using Microsoft.EntityFrameworkCore;
+using Unidesk.Db.Core;
 
 namespace Unidesk.Utils.Extensions;
 
@@ -92,6 +93,25 @@ public static class EnumerableExtensions
         items.RemoveAll(x => toBeDeleted.Contains(x));
         return (items, toBeAdded, toBeDeleted);
     }
+    
+    public static (List<T> toBeAdded, List<T> toBeDeleted) SynchronizeDbSet<T>(this List<T> items, List<T> other, DbSet<T> set)
+    where T: IdEntity
+    {
+        var (_, _, toBeAdded, toBeDeleted) = items.Synchronize(other, IdEntity.Compare);
+        set.AddRange(toBeAdded);
+        set.RemoveRange(toBeDeleted);
+        return (toBeAdded, toBeDeleted);
+    }
+    
+    public static (List<T> toBeAdded, List<T> toBeDeleted) SynchronizeDbSet<T>(this List<T> items, List<T> other, DbSet<T> set, Func<T, T, bool> comparer)
+        where T: class
+    {
+        var (_, _, toBeAdded, toBeDeleted) = items.Synchronize(other, comparer);
+        set.AddRange(toBeAdded);
+        set.RemoveRange(toBeDeleted);
+        return (toBeAdded, toBeDeleted);
+    }
+    
     
     
     public static void HandleCount<T>(this List<T> items, Action<T>? onSingleItem = null, Action<IEnumerable<T>>? onMultipleItems = null, Action? onNoItems = null)

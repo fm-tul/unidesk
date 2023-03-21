@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
-using Unidesk.Configurations;
 using Unidesk.Db;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
@@ -13,34 +12,25 @@ using Unidesk.Dtos.ReadOnly;
 using Unidesk.Dtos.Requests;
 using Unidesk.Security;
 using Unidesk.Services;
-using Unidesk.Utils;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("api/[controller]")]
+[Route("/api/[controller]")]
 [ExcludeFromCodeCoverage]
-public partial class UsersController : ControllerBase
+public class UsersController : ControllerBase
 {
-    private readonly ILogger<UsersController> _logger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserService _userService;
-    private readonly CryptographyUtils _cryptography;
     private readonly IUserProvider _userProvider;
-    private readonly AppOptions _appOptions;
     private readonly IMapper _mapper;
     private readonly UnideskDbContext _db;
 
-    public UsersController(ILogger<UsersController> logger, IHttpContextAccessor httpContextAccessor, UserService userService, CryptographyUtils cryptography, IUserProvider userProvider, AppOptions appOptions, IMapper mapper, UnideskDbContext db)
+    public UsersController(UserService userService, IUserProvider userProvider, IMapper mapper, UnideskDbContext db)
     {
-        _logger = logger;
-        _httpContextAccessor = httpContextAccessor;
         _userService = userService;
-        _cryptography = cryptography;
         _userProvider = userProvider;
-        _appOptions = appOptions;
         _mapper = mapper;
         _db = db;
     }
@@ -61,6 +51,8 @@ public partial class UsersController : ControllerBase
         var aliases = user.Aliases.Select(i => i.Id).Concat(new[] { user.Id }).ToList();
         var aliasThesis = _db.ThesisUsers
            .Include(i => i.Thesis)
+           .ThenInclude(i => i.ThesisUsers)
+           .ThenInclude(i => i.User)
            .Where(i => aliases.Contains(i.UserId))
            .ToList();
         

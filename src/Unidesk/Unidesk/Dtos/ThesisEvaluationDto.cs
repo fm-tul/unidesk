@@ -45,15 +45,12 @@ public class ThesisEvaluationDto : TrackedEntityDto
     }
 }
 
-public class ThesisEvaluationDetailDto : ThesisEvaluationDto
+public class ThesisEvaluationDetailDto : ThesisEvaluationPeekDto
 {
     public object? Response { get; set; }
 
     [Required]
     public required List<ReportQuestion> Questions { get; set; } = new();
-
-    [Required]
-    public required ThesisLookupDto Thesis { get; set; }
 
     public string? Format { get; set; }
 
@@ -61,29 +58,11 @@ public class ThesisEvaluationDetailDto : ThesisEvaluationDto
     public List<string> FormatCandidates { get; set; } = new();
 }
 
-public class ThesisEvaluationPeekDto
+public class ThesisEvaluationPeekDto : ThesisEvaluationDto
 {
     [Required]
-    public EvaluationStatus Status { get; set; }
-        
-    [Required]
-    public string? RejectionReason { get; set; }
-
-    [Required]
     public required ThesisLookupDto Thesis { get; set; }
-
-    [Required]
-    public UserLookupDto CreatedByUser { get; set; } = null!;
-
     // props which define the evaluation request
-    [Required]
-    public required Language Language { get; set; }
-
-    [Required]
-    public required string Email { get; set; }
-
-    [Required]
-    public required UserFunction UserFunction { get; set; }
 }
 
 public class ThesisEvaluationDtoValidator : AbstractValidator<ThesisEvaluationDto>

@@ -81,6 +81,13 @@ public class UnideskDbContext : DbContext
             relationship.DeleteBehavior = DeleteBehavior.Restrict;
         }
         
+        // manually set cascade on delete for certain relations
+        modelBuilder.Entity<Document>()
+           .HasOne(i => i.DocumentContent)
+           .WithOne(i => i.Document)
+           .HasForeignKey<DocumentContent>(i => i.DocumentId)
+           .OnDelete(DeleteBehavior.Cascade);
+        
         /*
          ALTER DATABASE Unidesk_dev
             COLLATE SQL_Latin1_General_CP1_CI_AI

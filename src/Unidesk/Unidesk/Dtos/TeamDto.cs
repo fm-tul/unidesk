@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using FluentValidation;
 using Unidesk.Db.Models;
+using Unidesk.Dtos.Documents;
 using Unidesk.Dtos.ReadOnly;
 using Unidesk.Validations;
 
@@ -16,7 +17,8 @@ public class TeamDto : TrackedEntityDto
     public string Name { get; set; }
     public string Description { get; set; }
     public string? Email { get; set; }
-    public string? Avatar { get; set; }
+    public DocumentDto? ProfileImage { get; set; }
+    public Guid? ProfileImageId { get; set; }
     public TeamType Type { get; set; }
 
 

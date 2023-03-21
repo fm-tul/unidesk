@@ -72,10 +72,10 @@ public class ClaimsObject
         return new ClaimsObject
         {
             _principal = principal,
-            Name = principal.FindFirstValue(ClaimTypes.Name),
-            NameIdentifier = Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier)),
-            Created = DateTime.Parse(principal.FindFirstValue("Created")),
-            Grants = principal.FindFirstValue("Grants")
+            Name = principal.FindFirstValue(ClaimTypes.Name)!,
+            NameIdentifier = Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier)!),
+            Created = DateTime.Parse(principal.FindFirstValue("Created")!),
+            Grants = principal.FindFirstValue("Grants")!
                 .Split(',')
                 .Where(i => !string.IsNullOrWhiteSpace(i))
                 .Select(i => Guid.Parse(i))
@@ -83,7 +83,7 @@ public class ClaimsObject
                 .Where(i => i is not null)
                 .OfType<Grant>()
                 .ToList(),
-            Fingerprint = principal.FindFirstValue("Fingerprint"),
+            Fingerprint = principal.FindFirstValue("Fingerprint")!,
         };
     }
 

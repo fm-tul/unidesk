@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.FileProviders;
 using Unidesk.Db;
 using Unidesk.Dtos;
+using Unidesk.Server.Converters;
 using Unidesk.Server.ServiceFilters;
 using Unidesk.Utils;
 using Unidesk.Utils.Extensions;
@@ -87,7 +88,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddControllersWithFilters(this IServiceCollection services)
     {
-        services.AddControllers(options => { options.Filters.AddService<RequireGrantFilter>(); });
+        services.AddControllersWithViews(options => { options.Filters.AddService<RequireGrantFilter>(); })
+           .AddJsonOptions(o => { o.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter()); });
 
         return services;
     }

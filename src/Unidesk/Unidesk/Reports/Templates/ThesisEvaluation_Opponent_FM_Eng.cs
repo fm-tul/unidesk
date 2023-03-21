@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 using Unidesk.Client;
 using Unidesk.Db.Models;
 using Unidesk.Locales;
@@ -123,7 +125,7 @@ file class Model : IEvaluationModel
         Questions.TextQuestions.OpponentName,
         Questions.TextQuestions.OpponentWorkplace,
 
-        Questions.Section("report.section.evaluation", "8599AA76-FDB0-4565-B6E4-9CD1E052CA91"),
+        Questions.Section("report.section.evaluation", "8599AA76-FDB0-4565-B6E4-9CD1E052CA91", new Padding(Left: 0.5f)),
         Questions.ChoiceGradeQuestions.A_AbstractQualityKeywordsMatching,
         Questions.ChoiceGradeQuestions.B_ResearchScopeAndProcessing,
         Questions.ChoiceGradeQuestions.C_LevelOfTheoreticalPart,

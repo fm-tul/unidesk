@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using QuestPDF.Infrastructure;
 using Unidesk.Dtos;
 
 namespace Unidesk.Reports.Elements;
@@ -20,4 +21,8 @@ public class ReportQuestion
     public string? Description { get; init; }
 }
 
-public class SectionQuestion : ReportQuestion { }
+public class SectionQuestion : ReportQuestion
+{
+    [JsonIgnore]
+    public Padding? Padding { get; init; }
+}

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Mvc;
@@ -41,7 +40,7 @@ var configuration = builder.Configuration
    .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
    .Build();
 
-if (isDev)
+if (isDev && false)
 {
     Console.WriteLine("Configuration values:");
     foreach (var (key, value) in configuration.AsEnumerable()) Console.WriteLine($" - {key}={value.SafeSubstring(64)}");
@@ -83,6 +82,7 @@ services.AddScoped<ReportService>();
 services.AddScoped<SettingsService>();
 services.AddScoped<ThesisEvaluationService>();
 services.AddScoped<EmailService>();
+services.AddScoped<DocumentService>();
 services.AddScoped<IThesisEvaluation, ThesisEvaluation_Opponent_FM_Eng>();
 
 services.AddSingleton<WordGeneratorService>();
@@ -162,6 +162,7 @@ await app.MigrateDbAsync();
 
 // app.UseHttpsRedirection();
 
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseCors();
@@ -228,9 +229,10 @@ evaluationApi.MapGet("/list/{id:guid}", async ([FromServices] ThesisEvaluationSe
    .WithName("GetAll")
    .Produces<List<ThesisEvaluationDto>>();
 
-evaluationApi.MapGet("/get/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, string pass, CancellationToken ct)
+evaluationApi.MapGet("/get/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, string? pass, CancellationToken ct)
         => await service.GetOneAsync(id, pass, ct))
    .WithName("GetOne")
+   .AllowAnonymous()
    .Produces<ThesisEvaluationDetailDto>();
 
 evaluationApi.MapGet("/peek/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, CancellationToken ct)
@@ -249,7 +251,7 @@ evaluationApi.MapPost("/upsert", async ([FromServices] ThesisEvaluationService s
            .Upsert(dto, ct), i => i, e => throw e)
     )
    .WithName("Upsert")
-   .Produces<ThesisEvaluationDto>()
+   .Produces<ThesisEvaluationPeekDto>()
    .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
 
 evaluationApi.MapPost("/update-one", async ([FromServices] ThesisEvaluationService service, ThesisEvaluationDetailDto dto, string pass, CancellationToken ct)
@@ -257,6 +259,7 @@ evaluationApi.MapPost("/update-one", async ([FromServices] ThesisEvaluationServi
            .UpdateOne(dto, pass, ct), i => i, e => throw e)
     )
    .WithName("UpdateOne")
+   .AllowAnonymous()
    .Produces<ThesisEvaluationDetailDto>();
 
 evaluationApi.MapPut("/change-status", async ([FromServices] ThesisEvaluationService service, Guid id, EvaluationStatus status, CancellationToken ct)
@@ -271,7 +274,7 @@ evaluationApi.MapPut("/change-status-pass", async ([FromServices] ThesisEvaluati
    .AllowAnonymous()
    .Produces<ThesisEvaluationDto>();
 
-evaluationApi.MapGet("/pdf-preview", async ([FromServices] ThesisEvaluationService service, Guid id, string pass, CancellationToken ct)
+evaluationApi.MapGet("/pdf-preview", async ([FromServices] ThesisEvaluationService service, Guid id, string? pass, CancellationToken ct)
         =>
     {
         var bytes = await service.PdfPreviewAsync(id, pass, ct);
@@ -286,7 +289,10 @@ evaluationApi.MapDelete("/delete/{id:guid}", async ([FromServices] ThesisEvaluat
    .WithName("DeleteOne")
    .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
 
-
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller}/{action=Index}/{id?}");
+app.MapFallbackToFile("index.html");
 // if (!isDev || true)
 // {
 //     app.UseClientAppStaticFiles();
@@ -297,5 +303,6 @@ if (isDev && generateModel)
 {
     ModelGeneration.ShutDownAfterModelGenerated(app);
 }
+
 
 app.Run();

@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection;
+using System.Text.Json.Serialization;
+using QuestPDF.Infrastructure;
 using Unidesk.Client;
 using Unidesk.Reports.Elements;
 using Unidesk.Reports.Templates;
@@ -30,67 +32,67 @@ public static class Questions
         public static ReportQuestion A_AbstractQualityKeywordsMatching = new GradeQuestion
         {
             Id = new Guid("07942853-8847-4701-BCBC-202694534590"),
-            Question = "Abstract quality, keywords matching",
+            Question = "A. Abstract quality, keywords matching",
         };
 
         public static ReportQuestion B_ResearchScopeAndProcessing = new GradeQuestion
         {
             Id = new Guid("A49BB7AA-3D3B-4BCF-B6FA-23C651A21A63"),
-            Question = "Research scope and processing",
+            Question = "B. Research scope and processing",
         };
 
         public static ReportQuestion C_LevelOfTheoreticalPart = new GradeQuestion
         {
             Id = new Guid("ACAB9A16-D149-48DA-963A-582AB0D17CC0"),
-            Question = "Level of theoretical part",
+            Question = "C. Level of theoretical part",
         };
 
         public static ReportQuestion D_AppropriatenessOfTheMethods = new GradeQuestion
         {
             Id = new Guid("436B28FA-22C7-4921-820D-F0FF0A034264"),
-            Question = "Appropriateness of the methods",
+            Question = "D. Appropriateness of the methods",
         };
 
         public static ReportQuestion E_ResultsElaborationAndDiscussion = new GradeQuestion
         {
             Id = new Guid("C3A16EF2-85DC-452F-92A7-CBF3BA8DDC21"),
-            Question = "Results elaboration and discussion",
+            Question = "E. Results elaboration and discussion",
         };
 
         public static ReportQuestion F_StudentsOwnContribution = new GradeQuestion
         {
             Id = new Guid("28E6A50E-0395-4B8C-9093-A0F5CD7D9D84"),
-            Question = "Students own contribution",
+            Question = "F. Students own contribution",
         };
 
         public static ReportQuestion G_TheConclusionStatement = new GradeQuestion
         {
             Id = new Guid("C73FC6F7-D893-4913-AEFA-CB1D07FEE98C"),
-            Question = "The conclusion statement",
+            Question = "G. The conclusion statement",
         };
 
         public static ReportQuestion H_FulfillmentOfThesisTasksGoals = new GradeQuestion
         {
             Id = new Guid("8B9B2715-B4FD-4A59-A4A2-209C6EAC7134"),
-            Question = "Fulfillment of Thesis tasks (goals)",
+            Question = "H. Fulfillment of Thesis tasks (goals)",
         };
 
         public static ReportQuestion I_StructureCorrectnessAndFullnessOfReferences = new GradeQuestion
         {
             Id = new Guid("EBDA51A5-F39C-4EFC-AF13-7CE0F220D218"),
-            Question = "Structure, correctness and fullness of references",
+            Question = "I. Structure, correctness and fullness of references",
         };
 
         public static ReportQuestion J_TypographicalAndLanguageLevel = new GradeQuestion
         {
             Id = new Guid("5C802A77-9ED9-46F2-9A89-D405FB0CACE2"),
-            Question = "Typographical and language level",
+            Question = "J. Typographical and language level",
         };
 
         public static ReportQuestion K_FormalQuality = new GradeQuestion
         {
             Id = new Guid("EC7FE25C-05AC-41B6-BDE2-08C30336756E"),
-            Question = "Formal quality",
+            Question = "K. Formal quality",
             Description = "(text structure, chapters order, clarity of illustrations)",
         };
 
@@ -343,10 +345,25 @@ public static class Questions
         // regex for guid: "\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
     }
 
-    public static ReportQuestion Section(string name, string guid) =>
+    public static ReportQuestion Section(string name, string guid, Padding? padding = null) =>
         new SectionQuestion
         {
             Id = guid.IsNullOrEmpty() ? Guid.NewGuid() : Guid.Parse(guid),
             Question = name,
+            Padding = padding,
         };
+    
+    
+    private static ReportQuestion[] FromClass(Type type)
+    {
+        return type.GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.FieldType == typeof(ReportQuestion))
+            .Select(f => (ReportQuestion)f.GetValue(null)!)
+            .ToArray();
+    }
+    public static ReportQuestion[] All = FromClass(typeof(Questions.CustomChoiceQuestions))
+        .Concat(FromClass(typeof(Questions.TextQuestions)))
+        .ToArray();
 }
+
+public record Padding(float? Left = 0, float? Right = 0, float? Top = 0, float? Bottom = 0);
