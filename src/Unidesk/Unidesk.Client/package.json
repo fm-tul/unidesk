@@ -3,10 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --port 3000",
+    "dev": "vite",
     "build": "tsc && vite build --sourcemap --emptyOutDir",
     "preview": "vite preview",
-    "generate-api": "npx openapi-typescript-codegen -i http://localhost:5222/swagger/v1/swagger.json -c axios -o src/api-client --name ApiClient --useOptions"
+    "generate-api": "npx openapi-typescript-codegen -i http://localhost:3401/swagger/v1/swagger.json -c axios -o src/api-client --name ApiClient --useOptions"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
@@ -39,7 +39,8 @@
     "ts-simple-nameof": "^1.3.1",
     "uuid": "^9.0.0",
     "vite-tsconfig-paths": "^3.6.0",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/node": "^18.11.9",

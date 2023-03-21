@@ -1,7 +1,7 @@
 import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
-import { useContext, useEffect, useRef, useState } from "react";
+import { FocusEventHandler, useContext, useEffect, useRef, useState } from "react";
 import { MdClear, MdKeyboardArrowDown } from "react-icons/md";
 
 import { useDebounceState } from "hooks/useDebounceState";
@@ -73,6 +73,7 @@ interface SelectFieldProps<T> {
   loading?: boolean;
   disabled?: boolean;
   onValue?: (value: T[]) => void;
+  onBlur?: (e: any) => void;
   getKey?: (value: T) => Primitive;
   getTitle?: (value: T) => Primitive | JSX.Element;
   getValue?: (value: T) => Primitive;
@@ -100,7 +101,7 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
     options,
   } = props;
   const { size = "md", width = "w-full min-w-[200px]", color = "info" } = props;
-  const { onValue, getTitle, getKey, getValue, onSearch, clientFilter = true } = props;
+  const { onValue, getTitle, getKey, getValue, onSearch, onBlur, clientFilter = true } = props;
   const values = value == undefined ? [] : Array.isArray(value) ? value : [value];
   const selectedValues = multiple ? values : values.length > 0 ? [values[0]] : [];
 
@@ -230,6 +231,7 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
     close();
     inputRef.current?.focus();
     setSearchText("");
+    onBlur?.(null);
   };
 
   const hasValue = selectedValues.length > 0;
@@ -269,6 +271,7 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
                 type="text"
                 className={classnames("pointer-events-none absolute col-start-2 row-start-1 min-w-[10px] select-text bg-transparent outline-none", multiple && "max-w-[100px]")}
                 onChange={handleSearchTextChange}
+                onBlur={onBlur}
                 onKeyDown={e => {
                   if (e.key === "Backspace" && searchText === "") {
                     onValueConditionally?.(selectedValues.slice(0, -1));

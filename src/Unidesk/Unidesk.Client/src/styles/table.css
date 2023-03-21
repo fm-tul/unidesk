@@ -1,25 +1,25 @@
-.table :is(th, .th) {
+.kinda-table :is(th, .th) {
   @apply cursor-pointer select-none text-sm font-bold text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-600;
 }
-.table :is(th, td, .th, .td) {
+.kinda-table :is(th, td, .th, .td) {
   @apply px-3 py-2 text-sm;
 }
-.table.dense th,
-.table.dense td {
+.kinda-table.dense th,
+.kinda-table.dense td {
   @apply px-2 py-1;
 }
 
-.table tr.table-header {
+.kinda-table tr.kinda-table-header {
   @apply border-b border-solid border-black/10;
 }
 
-.table.h-borders tr {
+.kinda-table.h-borders tr {
   @apply border-b border-solid border-black/10;
 }
-.table.v-borders td {
+.kinda-table.v-borders td {
   @apply border-x border-solid border-black/10;
 }
 
-.table .table-body {
+.kinda-table .kinda-table-body {
   @apply cursor-pointer transition hover:bg-info-200/30;
 }

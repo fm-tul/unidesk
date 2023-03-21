@@ -42,6 +42,10 @@
   @apply text-sm py-3;
 }
 
+.tf-wrapper:has(.i-disabled) {
+  @apply cursor-not-allowed border-neutral-400 bg-neutral-300 text-neutral-900 opacity-80
+}
+
 /*.tf {
   @apply rounded border border-solid border-neutral-300 bg-slate-200/50 outline-none focus:border-info-500 focus:ring-1 focus:ring-info-500;
 }

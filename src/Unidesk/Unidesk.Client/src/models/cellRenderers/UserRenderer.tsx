@@ -2,12 +2,11 @@ import { UserFunction } from "@api-client/constants/UserFunction";
 import { UserLookupDto } from "@models/UserLookupDto";
 import { UserSimpleDto } from "@models/UserSimpleDto";
 import { UserLink } from "components/utils/UserLink";
-import { IoBulbOutline, IoEaselOutline, IoSchoolOutline } from "react-icons/io5";
 import { MdVerified } from "react-icons/md";
-import { Link } from "react-router-dom";
-import { link_pageUserProfile } from "routes/links";
 import { except } from "utils/arrays";
 import { Tooltip } from "utils/Tooltip";
+import { MdCoPresent } from "react-icons/md";
+import { FaHospitalUser, FaUserGraduate, FaUserTie } from "react-icons/fa";
 
 export const renderUser = (user: UserSimpleDto) => {
   const { firstName, lastName, username, middleName, stagId } = user;
@@ -71,20 +70,30 @@ export const renderUserLookup = (user: UserLookupDto, withFunctions: boolean = f
   );
 };
 
-const userFunctionIconMap = (fuction: string) => {
-  switch (fuction) {
+const userFunctionIconMap = (fnc: string) => {
+  switch (fnc) {
     case UserFunction.Teacher.value:
+      return (<span key={fnc} title={fnc}>
+        <MdCoPresent className="w-6 h-6" />
+      </span>);
+
     case UserFunction.Supervisor.value:
-    case UserFunction.Opponent.value:
       return (
-        <span key={fuction} title={fuction}>
-          <IoBulbOutline />
+        <span key={fnc} title={fnc}>
+          <FaUserTie className="w-5 h-5" />
         </span>
       );
+    case UserFunction.Opponent.value:
+      return (
+        <span key={fnc} title={fnc}>
+          <FaHospitalUser className="w-6 h-6" />
+        </span>
+      );
+
     case UserFunction.Author.value:
       return (
-        <span key={fuction} title={fuction}>
-          <IoSchoolOutline />
+        <span key={fnc} title={fnc}>
+          <FaUserGraduate className="w-5 h-5" />
         </span>
       );
   }

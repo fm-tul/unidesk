@@ -1,7 +1,7 @@
 import { DefenseQuestionAnswerAll } from "@api-client/constants/DefenseQuestionAnswer";
 import { EvaluationStatusAll } from "@api-client/constants/EvaluationStatus";
 import { All as Grades } from "@api-client/constants/Grade";
-import { httpClient, rawAxiosClient } from "@core/init";
+import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { useTranslation } from "@locales/translationHooks";
@@ -32,7 +32,7 @@ type ReportQuestionWithType<T extends ReportQuestion> = T & {
   _expanded?: boolean;
 };
 
-export const PageEvaluationDetail = () => {
+export const PageEvaluationEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { language } = useContext(LanguageContext);
@@ -62,10 +62,8 @@ export const PageEvaluationDetail = () => {
     }
   );
 
-  // calmly-pricey-desk-2507
   return (
     <div>
-      calmly-pricey-desk-2507
       {!item ? (
         <div>Loading...</div>
       ) : (
@@ -167,7 +165,7 @@ export const PageEvaluationDetail = () => {
 
 interface EvaluationDetailProps {
   id: string;
-  pass: string;
+  pass: string|null;
 }
 const questionStyle = `
   p-4 gap-4 transition duration-200 rounded-lg
@@ -188,11 +186,11 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
 
   const {} = useQuery({
     queryKey: ["evaluation", id],
-    queryFn: () => httpClient.evaluations.getOne({ id, pass }),
+    queryFn: () => httpClient.evaluations.getOne({ id, pass: pass! }),
     onSuccess: setItem,
   });
 
-  const updateMutation = useMutation((item: ThesisEvaluationDetailDto) => httpClient.evaluations.updateOne({ requestBody: item!, pass }), {
+  const updateMutation = useMutation((item: ThesisEvaluationDetailDto) => httpClient.evaluations.updateOne({ requestBody: item!, pass: pass! }), {
     onSuccess: data => {
       toast.success(translate("saved"), { position: "bottom-left" });
       setItem(data);
@@ -203,14 +201,14 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
 
   const changeStatusMutation = useMutation(
     (dto: ThesisEvaluationDetailDto) =>
-      httpClient.evaluations.changeStatusWithPass({ id: dto.id, status: EvaluationStatus.SUBMITTED, pass }),
+      httpClient.evaluations.changeStatusWithPass({ id: dto.id, status: EvaluationStatus.SUBMITTED, pass: pass! }),
     {
       onSuccess: data => {
-        toast.success(translate("evalution-submitted"));
+        toast.success(translate("evalution.submitted"));
         item!.status = data.status;
       },
       onError: () => {
-        toast.error(translate("evalution-submitted-error"));
+        toast.error(translate("evalution.submitted-error"));
       },
     }
   );
@@ -238,28 +236,6 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
       answerItem._expanded = true;
     }
     setItem({ ...item! });
-  };
-
-  const getPdfPreview = async () => {
-    // pdf is long string
-    // const pdf = await fetch("https://localhost:7222/api/evaluation/pdf-preview?id=f5758a80-aaa5-4710-706e-08dafa3b1d9a&pass=lively-serpentine-vest-2701", {
-    //   method: "GET",
-    //   credentials: "include",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     "Access-Control-Allow-Origin": "*",
-    //   },
-    // });
-    // debugger;
-    // const data = await pdf.blob();
-    // const pdf = (await rawAxiosClient.get(`api/evaluation/pdf-preview?id=${id}&pass=${pass}`, { responseType: "blob" }));
-    // const data = pdf.data;
-    // const link = document.createElement("a");
-    // // link.href = window.URL.createObjectURL(new Blob([data], { type: "application/pdf" }));
-    // link.href = window.URL.createObjectURL(data);
-    // link.download = `${item?.thesis?.nameEng}.pdf`;
-    // link.click();
-    // link.remove();
   };
 
   const pdfUrl = `${API_URL}/api/evaluation/pdf-preview?id=${id}&pass=${pass}&t=${pdfPreviewRng}`;
@@ -483,4 +459,5 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   );
 };
 
-export default PageEvaluationDetail;
+
+export default PageEvaluationEdit;

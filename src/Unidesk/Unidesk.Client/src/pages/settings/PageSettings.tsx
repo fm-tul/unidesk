@@ -67,7 +67,7 @@ const RolesAndGrants = () => {
   const translate = (value: EnKeys) => RR(value, language);
 
   const queryClient = useQueryClient();
-  const saveMutation = useMutation(httpClient.settings.saveRole, {
+  const saveMutation = useMutation((item: UserRoleDto) => httpClient.settings.saveRole({ requestBody: item }), {
     onSuccess: () => {
       toast.success(translate("saved"));
       queryClient.invalidateQueries("roles-and-grants");
@@ -75,7 +75,7 @@ const RolesAndGrants = () => {
   });
   const { data } = useQuery({
     queryKey: "roles-and-grants",
-    queryFn: httpClient.settings.getRolesAndGrants,
+    queryFn: () => httpClient.settings.getRolesAndGrants(),
   });
   const [item, setItem] = useState<UserRoleDto>();
   const renderGrant = (id: string) => GrantsAll.find(i => i.id === id)?.name;
@@ -184,7 +184,7 @@ const RolesAndGrants = () => {
             onMultiValue={(grants: string[]) => setItem({ ...item, grants: grants.map(i => GrantsAll.find(j => j.id === i)!) })}
             optionRender={renderGrant}
           />
-          <Button className="ml-auto" success onClick={() => saveMutation.mutate({ requestBody: item })}>
+          <Button className="ml-auto" success onClick={() => saveMutation.mutate(item)}>
             {item.id === GUID_EMPTY ? RR("add-new", language) : RR("update", language)}
           </Button>
         </div>

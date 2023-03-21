@@ -3,6 +3,6 @@ import { formatDate } from "utils/dateUtils";
 
 export const DateOnlyRenderer = (params: any, key: string, language: LanguagesId) => {
   const value = params[key];
-  const dt = formatDate(value, "long");
+  const dt = formatDate(value, "short");
   return <span>{dt}</span>;
 };

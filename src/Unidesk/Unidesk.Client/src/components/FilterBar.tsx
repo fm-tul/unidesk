@@ -36,3 +36,28 @@ export const FilterBar: React.FC<ToolbarProps> = props => {
 
   return <div className={classnames(className, type)}>{clonedChildren}</div>;
 };
+
+
+export const ButtonGroup: React.FC<ToolbarProps> = props => {
+  const { disabled, className = "", children, type = "btn-group", loading = false } = props;
+  const size = getSize(props);
+  const variant = getVariant(props);
+
+  if (!(props.if ?? true)) {
+    return null;
+  }
+
+  const clonedChildren = React.Children.map(children, child => {
+    if (!React.isValidElement(child)) {
+      return child;
+    }
+    return React.cloneElement(child as any, {
+      variant: (child as any).props.variant ?? variant,
+      size: (child as any).props.size ?? size,
+      loading: (child as any).props.loading ?? loading,
+      disabled: (child as any).props.disabled ?? disabled,
+    });
+  });
+
+  return <div className={classnames(className, type)}>{clonedChildren}</div>;
+};

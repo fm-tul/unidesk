@@ -34,6 +34,7 @@ export const thesisInitialValues: Partial<ThesisDto> = {
   opponents: [],
   teams: [],
   keywords: [],
+  thesisUsers: [],
 };
 
 export const thesisValidationSchema = Yup.object({

@@ -10,10 +10,16 @@ import { getToastMessageOrDefault } from "./utils";
 (axios.interceptors.response as any).handlers = [];
 
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+export const axiosOptions = {
+  interceptors: true,
+}
 
 // register global error
 axios.interceptors.response.use(
   response => {
+    if (axiosOptions.interceptors === false) {
+      return response;
+    }
     const toastMsg = getToastMessageOrDefault(response.data);
     if (toastMsg) {
       toast(makeMessage(toastMsg.title, toastMsg.message), {
@@ -23,6 +29,9 @@ axios.interceptors.response.use(
     return response;
   },
   error => {
+    if (axiosOptions.interceptors === false) {
+      return Promise.reject(error);
+    }
     if (error?.code === "ERR_CANCELED") {
       return;
     }

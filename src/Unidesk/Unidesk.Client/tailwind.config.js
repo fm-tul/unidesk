@@ -63,6 +63,17 @@ module.exports = {
           abandoned: colors.orange,
           unknown: colors.gray,
         },
+        tul: {
+          100: "#dedaef",
+          200: "#bdb6de",
+          300: "#9b91ce",
+          400: "#7a6dbd",
+          500: "#5948ad",
+          600: "#473a8a",
+          700: "#352b68",
+          800: "#241d45",
+          900: "#120e23"
+},
       },
       minWidth: {
         xxs: '160px',

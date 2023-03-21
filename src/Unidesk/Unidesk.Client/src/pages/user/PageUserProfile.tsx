@@ -1,19 +1,10 @@
-import {
-  TeamLookupDto,
-  TeamRole,
-  UserDto,
-  UserFunction,
-  UserInTeamStatus,
-  UserLookupDto,
-  UserRoleDto,
-  UserTeamLookupDto,
-} from "@api-client";
+import { TeamLookupDto, TeamRole, UserDto, UserFunction, UserInTeamStatus, UserLookupDto } from "@api-client";
 import { All as UserFunctionAll } from "@api-client/constants/UserFunction";
 import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { MdEdit } from "react-icons/md";
 import { Link, useParams } from "react-router-dom";
 
@@ -23,7 +14,7 @@ import { renderTeam } from "models/cellRenderers/TeamRenderer";
 import { renderUserFull, renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
-import { SelectField, SelectFieldLive } from "ui/SelectField";
+import { SelectField } from "ui/SelectField";
 import { classnames } from "ui/shared";
 import { TextField } from "ui/TextField";
 import { UserContext } from "user/UserContext";
@@ -41,6 +32,7 @@ import { Table } from "ui/Table";
 import { link_pageTeamDetail } from "routes/links";
 import { Collapse } from "components/mui/Collapse";
 import { UserInTeamStatusRenderer } from "models/itemRenderers/UserInTeamStatusRenderer";
+import { Confirm, confirmDialog } from "ui/Confirm";
 
 type StatusUpdate = {
   status: UserInTeamStatus;
@@ -164,6 +156,7 @@ export const PageUserProfile = () => {
                 <Table
                   EmptyContent={<div className="text-center italic text-gray-600">-- {translate("no-teams")} --</div>}
                   rows={userTeams}
+                  fullWidth={false}
                   columns={[
                     {
                       id: "team",
@@ -180,7 +173,7 @@ export const PageUserProfile = () => {
                     },
                     {
                       id: "status",
-                      headerName: <div className="text-center w-full">Status</div>,
+                      headerName: <div className="w-full text-center">Status</div>,
                       className: "w-xxs",
                       field: i => UserInTeamStatusRenderer(i.status),
                     },
@@ -205,7 +198,7 @@ export const PageUserProfile = () => {
                             if={i.status == UserInTeamStatus.PENDING || i.status == UserInTeamStatus.ACCEPTED}
                             error
                             disabled={!isSuperAdminOrIsMe}
-                            onClick={() => changeStatusMutation.mutate({ teamId: i.team.id, status: UserInTeamStatus.DECLINED })}
+                            onConfirmedClick={() => changeStatusMutation.mutate({ teamId: i.team.id, status: UserInTeamStatus.DECLINED })}
                           >
                             {translate(i.status == UserInTeamStatus.PENDING ? "decline" : "leave")}
                           </Button>

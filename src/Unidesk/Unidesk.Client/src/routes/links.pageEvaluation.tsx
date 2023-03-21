@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
 
 const PageEvaluationManage = lazy(() => import("../pages/evaluations/PageEvaluationManage"));
-const PageEvaluationDetail = lazy(() => import("../pages/evaluations/PageEvaluationDetail"));
+const PageEvaluationEdit = lazy(() => import("../pages/evaluations/PageEvaluationEdit"));
+const PageEvaluationView = lazy(() => import("../pages/evaluations/PageEvaluationView"));
 
 export const PageEvaluationManageComponent = (
   <Suspense>
@@ -9,8 +10,14 @@ export const PageEvaluationManageComponent = (
   </Suspense>
 );
 
-export const PageEvaluationDetailComponent = (
+export const PageEvaluationEditComponent = (
   <Suspense>
-    <PageEvaluationDetail />
+    <PageEvaluationEdit />
+  </Suspense>
+);
+
+export const PageEvaluationViewComponent = (
+  <Suspense>
+    <PageEvaluationView />
   </Suspense>
 );

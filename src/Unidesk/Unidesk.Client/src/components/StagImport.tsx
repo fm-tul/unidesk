@@ -2,7 +2,7 @@ import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR, Translate } from "@locales/R";
 import { ThesisLookupDto } from "@models/ThesisLookupDto";
-import { ThesisListRenderer } from "models/itemRenderers/ThesisRenderer";
+import { ThesisListRenderer } from "models/itemRenderers/ThesisListRenderer";
 import { useContext, useState } from "react";
 import { toast } from "react-toastify";
 

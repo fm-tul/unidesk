@@ -41,7 +41,11 @@ export const ThesisFilterBar = (props: ThesisFilterBarProps) => {
 
   const [filter, setFilter, debounceFilter, _, clearLS] = useDebounceLocalStorageState<ThesisFilter>(
     `main.user-filter-bar.${myThesis ? "my" : "all"}`,
-    { keyword: "", ...initialFilter },
+    {
+      keyword: "",
+      schoolYearId: enums.schoolYears.find(i => new Date(i.start).getFullYear() === new Date().getFullYear() - 1)?.id,
+      ...initialFilter,
+    },
     300
   );
   const pageModel = usePaging({ pageSize: 80 });
@@ -101,7 +105,7 @@ export const ThesisFilterBar = (props: ThesisFilterBarProps) => {
       <FormField
         as={SelectField<string>}
         label={translate("school-year")}
-        options={enums.schoolYears.sort((a, b) => a.name.localeCompare(b.name)).map(i => i.id)}
+        options={enums.schoolYears.sort((b, a) => a.name.localeCompare(b.name)).map(i => i.id)}
         value={filter.schoolYearId ?? undefined}
         onValue={(v: string[]) => setFilter({ ...filter, schoolYearId: v[0] })}
         getTitle={(i: string) => enums.schoolYears.find(i2 => i2.id === i)?.name ?? ""}
@@ -140,14 +144,16 @@ export const ThesisFilterBar = (props: ThesisFilterBarProps) => {
         searchable
         multiple
       />
-      {(filter.keywords?.length ?? 0) > 1 && <FormField
-        as={SelectField<Operator>}
-        label={translate("operator.and-or")}
-        options={Object.values(Operator)}
-        value={filter.operator ?? Operator.OR}
-        onValue={v => setFilter({ ...filter, operator: v[0] })}
-        getTitle={i => translateVal(OperatorAll.find(j => j.value === i))}
-      />}
+      {(filter.keywords?.length ?? 0) > 1 && (
+        <FormField
+          as={SelectField<Operator>}
+          label={translate("operator.and-or")}
+          options={Object.values(Operator)}
+          value={filter.operator ?? Operator.OR}
+          onValue={v => setFilter({ ...filter, operator: v[0] })}
+          getTitle={i => translateVal(OperatorAll.find(j => j.value === i))}
+        />
+      )}
     </FilterBar>
   );
 };

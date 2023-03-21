@@ -32,37 +32,6 @@ export const PageTeamList = () => {
       }),
   });
 
-  // const {
-  //   paging: filter,
-  //   data,
-  //   error,
-  //   isLoading,
-  //   loadData,
-  //   setPaging: setFilter,
-  //   refresh,
-  //   refreshIndex,
-  // } = useQuery<TeamDto>({ pageSize: 100 });
-  // const [searchText, setSearchText, debouceSearch] = useDebounceState<string>("");
-
-  // const doSearch = async () => {
-  //   const requestBody = {
-  //     filter,
-  //     keyword: searchText,
-  //   };
-  //   await loadData(httpClient.team.find({ requestBody }));
-  // };
-
-  // const updateFilter = (filter: QueryPaging) => {
-  //   setFilter({ ...filter });
-  //   refresh();
-  // };
-
-  // useEffect(() => {
-  //   if (!isLoading) {
-  //     doSearch();
-  //   }
-  // }, [refreshIndex, debouceSearch]);
-
   return (
     <UnideskComponent name="PageTeamList">
       <FilterBar></FilterBar>

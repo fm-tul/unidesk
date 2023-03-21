@@ -61,19 +61,19 @@
   @apply bg-transparent shadow-none hocus:shadow-none;
 }
 .btn-text.btn-info {
-  @apply text-info-600 active:bg-info-200 hocus:bg-info-100 hocus:text-info-800 selected:bg-info-600/40 selected:text-black;
+  @apply text-info-600 active:bg-info-200 hocus:bg-info-100 hocus:text-info-800;
   --color-spinner-a: var(--color-info-500-rgb);
 }
 .btn-text.btn-success {
-  @apply text-success-600 active:bg-success-200 hocus:bg-success-100 hocus:text-success-800 selected:bg-success-600/40 selected:text-black;
+  @apply text-success-600 active:bg-success-200 hocus:bg-success-100 hocus:text-success-800;
   --color-spinner-a: var(--color-success-700-rgb);
 }
 .btn-text.btn-warning {
-  @apply text-warning-600 active:bg-warning-200 hocus:bg-warning-100 hocus:text-warning-800 selected:bg-warning-600/40 selected:text-black;
+  @apply text-warning-600 active:bg-warning-200 hocus:bg-warning-100 hocus:text-warning-800;
   --color-spinner-a: var(--color-warning-600-rgb);
 }
 .btn-text.btn-error {
-  @apply text-error-600 active:bg-error-200 hocus:bg-error-100 hocus:text-error-800 selected:bg-error-600/40 selected:text-black;
+  @apply text-error-600 active:bg-error-200 hocus:bg-error-100 hocus:text-error-800;
   --color-spinner-a: var(--color-error-500-rgb);
 }
 .btn-text.btn-neutral {
@@ -86,8 +86,8 @@
   --color-spinner-a: var(--color-white-rgb);
 }
 
-.i-disabled {
-  @apply pointer-events-none cursor-not-allowed;
+.i-disabled, .i-disabled:disabled {
+  @apply cursor-not-allowed;
 }
 
 .btn.disabled {

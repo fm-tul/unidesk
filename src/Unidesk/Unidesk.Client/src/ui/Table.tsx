@@ -92,7 +92,7 @@ export const Table = <TValue, >(props: TableProps<TValue>) => {
 
   return (
     <div className={classnames("table-wrapper", fullWidthCss, className)}>
-      <table className={`table ${fullWidthCss}`}>
+      <table className={`kinda-table ${fullWidthCss}`}>
         <thead>
           <tr className="table-tr table-header">
             {visibleColumns.map(col => {
@@ -113,7 +113,7 @@ export const Table = <TValue, >(props: TableProps<TValue>) => {
         <tbody>
           {sortedRows.map(item => (
             <tr
-              className={`table-tr table-body ${
+              className={`table-tr table-body cursor-pointer ${
                 idGetter(item) === selected ? "selected" : ""
               } selected:bg-gradient-to-r selected:from-info-500/30`}
               key={idGetter(item)}
@@ -171,7 +171,7 @@ export const ItemList = <TValue extends TId>(props: ItemListProps<TValue>) => {
 
   return (
     <div className={classnames("table-wrapper", fullWidthCss, className)}>
-      <div className={classnames("table", fullWidthCss)}>
+      <div className={classnames("kinda-table", fullWidthCss)}>
         <div className="table-tr table-header flow">
           {visibleColumns.map(col => {
             const HeaderValue = typeof col.headerName === "function" ? (col.headerName as () => JSX.Element) : null;

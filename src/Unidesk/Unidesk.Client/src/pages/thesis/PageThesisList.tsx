@@ -11,7 +11,7 @@ import { Modal } from "ui/Modal";
 
 import PageThesisEdit from "./PageThesisEdit";
 import { UnideskComponent } from "components/UnideskComponent";
-import { ThesisListRenderer } from "models/itemRenderers/ThesisRenderer";
+import { ThesisListRenderer } from "models/itemRenderers/ThesisListRenderer";
 import { FloatingAction } from "components/mui/FloatingAction";
 
 export interface PageThesisListProps {

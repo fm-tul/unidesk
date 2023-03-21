@@ -3,7 +3,7 @@ import { GUID_EMPTY } from "@core/config";
 import { EnKeys } from "@locales/all";
 import { R } from "@locales/R";
 import { useContext } from "react";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, NavLink, Route, Routes, useMatch, useResolvedPath } from "react-router-dom";
 
 import { Button } from "ui/Button";
 
@@ -20,18 +20,31 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
         <div className="flex items-center gap-2 p-4">
           {/* name and logo */}
           <Link to={link_pageHome.path}>
-            <div className="font-mono">Unidesk</div>
+            <div className="text-3xl text-info-800" style={{ fontFamily: "Cairo Play" }}>
+              UniBoard
+            </div>
           </Link>
 
           {/* links */}
           <div className="flex gap-3">
             {available_links
               .filter(i => i.visible !== false)
-              .map(i => (
-                <Button text key={i.path} to={i.path} component={Link}>
-                  {R(i.title)}
-                </Button>
-              ))}
+              .map(i => {
+                let resolved = useResolvedPath(i.path);
+                let match = useMatch({ path: resolved.pathname, end: true });
+
+                return (
+                  <Button
+                    text
+                    key={i.path}
+                    to={i.path}
+                    component={NavLink}
+                    className={match ? "selected" : ""}
+                  >
+                    {R(i.title)}
+                  </Button>
+                );
+              })}
           </div>
 
           {/* push to the right */}
@@ -57,12 +70,12 @@ export const App = () => {
     <>
       <div className="root-bg fixed inset-0 -z-10"></div>
 
-      <div className="min-h-screen bg-neutral-200/50">
+      <div className="min-h-screen">
         {renderMenu(available_links)}
 
-        <div className="container mx-auto grid bg-white/80 print:max-w-[90vw]">
+        <div className="container mx-auto mt-4  grid print:max-w-[90vw]">
           {/* content */}
-          <div className="rounded-sm p-4 shadow print:shadow-none">
+          <div className="rounded-md bg-white/90 p-6 shadow print:shadow-none">
             <Routes>
               {available_links.map(i => (
                 <Route key={i.path} {...i} />

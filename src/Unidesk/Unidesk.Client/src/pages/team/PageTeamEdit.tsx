@@ -39,6 +39,8 @@ import { link_pageTeamEdit, link_pageTeamList, link_pageUserProfile } from "rout
 import { UserInTeamStatusRenderer } from "models/itemRenderers/UserInTeamStatusRenderer";
 import "cropperjs/dist/cropper.css";
 import { ImageEditor } from "components/mui/ImageEditor";
+import { Debug } from "components/Debug";
+import { DocumentDto } from "@models/DocumentDto";
 
 const teamInitialValue: Partial<TeamDto> = {
   id: GUID_EMPTY,
@@ -98,9 +100,9 @@ export const TeamEdit = (props: PageTeamNewProps) => {
     },
   });
 
-  const propsFactory = getPropsFactory(dto, setDto, errors);
+  const { getPropsText } = getPropsFactory(dto, setDto, errors);
   const getProps = (key: keyof TeamDto) => ({
-    ...propsFactory(key),
+    ...getPropsText(key),
     label: translate(key as any),
   });
 
@@ -132,12 +134,6 @@ export const TeamEdit = (props: PageTeamNewProps) => {
     updateTeamMutation.mutate(dto);
   };
 
-  const handleDeleteClick = () => {
-    if (window.confirm("Are you sure you want to delete this team?")) {
-      deleteTeamMutation.mutate(dto.id);
-    }
-  };
-
   const addNewUser = () => {
     if (!newUser) {
       return;
@@ -162,8 +158,17 @@ export const TeamEdit = (props: PageTeamNewProps) => {
     }
   );
 
+  const updateDocumentContent = (content: string) => {
+    if (dto.profileImage == null) {
+      dto.profileImage = {} as DocumentDto;
+    }
+    dto.profileImage.documentContent = content;
+    setDto({ ...dto });
+  };
+
   return (
     <div>
+      <Debug value={dto}/>
       {/* <TeamDetail team={dto} onChange={setDto} /> */}
 
       <Section title="section.team-information" />
@@ -191,8 +196,8 @@ export const TeamEdit = (props: PageTeamNewProps) => {
               className="max-h-md"
               imgClassName="max-h-sm"
               style={{ width: "100%", height: 200 }}
-              value={dto.avatar}
-              onValue={v => setDto({ ...dto, avatar: v })}
+              value={dto.profileImage?.documentContent}
+              onValue={updateDocumentContent}
             />
           }
         />
@@ -330,7 +335,13 @@ export const TeamEdit = (props: PageTeamNewProps) => {
           <Button onClick={handleSaveClick} loading={updateTeamMutation.isLoading}>
             {translate(dto.id === GUID_EMPTY ? "create" : "update")}
           </Button>
-          <Button if={canEdit && dto.id !== GUID_EMPTY} onClick={handleDeleteClick} error loading={deleteTeamMutation.isLoading}>
+          <Button
+            if={canEdit && dto.id !== GUID_EMPTY}
+            error
+            loading={deleteTeamMutation.isLoading}
+            onConfirmedClick={() => deleteTeamMutation.mutate(dto.id)}
+            confirmDialogOptions={{ message: "confirm-dialog.are-you-sure-you-want-to-delete-this-team" }}
+          >
             {translate("delete")}
           </Button>
         </FilterBar>

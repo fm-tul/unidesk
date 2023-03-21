@@ -140,5 +140,15 @@ export const ThesisListRenderer = (props: Omit<ThesisListRendererProps, "columns
   const typeFactory = useMemo(() => ThesisTypeRendererFactory(enums.thesisTypes), [enums.thesisTypes]);
   const { renderItem, columns } = useMemo(() => ThesisRendererFactory({ translate, language, typeFactory }), [language, typeFactory]);
 
-  return <ItemList {...rest} renderItem={renderItem} columns={columns} rows={rows} listClassName={listClassName} clientSort={clientSort} />;
+  return (
+    <ItemList
+      {...rest}
+      fullWidth={false}
+      renderItem={renderItem}
+      columns={columns}
+      rows={rows}
+      listClassName={listClassName}
+      clientSort={clientSort}
+    />
+  );
 };

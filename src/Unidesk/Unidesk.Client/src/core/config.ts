@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 const env = import.meta.env;
-export const API_URL = env.VITE_API_URL ? (env.VITE_API_URL as string) : "";
+export const API_URL = ""//env.VITE_API_URL ? (env.VITE_API_URL as string) : "";
 export const VITE_DEBUG_LOGIN = env.VITE_DEBUG_LOGIN ? (env.VITE_DEBUG_LOGIN as string) : "";
 export const VITE_DEBUG_LOGIN_ADMIN = env.VITE_DEBUG_LOGIN_ADMIN ? (env.VITE_DEBUG_LOGIN_ADMIN as string) : "";
 export const IS_PROD = env.PROD === true;

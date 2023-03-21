@@ -16,11 +16,19 @@ export const en = {
   "report.section.evaluation": "Evaluation",
   "report.section.overall-evaluation": "Overall Evaluation",
 
+  "edit": "Edit",
+  "view": "View",
+
   // navbar
   import: "Import",
   styles: "Styles",
   login: "Login",
   logout: "Logout",
+  "login.local-account": "Login with local account",
+  "login.liane": "Login with LIANE",
+  "login.title": "Login",
+  "login.loading": "Logging in...",
+  
   "sort-by": "Sort by",
   "no-thesis-found": "No thesis found",
 
@@ -41,10 +49,11 @@ export const en = {
   submit: "Submit",
   "update-draft": "Save draft",
   "pdf-preview": "PDF Preview",
-  "evalution-submitted": "Evaluation submitted",
-  "evalution-submitted-error": "Error while submitting evaluation",
+  "evalution.submitted": "Evaluation submitted",
+  "evalution.submitted-error": "Error while submitting evaluation",
+  "evalution.submitted-success": "Evaluation submitted successfully",
+  "evalution.submitted-success-message": "Evaluation submitted successfully. You can now close this window.",
 
-  // general
   ok: "Ok",
   cancel: "Cancel",
   error: "error",
@@ -228,6 +237,17 @@ export const en = {
 
   // operators
   "operator.and-or": "And/Or",
+
+  // confirm-dialog
+  "confirm-dialog.title": "Are you sure?",
+  "confirm-dialog.message": "This action cannot be undone.",
+  "confirm-dialog.ok": "Confirm",
+  "confirm-dialog.cancel": "Cancel",
+
+  "confirm-dialog.are-you-sure-you-want-to-delete-this-team": "Are you sure you want to delete this team?",
+
+  "home.i-am-looking-for-thesis": "I am looking for thesis",
+  "home.i-want-to-create-thesis": "I want to create thesis",
 };
 
 export default en;

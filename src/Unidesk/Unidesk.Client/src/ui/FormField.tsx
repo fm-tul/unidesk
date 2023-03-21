@@ -1,4 +1,7 @@
+import { LanguageContext } from "@locales/LanguageContext";
+import { useTranslation } from "@locales/translationHooks";
 import { Collapse } from "components/mui/Collapse";
+import { useContext, useState } from "react";
 import { classnames, getHelperColor, HelperProps } from "./shared";
 
 interface FormFieldProps<T> extends HelperProps {
@@ -8,12 +11,16 @@ interface FormFieldProps<T> extends HelperProps {
 }
 
 export const FormField = <T,>(props: FormFieldProps<T> & T) => {
+  const {language} = useContext(LanguageContext);
   const { as: Component, forceTheme = true, classNameField } = props;
   const { helperText, helperColor, helperClassName = "pl-2" } = getHelperColor(props);
-  const theme = THEME[helperColor ?? "neutral"];
+  let theme = THEME[helperColor ?? "neutral"];
+  let helperTextToDisplay = helperText;
+  let helperColorToDisplay = helperColor;
+  
 
   const className = classnames((props as any).className, "h-full");
-  const propsToPass = forceTheme ? { ...props, className, color: helperColor } : { ...props, className };
+  const propsToPass = forceTheme ? { ...props, className, color: helperColorToDisplay } : { ...props, className };
 
   return (
     <div className={classnames("inline-flex flex-col gap-1", classNameField)}>
@@ -21,8 +28,8 @@ export const FormField = <T,>(props: FormFieldProps<T> & T) => {
         <Component {...propsToPass} />
       </div>
 
-      <Collapse open={!!helperText} className={classnames("text-sm", theme, helperClassName)}>
-        {helperText}
+      <Collapse open={!!helperTextToDisplay} className={classnames("text-sm", theme, helperClassName)}>
+        {helperTextToDisplay}
       </Collapse>
     </div>
   );

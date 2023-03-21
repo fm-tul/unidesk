@@ -1,7 +1,7 @@
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { UnideskComponent } from "components/UnideskComponent";
-import { ThesisListRenderer } from "models/itemRenderers/ThesisRenderer";
+import { ThesisListRenderer } from "models/itemRenderers/ThesisListRenderer";
 import { useContext } from "react";
 import { useQuery } from "react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";

@@ -19,9 +19,12 @@ export interface TextAreaProps extends SimpleComponentProps, ColorProps {
 
   spellCheck?: boolean;
   width?: string;
+
+  disabled?: boolean;
+  disableClass?: string;
 }
 export const TextArea = (props: TextAreaProps) => {
-  const { label, value, name, onChange, onBlur, onValue, onEnter, onEscape } = props;
+  const { label, value, name, onChange, onBlur, onValue, onEnter, onEscape, disabled, disableClass="disabled" } = props;
   const { minRows, maxRows, rows, spellCheck, width, className  } = props;
   const [textAreaRef, setRef] = useState<HTMLTextAreaElement | null>(null);
   useAutosizeTextArea(textAreaRef, value ?? "", minRows, maxRows);
@@ -31,6 +34,7 @@ export const TextArea = (props: TextAreaProps) => {
 
   const sizeCss = SIZES[size];
   const colorCss = color.toString();
+  const disabledCss = disabled ? `${disableClass} i-disabled` : "";
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange?.(e);
@@ -41,7 +45,7 @@ export const TextArea = (props: TextAreaProps) => {
     <div className={classnames("tf-wrapper", colorCss, sizeCss, className, width ?? "w-full")}>
       <textarea
         ref={setRef}
-        className="tf resize-none"
+        className={classnames("tf resize-none", disabledCss)}
         onChange={handleChange}
         onBlur={onBlur}
         name={name}
@@ -49,6 +53,7 @@ export const TextArea = (props: TextAreaProps) => {
         value={value ?? ""}
         rows={rows}
         spellCheck={spellCheck}
+        disabled={disabled}
       />
     </div>
   );

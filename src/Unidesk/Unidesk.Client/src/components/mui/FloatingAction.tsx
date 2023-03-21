@@ -1,29 +1,54 @@
-import { createElement } from "react";
+import { createElement, CSSProperties, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FaPlus } from "react-icons/fa";
 import { classnames, ColorProps, getColor, getSize, SizeProps } from "ui/shared";
+import { Tooltip } from "utils/Tooltip";
 
 interface FloatingActionProps extends ColorProps, SizeProps {
   fixed?: boolean;
   component?: React.ElementType;
   to?: string;
   tooltip?: string;
+  icon?: React.ReactNode;
   onClick?: () => void;
 }
 export const FloatingAction = (props: FloatingActionProps) => {
-  const { fixed = true, component, to, onClick } = props;
+  const { fixed = true, component, to, onClick, icon, tooltip="..." } = props;
   const colorCss = COLORS[getColor(props, "info")];
   const sizeCss = SIZES[getSize(props, "md")];
-  const className = classnames("rounded-full shadow-lg transition", fixed && "fixed bottom-12 right-12", colorCss, sizeCss);
+  const className = classnames("rounded-full shadow-lg transition-none", colorCss, sizeCss);
+  const container = document.getElementById("modal-root")!;
 
   if (component) {
-    return createElement(component, { className, to }, <FaPlus />);
+    return createPortal(createElement(component, { className, to }, <FaPlus />), container);
   }
 
-  return (
-    <button className={className} onClick={onClick}>
-      <FaPlus />
-    </button>
+  return createPortal(
+    <>
+      {tooltip ? (
+        <div className={classnames(fixed && "fixed bottom-12 right-12")}>
+          <Tooltip content={tooltip} placement="left">
+            <button className={className} onClick={onClick}>
+              {icon || <FaPlus />}
+            </button>
+          </Tooltip>
+        </div>
+      ) : (
+        <div className={classnames(fixed && "fixed bottom-12 right-12")}>
+          <button className={className} onClick={onClick}>
+            {icon || <FaPlus />}
+          </button>
+        </div>
+      )}
+    </>,
+    container
   );
+};
+
+export const FloatingActionGroup = (props: { children: React.ReactNode }) => {
+  const { children } = props;
+  const container = document.getElementById("modal-root")!;
+  return createPortal(<div className="fixed bottom-12 right-12">{children}</div>, container);
 };
 
 const COLORS = {

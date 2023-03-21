@@ -24,6 +24,9 @@ import { Table } from "ui/Table";
 import { TextField } from "ui/TextField";
 import { KeyValue } from "utils/KeyValue";
 import { UnideskComponent } from "components/UnideskComponent";
+import { addToDT, toDateLocalString } from "utils/dateUtils";
+import { classnames } from "ui/shared";
+import { toast } from "react-toastify";
 
 type TItem = DepartmentDto | FacultyDto | ThesisOutcomeDto | SchoolYearDto | ThesisTypeDto | StudyProgrammeDto;
 
@@ -52,7 +55,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
     () => deleteOne(formik.values.id),
     []
   );
-  const data = model.data ?? [] as T[];
+  const data = model.data ?? ([] as T[]);
 
   const dataKV = useMemo(() => toKV(language, data), [data, language]);
   const [itemId, setItemId] = useState<string>("");
@@ -61,6 +64,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
     const item = await model.setQuery.mutateAsync(formik.values);
     setItemId(item.id);
     formik.setFieldValue("id", item.id);
+    toast.success(RR("saved", language));
   };
 
   const handleDeleteClick = async () => {
@@ -115,17 +119,29 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
                   }
 
                   if (type === "date") {
+                    const addToDate = (amount: number, unit: moment.unitOfTime.DurationConstructor) => {
+                      const date = formik.values[key as keyof TItem];
+                      formik.setFieldValue(key as keyof TItem, toDateLocalString(addToDT(date, amount, unit)));
+                    };
                     return (
-                      <React.Fragment key={key}>
+                      <div className={classnames(colSpanClass, "flex  items-center gap-2")} key={key}>
                         <TextField
-                          type="datetime-local"
-                          className={colSpanClass}
+                          type="date"
+                          fullWidth
                           label={key}
                           name={key}
                           {...inputProps<T>(formik, key as keyof T, size)}
                         />
+                        <div className="flex flex-col gap-1">
+                          <Button variant="text" size="sm" onClick={() => addToDate(1, "day")}>
+                            +&nbsp;day
+                          </Button>
+                          <Button variant="text" size="sm" color="error" onClick={() => addToDate(-1, "day")}>
+                            -&nbsp;day
+                          </Button>
+                        </div>
                         {breakAfter && <span className="hidden md:block" />}
-                      </React.Fragment>
+                      </div>
                     );
                   }
 
@@ -142,7 +158,7 @@ export const SimpleEntityEditor = <T extends TItem>(props: SimpleEntityEditor2Pr
               </div>
               {itemId !== GUID_EMPTY && (
                 <div>
-                  <Button outlined error className="peer" onClick={handleDeleteClick} loading={model.deleteQuery.isLoading}>
+                  <Button outlined error className="peer" onConfirmedClick={handleDeleteClick} loading={model.deleteQuery.isLoading}>
                     Delete <MdDelete className="text-base peer-loading:hidden" />
                   </Button>
                 </div>

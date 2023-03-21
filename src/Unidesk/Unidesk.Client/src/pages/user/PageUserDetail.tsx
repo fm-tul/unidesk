@@ -11,7 +11,7 @@ import { groupBy } from "utils/arrays";
 
 import { HistoryInfoIcon } from "../../components/HistoryInfo";
 import { UnideskComponent } from "components/UnideskComponent";
-import { ThesisListRenderer } from "models/itemRenderers/ThesisRenderer";
+import { ThesisListRenderer } from "models/itemRenderers/ThesisListRenderer";
 import { UserContext } from "user/UserContext";
 import { EnKeys } from "@locales/all";
 import { RR } from "@locales/R";

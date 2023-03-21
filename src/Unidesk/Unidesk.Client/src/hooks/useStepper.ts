@@ -6,7 +6,7 @@ export const useStepper = (maxSteps: number) => {
   const hasPrevStep = step > 0;
 
   const setStep = (step: number) => {
-    setStepRaw(Math.min(Math.max(0, step), maxSteps));
+    setStepRaw(Math.min(Math.max(-1, step), maxSteps));
   };
 
   const nextStep = () => {

@@ -38,7 +38,7 @@ import { renderThesisStatus } from "models/cellRenderers/ThesisStatusRenderer";
 import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { link_pageEvaluationManage, link_pageThesisDetail, link_pageThesisEdit } from "routes/links";
 import { Button } from "ui/Button";
-import { CreateConfirmDialog as confirmWith } from "ui/Confirm";
+import { confirmDialog as confirmWith } from "ui/Confirm";
 import { FormField } from "ui/FormField";
 import { Modal } from "ui/Modal";
 import { generatePrimitive, Select, SelectOption, SelectProps, TId } from "ui/Select";
@@ -80,7 +80,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const departments = generateOptions(enums?.departments, language);
-  const schoolYears = (enums?.schoolYears ?? []).map(i => ({ key: i.id, value: i, label: i.name }));
+  const schoolYears = enums.schoolYears.map(i => ({ key: i.id, value: i, label: i.name }));
   const studyProgrammes = generateOptions(enums?.studyProgrammes, language);
   const thesisOutcomes = generateOptions(enums?.thesisOutcomes, language);
   const thesisTypes = generateOptions(enums?.thesisTypes, language);
@@ -152,7 +152,8 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
       setTouched(newTouched);
     }
 
-    const canSubmit = isValid || (await confirmWith({ title: "Form is not valid", message: "Do you want to continue anyway?" }));
+    const canSubmit =
+      isValid || (await confirmWith({ title: "Form is not valid" as any, message: "Do you want to continue anyway?" as any }));
     if (canSubmit) {
       setIsLoading(true);
       httpClient.thesis
@@ -178,6 +179,11 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
         })
         .finally(() => setIsLoading(false));
     }
+  };
+
+  const setThesisUsersFnc = (users: UserLookupDto[], fnc: UserFunction) => {
+    dto.thesisUsers = [...dto.thesisUsers.filter(i => i.function !== fnc), ...users.map(user => ({ user, function: fnc }))];
+    form.setDto({ ...dto });
   };
 
   return (
@@ -311,51 +317,81 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
             <div className="grid grid-cols-2 gap-4">
               <ArrayField label="Guidelines" value={form.dto.guidelines} setValue={v => form.setDto({ ...form.dto, guidelines: v })} />
               <ArrayField label="Literature" value={form.dto.literature} setValue={v => form.setDto({ ...form.dto, literature: v })} />
-              <div className="prose">
-                <ol>
-                  {form.dto.guidelines.map((i, index) => (
-                    <li key={index}>
-                      <Latex throwOnError={false}>{i}</Latex>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-              <div className="prose break-all">
-                <ul>
-                  {form.dto.literature.map((i, index) => (
-                    <li key={index}>
-                      <Latex throwOnError={false}>{i}</Latex>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+
+              {false && (
+                <>
+                  <div className="prose">
+                    <ol>
+                      {form.dto.guidelines.map((i, index) => (
+                        <li key={index}>
+                          <Latex throwOnError={false}>{i}</Latex>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                  <div className="prose break-all">
+                    <ul>
+                      {form.dto.literature.map((i, index) => (
+                        <li key={index}>
+                          <Latex throwOnError={false}>{i}</Latex>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
             </div>
           </Step>
           <Step label="Authors">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid w-full grid-cols-1 gap-4">
+              <div className="flex gap-2">
+                <FormField
+                  className="grow"
+                  as={Select<UserLookupDto>}
+                  searchable
+                  clearable
+                  multiple
+                  label={R("authors")}
+                  classNameField="w-full"
+                  optionRender={renderUserLookup}
+                  options={(keyword: string) => extractPagedResponse(httpClient.users.find({ requestBody: { keyword } }))}
+                  value={dto.thesisUsers.filter(i => i.function === UserFunction.AUTHOR).map(i => i.user)}
+                  onMultiValue={users => setThesisUsersFnc(users, UserFunction.AUTHOR)}
+                />
+                <FormField
+                  as={Select<TeamLookupDto>}
+                  searchable
+                  clearable
+                  multiple
+                  label={R("teams")}
+                  classNameField="w-full"
+                  optionRender={renderTeam}
+                  options={(keyword: string) => extractPagedResponse(httpClient.team.findSimple({ requestBody: { keyword } }))}
+                  value={dto.teams}
+                  onMultiValue={teams => form.setDto({ ...form.dto, teams })}
+                />
+              </div>
               <FormField
                 as={Select<UserLookupDto>}
                 searchable
                 clearable
                 multiple
-                label={R("authors")}
+                label={R("opponents")}
                 optionRender={renderUserLookup}
                 options={(keyword: string) => extractPagedResponse(httpClient.users.find({ requestBody: { keyword } }))}
-                value={dto.authors.map(i => i.user)}
-                onMultiValue={authors =>
-                  form.setDto({ ...form.dto, authors: authors.map(user => ({ user, function: UserFunction.AUTHOR })) })
-                }
+                value={dto.thesisUsers.filter(i => i.function === UserFunction.OPPONENT).map(i => i.user)}
+                onMultiValue={users => setThesisUsersFnc(users, UserFunction.OPPONENT)}
               />
               <FormField
-                as={Select<TeamLookupDto>}
+                as={Select<UserLookupDto>}
                 searchable
                 clearable
                 multiple
-                label={R("teams")}
-                optionRender={renderTeam}
-                options={(keyword: string) => extractPagedResponse(httpClient.team.findSimple({ requestBody: { keyword } }))}
-                value={dto.teams}
-                onMultiValue={teams => form.setDto({ ...form.dto, teams })}
+                label={R("supervisors")}
+                optionRender={renderUserLookup}
+                options={(keyword: string) => extractPagedResponse(httpClient.users.find({ requestBody: { keyword } }))}
+                value={dto.thesisUsers.filter(i => i.function === UserFunction.SUPERVISOR).map(i => i.user)}
+                onMultiValue={users => setThesisUsersFnc(users, UserFunction.SUPERVISOR)}
               />
             </div>
           </Step>

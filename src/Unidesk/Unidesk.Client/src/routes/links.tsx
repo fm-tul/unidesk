@@ -3,7 +3,7 @@ import { User_Admin, User_SuperAdmin } from "@api-client/constants/Grants";
 import { link_admin, link_adminManageEnum } from "./admin/links";
 import { PageStagImportComponent } from "./admin/links.pageStagImport";
 import { ExtraRouteProps, ExtraRoutePropsWithGoto } from "./core";
-import { PageEvaluationManageComponent, PageEvaluationDetailComponent } from "./links.pageEvaluation";
+import { PageEvaluationManageComponent, PageEvaluationEditComponent, PageEvaluationViewComponent } from "./links.pageEvaluation";
 import { PageHomeComponent } from "./links.pageHome";
 import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
 import { PageStylesComponent } from "./links.pageStyles";
@@ -146,14 +146,25 @@ export const link_pageEvaluationManage: ExtraRoutePropsWithGoto = {
   visible: false,
   element: PageEvaluationManageComponent,
   navigate: (id: string) => `/evaluations/${id}`,
+  allowAnonymous: true,
 };
 
-export const link_pageEvaluationDetailComponent: ExtraRoutePropsWithGoto = {
+export const link_pageEvaluationEdit: ExtraRoutePropsWithGoto = {
   title: "link.evaluation-detail",
   path: "/evaluation/:id",
   visible: false,
-  element: PageEvaluationDetailComponent,
+  element: PageEvaluationEditComponent,
   navigate: (id: string) => `/evaluation/${id}`,
+  allowAnonymous: true,
+};
+
+export const link_pageEvaluationView: ExtraRoutePropsWithGoto = {
+  title: "link.evaluation-detail",
+  path: "/evaluation/:id/view",
+  visible: false,
+  element: PageEvaluationViewComponent,
+  navigate: (id: string) => `/evaluation/${id}/view`,
+  allowAnonymous: false,
 };
 
 export const links = [
@@ -187,5 +198,6 @@ export const links = [
   link_settingsManageSettings,
 
   link_pageEvaluationManage,
-  link_pageEvaluationDetailComponent,
+  link_pageEvaluationEdit,
+  link_pageEvaluationView,
 ];

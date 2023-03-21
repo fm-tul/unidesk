@@ -16,40 +16,49 @@ export interface ConfirmProps {
 }
 
 export const Confirm = (props: ConfirmProps) => {
-    const { isOpen, onResolve, onReject } = props;
-    return (
-      <Modal open={isOpen} onClose={() => onResolve(false)}>
-        csacascs
-      </Modal>
-    );
+  const { isOpen, onResolve, onReject } = props;
+  return (
+    <Modal open={isOpen} onClose={() => onResolve(false)}>
+      csacascs
+    </Modal>
+  );
 };
 
-
-interface ShowConfirmOptions {
-    title: string;
-    message: string;
-    okText?: EnKeys;
-    cancelText?: EnKeys;
+export interface ConfirmDialogOptions {
+  title?: EnKeys;
+  message?: EnKeys;
+  okText?: EnKeys;
+  cancelText?: EnKeys;
+  acceptFunc?: () => void;
+  rejectFunc?: () => void;
 }
-export const CreateConfirmDialog = (options: ShowConfirmOptions): Promise<boolean> => {
-    const { title, message, okText="ok", cancelText="cancel" } = options;
-    const Confirm = (props: ConfirmProps) => {
-       const {language} = useContext(LanguageContext);
-        const { isOpen, onResolve, onReject } = props;
-        const resolve = () => onResolve(true);
-        const reject = () => onResolve(false);
-
-        return (
-          <Modal open={isOpen} onClose={() => onResolve(false)} width="sm" className="p-4 bg-white rounded">
-            <h1 className="text-2xl font-bold">{title}</h1>
-            <p className="text-gray-500">{message}</p>
-            <FilterBar className="flex justify-end" text>
-                <Button onClick={resolve}>{RR(okText, language)}</Button>
-                <Button error onClick={reject}>{RR(cancelText, language)}</Button>
-            </FilterBar>
-          </Modal>
-        );
+export const confirmDialog = (options?: ConfirmDialogOptions): Promise<boolean> => {
+  const { title="confirm-dialog.title", message="confirm-dialog.message", okText = "ok", cancelText = "cancel", acceptFunc, rejectFunc } = options ?? {};
+  const Confirm = (props: ConfirmProps) => {
+    const { language } = useContext(LanguageContext);
+    const { isOpen, onResolve, onReject } = props;
+    const resolve = () => {
+      acceptFunc?.();
+      onResolve(true);
+    };
+    const reject = () => {
+      rejectFunc?.();
+      onResolve(false);
     };
 
-    return create(Confirm)();
-}
+    return (
+      <Modal open={isOpen} onClose={() => onResolve(false)} width="sm" className="rounded bg-white p-4">
+        <h1 className="text-2xl font-bold">{RR(title, language)}</h1>
+        <p className="text-gray-500">{RR(message, language)}</p>
+        <FilterBar className="flex justify-end" text>
+          <Button onClick={resolve}>{RR(okText, language)}</Button>
+          <Button error onClick={reject}>
+            {RR(cancelText, language)}
+          </Button>
+        </FilterBar>
+      </Modal>
+    );
+  };
+
+  return create(Confirm)();
+};

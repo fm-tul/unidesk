@@ -1,10 +1,9 @@
-import { IS_PROD } from "@core/config";
+import { GUID_EMPTY, IS_PROD } from "@core/config";
 import { languages } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import ModalContainer from "react-modal-promise";
-import { BrowserRouter } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
 import { App } from "./App";
@@ -19,9 +18,11 @@ import "@fontsource/roboto/700.css";
 import "react-toastify/dist/ReactToastify.css";
 import { defaultEnumsContext, EnumsContext } from "models/EnumsContext";
 import { EnumsDto } from "./api-client";
-import { httpClient } from "@core/init";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { axiosOptions, httpClient } from "@core/init";
+import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { LanguagesId } from "@locales/common";
+import { LoginComponent } from "components/LoginComponent";
+import { BrowserRouter } from "react-router-dom";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,22 +37,44 @@ const AppWithProviders = () => {
   const [user, setUser] = useLocalStorage("user", userGuest);
   const [enums, setEnums] = useState<EnumsDto>(defaultEnumsContext.enums);
   const resetUser = () => setUser(userGuest);
+  const isLoggedIn = !!user && user.id != GUID_EMPTY;
+  // path does not start with /evaluation/...
+  const location = window.location.pathname;
+  const requireLogin = !location.startsWith("/evaluation/");
 
-  useEffect(() => {
-    const fetchEnums = async () => {
-      const enums = await httpClient.enums.allEnums();
-      setEnums(enums);
-    };
-    fetchEnums();
-  }, []);
+  const logginingQuery = useQuery({
+    queryKey: "whoami",
+    queryFn: () => {
+      axiosOptions.interceptors = false;
+      return httpClient.account.whoAmI();
+    },
+    onSuccess: response => {
+      axiosOptions.interceptors = true;
+      setUser(response.data);
+    },
+    onError: () => {
+      axiosOptions.interceptors = true;
+      setUser(userGuest);
+    },
+  });
+
+  useQuery({
+    queryKey: "enums",
+    queryFn: () => httpClient.enums.allEnums(),
+    enabled: isLoggedIn,
+    onSuccess: data => {
+      setEnums(data);
+    },
+  });
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <EnumsContext.Provider value={{ enums, setEnums }}>
-        <LanguageContext.Provider value={{ language, setLanguage }}>
-          <UserContext.Provider value={{ user, setUser, resetUser }}>
-            <BrowserRouter>
-              <App />
+    <EnumsContext.Provider value={{ enums, setEnums }}>
+      <LanguageContext.Provider value={{ language, setLanguage }}>
+        <UserContext.Provider value={{ user, setUser, resetUser }}>
+          <BrowserRouter>
+            <>
+              {isLoggedIn || !requireLogin ? <App /> : <LoginComponent isLoading={logginingQuery.isLoading || logginingQuery.isFetching} />}
+              {/* {<App /> } */}
               <ToastContainer
                 position="bottom-right"
                 autoClose={5000}
@@ -62,21 +85,19 @@ const AppWithProviders = () => {
                 draggable={false}
                 pauseOnHover
               />
-            </BrowserRouter>
-            <ModalContainer />
-          </UserContext.Provider>
-        </LanguageContext.Provider>
-      </EnumsContext.Provider>
-    </QueryClientProvider>
+            </>
+          </BrowserRouter>
+          <ModalContainer />
+        </UserContext.Provider>
+      </LanguageContext.Provider>
+    </EnumsContext.Provider>
   );
 };
 
-if (!IS_PROD) {
-  ReactDOM.createRoot(document.getElementById("root")!).render(
-    // <React.StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
       <AppWithProviders />
-    // </React.StrictMode>
-  );
-} else {
-  ReactDOM.createRoot(document.getElementById("root")!).render(<AppWithProviders />);
-}
+    </QueryClientProvider>
+  </React.StrictMode>
+);

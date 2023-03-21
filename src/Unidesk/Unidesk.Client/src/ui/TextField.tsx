@@ -27,7 +27,7 @@ export interface TextFieldProps extends SimpleComponentProps, ColorProps {
 }
 export const TextField = (props: TextFieldProps) => {
   const { label, value, name, type = "text", onChange, onBlur, onValue, onEnter, onEscape } = props;
-  const { className, rows = 1, width = "w-full", required = false } = props;
+  const { className, rows = 1, width = "w-full" } = props;
   const { multiline = rows > 1, loading = false, disabled = false, disableClass = "disabled", spellCheck } = props;
   const color = getColor(props, "neutral");
   const size = getSize(props);

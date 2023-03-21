@@ -20,7 +20,7 @@ export function UserMenu() {
 
   const authUser = async (admin: boolean) => {
     const loginPath = admin ? VITE_DEBUG_LOGIN_ADMIN : VITE_DEBUG_LOGIN;
-    const response = await httpClient.users.loginSso({ path: loginPath });
+    const response = await httpClient.account.loginSso({ path: loginPath });
 
     if (!!response.data) {
       setUser(response.data);
@@ -30,7 +30,7 @@ export function UserMenu() {
   };
 
   const logoutUser = async () => {
-    const response = await httpClient.users.logout().catch(error => {
+    const response = await httpClient.account.logout().catch(error => {
       console.log(error);
     });
     resetUser();

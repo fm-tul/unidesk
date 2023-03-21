@@ -1,9 +1,9 @@
 import { Collapse } from "components/mui/Collapse";
-import React, { useEffect, useMemo } from "react";
+import React from "react";
 import { PropsWithChildren } from "react";
 
 import { Button } from "./Button";
-import { classnames, SimpleComponentProps } from "./shared";
+import { SimpleComponentProps } from "./shared";
 
 export interface StepProps {
   label: string | React.ReactNode;
@@ -11,7 +11,7 @@ export interface StepProps {
 }
 export const Step = (props: PropsWithChildren<any>) => {
   const { children } = props;
-  return <div className="step">{children}</div>;
+  return <div className="step w-full">{children}</div>;
 };
 
 export interface StepperProps extends SimpleComponentProps {
@@ -21,6 +21,15 @@ export interface StepperProps extends SimpleComponentProps {
 export const Stepper = (props: PropsWithChildren<StepperProps>) => {
   const { children, step, setStep } = props;
   const items = React.Children.toArray(children);
+
+  const handleSetStep = (index: number) => {
+    if (step === index) {
+      // collapse
+      setStep?.(-1);
+    } else {
+      setStep?.(index);
+    }
+  };
 
   return (
     <div className="stepper">
@@ -32,19 +41,17 @@ export const Stepper = (props: PropsWithChildren<StepperProps>) => {
           <div className="flex flex-col items-start" key={index}>
             <div className="flex items-center gap-1">
               <div className={`my-1 grid h-8 w-8 place-content-center rounded-full text-white ${className}`}>{index + 1}</div>
-              <Button text justify="justify-start" className="min-w-xs" onClick={() => setStep?.(index)}>
+              <Button text justify="justify-start" className="min-w-xs" onClick={() => handleSetStep(index)}>
                 {label}
               </Button>
             </div>
 
             <Collapse open={index === step}>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full">
                 <div className="flex w-8  items-stretch justify-center rounded-full">
-                  <div className="rounded-full w-2 my-2 from-blue-500/10 via-blue-500/40 to-blue-500/10 bg-gradient-to-b">&nbsp;</div>
+                  <div className="my-2 w-2 rounded-full bg-gradient-to-b from-blue-500/10 via-blue-500/40 to-blue-500/10">&nbsp;</div>
                 </div>
-                <div className="py-4">
-                  {component}
-                </div>
+                <div className="py-4 w-full">{component}</div>
               </div>
             </Collapse>
           </div>

@@ -21,14 +21,14 @@ export const MetadataRenderer = <T extends TrackedEntityDto>(params: T, language
 
 export const CreatedRenderer = <T extends TrackedEntityDto>(params: T, language: LanguagesId) => {
   const { created } = params;
-  const { className, formatedDate } = getDateProps(created, "long");
+  const { className, formatedDate } = getDateProps(created, "short");
 
   return <span className={classnames("text-xs", className)}>{formatedDate}</span>;
 };
 
 export const ModifiedRenderer = <T extends TrackedEntityDto>(params: T, language: LanguagesId) => {
   const { modified } = params;
-  const { className, formatedDate } = getDateProps(modified, "long");
+  const { className, formatedDate } = getDateProps(modified, "short");
 
   return <span className={classnames("text-xs", className)}>{formatedDate}</span>;
 };

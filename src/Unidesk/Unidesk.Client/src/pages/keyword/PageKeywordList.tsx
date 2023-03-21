@@ -13,12 +13,9 @@ import { Modal } from "ui/Modal";
 import { HistoryInfoIcon } from "../../components/HistoryInfo";
 import { KeywordMerger } from "./KeywordMerger";
 import { UnideskComponent } from "components/UnideskComponent";
+import { FloatingAction } from "components/mui/FloatingAction";
+import { MdCallMerge } from "react-icons/md";
 
-const usedCountOptions = [
-  { label: ">1", key: "moreThan1", value: KeywordUsedCount.MORE_THAN1 },
-  { label: ">5", key: "moreThan5", value: KeywordUsedCount.MORE_THAN5 },
-  { label: ">10", key: "moreThan10", value: KeywordUsedCount.MORE_THAN10 },
-];
 export const PageKeywordList = () => {
   const { language } = useContext(LanguageContext);
 
@@ -32,8 +29,6 @@ export const PageKeywordList = () => {
   return (
     <UnideskComponent name="PageKeywordList">
       <LoadingWrapper error={""} isLoading={false}>
-        <h1>Keywords</h1>
-        <Button onClick={open}>Merge Keywords...</Button>
 
         {isOpen && (
           <Modal open={isOpen} onClose={close} height="xl" className="rounded bg-white p-6">
@@ -60,6 +55,8 @@ export const PageKeywordList = () => {
               ))}
           </div>
         )}
+
+        <FloatingAction onClick={open} tooltip="merge" icon={<MdCallMerge className="w-6 h-6" />} />
       </LoadingWrapper>
     </UnideskComponent>
   );

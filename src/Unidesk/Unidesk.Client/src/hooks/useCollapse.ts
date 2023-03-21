@@ -1,7 +1,7 @@
 import { CSSProperties, useEffect, useState } from "react";
 
-const classNamesCollapsing = "max-h-0 overflow-hidden motion-safe:transition-all";
-const classNamesOpen = "max-h-0 motion-safe:transition-all";
+const classNamesCollapsing = "max-h-0 w-full overflow-hidden motion-safe:transition-all";
+const classNamesOpen = "max-h-0 w-full motion-safe:transition-all";
 export const useCollape = (element: HTMLElement | null, open: boolean) => {
   const [canBeHidden, setCanBeHidden] = useState(true);
   const [fullyOpen, setFullyOpen] = useState(false);
