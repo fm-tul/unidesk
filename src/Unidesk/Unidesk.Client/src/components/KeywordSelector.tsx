@@ -15,23 +15,27 @@ import { TextField } from "ui/TextField";
 import { groupBy, sortBy } from "utils/arrays";
 import { locales } from "@locales/common";
 import { useQuery } from "react-query";
+import { useTranslation } from "@locales/translationHooks";
 
 interface KeywordSelectorProps {
   keywords?: KeywordDto[];
   onChange?: (value: KeywordDto[]) => void;
   max?: number;
   separateByLocale?: boolean;
+  disabled?: boolean;
 }
 export const KeywordSelector = (props: KeywordSelectorProps) => {
+  const { keywords = [], onChange, max = 100, disabled=false } = props;
   const { language } = useContext(LanguageContext);
-  const { keywords = [], onChange, max = 100 } = props;
+  const { translateName, translateVal, translate } = useTranslation(language);
+
   const [keyword, setKeyword, debounceKw] = useDebounceState<string>("");
 
-  const {data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["keywords", debounceKw],
     queryFn: () => httpClient.keywords.find({ keyword: debounceKw.trim() }),
     enabled: debounceKw.trim() !== "",
-  })
+  });
   const keywordCandidates = data ?? [];
   const { open, close, isOpen } = useOpenClose();
 
@@ -39,7 +43,6 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
     const unique = value.filter((v, i, a) => a.findIndex(t => t.value === v.value && t.locale === v.locale) === i);
     onChange?.(unique);
   };
-
 
   const tryAddKeywordFromOtherLocale = (keyword: KeywordDto) => {
     const toAdd: KeywordDto[] = [];
@@ -101,15 +104,19 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
     </div>
   );
 
+  const hasKeywords = keywords?.length > 0;
+
   return (
-    <div className="col-span-2 flex flex-col gap-2">
-      <Button text onClick={open}>
-        {RR("click-to-edit", language)}
-      </Button>
-      {KeywordList}
+    <div className={classnames("flex flex-col gap-2", disabled && "disabled-style")}>
+      <div className="flex">
+        {KeywordList}
+        <Button text onClick={open} className={classnames(hasKeywords && "ml-auto")} disabled={disabled}>
+          {translate(!hasKeywords ? "keywords.add-new" : "click-to-edit")}
+        </Button>
+      </div>
 
       {isOpen && (
-        <Modal open={isOpen} onClose={close} height="md" className=" flex flex-col gap-2 bg-white p-4">
+        <Modal open={isOpen} onClose={close} className="flex flex-col gap-2 bg-white p-4 rounded" width="lg">
           <h3 className="flex items-end justify-between text-sm font-semibold">
             {RR("keywords", language)}
             <Button text sm onClick={close}>
@@ -128,7 +135,6 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
           </div>
 
           {KeywordList}
-          <div></div>
 
           <div>
             {keywordCandidates.length > 0 && (
@@ -166,7 +172,8 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
                   {RR("no-keywords-found", language)}
                   <Button onClick={close} text sm></Button>
                 </div>
-                <div className="grid w-full grid-cols-2 gap-8 p-2 ">
+
+                <div className="grid grid-cols-2 gap-8 p-2 ">
                   <Button
                     sm
                     outlined
@@ -190,6 +197,12 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="flex justify-end">
+            <Button text sm onClick={close}>
+              {translate("close")}
+            </Button>
           </div>
         </Modal>
       )}

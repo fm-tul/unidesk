@@ -8,7 +8,7 @@ public class KeywordThesis
     public Guid KeywordId { get; set; }
     public Keyword Keyword { get; set; }
 
-    public KeywordThesisStatus Status { get; set; }
+    public KeywordStatus Status { get; set; }
 
 
     protected bool Equals(KeywordThesis other)
@@ -40,11 +40,4 @@ public class KeywordThesis
     {
         return HashCode.Combine(ThesisId, KeywordId);
     }
-}
-
-public enum KeywordThesisStatus
-{
-    Official,
-    Suggested,
-    Rejected,
 }

@@ -1,10 +1,11 @@
-import { User_Admin, User_SuperAdmin } from "@api-client/constants/Grants";
+import { User_Admin, User_SuperAdmin, Internship_Manage } from "@api-client/constants/Grants";
 
 import { link_admin, link_adminManageEnum } from "./admin/links";
 import { PageStagImportComponent } from "./admin/links.pageStagImport";
 import { ExtraRouteProps, ExtraRoutePropsWithGoto } from "./core";
 import { PageEvaluationManageComponent, PageEvaluationEditComponent, PageEvaluationViewComponent } from "./links.pageEvaluation";
 import { PageHomeComponent } from "./links.pageHome";
+import { PageInternshipDetailComponent, PageInternshipListComponent } from "./links.pageInternships";
 import { PageKeywordDetailComponent, PageKeywordListComponent } from "./links.pageKeyword";
 import { PageStylesComponent } from "./links.pageStyles";
 import { PageTeamDetailComponent, PageTeamEditComponent, PageTeamListComponent } from "./links.pageTeam";
@@ -167,6 +168,22 @@ export const link_pageEvaluationView: ExtraRoutePropsWithGoto = {
   allowAnonymous: false,
 };
 
+// internships
+export const link_pageInternshipList: ExtraRouteProps = {
+  title: "link.internships",
+  path: "/internships",
+  visible: true,
+  element: PageInternshipListComponent,
+};
+
+export const link_pageInternshipDetail: ExtraRoutePropsWithGoto = {
+  title: "link.internship",
+  path: "/internships/:id",
+  visible: false,
+  element: PageInternshipDetailComponent,
+  navigate: (id: string) => `/internships/${id}`,
+};
+
 export const links = [
   link_pageHome,
   link_stagImport,
@@ -200,4 +217,8 @@ export const links = [
   link_pageEvaluationManage,
   link_pageEvaluationEdit,
   link_pageEvaluationView,
+
+  // internships
+  link_pageInternshipList,
+  link_pageInternshipDetail,
 ];

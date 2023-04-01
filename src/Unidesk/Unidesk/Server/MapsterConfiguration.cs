@@ -1,8 +1,10 @@
 ﻿using System.Linq.Expressions;
 using Mapster;
 using Unidesk.Db.Models;
+using Unidesk.Db.Models.Internships;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Documents;
+using Unidesk.Dtos.Internships;
 using Unidesk.Dtos.ReadOnly;
 using Unidesk.Dtos.Resolvers;
 using Unidesk.Utils.Extensions;
@@ -96,6 +98,10 @@ public static class MapsterConfiguration
           .Ignore(i => i.ProfileImage)
           .Ignore(i => i.ProfileImageId);
 
+
+        config.ForType<InternshipDto, Internship>()
+          .Ignore(i => i.KeywordInternship)
+          .Ignore(i => i.Student);
 
         return config;
     }

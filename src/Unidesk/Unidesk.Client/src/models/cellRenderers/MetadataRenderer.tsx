@@ -33,10 +33,21 @@ export const ModifiedRenderer = <T extends TrackedEntityDto>(params: T, language
   return <span className={classnames("text-xs", className)}>{formatedDate}</span>;
 };
 
-const getDateProps = (dateStr: string, format: DateFormatTypes = "smart") => {
+const getDateProps = (dateStr: string | number | Date, format: DateFormatTypes = "smart") => {
   const date = moment(dateStr);
   const formatedDate = formatDate(date, format);
   const isNew = Math.abs(date.diff(moment(), "days")) <= 3;
   const className = isNew ? "text-green-500 font-semibold" : "text-gray-500";
   return { className, date, formatedDate };
+};
+
+interface RenderDateProps {
+  date: Date | string | number;
+  format?: DateFormatTypes;
+  skipClassNames?: boolean;
+}
+export const RenderDate = (props: RenderDateProps) => {
+  const { date, format = "short", skipClassNames=true} = props;
+  const { className, formatedDate } = getDateProps(date, format);
+  return <span className={classnames(!skipClassNames && className, "text-xs")}>{formatedDate}</span>;
 };

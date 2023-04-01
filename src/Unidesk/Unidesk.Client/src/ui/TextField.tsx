@@ -7,7 +7,7 @@ import { TextArea } from "components/mui/ArrayField";
 import { classnames, ColorProps, getColor, getSize, SimpleComponentProps, UiColors } from "./shared";
 
 export interface TextFieldProps extends SimpleComponentProps, ColorProps {
-  label?: string;
+  label?: string | JSX.Element;
   name?: string;
   value?: string | null;
   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -74,6 +74,7 @@ export const TextField = (props: TextFieldProps) => {
           onBlur={onBlur}
           onKeyUp={handleKeyUp}
           spellCheck={spellCheck}
+          disabled={disabled}
         />
       )}
       {loading && (

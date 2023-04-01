@@ -63,9 +63,14 @@ public class TeamService
            .FirstAsync(x => x.TeamId == teamId && x.UserId == userId);
     }
 
-    public async Task<Team> UpsertAsync(TeamDto dto)
+    public async Task<Team> UpsertAsync(TeamDto dto, CancellationToken ct)
     {
-        var (isNew, item) = await _db.Teams.Query().GetOrCreateFromDto(_mapper, dto);
+        var (isNew, item) = await _db.Teams
+           .Query()
+           .Include(i => i.ProfileImage)
+           .ThenInclude(i => i.DocumentContent)
+           .GetOrCreateFromDto(_mapper, dto);
+        
         NotFoundException.ThrowIfNullOrEmpty(item);
         
         if (isNew)
@@ -89,16 +94,19 @@ public class TeamService
             _db.UserInTeams.AddRange(toBeAdded);
             _db.UserInTeams.RemoveRange(toBeDeleted);
 
-            _db.Teams.Update(item);
             _logger.LogInformation("Removed {Count} users from team {TeamId}", toBeDeleted.Count, item.Id);
         }
         
         // manual mapping
-        var profileImage = await _documentService.UpdateDocumentAsync(item.ProfileImageId, dto.ProfileImage);
-        item.ProfileImageId = profileImage?.Id;
+        if (dto.ProfileImage is not null)
+        {
+            var profileImage = await _documentService.UpdateDocumentAsync(item.ProfileImage, dto.ProfileImage, ct);
+        }
+        // item.ProfileImageId = profileImage?.Id;
+        // item.ProfileImageId = null;
 
         MakeSureOwnerIsValid(item);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(ct);
 
         var fresh = await _db.Teams.Query().FirstOrDefaultAsync(item.Id);
         NotFoundException.ThrowIfNullOrEmpty(fresh);

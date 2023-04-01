@@ -43,7 +43,7 @@
 }
 
 .tf-wrapper:has(.i-disabled) {
-  @apply cursor-not-allowed border-neutral-400 bg-neutral-300 text-neutral-900 opacity-80
+  @apply disabled-style;
 }
 
 /*.tf {

@@ -10,14 +10,15 @@ export const en = {
   deleted: "Deleted",
   delete: "Delete",
   "user-aliases": "User Aliases",
+  days: "days",
 
-  // report 
+  // report
   "report.section.general": "General",
   "report.section.evaluation": "Evaluation",
   "report.section.overall-evaluation": "Overall Evaluation",
 
-  "edit": "Edit",
-  "view": "View",
+  edit: "Edit",
+  view: "View",
 
   // navbar
   import: "Import",
@@ -28,7 +29,7 @@ export const en = {
   "login.liane": "Login with LIANE",
   "login.title": "Login",
   "login.loading": "Logging in...",
-  
+
   "sort-by": "Sort by",
   "no-thesis-found": "No thesis found",
 
@@ -56,6 +57,7 @@ export const en = {
 
   ok: "Ok",
   cancel: "Cancel",
+  close: "Close",
   error: "error",
   "error-occurred": "Error occurred",
   topics: "Topics",
@@ -116,6 +118,7 @@ export const en = {
   opponent: "Opponent",
   opponents: "Opponents",
   keywords: "Keywords",
+  "keywords.add-new": "Add new keyword",
   "name-lang": (lang: string) => `Name (${lang})`,
   "multiple-types": "Multiple types",
   abstract: "Abstract",
@@ -143,6 +146,7 @@ export const en = {
 
   // errors
   required: "Required",
+  "form.required": "This field is required",
   from: "From",
   "min-3": "Select at least 3 values",
   "basic-information": "Basic information",
@@ -155,7 +159,7 @@ export const en = {
 
   // paging
   "page-of": "of",
-  
+
   // keywords
   "keyword-used-count": "Used count",
 
@@ -184,6 +188,8 @@ export const en = {
   "link.edit-thesis": "Edit Thesis",
   "link.create-thesis": "Create new Thesis",
   "link.evaluation-edit": "Edit Evaluation",
+  "link.internships": "Internships",
+  "link.internship": "Internship",
 
   "link.keywords": "Keywords",
   "link.keyword": "Keyword",
@@ -208,7 +214,6 @@ export const en = {
   // select component
   "select-component.type-to-search": "Type to search...",
   "select-component.no-results-found": "No results found",
-  
 
   // form
   "section.personal-information": "Personal Information",
@@ -221,9 +226,12 @@ export const en = {
   "section.team-composition": "Team Composition",
 
   // help
-  "help.user-function": "User Functions serves as a guide for users of the system. Please select all the functions which are applicable to this user.",
-  "help.user-aliases": "User Aliases are used to connect your main account with other originating from STAG. Please select all the aliases which are applicable to this user.",
-  "help.user-roles": "User Roles are used to grant you access to certain parts of the system. Please select all the roles which are applicable to this user.",
+  "help.user-function":
+    "User Functions serves as a guide for users of the system. Please select all the functions which are applicable to this user.",
+  "help.user-aliases":
+    "User Aliases are used to connect your main account with other originating from STAG. Please select all the aliases which are applicable to this user.",
+  "help.user-roles":
+    "User Roles are used to grant you access to certain parts of the system. Please select all the roles which are applicable to this user.",
   "help.teams": "Teams are used to group users together. Please select all the teams which are applicable to this user.",
 
   // user function
@@ -246,8 +254,55 @@ export const en = {
 
   "confirm-dialog.are-you-sure-you-want-to-delete-this-team": "Are you sure you want to delete this team?",
 
-  "home.i-am-looking-for-thesis": "I am looking for thesis",
-  "home.i-want-to-create-thesis": "I want to create thesis",
+  "home.i-am-looking-for-thesis": (
+    <>
+      I am{" "}
+      <span className="group-hover:font-bold group-hover:underline group-hover:decoration-white/70 group-hover:decoration-2">looking</span>{" "}
+      for thesis
+    </>
+  ),
+  "home.i-want-to-create-thesis": (
+    <>
+      I want to{" "}
+      <span className="group-hover:font-bold group-hover:underline group-hover:decoration-white/70 group-hover:decoration-2">create</span>{" "}
+      thesis
+    </>
+  ),
+
+  // internships
+  "internship.student": "Student",
+  "internship.student.locked-description": "You cannot edit selected student, missing grants.",
+  "internship.title": "Internship Title",
+  "internship.company-name": "Company Name",
+  "internship.department": "Department",
+  "internship.location": "Location",
+  "internship.start-date": "Start Date",
+  "internship.end-date": "End Date",
+  "internship.period": "Internship Period",
+
+  "internship.no-internships": "No internships found",
+  "internship.submit-for-approval": "Submit for approval",
+  "internship.approve-internship": "Approve internship",
+  "internship.reopen-internship": "Reopen internship",
+  "internship.reject-internship": "Reject internship",
+  "internship.mark-as-finished": "Mark as finished",
+  "internship.mark-as-defended": "Mark as defended",
+
+  "internship.section.general": "General Details",
+  "internship.section.dates": "Dates",
+  "internship.section.contact": "Contact's Information",
+  "internship.section.job-description": "Job Description",
+
+  "internship.supervisor-name": "Supervisor Name",
+  "internship.supervisor-phone": "Supervisor Phone",
+  "internship.supervisor-email": "Supervisor Email",
+  "internship.requirements": "Requirements",
+  "internship.abstract": "Abstract",
+  "internship.keywords": "Keywords",
+  "internship.comments": "Comments",
+  "internship.warning.duration-6-weeks": "The internship duration is less than 6 weeks. Please check the dates.",
+  "internship.warning.internalship-not-ended": "This internship has not ended yet.",
+  "internship.error.start-date-must-be-before-end-date": "Start date must be before end date",
 };
 
 export default en;

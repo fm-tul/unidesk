@@ -33,13 +33,13 @@ export function LanguageSelector() {
   return (
     <div>
       {/* switch language */}
-      <Tooltip content={language === "cze" ? "English" : "Čeština"}>
+      <Tooltip content={language === "cze" ? "Switch to English" : "Přepnout do Češtiny"}>
         <Button
           text
           className={classnames("h-12 w-12 p-4 text-xs font-bold text-neutral-900 ")}
           onClick={() => setLanguage(language === "cze" ? "eng" : "cze")}
         >
-          <img className="w-4" src={language === "cze" ? uk : cz} />
+          <img className="w-4" src={language === "cze" ? cz : uk} />
         </Button>
       </Tooltip>
     </div>

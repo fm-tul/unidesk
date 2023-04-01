@@ -53,7 +53,7 @@ public class Thesis : TrackedEntity
 
 
     /// <summary>
-    /// Schoold year of the thesis
+    /// SchoolId year of the thesis
     /// </summary>
     [IgnoreMapping]
     public SchoolYear SchoolYear { get; set; }

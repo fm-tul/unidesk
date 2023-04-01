@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Unidesk.Db.Core;
 using Unidesk.Db.Functions;
 using Unidesk.Db.Models;
+using Unidesk.Db.Models.Internships;
 using Unidesk.Db.Models.Reports;
 using Unidesk.Db.Seeding;
 using Unidesk.Services;
@@ -51,6 +52,9 @@ public class UnideskDbContext : DbContext
     
     public DbSet<ThesisEvaluation> ThesisEvaluations { get; set; }
 
+    // internship
+    public  DbSet<Internship> Internships { get; set; }
+    public  DbSet<KeywordInternship> KeywordInternships { get; set; }
 
     public  DbSet<ChangeLog> ChangeLogs { get; set; }
 
@@ -80,6 +84,13 @@ public class UnideskDbContext : DbContext
         {
             relationship.DeleteBehavior = DeleteBehavior.Restrict;
         }
+
+        modelBuilder.Entity<ChangeLog>().OwnsOne(
+            i => i.Details, navBuilder =>
+            {
+                navBuilder.ToJson();
+                navBuilder.OwnsMany(j => j.Details);
+            });
         
         // manually set cascade on delete for certain relations
         modelBuilder.Entity<Document>()
@@ -106,7 +117,6 @@ public class UnideskDbContext : DbContext
         // backing fields
         modelBuilder.Entity<SchoolYear>().Property(e => e._start);
         modelBuilder.Entity<SchoolYear>().Property(e => e._end);
-
         modelBuilder.Entity<UserRole>().Property(e => e._grants);
 
         // UserInTeam basically handles m-n relation and we must specify the keys here
@@ -118,6 +128,9 @@ public class UnideskDbContext : DbContext
 
         modelBuilder.Entity<ThesisUser>()
            .HasKey(j => new { j.ThesisId, j.UserId });
+        
+        modelBuilder.Entity<KeywordInternship>()
+           .HasKey(j => new { j.KeywordId, j.InternshipId });
     }
 
 
@@ -150,10 +163,11 @@ public class UnideskDbContext : DbContext
         var items = ChangeTracker
            .Entries()
            .Where(i => i.Entity is TrackedEntity)
-           .Where(i => i.State == EntityState.Added || i.State == EntityState.Modified)
+           .Where(i => i.State == EntityState.Added || i.State == EntityState.Modified || i.State == EntityState.Deleted)
            .ToList();
 
         // update Modified, ModifiedBy, Created and CreatedBy
+        var changeLogs = new List<ChangeLog>();
         info += items
            .AsEnumerable()
            .ForEach(i =>
@@ -162,7 +176,7 @@ public class UnideskDbContext : DbContext
                 {
                     entity.Modified = _dateTimeService.Now;
                     entity.ModifiedBy = _userProvider.CurrentUser?.Email;
-                    ChangeLogs.Add(ChangeLog.Create(i, _userProvider.CurrentUser?.Email));
+                    changeLogs.Add(ChangeLog.Create(i, _userProvider.CurrentUser?.Email));
 
                     if (i.State == EntityState.Added)
                     {
@@ -171,6 +185,9 @@ public class UnideskDbContext : DbContext
                     }
                 }
             }).ToList();
+        
+        // save change logs
+        ChangeLogs.AddRange(changeLogs);
 
         return info;
     }
@@ -181,7 +198,7 @@ public class UnideskDbContext : DbContext
         return base.SaveChanges();
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         HandleInterceptors();
         return base.SaveChangesAsync(cancellationToken);

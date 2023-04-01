@@ -2,8 +2,6 @@ import { UserFunction as UserFunctions } from "@api-client/constants/UserFunctio
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { ThesisEvaluationDto } from "@models/ThesisEvaluationDto";
-import { UserLookupDto } from "@models/UserLookupDto";
-import { UserFunction } from "@models/UserFunction";
 import { FloatingAction } from "components/mui/FloatingAction";
 import { UnideskComponent } from "components/UnideskComponent";
 import { extractPagedResponse, useModel } from "hooks/useFetch";
@@ -31,6 +29,7 @@ import { ButtonGroup } from "components/FilterBar";
 import { z } from "zod";
 import { ThesisEvaluationPeekDto } from "@models/ThesisEvaluationPeekDto";
 import { link_pageEvaluationEdit, link_pageEvaluationView } from "routes/links";
+import { UserFunction, UserLookupDto } from "@api-client/index";
 
 const supportedUserFunctions = [UserFunctions.Opponent, UserFunctions.Supervisor, UserFunctions.External];
 const initialDto = { id: GUID_EMPTY, status: EvaluationStatus.PREPARED } as ThesisEvaluationDto;

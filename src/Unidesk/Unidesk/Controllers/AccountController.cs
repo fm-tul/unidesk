@@ -9,8 +9,6 @@ using Unidesk.Dtos;
 using Unidesk.Services;
 using Unidesk.Utils;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Controllers;

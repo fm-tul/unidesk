@@ -1,7 +1,4 @@
-import { LanguageContext } from "@locales/LanguageContext";
-import { useTranslation } from "@locales/translationHooks";
 import { Collapse } from "components/mui/Collapse";
-import { useContext, useState } from "react";
 import { classnames, getHelperColor, HelperProps } from "./shared";
 
 interface FormFieldProps<T> extends HelperProps {
@@ -11,7 +8,6 @@ interface FormFieldProps<T> extends HelperProps {
 }
 
 export const FormField = <T,>(props: FormFieldProps<T> & T) => {
-  const {language} = useContext(LanguageContext);
   const { as: Component, forceTheme = true, classNameField } = props;
   const { helperText, helperColor, helperClassName = "pl-2" } = getHelperColor(props);
   let theme = THEME[helperColor ?? "neutral"];

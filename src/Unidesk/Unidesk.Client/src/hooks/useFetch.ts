@@ -8,7 +8,7 @@ import { PagingModel } from "./usePaging";
 import { useMutation, useQuery } from "react-query";
 import { GUID_EMPTY } from "@core/config";
 import { ZodObject } from "zod";
-import { useDto } from "utils/forms";
+import { extractErrors, useDto } from "utils/forms";
 
 export const useModel = <T>(
   id: string,
@@ -18,19 +18,30 @@ export const useModel = <T>(
   deleteFunc: (id: string) => Promise<SimpleJsonResponse>,
   deps: DependencyList = [],
   schema: ZodObject<any> | undefined = undefined,
-  autoValidate = false
+  autoValidate = false,
+  onSuccess?: (data: T) => void
 ) => {
   // const [data, setData] = useState<T>();
-  const { dto, setDto, getPropsText, getPropsSelect, errors, setErrors, validateSafe, validateAndSetErrors } = useDto<T>(initialValues, schema, autoValidate);
+  const { dto, setDto, getPropsText, getPropsSelect, errors, setErrors, validateSafe, validateAndSetErrors, getHelperProps } = useDto<T>(
+    initialValues,
+    schema,
+    autoValidate
+  );
   const getQuery = useQuery({
     queryKey: deps,
     queryFn: getFunc,
     onSuccess: setDto,
-    enabled: !!id && id !== GUID_EMPTY,
+    enabled: !!id && id !== GUID_EMPTY && id !== "new",
   });
 
   const setQuery = useMutation(setFunc, {
-    onSuccess: setDto,
+    onSuccess: (data: T) => {
+      setDto(data);
+      onSuccess?.(data);
+    },
+    onError: (e: any) => {
+      setErrors(extractErrors(e));
+    },
   });
 
   const deleteQuery = useMutation(deleteFunc, {
@@ -50,6 +61,7 @@ export const useModel = <T>(
     deleteQuery,
     getPropsText,
     getPropsSelect,
+    getHelperProps,
     errors,
     setErrors,
     validateSafe,

@@ -1,29 +1,19 @@
-﻿using MapsterMapper;
+﻿using System.Linq.Expressions;
+using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using Unidesk.Db;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
+using Unidesk.Db.Models.Internships;
 using Unidesk.Dtos;
 
 namespace Unidesk.Utils.Extensions;
 
 public static class EntityExtensions
 {
-    public static ThesisUser StripToGuids(this ThesisUser thesisUser)
+    
+    public static IQueryable<T> WhereIf<T>(this IQueryable<T> queryable, bool condition, Expression<Func<T, bool>> predicate)
     {
-        return new ThesisUser()
-        {
-            UserId = thesisUser.UserId,
-            ThesisId = thesisUser.ThesisId,
-            Function = thesisUser.Function,
-        };
-    }
-
-    public static UserInTeam StripToGuids(this UserInTeam userInTeam)
-    {
-        userInTeam.Team = null;
-        userInTeam.User = null;
-        return userInTeam;
+        return condition ? queryable.Where(predicate) : queryable;
     }
 }
 
@@ -63,6 +53,14 @@ public static class EntityQueryExtensions
            .Include(i => i.Roles)
            .Include(i => i.UserInTeams)
            .ThenInclude(i => i.Team);
+    }
+    
+    public static IQueryable<Internship> Query(this DbSet<Internship> dbSet)
+    {
+        return dbSet
+           .Include(i => i.Student)
+           .Include(i => i.KeywordInternship)
+           .ThenInclude(i => i.Keyword);
     }
 
     public static T First<T>(this IQueryable<T> items, Guid id) where T : TrackedEntity

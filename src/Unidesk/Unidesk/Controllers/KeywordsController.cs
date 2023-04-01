@@ -32,13 +32,13 @@ public class KeywordsController : ControllerBase
     [HttpPost, Route("all")]
     [SwaggerOperation(OperationId = nameof(GetAll))]
     [ProducesResponseType(typeof(PagedResponse<KeywordDto>), 200)]
-    public async Task<IActionResult> GetAll([FromBody] KeywordFilter filter)
+    public async Task<IActionResult> GetAll([FromBody] KeywordFilter filter, CancellationToken ct)
     {
         var query = _keywordsService.WhereFilter(filter, includeUsage: true);
 
         var response = await query
             .OrderByDescending(i => i.KeywordThesis.Count)
-            .ToListWithPagingAsync<Keyword, KeywordDto>(filter.Paging, _mapper);
+            .ToListWithPagingAsync<Keyword, KeywordDto>(filter.Paging, _mapper, ct);
         
         return Ok(response);
     }

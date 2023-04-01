@@ -25,6 +25,7 @@ export type TableProps<TValue> = HTMLAttributes<HTMLDivElement> & {
   rows?: TValue[];
   columns: ColumnDefinition<TValue>[];
   onRowClick?: (value: TValue) => void;
+  rowClassName?: (value: TValue) => string;
   autoHeight?: boolean;
   fullWidth?: boolean;
   clientSort?: boolean;
@@ -63,8 +64,21 @@ const applySort = <TValue,>(rows: TValue[], sortBy: SortBy<TValue>): TValue[] =>
 
 const defaultIdGetter = <TValue,>(value: TValue) => (value as any).id ?? JSON.stringify(value);
 
-export const Table = <TValue, >(props: TableProps<TValue>) => {
-  const { rows = [], columns, onRowClick, autoHeight, fullWidth = true, clientSort = false, selected, className, idGetter=defaultIdGetter, EmptyContent, ...rest } = props;
+export const Table = <TValue,>(props: TableProps<TValue>) => {
+  const {
+    rows = [],
+    columns,
+    onRowClick,
+    rowClassName,
+    autoHeight,
+    fullWidth = true,
+    clientSort = false,
+    selected,
+    className,
+    idGetter = defaultIdGetter,
+    EmptyContent,
+    ...rest
+  } = props;
   const fullWidthCss = fullWidth ? "w-full" : "";
   const visibleColumns = columns.filter(i => i.visible !== false);
 
@@ -113,9 +127,14 @@ export const Table = <TValue, >(props: TableProps<TValue>) => {
         <tbody>
           {sortedRows.map(item => (
             <tr
-              className={`table-tr table-body cursor-pointer ${
-                idGetter(item) === selected ? "selected" : ""
-              } selected:bg-gradient-to-r selected:from-info-500/30`}
+              className={classnames(
+                "table-tr table-body cursor-pointer",
+                "selected:bg-gradient-to-r selected:from-info-500/30",
+                "hover:bg-gradient-to-r hover:from-yellow-500/20",
+                "selected:hover:bg-gradient-to-r selected:hover:from-info-500/50",
+                idGetter(item) === selected && "selected",
+                rowClassName?.(item)
+              )}
               key={idGetter(item)}
               onClick={() => onRowClick?.(item)}
             >
@@ -124,7 +143,7 @@ export const Table = <TValue, >(props: TableProps<TValue>) => {
               ))}
             </tr>
           ))}
-          
+
           {!!EmptyContent && sortedRows.length === 0 && (
             <tr className="table-tr table-body">
               <td colSpan={visibleColumns.length}>{EmptyContent}</td>

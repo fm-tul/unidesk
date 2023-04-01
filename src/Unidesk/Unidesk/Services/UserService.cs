@@ -9,7 +9,6 @@ using Unidesk.Db.Functions;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
-using Unidesk.Security;
 using Unidesk.Server;
 using Unidesk.Utils;
 using Unidesk.Utils.Extensions;
@@ -260,6 +259,12 @@ public class UserService
             {
                 _db.UserRoles.Add(UserRoles.SuperAdmin);
                 superAdminRole = UserRoles.SuperAdmin;
+                needsSave = true;
+            }
+
+            if (superAdminRole.Grants.Count != UserRoles.SuperAdmin.Grants.Count)
+            {
+                superAdminRole.Grants = UserRoles.SuperAdmin.Grants;
                 needsSave = true;
             }
             

@@ -20,6 +20,8 @@ import { toKV, toKVWithCode } from "utils/transformUtils";
 import { SimpleEntityEditor } from "./SimpleEntityEditor";
 import { UnideskComponent } from "components/UnideskComponent";
 import { EditorPropertiesOf } from "models/typing";
+import { Section } from "components/mui/Section";
+import { ChangeTracker } from "./ChangeTracker";
 
 export const PageAdministrator = () => {
   const { enumName } = useParams();
@@ -109,13 +111,18 @@ export const PageAdministrator = () => {
         />
       ),
     },
+    {
+      name: "Change Tracker",
+      path: "change-tracker",
+      component: <ChangeTracker />
+    }
   ];
 
   const validEnum = enumsList.find(e => e.path === enumName);
 
   return (
     <UnideskComponent name="PageAdministrator">
-      {!validEnum && <h1 className="text-xl">{R("administration-menu")}</h1>}
+      {!validEnum && <Section title="administration-menu" />}
       <div
         className={classnames(
           "grid gap-4",
@@ -130,7 +137,7 @@ export const PageAdministrator = () => {
       </div>
 
       <div>
-        <h1 className="text-xl">{R("administration-actions")}</h1>
+        <Section title="administration-actions" />
         <div
           className={classnames(
             "grid gap-4",

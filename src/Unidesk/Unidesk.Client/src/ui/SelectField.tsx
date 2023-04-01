@@ -64,7 +64,7 @@ const getTitleFuncBasedOnOption = <T,>(item: T, titleGetter?: (value: T) => Prim
   return (isPrimitiveType(item) ? item => item : item => JSON.stringify(item)) as TitleFunc;
 };
 
-interface SelectFieldProps<T> {
+export interface SelectFieldProps<T> {
   value: T | T[] | undefined;
   options: T[];
   multiple?: boolean;
@@ -241,8 +241,8 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
       <div
         onClick={handleSelectClick}
         className={classnames(
-          disabled && "cursor-not-allowed bg-neutral-200 opacity-80",
-          "select-wrapper flex h-full justify-between rounded border border-solid border-neutral-400 bg-white/80 ring-0 transition-all focus-within:ring-2",
+          disabled ? "disabled-style" : "border-neutral-400 bg-white/80",
+          "select-wrapper flex h-full justify-between rounded border border-solid ring-0 transition-all focus-within:ring-2",
           theme.ring
         )}
       >

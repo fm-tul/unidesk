@@ -83,6 +83,8 @@ services.AddScoped<SettingsService>();
 services.AddScoped<ThesisEvaluationService>();
 services.AddScoped<EmailService>();
 services.AddScoped<DocumentService>();
+services.AddScoped<InternshipService>();
+services.AddScoped<ChangeTrackerService>();
 services.AddScoped<IThesisEvaluation, ThesisEvaluation_Opponent_FM_Eng>();
 
 services.AddSingleton<WordGeneratorService>();

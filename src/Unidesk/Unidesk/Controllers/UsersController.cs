@@ -113,12 +113,12 @@ public class UsersController : ControllerBase
     [HttpPost, Route("find")]
     [SwaggerOperation(OperationId = nameof(Find))]
     [ProducesResponseType(typeof(PagedResponse<UserLookupDto>), 200)]
-    public async Task<IActionResult> Find([FromBody] UserFilter? query = null)
+    public async Task<IActionResult> Find([FromBody] UserFilter? filter, CancellationToken ct)
     {
         var response = await _userService
-            .Where(query)
-            .ApplyOrderBy(query?.Paging)
-            .ToListWithPagingAsync<User, UserLookupDto>(query?.Paging, _mapper);
+           .Where(filter)
+           .ApplyOrderBy(filter?.Paging)
+           .ToListWithPagingAsync<User, UserLookupDto>(filter?.Paging, _mapper, ct);
     
         return Ok(response);
     }

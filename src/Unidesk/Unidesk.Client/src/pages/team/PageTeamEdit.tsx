@@ -51,9 +51,6 @@ const teamInitialValue: Partial<TeamDto> = {
 };
 
 const teamTypeOptions = TeamTypeAll.filter(i => i !== TeamType.UNKNOWN);
-interface PageTeamNewProps {
-  initialValues?: TeamDto;
-}
 
 interface TeamDetailsProps {
   team: TeamDto;
@@ -75,8 +72,11 @@ type StatusUpdate = {
   status: UserInTeamStatus;
   userId: string;
 };
+interface PageTeamNewProps {
+  id: string;
+}
 export const TeamEdit = (props: PageTeamNewProps) => {
-  const { initialValues } = props;
+  const { id } = props;
   const { language } = useContext(LanguageContext);
   const { user: me } = useContext(UserContext);
   const { translateName, translateVal, translate } = useTranslation(language);
@@ -84,7 +84,7 @@ export const TeamEdit = (props: PageTeamNewProps) => {
   const navigate = useNavigate();
   const [newUser, setNewUser] = useState<UserLookupDto>();
   const [errors, setErrors] = useState<FormErrors<TeamDto>>();
-  const [dto, setDto] = useState<TeamDto>(initialValues || (teamInitialValue as TeamDto));
+  const [dto, setDto] = useState<TeamDto>(teamInitialValue as TeamDto);
 
   const canAddNewUser = newUser && !dto.users.some(i => i.user.id === newUser.id);
   const canEdit =
@@ -92,9 +92,9 @@ export const TeamEdit = (props: PageTeamNewProps) => {
     dto.users.some(u => u.user.id === me.id && u.role === TeamRole.OWNER);
 
   useQuery({
-    queryKey: ["team", dto.id],
-    queryFn: () => httpClient.team.get({ id: dto.id }),
-    enabled: dto.id !== GUID_EMPTY,
+    queryKey: ["team", id],
+    queryFn: () => httpClient.team.get({ id }),
+    enabled: id !== "new",
     onSuccess: data => {
       setDto(data);
     },
@@ -163,12 +163,13 @@ export const TeamEdit = (props: PageTeamNewProps) => {
       dto.profileImage = {} as DocumentDto;
     }
     dto.profileImage.documentContent = content;
+    dto.profileImageId = GUID_EMPTY;
     setDto({ ...dto });
   };
 
   return (
     <div>
-      <Debug value={dto}/>
+      <Debug value={dto} />
       {/* <TeamDetail team={dto} onChange={setDto} /> */}
 
       <Section title="section.team-information" />
@@ -201,6 +202,7 @@ export const TeamEdit = (props: PageTeamNewProps) => {
             />
           }
         />
+        <Debug show value={dto} />
       </div>
 
       {dto.id !== GUID_EMPTY && (
@@ -352,18 +354,15 @@ export const TeamEdit = (props: PageTeamNewProps) => {
 
 export const PageTeamEdit = () => {
   const { id } = useParams();
-  const { data, error, isLoading } = useQuery({
-    queryKey: ["team", id],
-    queryFn: () => httpClient.team.get({ id: id! }),
-    enabled: id !== "new",
-  });
-  const team = id === "new" ? teamInitialValue : data;
+  // const { data, error, isLoading } = useQuery({
+  //   queryKey: ["team", id],
+  //   queryFn: () => httpClient.team.get({ id: id! }),
+  //   enabled: id !== "new",
+  // });
 
   return (
     <UnideskComponent name="PageTeamEdit">
-      <LoadingWrapper isLoading={isLoading} error={error}>
-        {!!team && <TeamEdit initialValues={team as TeamDto} />}
-      </LoadingWrapper>
+      <TeamEdit id={id!} />
     </UnideskComponent>
   );
 };

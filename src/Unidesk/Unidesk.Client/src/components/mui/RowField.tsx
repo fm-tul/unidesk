@@ -5,15 +5,18 @@ import { useContext, useState } from "react";
 import { MdInfoOutline } from "react-icons/md";
 import { Button } from "ui/Button";
 import { Collapse } from "./Collapse";
+import { Tooltip } from "utils/Tooltip";
+import { BsAsterisk } from "react-icons/bs";
 
 interface RowFieldProps {
   title: EnKeys;
   description?: EnKeys;
   Field: JSX.Element;
+  required?: boolean;
 }
 
 export const RowField = (props: RowFieldProps) => {
-  const { title, description, Field } = props;
+  const { title, description, Field, required = false } = props;
   const { language } = useContext(LanguageContext);
   const { translate } = useTranslation(language);
   const [showDescription, setShowDescription] = useState(false);
@@ -28,7 +31,16 @@ export const RowField = (props: RowFieldProps) => {
               <MdInfoOutline className="text-base" onClick={() => setShowDescription(!showDescription)} />
             </Button>
           )}
-          {translate(title)}
+          {required ? (
+            <Tooltip content={translate("form.required")}>
+              <div className="group flex items-baseline">
+                {translate(title)}
+                <BsAsterisk className="w-2 text-red-500 transition-all duration-500 group-hover:w-3 group-hover:rotate-[60deg]" />
+              </div>
+            </Tooltip>
+          ) : (
+            translate(title)
+          )}
         </div>
 
         {hasDescription && (

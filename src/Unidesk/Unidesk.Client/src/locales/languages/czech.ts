@@ -12,6 +12,7 @@ export const cs: ILocale = {
   deleted: "Smazáno",
   delete: "Smazat",
   "user-aliases": "Uživatelské aliasy",
+  days: "dní",
 
   // report
   "report.section.general": "Obecné",
@@ -58,6 +59,7 @@ export const cs: ILocale = {
 
   ok: "Ok",
   cancel: "Zrušit",
+  close: "Zavřít",
   error: "chyba",
   "error-occurred": "Došlo k chybě",
   topics: "Témata",
@@ -118,6 +120,7 @@ export const cs: ILocale = {
   opponent: "Oponent",
   opponents: "Oponenti",
   keywords: "Klíčová slova",
+  "keywords.add-new": "Přidat nové",
   "name-lang": ((lang: string) => `Název (${lang})`) as any,
   "multiple-types": "Více typů",
   abstract: "Abstrakt",
@@ -186,6 +189,8 @@ export const cs: ILocale = {
   "link.edit-thesis": "Upravit práci",
   "link.create-thesis": "Vytvořit novou práci",
   "link.evaluation-edit": "Upravit hodnocení",
+  "link.internships": "Praxe",
+  "link.internship": "Praxe",
 
   "link.keywords": "Klíčová slova",
   "link.keyword": "Klíčové slovo",
@@ -235,6 +240,7 @@ export const cs: ILocale = {
   "user-function.supervisor": "Vedoucí",
   "user-function.opponent": "Oponent",
   "user-function.external": "Externí",
+  "internship.period": "Období praxe",
 
   // operators
   "operator.and-or": "A/Nebo",

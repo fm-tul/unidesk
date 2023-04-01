@@ -72,7 +72,7 @@ public class ThesisController : Controller
     [HttpPost, Route("find")]
     [SwaggerOperation(OperationId = nameof(Find))]
     [ProducesResponseType(typeof(PagedResponse<ThesisLookupDto>), 200)]
-    public async Task<IActionResult> Find([FromBody] ThesisFilter requestFilter)
+    public async Task<IActionResult> Find([FromBody] ThesisFilter requestFilter, CancellationToken ct)
     {
         var query = _db.Theses.Query();
 
@@ -151,7 +151,7 @@ public class ThesisController : Controller
         var response = await query
            .OrderBy(i => i.Status)
            .ThenBy(i => i.Created)
-           .ToListWithPagingAsync<Thesis, ThesisLookupDto>(requestFilter.Paging, _mapper);
+           .ToListWithPagingAsync<Thesis, ThesisLookupDto>(requestFilter.Paging, _mapper, ct);
 
         return Ok(response);
     }

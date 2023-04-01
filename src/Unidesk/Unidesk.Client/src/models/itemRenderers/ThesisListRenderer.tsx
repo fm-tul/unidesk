@@ -1,6 +1,7 @@
 import { EnKeys, LanguagesId } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import { RR } from "@locales/R";
+import { TranslateFunc } from "@locales/translationHooks";
 import { ThesisDto } from "@models/ThesisDto";
 import { ThesisLookupDto } from "@models/ThesisLookupDto";
 import { IdRenderer } from "models/cellRenderers/IdRenderer";
@@ -18,7 +19,7 @@ import { ColumnDefinition, ItemList, ItemListProps } from "ui/Table";
 interface ThesisRendererProps {
   typeFactory: (params: ThesisLookupDto | ThesisDto) => JSX.Element;
   language: LanguagesId;
-  translate: (value: EnKeys, ...args: any[]) => string;
+  translate: TranslateFunc;
 }
 export const ThesisRendererFactory = (props: ThesisRendererProps) => {
   const { typeFactory, language, translate } = props;

@@ -1,12 +1,11 @@
 import { UserFunction } from "@api-client/constants/UserFunction";
-import { UserLookupDto } from "@models/UserLookupDto";
-import { UserSimpleDto } from "@models/UserSimpleDto";
 import { UserLink } from "components/utils/UserLink";
 import { MdVerified } from "react-icons/md";
 import { except } from "utils/arrays";
 import { Tooltip } from "utils/Tooltip";
 import { MdCoPresent } from "react-icons/md";
 import { FaHospitalUser, FaUserGraduate, FaUserTie } from "react-icons/fa";
+import { UserLookupDto, UserSimpleDto } from "@api-client/index";
 
 export const renderUser = (user: UserSimpleDto) => {
   const { firstName, lastName, username, middleName, stagId } = user;
@@ -52,7 +51,7 @@ export const renderUserFull = (user: UserSimpleDto) => {
 export const renderUserLookup = (user: UserLookupDto, withFunctions: boolean = false) => {
   const { fullName, stagId, userFunction } = user;
   const functions = except(
-    (userFunction ?? "").split(",").map(i => i.trim()),
+    (userFunction ?? "").split(",").map((i: string) => i.trim()),
     UserFunction.None.value
   );
 

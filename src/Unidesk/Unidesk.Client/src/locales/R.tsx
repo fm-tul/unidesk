@@ -7,7 +7,7 @@ export const R = (key: EnKeys, ...args: any) => {
   const context = useContext(LanguageContext);
   const dict = languages.find(i => i.id === context.language) ?? languages[0];
   const result = dict[key] ?? languages[0][key] ?? key;
-  if (typeof result === "string") {
+  if (typeof result === "string" || typeof result === "object") {
     return result;
   }
   return result.apply(null, args);
@@ -28,7 +28,7 @@ export const RR = (key: EnKeys, context: ILanguageContext | LanguagesId, ...args
   const lang = typeof context === "string" ? context : context.language;
   const dict = languages.find(i => i.id === lang) ?? languages[0];
   const result = dict[key] ?? languages[0][key] ?? key;
-  if (typeof result === "string") {
+  if (typeof result === "string" || typeof result === "object") {
     return result;
   }
   return result.apply(null, args);

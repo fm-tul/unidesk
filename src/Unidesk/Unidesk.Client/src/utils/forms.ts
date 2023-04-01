@@ -1,11 +1,11 @@
 import { Severity } from "@models/Severity";
 import { SimpleJsonResponse } from "@models/SimpleJsonResponse";
 import { useState } from "react";
-import { TId } from "ui/Select";
-import { HelperProps, UiColors } from "ui/shared";
+import { UiColors } from "ui/shared";
 import { ZodError, ZodObject, ZodType } from "zod/lib";
 import { toCamelCase } from "./stringUtils";
 
+export type DateProps<T> = ({ [P in keyof T]: T[P] extends Date ? P : never })[keyof T];
 export type ErrorObj = { message: string; severity?: Severity };
 export type ErrorValues<T> = {
   propertyName: keyof T;
@@ -88,7 +88,7 @@ export const getPropsFactory = <T>(dto: T, setter: (value: T) => void, errors?: 
         setter({ ...dto, [key]: value });
       },
       onBlur: (e: any) => {
-        validateKey?.(key, dto[key]);
+        validateKey?.(key, dto?.[key]);
       }
     };
     if (!errorValue) {
@@ -120,7 +120,17 @@ export const getPropsFactory = <T>(dto: T, setter: (value: T) => void, errors?: 
       helperColor: severityToColor(errorValue.severity),
     };
   };
-  return { getPropsText, getPropsSelect };
+  const getHelperProps = (key: keyof T) => {
+    const errorValue = errors?.[key];
+    if (!errorValue) {
+      return {};
+    }
+    return {
+      helperText: errorValue.errorMessage,
+      helperColor: severityToColor(errorValue.severity),
+    };
+  };
+  return { getPropsText, getPropsSelect, getHelperProps };
 };
 
 /* usage:
@@ -172,7 +182,7 @@ export const useDto = <T>(initialValues: Partial<T>, schema?: ZodObject<any>, au
     }
   }
 
-  const { getPropsText, getPropsSelect } = getPropsFactory(dto!, updateDto, errors, validateKey);
+  const { getPropsText, getPropsSelect, getHelperProps } = getPropsFactory(dto!, updateDto, errors, validateKey);
 
   return {
     dto,
@@ -181,6 +191,7 @@ export const useDto = <T>(initialValues: Partial<T>, schema?: ZodObject<any>, au
     setErrors,
     getPropsText,
     getPropsSelect,
+    getHelperProps,
     validateSafe,
     validateAndSetErrors,
   }

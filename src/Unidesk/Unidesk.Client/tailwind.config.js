@@ -17,6 +17,18 @@ module.exports = {
       xl: '1440px',
     },
     extend: {
+      transitionDuration: {
+        '2000': '2s',
+        '3000': '3s',
+        '4000': '4s',
+        '5000': '5s',
+      },
+      animationDuration: {
+        '2000': '2s',
+        '3000': '3s',
+        '4000': '4s',
+        '5000': '5s',
+      },
       keyframes: {
         "reveal-sm": {
           "0%": { maxHeight: 0, overflow: 'hidden' },

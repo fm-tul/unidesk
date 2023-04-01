@@ -19,9 +19,10 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
       <div className="container mx-auto print:hidden">
         <div className="flex items-center gap-2 p-4">
           {/* name and logo */}
-          <Link to={link_pageHome.path}>
-            <div className="text-3xl text-info-800" style={{ fontFamily: "Cairo Play" }}>
-              UniBoard
+          <Link to={link_pageHome.path} style={{ fontFamily: "Cairo Play" }} className="text-info-800">
+            <div className="" >
+              <div className="text-2xl">Témata</div>
+              <div className="text-xl -mt-3">.fm.tul.cz</div>
             </div>
           </Link>
 
@@ -73,7 +74,7 @@ export const App = () => {
       <div className="min-h-screen">
         {renderMenu(available_links)}
 
-        <div className="container mx-auto mt-4  grid print:max-w-[90vw]">
+        <div className="container mx-auto mt-4 grid print:max-w-[90vw]">
           {/* content */}
           <div className="rounded-md bg-white/90 p-6 shadow print:shadow-none">
             <Routes>
@@ -83,6 +84,7 @@ export const App = () => {
             </Routes>
           </div>
         </div>
+        <div className="h-[50vh]"></div>
       </div>
     </>
   );

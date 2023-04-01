@@ -31,3 +31,21 @@ export const previewText = (text: string|null|undefined, maxLength: number) => {
   const preview = text.substring(0, maxLength - 3).split(" ").slice(0, -1).join(" ");
   return preview.length < text.length ? `${preview}...` : preview; 
 }
+
+export const takeLastPart = (str: string|undefined|null, separator: string = ".") => {
+  if (!str) {
+    return "";
+  }
+
+  const parts = str.split(separator);
+  return parts[parts.length - 1];
+}
+
+export const takeFirstPart = (str: string|undefined|null, separator: string = ".") => {
+  if (!str) {
+    return "";
+  }
+
+  const parts = str.split(separator);
+  return parts[0];
+}

@@ -60,4 +60,10 @@ public enum Grants
     
     [GrantInfo("98449DF2-4DF6-4B38-A751-A08DB3BB8300", nameof(Action_Create_Team), "Create Team")]
     Action_Create_Team = 13,
+    
+    [GrantInfo("52DD62D9-AA55-4E25-AD31-0CA8ED0E60DC", nameof(Internship_View), "Create Thesis")]
+    Internship_View = 14,
+
+    [GrantInfo("C3896CB6-EE0E-4AA9-AE58-3237A9B1FB3B", nameof(Internship_Manage), "Manage Internship")]
+    Internship_Manage = 15,
 }

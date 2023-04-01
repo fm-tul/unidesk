@@ -36,12 +36,12 @@ public class TeamController : ControllerBase
     [HttpPost, Route("find")]
     [SwaggerOperation(OperationId = nameof(Find))]
     [ProducesResponseType(typeof(PagedResponse<TeamDto>), 200)]
-    public async Task<IActionResult> Find([FromBody] TeamFilter filter)
+    public async Task<IActionResult> Find([FromBody] TeamFilter filter, CancellationToken ct)
     {
         var query = _teamService.WhereFilter(filter);
         var response = await query
            .OrderBy(i => i.Name)
-           .ToListWithPagingAsync<Team, TeamDto>(filter.Paging, _mapper);
+           .ToListWithPagingAsync<Team, TeamDto>(filter.Paging, _mapper, ct);
 
         return Ok(response);
     }
@@ -49,12 +49,12 @@ public class TeamController : ControllerBase
     [HttpPost, Route("find-simple")]
     [SwaggerOperation(OperationId = nameof(FindSimple))]
     [ProducesResponseType(typeof(PagedResponse<TeamLookupDto>), 200)]
-    public async Task<IActionResult> FindSimple([FromBody] TeamFilter filter)
+    public async Task<IActionResult> FindSimple([FromBody] TeamFilter filter, CancellationToken ct)
     {
         var query = _teamService.WhereFilter(filter);
         var response = await query
            .OrderBy(i => i.Name)
-           .ToListWithPagingAsync<Team, TeamLookupDto>(filter.Paging, _mapper);
+           .ToListWithPagingAsync<Team, TeamLookupDto>(filter.Paging, _mapper, ct);
 
         return Ok(response);
     }
@@ -79,11 +79,11 @@ public class TeamController : ControllerBase
     [ProducesResponseType(typeof(TeamDto), 200)]
     [ProducesResponseType(typeof(SimpleJsonResponse), 500)]
     [RequireGrant(Grants.Entity_Team_Edit)]
-    public async Task<IActionResult> Upsert([FromBody] TeamDto dto)
+    public async Task<IActionResult> Upsert([FromBody] TeamDto dto, CancellationToken ct)
     {
         TeamDto.ValidateAndThrow(dto);
-        
-        var team = await _teamService.UpsertAsync(dto);
+
+        var team = await _teamService.UpsertAsync(dto, ct);
         var newDto = _teamService.ToDto(team);
         return Ok(newDto);
     }

@@ -15,6 +15,9 @@ export const translateValFor = (value: EntityWithVal | undefined, locale: Langua
 export const useTranslation = (locale: LanguagesId) => {
   const translateName = (value: EntityWithName | undefined) => translateNameFor(value, locale);
   const translateVal = (value: EntityWithVal | undefined) => translateValFor(value, locale);
-  const translate = (value: EnKeys) => RR(value, locale);
+  const translate: TranslateFunc = (value: EnKeys, ...args: any) => RR(value, locale, args);
   return { translateName, translateVal, translate };
 };
+
+
+export type TranslateFunc = (value: EnKeys, ...args: any) => string | JSX.Element;

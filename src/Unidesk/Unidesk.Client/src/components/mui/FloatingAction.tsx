@@ -8,7 +8,7 @@ interface FloatingActionProps extends ColorProps, SizeProps {
   fixed?: boolean;
   component?: React.ElementType;
   to?: string;
-  tooltip?: string;
+  tooltip?: string | JSX.Element;
   icon?: React.ReactNode;
   onClick?: () => void;
 }
@@ -20,7 +20,8 @@ export const FloatingAction = (props: FloatingActionProps) => {
   const container = document.getElementById("modal-root")!;
 
   if (component) {
-    return createPortal(createElement(component, { className, to }, <FaPlus />), container);
+    const fullClassName = classnames(className, "fixed bottom-12 right-12");
+    return createPortal(createElement(component, { className: fullClassName, to }, <FaPlus />), container);
   }
 
   return createPortal(

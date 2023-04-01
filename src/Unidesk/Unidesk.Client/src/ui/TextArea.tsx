@@ -3,7 +3,7 @@ import { FocusEventHandler, useState } from "react";
 import { SimpleComponentProps, ColorProps, getColor, getSize, classnames } from "./shared";
 
 export interface TextAreaProps extends SimpleComponentProps, ColorProps {
-  label?: string;
+  label?: string | JSX.Element;
   name?: string;
   value?: string | null;
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -49,7 +49,7 @@ export const TextArea = (props: TextAreaProps) => {
         onChange={handleChange}
         onBlur={onBlur}
         name={name}
-        placeholder={label}
+        placeholder={label as string}
         value={value ?? ""}
         rows={rows}
         spellCheck={spellCheck}

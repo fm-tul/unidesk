@@ -20,7 +20,7 @@
      )
      VALUES
      (
-       N'20230207104456_InitialCreate',
+       N'20230330091100_InitialCreate',
        N'7.0.0'
      )
      ```
