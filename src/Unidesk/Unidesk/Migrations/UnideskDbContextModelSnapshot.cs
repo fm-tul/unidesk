@@ -210,6 +210,83 @@ namespace Unidesk.Migrations
                     b.ToTable("Faculties");
                 });
 
+            modelBuilder.Entity("Unidesk.Db.Models.Internships.Internship", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Abstract")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Comments")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InternshipTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Modified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Requirements")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SupervisorEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SupervisorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SupervisorPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Internships");
+                });
+
             modelBuilder.Entity("Unidesk.Db.Models.Keyword", b =>
                 {
                     b.Property<Guid>("Id")
@@ -239,6 +316,24 @@ namespace Unidesk.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Keywords");
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.KeywordInternship", b =>
+                {
+                    b.Property<Guid>("KeywordId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("InternshipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("KeywordId", "InternshipId");
+
+                    b.HasIndex("InternshipId");
+
+                    b.ToTable("KeywordInternships");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.KeywordThesis", b =>
@@ -936,6 +1031,55 @@ namespace Unidesk.Migrations
                     b.ToTable("UserUserRole");
                 });
 
+            modelBuilder.Entity("Unidesk.Db.Models.ChangeLog", b =>
+                {
+                    b.OwnsOne("Unidesk.Db.Models.ChangeDetails", "Details", b1 =>
+                        {
+                            b1.Property<Guid>("ChangeLogId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.HasKey("ChangeLogId");
+
+                            b1.ToTable("ChangeLogs");
+
+                            b1.ToJson("Details");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ChangeLogId");
+
+                            b1.OwnsMany("Unidesk.Db.Models.ChangeDetail", "Details", b2 =>
+                                {
+                                    b2.Property<Guid>("ChangeDetailsChangeLogId")
+                                        .HasColumnType("uniqueidentifier");
+
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("int");
+
+                                    b2.Property<string>("NewValue")
+                                        .HasColumnType("nvarchar(max)");
+
+                                    b2.Property<string>("OldValue")
+                                        .HasColumnType("nvarchar(max)");
+
+                                    b2.Property<string>("Property")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)");
+
+                                    b2.HasKey("ChangeDetailsChangeLogId", "Id");
+
+                                    b2.ToTable("ChangeLogs");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("ChangeDetailsChangeLogId");
+                                });
+
+                            b1.Navigation("Details");
+                        });
+
+                    b.Navigation("Details");
+                });
+
             modelBuilder.Entity("Unidesk.Db.Models.DocumentContent", b =>
                 {
                     b.HasOne("Unidesk.Db.Models.Document", "Document")
@@ -945,6 +1089,36 @@ namespace Unidesk.Migrations
                         .IsRequired();
 
                     b.Navigation("Document");
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.Internships.Internship", b =>
+                {
+                    b.HasOne("Unidesk.Db.Models.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.KeywordInternship", b =>
+                {
+                    b.HasOne("Unidesk.Db.Models.Internships.Internship", "Internship")
+                        .WithMany("KeywordInternship")
+                        .HasForeignKey("InternshipId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Unidesk.Db.Models.Keyword", "Keyword")
+                        .WithMany()
+                        .HasForeignKey("KeywordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Internship");
+
+                    b.Navigation("Keyword");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.KeywordThesis", b =>
@@ -1173,6 +1347,11 @@ namespace Unidesk.Migrations
                 {
                     b.Navigation("DocumentContent")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Unidesk.Db.Models.Internships.Internship", b =>
+                {
+                    b.Navigation("KeywordInternship");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.Keyword", b =>

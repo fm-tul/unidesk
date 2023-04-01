@@ -20,7 +20,8 @@ namespace Unidesk.Migrations
                     User = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     State = table.Column<int>(type: "int", nullable: false),
                     DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Details = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -198,7 +199,7 @@ namespace Unidesk.Migrations
                         column: x => x.DocumentId,
                         principalTable: "Documents",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -242,6 +243,41 @@ namespace Unidesk.Migrations
                     table.ForeignKey(
                         name: "FK_Users_Users_UserId",
                         column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Internships",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    StudentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    InternshipTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CompanyName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Department = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SupervisorName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SupervisorPhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SupervisorEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Requirements = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Abstract = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Comments = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Modified = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Internships", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Internships_Users_StudentId",
+                        column: x => x.StudentId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -306,6 +342,31 @@ namespace Unidesk.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "KeywordInternships",
+                columns: table => new
+                {
+                    InternshipId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    KeywordId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KeywordInternships", x => new { x.KeywordId, x.InternshipId });
+                    table.ForeignKey(
+                        name: "FK_KeywordInternships_Internships_InternshipId",
+                        column: x => x.InternshipId,
+                        principalTable: "Internships",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_KeywordInternships_Keywords_KeywordId",
+                        column: x => x.KeywordId,
+                        principalTable: "Keywords",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "KeywordThesis",
                 columns: table => new
                 {
@@ -332,8 +393,8 @@ namespace Unidesk.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Avatar = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
+                    ProfileImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ThesisId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -343,6 +404,12 @@ namespace Unidesk.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Teams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Teams_Documents_ProfileImageId",
+                        column: x => x.ProfileImageId,
+                        principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -441,7 +508,8 @@ namespace Unidesk.Migrations
                     Language = table.Column<int>(type: "int", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserFunction = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EvaluatorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EvaluatorFullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -464,8 +532,8 @@ namespace Unidesk.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_ThesisEvaluations_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_ThesisEvaluations_Users_EvaluatorId",
+                        column: x => x.EvaluatorId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -595,6 +663,16 @@ namespace Unidesk.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Internships_StudentId",
+                table: "Internships",
+                column: "StudentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_KeywordInternships_InternshipId",
+                table: "KeywordInternships",
+                column: "InternshipId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_KeywordThesis_ThesisId",
                 table: "KeywordThesis",
                 column: "ThesisId");
@@ -603,6 +681,11 @@ namespace Unidesk.Migrations
                 name: "IX_ReportUsers_UserId",
                 table: "ReportUsers",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teams_ProfileImageId",
+                table: "Teams",
+                column: "ProfileImageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Teams_ThesisId",
@@ -640,14 +723,14 @@ namespace Unidesk.Migrations
                 column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ThesisEvaluations_EvaluatorId",
+                table: "ThesisEvaluations",
+                column: "EvaluatorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ThesisEvaluations_ThesisId",
                 table: "ThesisEvaluations",
                 column: "ThesisId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ThesisEvaluations_UserId",
-                table: "ThesisEvaluations",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ThesisOutcomes_ThesisId",
@@ -738,6 +821,9 @@ namespace Unidesk.Migrations
                 name: "DocumentContents");
 
             migrationBuilder.DropTable(
+                name: "KeywordInternships");
+
+            migrationBuilder.DropTable(
                 name: "KeywordThesis");
 
             migrationBuilder.DropTable(
@@ -760,6 +846,9 @@ namespace Unidesk.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserUserRole");
+
+            migrationBuilder.DropTable(
+                name: "Internships");
 
             migrationBuilder.DropTable(
                 name: "Keywords");
