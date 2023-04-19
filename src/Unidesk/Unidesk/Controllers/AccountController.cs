@@ -136,11 +136,16 @@ public class AccountController : ControllerBase
         
         var dto = _mapper.Map<UserWhoamiDto>(dbUser);
         dto.Environment = _appOptions.Environment;
-        return Ok(new ToastResponse<UserDto>
+        if (_appOptions.Environment is EnvironmentType.Local)
         {
-            Message = $"User {dbUser.Username} logged in successfully",
-            Data = dto,
-        });
+            return Ok(new ToastResponse<UserDto>
+            {
+                Message = $"User {dbUser.Username} logged in successfully",
+                Data = dto,
+            });
+        }
+
+        return Redirect("/");
     }
 
     [HttpGet, Route("logout")]
