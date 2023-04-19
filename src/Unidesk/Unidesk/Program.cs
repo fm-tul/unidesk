@@ -1,5 +1,4 @@
 using MapsterMapper;
-using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
@@ -119,10 +118,6 @@ services.AddDbContext<UnideskDbContext>(options =>
 });
 services.AddScoped<CachedDbContext>();
 services.AddDatabaseDeveloperPageExceptionFilter();
-if (isDev && generateModel)
-{
-    services.AddSingleton(new ModelGeneration());
-}
 
 // state patters
 services.AddScoped<IThesisStateTransitionService, ThesisDraftState>();
@@ -133,22 +128,24 @@ services.AddScoped<ThesisTransitionService>();
 
 var app = builder.Build();
 
+if (generateModel)
+{
+    var constantsDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "Unidesk.Client", "src", "api-client", "constants");
+    app.GenerateModels<Program>(Path.GetFullPath(constantsDir));
+    Console.WriteLine("Models generated");
+}
+else
+{
+    await app.MigrateDbAsync();
+}
+
 if (isDev)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    if (generateModel)
-    {
-        app.GenerateModels<Program>(
-            Path.GetFullPath(
-                Path.Combine(Directory.GetCurrentDirectory(), "..", "Unidesk.Client", "src", "api-client", "constants")));
-    }
 }
 
-
 app.UseExceptionHandler();
-await app.MigrateDbAsync();
-
 
 if (appOptions.Environment == EnvironmentType.Prod)
 {
@@ -287,11 +284,5 @@ app.MapControllerRoute(
     pattern: "{controller}/{action=Index}/{id?}");
 
 app.MapFallbackToFile("index.html");
-
-if (isDev && generateModel)
-{
-    ModelGeneration.ShutDownAfterModelGenerated(app);
-}
-
 
 app.Run();

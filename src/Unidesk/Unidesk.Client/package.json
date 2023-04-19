@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build --sourcemap --emptyOutDir",
     "preview": "vite preview",
-    "generate-api": "npx openapi-typescript-codegen -i http://localhost:3401/swagger/v1/swagger.json -c axios -o src/api-client --name ApiClient --useOptions"
+    "generate-api": "npx openapi-typescript-codegen -i http://localhost:3401/swagger/v1/swagger.json -c axios -o src/api-client --name ApiClient --useOptions",
+    "generate": "npx openapi-typescript-codegen -i swagger.json -c axios -o src/api-client --name ApiClient --useOptions"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",

@@ -266,3 +266,4 @@ _Pvt_Extensions
 .fake/
 
 /templates/
+/src/Unidesk/Unidesk.Client/swagger.json
