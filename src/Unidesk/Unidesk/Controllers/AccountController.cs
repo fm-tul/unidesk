@@ -77,20 +77,22 @@ public class AccountController : ControllerBase
     
     [HttpGet, Route("whoami")]
     [SwaggerOperation(OperationId = nameof(WhoAmI))]
-    [ProducesResponseType(typeof(ToastResponse<UserDto>), 200)]
+    [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
     public IActionResult WhoAmI()
     {
         var user = _userProvider.CurrentUser;
-        return Ok(new ToastResponse<UserDto>
+        var dto = _mapper.Map<UserWhoamiDto>(user);
+        dto.Environment = _appOptions.Environment;
+        return Ok(new ToastResponse<UserWhoamiDto>
         {
-            Data = _mapper.Map<UserDto>(user),
+            Data = dto,
         });
     }
 
     [HttpGet, Route("login.sso/{*path}")]
     [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(LoginSSO))]
-    [ProducesResponseType(typeof(ToastResponse<UserDto>), 200)]
+    [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
     public async Task<IActionResult> LoginSSO(string path)
     {
         var plainText = _cryptography.DecryptText(path);
@@ -131,11 +133,13 @@ public class AccountController : ControllerBase
         await _userService.FixRolesAsync(dbUser);
         await _userService.SignInAsync(httpContext, dbUser);
         _logger.LogInformation("User {Email} logged in at {Time}", shibboRequest.Eppn, DateTime.UtcNow);
-
+        
+        var dto = _mapper.Map<UserWhoamiDto>(dbUser);
+        dto.Environment = _appOptions.Environment;
         return Ok(new ToastResponse<UserDto>
         {
             Message = $"User {dbUser.Username} logged in successfully",
-            Data = _mapper.Map<UserDto>(dbUser),
+            Data = dto,
         });
     }
 

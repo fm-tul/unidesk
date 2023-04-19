@@ -23,6 +23,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "react-query";
 import { LanguagesId } from "@locales/common";
 import { LoginComponent } from "components/LoginComponent";
 import { BrowserRouter } from "react-router-dom";
+import EnvTag from "components/EnvTag";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,7 @@ const AppWithProviders = () => {
   // path does not start with /evaluation/...
   const location = window.location.pathname;
   const requireLogin = !location.startsWith("/evaluation/");
+  const environment = user.environment;
 
   const logginingQuery = useQuery({
     queryKey: "whoami",
@@ -85,6 +87,7 @@ const AppWithProviders = () => {
                 draggable={false}
                 pauseOnHover
               />
+              <EnvTag environment={environment} visible={user.fullName === "admin"} />
             </>
           </BrowserRouter>
           <ModalContainer />

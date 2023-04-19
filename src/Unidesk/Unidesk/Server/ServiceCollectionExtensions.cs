@@ -17,6 +17,23 @@ namespace Unidesk.Server;
 [ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
+    
+    public static void PrintConfiguration(this IConfigurationRoot configuration)
+    {
+        Console.WriteLine("Configuration values:");
+        foreach (var (key, value) in configuration.AsEnumerable()) Console.WriteLine($" - {key}={value.SafeSubstring(128)}");
+        Console.WriteLine("----------------------------------------------------------------");
+
+        Console.WriteLine("Configuration sources:");
+        foreach (var source in configuration.Providers) Console.WriteLine($" - {source}");
+        Console.WriteLine("----------------------------------------------------------------");
+
+        Console.WriteLine("Working directory: " + Environment.CurrentDirectory);
+        Console.WriteLine("----------------------------------------------------------------");
+        Console.WriteLine("Files in working directory:");
+        foreach (var file in Directory.GetFiles(Environment.CurrentDirectory)) Console.WriteLine($" - {file}");
+    }
+    
     public static IServiceCollection AddDevCors(this IServiceCollection services)
     {
         services.AddCors(options =>

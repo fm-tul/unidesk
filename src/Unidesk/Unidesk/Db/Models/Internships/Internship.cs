@@ -35,6 +35,8 @@ public class Internship : TrackedEntity
     public DateTime StartDate { get; set; }
 
     public DateTime EndDate { get; set; }
+    
+    public long DutationDays => (EndDate - StartDate).Days;
 
     
     // under who

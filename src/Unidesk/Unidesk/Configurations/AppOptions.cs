@@ -1,4 +1,5 @@
-﻿using Unidesk.Services.Email;
+﻿using System.Text.Json.Serialization;
+using Unidesk.Services.Email;
 
 namespace Unidesk.Configurations;
 
@@ -19,4 +20,15 @@ public class AppOptions
     
     // email options
     public EmailOptions EmailOptions { get; set; } = null!;
+    
+    public EnvironmentType Environment { get; set; }
+}
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum EnvironmentType
+{
+    Local = 0,
+    Dev,
+    Test,
+    Prod,
 }

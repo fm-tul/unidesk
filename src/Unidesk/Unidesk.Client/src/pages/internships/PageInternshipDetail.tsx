@@ -1,11 +1,14 @@
 import { Grants } from "@api-client/constants/Grants";
+import { InternshipStatusAll } from "@api-client/constants/InternshipStatus";
 import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
-import { useTranslation } from "@locales/translationHooks";
+import { LanguagesId } from "@locales/common";
+import { translateValFor, useTranslation } from "@locales/translationHooks";
 import { InternshipDto } from "@models/InternshipDto";
 import { InternshipStatus } from "@models/InternshipStatus";
 import { KeywordSelector } from "components/KeywordSelector";
+import Timeline from "components/Timeline";
 import { RowField } from "components/mui/RowField";
 import { Section } from "components/mui/Section";
 import { useModel } from "hooks/useFetch";
@@ -23,6 +26,21 @@ import { UserSelectFormField } from "ui/UserSelectFormField";
 import { UserContext } from "user/UserContext";
 import { calculateDuration } from "utils/dateUtils";
 import { z } from "zod";
+
+const humanInternshipStatuses = InternshipStatusAll.filter(
+  i => i.value != InternshipStatus.CANCELLED && i.value != InternshipStatus.REJECTED && i.value != InternshipStatus.REOPENED
+);
+
+const DrawTimelime = (props: { status: InternshipStatus | undefined; language: LanguagesId }) => {
+  const { status, language } = props;
+  const statusIndex = humanInternshipStatuses.findIndex(i => status == i.value);
+
+  return statusIndex === -1 ? (
+    <div />
+  ) : (
+    <Timeline className="my-4" items={humanInternshipStatuses.map(i => translateValFor(i, language))} activeIndex={statusIndex} />
+  );
+};
 
 const internshipsMinDuration = 6 * 7;
 const schema = z.object({
@@ -124,6 +142,7 @@ export const PageInternshipDetail = () => {
           </div>
         </div>
       )}
+      <DrawTimelime status={dtoOrEmpty.status} language={language} />
       <Section title={"internship.section.general"}></Section>
       <RowField
         required
@@ -243,6 +262,8 @@ export const PageInternshipDetail = () => {
         title="internship.keywords"
         Field={<KeywordSelector disabled={disabled} onChange={i => setDto({ ...dto!, keywords: i })} keywords={dto?.keywords} />}
       />
+
+      <DrawTimelime status={dtoOrEmpty.status} language={language} />
 
       <div className="btn-group col-start-2 justify-end">
         <Button onClick={() => setQuery.mutate(dtoOrEmpty as InternshipDto)} loading={setQuery.isLoading} if={isDraft}>

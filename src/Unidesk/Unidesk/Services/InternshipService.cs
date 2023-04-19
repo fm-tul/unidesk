@@ -8,6 +8,7 @@ using Unidesk.Dtos.Internships;
 using Unidesk.Dtos.Requests;
 using Unidesk.Exceptions;
 using Unidesk.Reports;
+using Unidesk.Security;
 using Unidesk.Services.Email;
 using Unidesk.Services.Email.Templates;
 using Unidesk.Utils.Extensions;

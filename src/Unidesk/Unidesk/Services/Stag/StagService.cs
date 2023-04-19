@@ -30,10 +30,10 @@ public class StagService
     private HttpClient CreateClient()
     {
         var client = new HttpClient();
-        var username = _appOptions.StagUsername;
-        var password = _appOptions.StagPassword;
-        var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
-        client.DefaultRequestHeaders.Add("Authorization", $"Basic {encoded}");
+        // var username = _appOptions.StagUsername;
+        // var password = _appOptions.StagPassword;
+        // var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
+        // client.DefaultRequestHeaders.Add("Authorization", $"Basic {encoded}");
         return client;
     }
 

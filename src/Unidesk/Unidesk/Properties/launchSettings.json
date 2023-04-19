@@ -8,13 +8,44 @@
     }
   },
   "profiles": {
-    "Unidesk": {
+    "Unidesk-Local": {
       "commandName": "Project",
       "launchBrowser": false,
       "applicationUrl": "https://localhost:3400;http://localhost:3401",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",
+        "UNIDESK_ENVIRONMENT": "Local"
+      }
+    },
+    "Unidesk-Dev": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:3400;http://localhost:3401",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",
+        "UNIDESK_ENVIRONMENT": "Dev"
+      }
+    },
+    "Unidesk-Test": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:3400;http://localhost:3401",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",
+        "UNIDESK_ENVIRONMENT": "Test"
+      }
+    },
+    "Unidesk-Prod": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:3400;http://localhost:3401",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",
+        "UNIDESK_ENVIRONMENT": "Prod"
       }
     },
     "GenerateModel": {

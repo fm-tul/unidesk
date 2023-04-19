@@ -17,6 +17,7 @@ import { TextField } from "ui/TextField";
 import { product } from "../utils/product";
 import { useCollape } from "hooks/useCollapse";
 import { Collapse } from "components/mui/Collapse";
+import Timeline from "components/Timeline";
 
 const Buttons = () => {
   const colors = [
@@ -280,8 +281,18 @@ export const Styles = () => {
     <div>
       <h1 className="text-2xl">Select</h1>
 
-      <Test />
-      <FilterBar>
+      <Timeline items={[
+        "Lorem Impsum",
+        "Lorem Impsum",
+        "Lorem Impsum",
+        "Lorem Impsum",
+        "Lorem Impsum",
+        "Lorem Impsum",
+        "Lorem Impsum",
+      ]}
+      />
+      {/* <Test /> */}
+      {/* <FilterBar> */}
         {/* <FormField as={SelectField<number>} value={value} options={options} onValue={setValue} multiple searchable /> */}
 
         {/* <FormField
@@ -325,7 +336,7 @@ export const Styles = () => {
           clearable
           searchable
         /> */}
-      </FilterBar>
+      {/* </FilterBar> */}
     </div>
   );
 };

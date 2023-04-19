@@ -140,7 +140,7 @@ public class UnideskDbContext : DbContext
 
         if (info.TotalRows > 0)
         {
-            await SaveChangesAsync();
+            await SaveChangesAsync("system");
         }
 
         return info;
@@ -152,18 +152,20 @@ public class UnideskDbContext : DbContext
         return new ChangeTrackedStats(ChangeTracker.Entries(), detailed);
     }
 
-    public OperationInfo HandleInterceptors()
+    public OperationInfo HandleInterceptors(string? currentUser = null)
     {
         if (!_interceptorsEnabled)
         {
             return new OperationInfo("Interceptors: disabled");
         }
+        
+        var changedBy = currentUser ?? _userProvider.CurrentUser?.Email;
 
         var info = new OperationInfo("Interceptors");
         var items = ChangeTracker
            .Entries()
            .Where(i => i.Entity is TrackedEntity)
-           .Where(i => i.State == EntityState.Added || i.State == EntityState.Modified || i.State == EntityState.Deleted)
+           .Where(i => i.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
            .ToList();
 
         // update Modified, ModifiedBy, Created and CreatedBy
@@ -175,13 +177,13 @@ public class UnideskDbContext : DbContext
                 if (i.Entity is TrackedEntity entity)
                 {
                     entity.Modified = _dateTimeService.Now;
-                    entity.ModifiedBy = _userProvider.CurrentUser?.Email;
-                    changeLogs.Add(ChangeLog.Create(i, _userProvider.CurrentUser?.Email));
+                    entity.ModifiedBy = changedBy;
+                    changeLogs.Add(ChangeLog.Create(i, changedBy));
 
                     if (i.State == EntityState.Added)
                     {
                         entity.Created = _dateTimeService.Now;
-                        entity.CreatedBy = _userProvider.CurrentUser?.Email;
+                        entity.CreatedBy = changedBy;
                     }
                 }
             }).ToList();
@@ -197,12 +199,24 @@ public class UnideskDbContext : DbContext
         HandleInterceptors();
         return base.SaveChanges();
     }
+    public  int SaveChanges(string? currentUser)
+    {
+        HandleInterceptors(currentUser);
+        return base.SaveChanges();
+    }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         HandleInterceptors();
         return base.SaveChangesAsync(cancellationToken);
     }
+    
+    public  Task<int> SaveChangesAsync(string? currentUser, CancellationToken cancellationToken = default)
+    {
+        HandleInterceptors(currentUser);
+        return base.SaveChangesAsync(cancellationToken);
+    }
+    
 
     public UnideskDbContext DisableInterceptors()
     {

@@ -1,8 +1,8 @@
 import { createContext } from "react";
 
-import { UserDto, UserFunction } from "../api-client";
+import { UserWhoamiDto, UserFunction, EnvironmentType } from "../api-client";
 
-export const userGuest: UserDto = {
+export const userGuest: UserWhoamiDto = {
   id: "00000000-0000-0000-0000-000000000000",
   username: "guest",
   grantIds: [] as string[],
@@ -13,17 +13,18 @@ export const userGuest: UserDto = {
   teams: [],
   aliases: [],
   allThesis: [],
+  environment: EnvironmentType.LOCAL,
 };
 
 export interface IUserContext {
-  user: UserDto;
-  setUser: (user: UserDto) => void;
+  user: UserWhoamiDto;
+  setUser: (user: UserWhoamiDto) => void;
   resetUser: () => void;
 }
 
 export const defaultContext = {
   user: userGuest,
-  setUser: (user: UserDto) => {
+  setUser: (user: UserWhoamiDto) => {
     console.log("DBG setUser", user);
     debugger;
     throw new Error("setUser not implemented");

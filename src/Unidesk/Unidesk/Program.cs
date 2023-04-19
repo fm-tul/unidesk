@@ -30,30 +30,23 @@ using OneOfExtensions = Unidesk.Utils.OneOfExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var generateModel = Environment.GetEnvironmentVariable("GENERATE_MODEL") == "1";
+var environmentType = Environment.GetEnvironmentVariable("UNIDESK_ENVIRONMENT") ?? "Local";
+var isVerbose = Environment.GetEnvironmentVariable("UNIDESK_VERBOSE") == "1" || true;
 var isDev = builder.Environment.IsDevelopment();
 
 var services = builder.Services;
 
 // optionally add appsettings.secret.{username}.json which is ignored
 var configuration = builder.Configuration
-   .AddJsonFile($"appsettings.secret.json", true)
+   .AddJsonFile("appsettings.secret.json", true)
+   .AddJsonFile($"appsettings.{environmentType}.json", true)
+   .AddJsonFile($"appsettings.secret.{environmentType}.json", true)
    .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
    .Build();
 
-if (isDev && false)
+if (isVerbose)
 {
-    Console.WriteLine("Configuration values:");
-    foreach (var (key, value) in configuration.AsEnumerable()) Console.WriteLine($" - {key}={value.SafeSubstring(64)}");
-    Console.WriteLine("----------------------------------------------------------------");
-
-    Console.WriteLine("Configuration sources:");
-    foreach (var source in configuration.Providers) Console.WriteLine($" - {source}");
-    Console.WriteLine("----------------------------------------------------------------");
-
-    Console.WriteLine("Working directory: " + Environment.CurrentDirectory);
-    Console.WriteLine("----------------------------------------------------------------");
-    Console.WriteLine("Files in working directory:");
-    foreach (var file in Directory.GetFiles(Environment.CurrentDirectory)) Console.WriteLine($" - {file}");
+    configuration.PrintConfiguration();
 }
 
 services.AddEndpointsApiExplorer();
@@ -63,8 +56,8 @@ services.AddSwaggerGen(options =>
     options.EnableAnnotations(enableAnnotationsForInheritance: true, enableAnnotationsForPolymorphism: true);
 });
 
-services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
-   .AddCertificate(options => { });
+// services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme)
+//    .AddCertificate(options => { });
 
 // scoped
 services.AddScoped<CryptographyUtils>();
@@ -102,6 +95,7 @@ services.AddScoped<IMapper, ServiceMapper>();
 
 // configs
 var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>()!;
+appOptions.Environment = Enum.Parse<EnvironmentType>(environmentType);
 var emailOptions = configuration.GetSection(nameof(EmailOptions)).Get<EmailOptions>()!;
 var connectionString = configuration.GetValue<string>("UNIDESK_CONNECTION_STRING")
                     ?? configuration.GetConnectionString(nameof(UnideskDbContext));
@@ -139,12 +133,6 @@ services.AddScoped<ThesisTransitionService>();
 
 var app = builder.Build();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var reportService = scope.ServiceProvider.GetRequiredService<ReportService>()!;
-//     reportService.GenerateReport();
-// }
-
 if (isDev)
 {
     app.UseSwagger();
@@ -162,7 +150,10 @@ app.UseExceptionHandler();
 await app.MigrateDbAsync();
 
 
-// app.UseHttpsRedirection();
+if (appOptions.Environment == EnvironmentType.Prod)
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseStaticFiles();
 app.UseRouting();
@@ -294,12 +285,8 @@ evaluationApi.MapDelete("/delete/{id:guid}", async ([FromServices] ThesisEvaluat
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
-app.MapFallbackToFile("index.html");
-// if (!isDev || true)
-// {
-//     app.UseClientAppStaticFiles();
-// }
 
+app.MapFallbackToFile("index.html");
 
 if (isDev && generateModel)
 {
