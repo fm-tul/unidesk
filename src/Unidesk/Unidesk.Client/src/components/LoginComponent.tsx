@@ -16,7 +16,7 @@ export const LoginComponent = (props: LoginComponentProps) => {
   const { isLoading } = props;
   const { language, setLanguage } = useContext(LanguageContext);
   const { translate } = useTranslation(language);
-  const lianeLoginUrl = `${API_URL}/account/liane-login`;
+  const lianeLoginUrl = `${API_URL}/liane-login`;
   const queryClient = useQueryClient();
 
   const doDebugLogin = async (path: string) => {

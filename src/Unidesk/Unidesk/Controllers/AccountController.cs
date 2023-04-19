@@ -40,7 +40,7 @@ public class AccountController : ControllerBase
     }
     
     // redirects to SAML service provider
-    [HttpGet, Route("liane-login")]
+    [HttpGet, Route("/liane-login")]
     [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(LianeLogin))]
     public RedirectResult LianeLogin()
