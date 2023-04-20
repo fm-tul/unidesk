@@ -243,7 +243,8 @@ public class UserService
            .Query()
            .FirstOrDefault(i => i.Email == request.Eppn);
         
-        if (user is not null && BCrypt.Net.BCrypt.Verify(request.PasswordBase64, user.PasswordHash) && string.IsNullOrWhiteSpace(request.RecoveryToken))
+        var userHasPassword = user is not null && !string.IsNullOrWhiteSpace(user.PasswordHash);
+        if (userHasPassword && BCrypt.Net.BCrypt.Verify(passwordHash, user!.PasswordHash) && string.IsNullOrWhiteSpace(request.RecoveryToken))
         {
             return user;
         }
