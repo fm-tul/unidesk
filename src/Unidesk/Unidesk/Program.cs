@@ -76,10 +76,11 @@ services.AddScoped<EmailService>();
 services.AddScoped<DocumentService>();
 services.AddScoped<InternshipService>();
 services.AddScoped<ChangeTrackerService>();
+services.AddScoped<ServerService>();
 services.AddScoped<IThesisEvaluation, ThesisEvaluation_Opponent_FM_Eng>();
 
 services.AddSingleton<WordGeneratorService>();
-services.AddSingleton<TemplateService>();
+services.AddSingleton<TemplateFactory>();
 
 
 // mapper

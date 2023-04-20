@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using MailKit.Security;
 using MimeKit;
 using Unidesk.Utils.Extensions;
 
@@ -16,12 +17,13 @@ public class EmailService
     private async Task<SmtpClient> GetSmtpClient()
     {
         var client = new SmtpClient();
-        await client.ConnectAsync(_emailOptions.Server, _emailOptions.Port, _emailOptions.UseSsl);
+        // await client.ConnectAsync(_emailOptions.Server, _emailOptions.Port, _emailOptions.UseSsl);
+        await client.ConnectAsync(_emailOptions.Server, _emailOptions.Port, SecureSocketOptions.StartTls);
         await client.AuthenticateAsync(_emailOptions.Username, _emailOptions.Password);
         return client;
     }
 
-    public async Task SendTextEmailAsync(string to, string subject, string body)
+    public async Task SendTextEmailAsync(string to, string subject, string body, CancellationToken ct)
     {
         using var client = await GetSmtpClient();
         var message = new MimeMessage();
@@ -43,6 +45,6 @@ public class EmailService
             Text = body,
         };
         
-        await client.SendAsync(message);
+        await client.SendAsync(message, ct);
     }
 }

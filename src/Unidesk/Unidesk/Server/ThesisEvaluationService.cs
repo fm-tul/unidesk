@@ -33,11 +33,11 @@ public class ThesisEvaluationService
     private readonly IUserProvider _userProvider;
     private readonly IEnumerable<IThesisEvaluation> _thesisEvaluations;
     private readonly EmailService _emailService;
-    private readonly TemplateService _templateService;
-    private readonly IServer _server;
+    private readonly TemplateFactory _templateFactory;
+    private readonly ServerService _serverService;
 
     public ThesisEvaluationService(UnideskDbContext db, IMapper mapper, WordGeneratorService wordGeneratorService, IUserProvider userProvider,
-        IEnumerable<IThesisEvaluation> thesisEvaluations, EmailService emailService, TemplateService templateService, IServer server)
+        IEnumerable<IThesisEvaluation> thesisEvaluations, EmailService emailService, TemplateFactory templateFactory, ServerService serverService)
     {
         _db = db;
         _mapper = mapper;
@@ -45,8 +45,8 @@ public class ThesisEvaluationService
         _userProvider = userProvider;
         _thesisEvaluations = thesisEvaluations;
         _emailService = emailService;
-        _templateService = templateService;
-        _server = server;
+        _templateFactory = templateFactory;
+        _serverService = serverService;
     }
 
     private async Task<ThesisEvaluation> GetWithPassword(Guid id, string pass, CancellationToken ct)
@@ -421,30 +421,32 @@ public class ThesisEvaluationService
     private async Task ChangeToInvitedAsync(ThesisEvaluation item, CancellationToken ct)
     {
         // prefer https
-        var address = _server.Features.Get<IServerAddressesFeature>()?.Addresses.MaxBy(i => i.StartsWith("https"))
-                     ?? "https://localhost:3000";
-        
+        var url = _serverService.UrlBase;
         var passphrase = _wordGeneratorService.GeneratePassPhrase();
         item.PassphraseHash = BCrypt.Net.BCrypt.HashPassword(passphrase);
         item.Status = EvaluationStatus.Invited;
+        
         var user = item.Evaluator;
-        // TODO: email service here
-        _templateService.LoadTemplate(ThesisEvaluationInviteTemplate.TemplateBody);
-        var body = _templateService.Render(new ThesisEvaluationInviteTemplate
-        {
-            SupervisorName = user?.FullName ?? "sir/madam",
-            StudentName = item.Thesis.Authors.FirstOrDefault()?.FullName ?? "student",
-            ThesisTitle = item.Thesis.NameEng,
-            ContactEmail = "viroco@tul.cz",
-            ThesisEvaluationDeadline = DateTime.Now.AddDays(14).ToLongDateString(),
-            ThesisEvaluationPassword = passphrase,
-            ThesisEvaluationUrl = $"{address}/evaluation/{item.Id}",
-        });
+        var body = _templateFactory
+           .LoadTemplate(ThesisEvaluationInviteTemplate.TemplateBody)
+           .RenderTemplate(new ThesisEvaluationInviteTemplate
+            {
+                SupervisorName = user?.FullName ?? "sir/madam",
+                StudentName = item.Thesis.Authors.FirstOrDefault()
+                  ?.FullName ?? "student",
+                ThesisTitle = item.Thesis.NameEng,
+                ContactEmail = "viroco@tul.cz",
+                ThesisEvaluationDeadline = DateTime.Now.AddDays(14)
+                   .ToLongDateString(),
+                ThesisEvaluationPassword = passphrase,
+                ThesisEvaluationUrl = $"{url}/evaluation/{item.Id}",
+            });
 
         await _emailService.SendTextEmailAsync(
             to: item.Email,
             subject: "Thesis evaluation invitation",
-            body: body
+            body: body,
+            ct: ct
         );
     }
 

@@ -20,6 +20,13 @@ public class User : TrackedEntity, ISimpleUser, IStateEntity
     public string? FullName => this.FullName();
 
     public string? Email { get; set; }
+    /// <summary>
+    /// for local accounts
+    /// </summary>
+    public string? PasswordHash { get; set; }
+    
+    public string? RecoveryToken { get; set; }
+    
     public string? Phone { get; set; }
     public string? Company { get; set; }
     public string? Address { get; set; }

@@ -10,6 +10,7 @@ using Unidesk.Services;
 using Unidesk.Utils;
 using System.Text.Json;
 using Unidesk.Utils.Extensions;
+using BCrypt.Net;
 
 namespace Unidesk.Controllers;
 
@@ -38,7 +39,7 @@ public class AccountController : ControllerBase
         _appOptions = appOptions;
         _mapper = mapper;
     }
-    
+
     // redirects to SAML service provider
     [HttpGet, Route("/liane-login")]
     [AllowAnonymous]
@@ -48,33 +49,69 @@ public class AccountController : ControllerBase
         var loginUrl = _appOptions.LianeLoginUrl;
         return Redirect(loginUrl);
     }
-    
+
 
     [HttpPost, Route("login")]
     [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(Login))]
-    [ProducesResponseType(typeof(ToastResponse<UserDto>), 200)]
-    public async Task<IActionResult> Login(LoginRequest request)
+    [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken ct)
     {
-        if (!_appOptions.AllowLocalAccounts)
-        {
-            return Forbid();
-        }
-
         var httpContext = _httpContextAccessor.HttpContext
                        ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
 
-        var dbUser = _userService.FromLoginRequest(request);
+        var dbUser = await _userService.FromLoginRequestAsync(request, ct)
+                  ?? throw new Exception("User not found or password is incorrect");
+
+        await _userService.FixRolesAsync(dbUser);
         await _userService.SignInAsync(httpContext, dbUser);
         _logger.LogInformation("User {Email} logged in at {Time}", request.Eppn, DateTime.UtcNow);
 
-        return Ok(new ToastResponse<UserDto>
+        var dto = _mapper.Map<UserWhoamiDto>(dbUser);
+        dto.Environment = _appOptions.Environment;
+
+        return Ok(new ToastResponse<UserWhoamiDto>
         {
             Message = "User logged in successfully",
-            Data = _mapper.Map<UserDto>(dbUser),
+            Data = dto,
         });
     }
     
+    [HttpPost, Route("register")]
+    [AllowAnonymous]
+    [SwaggerOperation(OperationId = nameof(Register))]
+    [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
+    public async Task<IActionResult> Register(RegisterRequest request)
+    {
+        var httpContext = _httpContextAccessor.HttpContext
+                       ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
+
+        var dbUser = _userService.RegisterFromRequest(request)
+                  ?? throw new Exception("User not found");
+
+        await _userService.SignInAsync(httpContext, dbUser);
+        _logger.LogInformation("User {Email} logged in at {Time}", request.Eppn, DateTime.UtcNow);
+
+        var dto = _mapper.Map<UserWhoamiDto>(dbUser);
+        dto.Environment = _appOptions.Environment;
+
+        return Ok(new ToastResponse<UserWhoamiDto>
+        {
+            Message = "User logged in successfully",
+            Data = dto,
+        });
+    }
+    
+    [HttpPost, Route("reset-password")]
+    [AllowAnonymous]
+    [SwaggerOperation(OperationId = nameof(ResetPassword))]
+    [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken ct)
+    {
+        await _userService.RequestResetPasswordAsync(request, ct);
+        return Ok();
+    }
+
     [HttpGet, Route("whoami")]
     [SwaggerOperation(OperationId = nameof(WhoAmI))]
     [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
@@ -120,7 +157,7 @@ public class AccountController : ControllerBase
                 }
                 else if (_appOptions.AllowLocalAccounts)
                 {
-                    dbUser = _userService.FromLoginRequest(shibboRequest);
+                    dbUser = _userService.GetFromShibboLoginRequest(shibboRequest);
                 }
             }
         );
@@ -133,7 +170,7 @@ public class AccountController : ControllerBase
         await _userService.FixRolesAsync(dbUser);
         await _userService.SignInAsync(httpContext, dbUser);
         _logger.LogInformation("User {Email} logged in at {Time}", shibboRequest.Eppn, DateTime.UtcNow);
-        
+
         var dto = _mapper.Map<UserWhoamiDto>(dbUser);
         dto.Environment = _appOptions.Environment;
         if (_appOptions.Environment is EnvironmentType.Local)

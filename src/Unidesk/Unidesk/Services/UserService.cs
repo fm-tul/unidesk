@@ -10,6 +10,8 @@ using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Dtos.Requests;
 using Unidesk.Server;
+using Unidesk.Services.Email;
+using Unidesk.Services.Email.Templates;
 using Unidesk.Utils;
 using Unidesk.Utils.Extensions;
 
@@ -18,10 +20,16 @@ namespace Unidesk.Services;
 public class UserService
 {
     private readonly UnideskDbContext _db;
+    private readonly EmailService _emailService;
+    private readonly TemplateFactory _templateFactory;
+    private readonly ServerService _serverService;
 
-    public UserService(UnideskDbContext db)
+    public UserService(UnideskDbContext db, EmailService emailService, TemplateFactory templateFactory, ServerService serverService)
     {
         _db = db;
+        _emailService = emailService;
+        _templateFactory = templateFactory;
+        _serverService = serverService;
     }
 
     public Task<List<User>> FindAsync(ILoginRequest request)
@@ -213,17 +221,115 @@ public class UserService
         );
     }
 
-    public User FromLoginRequest(ILoginRequest request)
+    public User GetFromShibboLoginRequest(LoginShibboRequest request)
     {
         var user = new User
         {
             Username = request.Eppn,
-            Email = $"{request.Eppn}@unidesk.tul",
+            Email = $"{request.Eppn}@temata.fm.tul.cz",
         };
 
         return user;
     }
+    
+    public async Task<User?> FromLoginRequestAsync(LoginRequest request, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.PasswordBase64))
+        {
+            return null;
+        }
+        
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.PasswordBase64)!;
+        var user = _db.Users
+           .Query()
+           .FirstOrDefault(i => i.Email == request.Eppn);
+        
+        if (user is not null && BCrypt.Net.BCrypt.Verify(request.PasswordBase64, user.PasswordHash) && string.IsNullOrWhiteSpace(request.RecoveryToken))
+        {
+            return user;
+        }
 
+        user = null;
+        if (user is null && !string.IsNullOrWhiteSpace(request.RecoveryToken))
+        {
+            user = _db.Users
+               .Query()
+               .FirstOrDefault(i => i.Email == request.Eppn && i.RecoveryToken == request.RecoveryToken);
+
+            if (user is not null)
+            {
+                ValidatePasswordAndThrow(request.PasswordBase64);
+                user.PasswordHash = passwordHash;
+                user.RecoveryToken = null;
+                await _db.SaveChangesAsync(ct);
+            }
+        }
+
+        return user;
+    }
+    
+    public User RegisterFromRequest(RegisterRequest request)
+    {
+        if (request.PasswordBase64 != request.PasswordBase64Repeat)
+        {
+            throw new Exception("Passwords do not match");
+        }
+        
+        var user = new User
+        {
+            Username = request.Eppn.UsernameFromEmail() ?? throw new Exception("Invalid username"),
+            Email = request.Eppn.ValidEmailOrDefault() ?? throw new Exception("Invalid email"),
+        };
+
+        ValidatePasswordAndThrow(request.PasswordBase64);
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.PasswordBase64)!;
+        
+        var existingUser = _db.Users.FirstOrDefault(i => i.Email == user.Email);
+        if (existingUser != null)
+        {
+            throw new Exception("User with this email already exists");
+        }
+
+        _db.Users.Add(user);
+        _db.SaveChanges();
+
+        return user;
+    }
+    
+    private void ValidatePasswordAndThrow(string password)
+    {
+        var issues = CryptographyUtils.GetPasswordStrength(password);
+        if (issues != PasswordIssues.None)
+        {
+            throw new Exception("Password is not secure enough");
+        }
+    }
+
+    public async Task RequestResetPasswordAsync(ResetPasswordRequest resetPasswordRequest, CancellationToken ct)
+    {
+        var existingUser = _db.Users.FirstOrDefault(i => i.Email == resetPasswordRequest.Eppn)
+            ?? throw new Exception("User with this email does not exist");
+        
+        var token = CryptographyUtils.GenerateToken();
+        existingUser.RecoveryToken = token;
+        await _db.SaveChangesAsync(ct);
+        
+        var body = _templateFactory
+           .LoadTemplate(RequestResetPasswordTemplate.TemplateBody)
+           .RenderTemplate(new RequestResetPasswordTemplate
+            {
+                Email = existingUser.Email!,
+                Token = token,
+            });
+        
+        await _emailService.SendTextEmailAsync(
+            existingUser.Email!,
+            "Password Reset",
+            body,
+            ct
+        );
+    }
+    
     public async Task SignOutAsync(HttpContext httpContext)
     {
         await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -250,7 +356,7 @@ public class UserService
 
     public async Task<User> FixRolesAsync(User user)
     {
-        if (user.Email == "admin@unidesk.tul.cz")
+        if (user.Email == "admin@temata.fm.tul.cz")
         {
             var superAdminRole = await _db.UserRoles.FirstOrDefaultAsync(UserRoles.SuperAdmin.Id);
             var needsSave = false;

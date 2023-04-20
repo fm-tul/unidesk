@@ -1,6 +1,6 @@
 import { LanguageContext } from "@locales/LanguageContext";
 import { useTranslation } from "@locales/translationHooks";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { classnames } from "ui/shared";
 import { TulLogo } from "assets/images/tul.svg.jsx";
 import { FaUserGraduate } from "react-icons/fa";
@@ -8,7 +8,13 @@ import { API_URL, VITE_DEBUG_LOGIN, VITE_DEBUG_LOGIN_ADMIN } from "@core/config"
 import { Fade } from "./mui/Fade";
 import { httpClient } from "@core/init";
 import { useQueryClient } from "react-query";
+import { Collapse } from "./mui/Collapse";
+import { TextField } from "ui/TextField";
+import { FormField } from "ui/FormField";
+import { RowField } from "./mui/RowField";
+import LoginForm from "./LoginForm";
 
+const lianeLoginUrl = `${API_URL}/liane-login`;
 interface LoginComponentProps {
   isLoading: boolean;
 }
@@ -16,12 +22,17 @@ export const LoginComponent = (props: LoginComponentProps) => {
   const { isLoading } = props;
   const { language, setLanguage } = useContext(LanguageContext);
   const { translate } = useTranslation(language);
-  const lianeLoginUrl = `${API_URL}/liane-login`;
   const queryClient = useQueryClient();
+
+  const [localLogin, setLocalLogin] = useState(false);
 
   const doDebugLogin = async (path: string) => {
     await httpClient.account.loginSso({ path });
     queryClient.invalidateQueries("whoami");
+  };
+
+  const showLocalLogin = () => {
+    setLocalLogin(!localLogin);
   };
 
   return (
@@ -65,7 +76,7 @@ export const LoginComponent = (props: LoginComponentProps) => {
           </div>
         </Fade>
 
-        <div className={classnames("text-center text-2xl font-light text-neutral-700 mb-4 uppercase", isLoading && "pointer-events-none")}>
+        <div className={classnames("mb-4 text-center text-2xl font-light uppercase text-neutral-700", isLoading && "pointer-events-none")}>
           {translate("login.title")}
         </div>
         {/* shibboleth login */}
@@ -80,23 +91,27 @@ export const LoginComponent = (props: LoginComponentProps) => {
             <TulLogo className={classnames("col-start-1 row-start-1 h-20 w-20 fill-current")} />
             <span className="col-start-1 row-start-1">{translate("login.liane")}</span>
           </a>
-          <a
-            href={isLoading ? undefined : lianeLoginUrl}
-            className={classnames(
-              "flex w-full items-center gap-8 rounded-sm bg-orange-500/10 p-4 text-lg transition-all",
-              "hocus:rounded-xl hocus:bg-orange-700 hocus:text-white hocus:shadow-xl hocus:shadow-orange-500/50"
-            )}
-          >
-            <FaUserGraduate className={classnames("col-start-1 row-start-1 h-20 w-20 fill-current")} />
-            <span className="col-start-1 row-start-1">{translate("login.local-account")}</span>
-          </a>
+
+          <div>
+            <button
+              onClick={showLocalLogin}
+              className={classnames(
+                "flex w-full items-center gap-8 rounded-sm bg-orange-500/10 p-4 text-lg transition-all",
+                "hocus:rounded-xl hocus:bg-orange-700 hocus:text-white hocus:shadow-xl hocus:shadow-orange-500/50"
+              )}
+            >
+              <FaUserGraduate className={classnames("col-start-1 row-start-1 h-20 w-20 fill-current")} />
+              <span className="col-start-1 row-start-1 uppercase">{translate("login.local-account")}</span>
+            </button>
+            <LoginForm open={localLogin} />
+          </div>
 
           {(!!VITE_DEBUG_LOGIN_ADMIN || !!VITE_DEBUG_LOGIN) && (
             <div className="flex gap-4">
               {!!VITE_DEBUG_LOGIN_ADMIN && (
                 <button
                   className={classnames(
-                    "flex w-full items-center gap-8 rounded-sm bg-rose-500/10 p-4 text-lg transition-all" ,
+                    "flex w-full items-center gap-8 rounded-sm bg-rose-500/10 p-4 text-lg transition-all",
                     "hocus:rounded-xl hocus:bg-rose-700 hocus:text-white hocus:shadow-xl hocus:shadow-rose-500/50"
                   )}
                   onClick={() => doDebugLogin(VITE_DEBUG_LOGIN_ADMIN)}

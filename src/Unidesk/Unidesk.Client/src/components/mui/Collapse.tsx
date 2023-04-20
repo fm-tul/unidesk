@@ -7,9 +7,10 @@ interface CollapeProps {
   open: boolean;
   className?: string;
   mountIfClosed?: boolean;
+  width?: string;
 }
 export const Collapse = (props: CollapeProps) => {
-  const { children, open, className, mountIfClosed = false } = props;
+  const { children, open, className, mountIfClosed = false, width="w-full" } = props;
   const [ref, setRef] = useState<HTMLDivElement | null>(null);
   const [extraClassNames, canBeHidden, fullyOpen] = useCollape(ref, open);
 
@@ -17,8 +18,10 @@ export const Collapse = (props: CollapeProps) => {
     return null;
   }
 
+  // console.log("Collapse", open, extraClassNames, canBeHidden, fullyOpen);
+  // const extraClassNames = open ? "" : "hidden";
   return (
-    <div ref={setRef} className={classnames(extraClassNames, className)}>
+    <div ref={setRef} className={classnames(extraClassNames, className, width)}>
       {children}
     </div>
   );

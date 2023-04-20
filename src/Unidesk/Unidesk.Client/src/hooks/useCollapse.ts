@@ -1,7 +1,7 @@
 import { CSSProperties, useEffect, useState } from "react";
 
-const classNamesCollapsing = "max-h-0 w-full overflow-hidden motion-safe:transition-all";
-const classNamesOpen = "max-h-0 w-full motion-safe:transition-all";
+const classNamesCollapsing = "max-h-0 overflow-hidden motion-safe:transition-all";
+const classNamesOpen = "max-h-0 motion-safe:transition-all";
 export const useCollape = (element: HTMLElement | null, open: boolean) => {
   const [canBeHidden, setCanBeHidden] = useState(true);
   const [fullyOpen, setFullyOpen] = useState(false);
@@ -11,6 +11,10 @@ export const useCollape = (element: HTMLElement | null, open: boolean) => {
       return;
     }
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (fullyOpen && !open) {
+      element.style.maxHeight = `${element.scrollHeight}px`;
+    }
 
     if (open) {
       setCanBeHidden(false);
@@ -36,9 +40,12 @@ export const useCollape = (element: HTMLElement | null, open: boolean) => {
       }
       if (open && e.target === element && e.propertyName === "max-height") {
         setFullyOpen(true);
+        element.style.maxHeight = "999px";
       }
     };
+
     element.addEventListener("transitionend", handleAnimationEnd);
+
     return () => {
       element.removeEventListener("transitionend", handleAnimationEnd);
     };

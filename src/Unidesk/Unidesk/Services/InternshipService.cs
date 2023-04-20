@@ -22,10 +22,10 @@ public class InternshipService
     private readonly WordGeneratorService _wordGeneratorService;
     private readonly IUserProvider _userProvider;
     private readonly EmailService _emailService;
-    private readonly TemplateService _templateService;
+    private readonly TemplateFactory _templateFactory;
     private readonly IServer _server;
 
-    public InternshipService(UnideskDbContext db, IMapper mapper, WordGeneratorService wordGeneratorService, IUserProvider userProvider, EmailService emailService, TemplateService templateService,
+    public InternshipService(UnideskDbContext db, IMapper mapper, WordGeneratorService wordGeneratorService, IUserProvider userProvider, EmailService emailService, TemplateFactory templateFactory,
         IServer server)
     {
         _db = db;
@@ -33,7 +33,7 @@ public class InternshipService
         _wordGeneratorService = wordGeneratorService;
         _userProvider = userProvider;
         _emailService = emailService;
-        _templateService = templateService;
+        _templateFactory = templateFactory;
         _server = server;
     }
 

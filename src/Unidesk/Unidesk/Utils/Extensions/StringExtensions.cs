@@ -60,21 +60,24 @@ public static class StringExtensions
         return new string(value.Where(c => !char.IsDigit(c)).ToArray());
     }
 
-    public static string UsernameFromEmail(this string email)
+    public static string? UsernameFromEmail(this string email)
     {
-        return email.Split("@")[0];
+        var withoutDomain = email.Split("@")[0];
+        return string.IsNullOrWhiteSpace(withoutDomain) ? null : withoutDomain;
     }
 
     public static string? FirstnameFromEmail(this string email)
     {
-        var username = email.UsernameFromEmail();
+        var username = email.UsernameFromEmail()
+            ?? throw new ArgumentException("Email is not valid", nameof(email));
         var parts = username.Split(".");
         return parts.Length >= 2 ? parts[0].RemoveNumbers().Capitalize() : null;
     }
 
     public static string? LastnameFromEmail(this string email)
     {
-        var username = email.UsernameFromEmail();
+        var username = email.UsernameFromEmail()
+            ?? throw new ArgumentException("Email is not valid", nameof(email));
         var parts = username.Split(".");
         return parts.Length >= 2 ? parts[1].RemoveNumbers().Capitalize() : null;
     }

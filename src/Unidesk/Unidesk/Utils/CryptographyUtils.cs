@@ -68,4 +68,51 @@ public class CryptographyUtils
         cipher.IV = Encoding.UTF8.GetBytes(_appOptions.AesIV);
         return cipher;
     }
+
+    public static PasswordIssues GetPasswordStrength(string requestPasswordBase64)
+    {
+        var requestPassword = Encoding.UTF8.GetString(Convert.FromBase64String(requestPasswordBase64));
+        var issues = PasswordIssues.None;
+        if (!requestPassword.Any(char.IsLower))
+        {
+            issues |= PasswordIssues.Min1Lowercase;
+        }
+        
+        if (!requestPassword.Any(char.IsUpper))
+        {
+            issues |= PasswordIssues.Min1Uppercase;
+        }
+        
+        if (!requestPassword.Any(char.IsNumber))
+        {
+            issues |= PasswordIssues.Min1Number;
+        }
+        
+        if (!requestPassword.Any(char.IsSymbol) && !requestPassword.Any(i => "!@#$%^&*()_+`-=[]{}|;':\",./<>?".Contains(i)))
+        {
+            issues |= PasswordIssues.Min1SpecialChar;
+        }
+
+        return issues;
+    }
+
+    public static string GenerateToken()
+    {
+        var tokenStr = $"{Guid.NewGuid()}-{Guid.NewGuid()}";
+        var tokenHash = BCrypt.Net.BCrypt.HashPassword(tokenStr)!;
+        var tokenBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(tokenHash));
+        var tokenWithSafeChars = tokenBase64.Replace("/", "_");
+        return tokenWithSafeChars;
+    }
+}
+
+[Flags]
+public enum PasswordIssues
+{
+    None,
+    Min8Chars,
+    Min1Lowercase,
+    Min1Uppercase,
+    Min1Number,
+    Min1SpecialChar,
 }

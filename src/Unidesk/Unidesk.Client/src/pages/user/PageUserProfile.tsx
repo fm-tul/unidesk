@@ -130,7 +130,7 @@ export const PageUserProfile = () => {
               </h1>
 
               {/* user functions */}
-              <div className="flow">
+              <div className="flow flex-wrap">
                 {user.userFunction.split(",").map(i => (
                   <span key={i} className="flow rounded-full bg-gray-200 px-2 py-1">
                     <span className="text-xs">{i}</span>
@@ -139,7 +139,7 @@ export const PageUserProfile = () => {
               </div>
 
               {/* user grants */}
-              <div className="flow">
+              <div className="flow flex-wrap">
                 {user.grantIds.map(i => (
                   <span key={i} className="flow rounded-full bg-gray-200 px-2 py-1">
                     <span className="text-xs">{GrantsAll.find(j => j.id === i)?.name}</span>

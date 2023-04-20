@@ -17,7 +17,7 @@ export const EnvTag = (props: EnvTagProps) => {
       if (ref.current) {
         const distanceFromTopRight = Math.abs(document.body.clientWidth - e.clientX) + Math.abs(e.clientY);
         // the closer the less opacity
-        const opacity = Math.max(0.1, distanceFromTopRight / 500);
+        const opacity = Math.min(1, Math.max(0.1, distanceFromTopRight / 500));
         ref.current.style.opacity = opacity.toString();
       }
     };
