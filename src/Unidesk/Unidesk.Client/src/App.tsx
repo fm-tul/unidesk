@@ -1,6 +1,5 @@
 import { UserDto } from "@api-client";
 import { GUID_EMPTY } from "@core/config";
-import { EnKeys } from "@locales/all";
 import { R } from "@locales/R";
 import { useContext } from "react";
 import { Link, NavLink, Route, Routes, useMatch, useResolvedPath } from "react-router-dom";

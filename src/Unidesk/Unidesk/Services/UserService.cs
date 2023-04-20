@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Unidesk.Controllers;
 using Unidesk.Db;
 using Unidesk.Db.Core;
 using Unidesk.Db.Functions;

@@ -7,3 +7,4 @@ export const VITE_DEBUG_LOGIN_ADMIN = env.VITE_DEBUG_LOGIN_ADMIN ? (env.VITE_DEB
 export const IS_PROD = env.PROD === true;
 export const IS_DEV = env.DEV === true;
 export const GUID_EMPTY = "00000000-0000-0000-0000-000000000000";
+export const VITE_UNIDESK_VERSION = env.VITE_UNIDESK_VERSION ? (env.VITE_UNIDESK_VERSION as string) : "0.0.0";

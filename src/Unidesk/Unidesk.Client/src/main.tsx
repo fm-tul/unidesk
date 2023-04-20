@@ -1,4 +1,4 @@
-import { GUID_EMPTY, IS_PROD } from "@core/config";
+import { GUID_EMPTY, IS_PROD, VITE_UNIDESK_VERSION } from "@core/config";
 import { languages } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
 import React, { useEffect, useState } from "react";
@@ -88,6 +88,7 @@ const AppWithProviders = () => {
                 pauseOnHover
               />
               <EnvTag environment={environment} visible={user.fullName === "admin"} />
+              <div className="fixed bottom-0 right-0 text-xs text-neutral-500 select-none hover:text-black">v{VITE_UNIDESK_VERSION}</div>
             </>
           </BrowserRouter>
           <ModalContainer />
