@@ -244,7 +244,7 @@ public class UserService
            .FirstOrDefault(i => i.Email == request.Eppn);
         
         var userHasPassword = user is not null && !string.IsNullOrWhiteSpace(user.PasswordHash);
-        if (userHasPassword && BCrypt.Net.BCrypt.Verify(passwordHash, user!.PasswordHash) && string.IsNullOrWhiteSpace(request.RecoveryToken))
+        if (userHasPassword && BCrypt.Net.BCrypt.Verify(request.PasswordBase64, user!.PasswordHash) && string.IsNullOrWhiteSpace(request.RecoveryToken))
         {
             return user;
         }
@@ -259,7 +259,7 @@ public class UserService
             if (user is not null)
             {
                 ValidatePasswordAndThrow(request.PasswordBase64);
-                user.PasswordHash = passwordHash;
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.PasswordBase64)!;
                 user.RecoveryToken = null;
                 await _db.SaveChangesAsync(ct);
             }
