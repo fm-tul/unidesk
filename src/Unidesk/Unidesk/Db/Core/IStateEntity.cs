@@ -13,6 +13,7 @@ public enum StateEntity
     Active = 0,
     Deleted = 1,
     Hidden = 2,
+    Blocked = 3,
 }
 
 public static class States

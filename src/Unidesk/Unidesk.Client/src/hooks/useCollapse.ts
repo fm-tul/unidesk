@@ -40,7 +40,7 @@ export const useCollape = (element: HTMLElement | null, open: boolean) => {
       }
       if (open && e.target === element && e.propertyName === "max-height") {
         setFullyOpen(true);
-        element.style.maxHeight = "999px";
+        element.style.maxHeight = "9999px";
       }
     };
 

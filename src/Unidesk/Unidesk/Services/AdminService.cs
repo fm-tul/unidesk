@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Client;
 using Unidesk.Db;
+using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Utils.Extensions;
 
@@ -44,7 +45,8 @@ public class AdminService
 
                 var byUser = thesisUsers
                    .GroupBy(g => g.UserId)
-                   .ToDictionary(k => k.Key, v => v.Select(i => i.Function).Combine());
+                   .ToDictionary(k => k.Key, v => v.Select(i => i.Function)
+                       .Combine());
 
                 var userIds = byUser.Keys.ToArray();
 
@@ -94,6 +96,32 @@ public class AdminService
         return await _db.Users
                   .FirstOrDefaultAsync(i => i.Username == value, ct)
             ?? throw new Exception($"User with name {value} not found");
+    }
+
+    public async Task<User> BlockUserAsync(Guid userId, CancellationToken ct)
+    {
+        var user = await _db.Users
+                      .Query()
+                      .IgnoreQueryFilters()
+                      .FirstOrDefaultAsync(i => i.Id == userId, ct)
+                ?? throw new Exception($"User with id {userId} not found");
+
+        user.State = StateEntity.Blocked;
+        await _db.SaveChangesAsync(ct);
+        return user;
+    }
+
+    public async Task<User> UnblockUserAsync(Guid userId, CancellationToken ct)
+    {
+        var user = await _db.Users
+                      .Query()
+                      .IgnoreQueryFilters()
+                      .FirstOrDefaultAsync(i => i.Id == userId, ct)
+                ?? throw new Exception($"User with id {userId} not found");
+
+        user.State = StateEntity.Active;
+        await _db.SaveChangesAsync(ct);
+        return user;
     }
 }
 

@@ -14,6 +14,7 @@ export const userGuest: UserWhoamiDto = {
   aliases: [],
   allThesis: [],
   environment: EnvironmentType.LOCAL,
+  state: 0,
 };
 
 export interface IUserContext {

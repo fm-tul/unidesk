@@ -29,7 +29,7 @@ using OneOfExtensions = Unidesk.Utils.OneOfExtensions;
 var builder = WebApplication.CreateBuilder(args);
 var generateModel = Environment.GetEnvironmentVariable("GENERATE_MODEL") == "1";
 var environmentType = Environment.GetEnvironmentVariable("UNIDESK_ENVIRONMENT") ?? "Local";
-var isVerbose = Environment.GetEnvironmentVariable("UNIDESK_VERBOSE") == "1" || true;
+var isVerbose = Environment.GetEnvironmentVariable("UNIDESK_VERBOSE") == "1";
 var isDev = builder.Environment.IsDevelopment();
 
 var services = builder.Services;

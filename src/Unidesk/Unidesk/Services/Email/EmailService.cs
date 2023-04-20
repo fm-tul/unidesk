@@ -27,7 +27,7 @@ public class EmailService
     {
         using var client = await GetSmtpClient();
         var message = new MimeMessage();
-        message.From.Add(new MailboxAddress("Unidesk", _emailOptions.Username));
+        message.From.Add(new MailboxAddress("Temata", _emailOptions.Username));
 
         if (_emailOptions.RedirectAllEmailsTo.IsNotNullOrEmpty())
         {

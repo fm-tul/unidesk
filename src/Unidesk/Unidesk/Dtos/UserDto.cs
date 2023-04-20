@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Dtos.ReadOnly;
 using Unidesk.Server;
@@ -26,4 +27,7 @@ public class UserDto : UserSimpleDto
 
     [Required]
     public List<ThesisSimpleWithUserDto> AllThesis { get; set; } = new();
+    
+    [Required]
+    public StateEntity State { get; set; }
 }

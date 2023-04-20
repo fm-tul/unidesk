@@ -40,4 +40,24 @@ public class AdminController : ControllerBase
         var user = await _adminService.SwitchUserAsync(username, ct);
         return _mapper.Map<UserDto>(user);
     }
+    
+    [RequireGrant(Grants.Action_Block_User)]
+    [HttpPost, Route("block-user")]
+    [SwaggerOperation(OperationId = nameof(BlockUser))]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    public async Task<object> BlockUser(Guid userId, CancellationToken ct)
+    {
+        var user = await _adminService.BlockUserAsync(userId, ct);
+        return _mapper.Map<UserDto>(user);
+    }
+    
+    [RequireGrant(Grants.Action_Unblock_User)]
+    [HttpPost, Route("unblock-user")]
+    [SwaggerOperation(OperationId = nameof(UnblockUser))]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    public async Task<object> UnblockUser(Guid userId, CancellationToken ct)
+    {
+        var user = await _adminService.UnblockUserAsync(userId, ct);
+        return _mapper.Map<UserDto>(user);
+    }
 }

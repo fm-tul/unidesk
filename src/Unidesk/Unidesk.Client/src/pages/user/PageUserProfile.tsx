@@ -1,4 +1,4 @@
-import { TeamLookupDto, TeamRole, UserDto, UserFunction, UserInTeamStatus, UserLookupDto } from "@api-client";
+import { StateEntity, TeamLookupDto, TeamRole, UserDto, UserFunction, UserInTeamStatus, UserLookupDto } from "@api-client";
 import { All as UserFunctionAll } from "@api-client/constants/UserFunction";
 import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
@@ -86,6 +86,22 @@ export const PageUserProfile = () => {
     if (result) {
       toast.success("Saved");
       setIsEditing(false);
+      setUser(result);
+    }
+  };
+
+  const handleBlockClick = async () => {
+    const result = await httpClient.admin.blockUser({ userId: user!.id });
+    if (result) {
+      toast.success("Blocked");
+      setUser(result);
+    }
+  };
+
+  const handleUnblockClick = async () => {
+    const result = await httpClient.admin.unblockUser({ userId: user!.id });
+    if (result) {
+      toast.success("Unblocked");
       setUser(result);
     }
   };
@@ -307,7 +323,15 @@ export const PageUserProfile = () => {
                   />
                 </>
               )}
-              <Button onClick={handleSave}>Save</Button>
+              <div className="flex justify-end gap-2">
+                <Button onClick={handleSave}>Save</Button>
+                <Button onConfirmedClick={handleBlockClick} if={me.grantIds.includes(Grants.Action_Block_User.id) && user.state !== StateEntity._3} error>
+                  Block User
+                </Button>
+                <Button onConfirmedClick={handleUnblockClick} if={me.grantIds.includes(Grants.Action_Unblock_User.id) && user.state === StateEntity._3} error>
+                  Unblock User
+                </Button>
+              </div>
               <Debug value={user} />
             </Collapse>
           </>

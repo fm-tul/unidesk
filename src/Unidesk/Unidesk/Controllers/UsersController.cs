@@ -41,7 +41,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(UserDto), 200)]
     public async Task<IActionResult> Get(Guid id)
     {
-        var user = await _userService.FindAsync(id);
+        var user = await _userService.FindAsync(id, includeNotActive: _userProvider.HasSomeOfGrants(Grants.User_Admin, Grants.User_SuperAdmin));
         if (user is null)
         {
             return NotFound();
@@ -66,7 +66,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(UserDto), 200)]
     public async Task<IActionResult> Update([FromBody] UserDto userDto)
     {
-        var user = await _userService.FindAsync(userDto.Id)
+        var user = await _userService.FindAsync(userDto.Id, includeNotActive: true)
             ?? throw new Exception("User not found");
 
         var canUpdate = _userProvider.CurrentUser.Id == user.Id
@@ -153,7 +153,7 @@ public class UsersController : ControllerBase
     [SwaggerOperation(OperationId = nameof(DeleteOne))]
     public async Task<IActionResult> DeleteOne(Guid id)
     {
-        var user = await _userService.FindAsync(id);
+        var user = await _userService.FindAsync(id, includeNotActive:true);
         if (user is null)
         {
             return NotFound();

@@ -31,18 +31,23 @@ public class UserService
         _serverService = serverService;
     }
 
-    public Task<List<User>> FindAsync(ILoginRequest request)
+    public Task<List<User>> FindAsync(ILoginRequest request, bool includeNotActive = false)
     {
-        return _db.Users
-           .Query()
-           .Where(u => u.Email == request.Eppn).ToListAsync();
+        return GetUsersQuery(includeNotActive)
+           .Where(u => u.Email == request.Eppn)
+           .ToListAsync();
+    }
+    
+    private IQueryable<User> GetUsersQuery(bool includeNotActive = false)
+    {
+        return includeNotActive
+            ? _db.Users.Query().IgnoreQueryFilters()
+            : _db.Users.Query();
     }
 
-    public Task<User?> FindAsync(Guid id)
+    public Task<User?> FindAsync(Guid id, bool includeNotActive = false)
     {
-        return _db.Users
-           .Query()
-           .IgnoreQueryFilters()
+        return GetUsersQuery(includeNotActive)
            .FirstOrDefaultAsync(x => x.Id == id);
     }
 

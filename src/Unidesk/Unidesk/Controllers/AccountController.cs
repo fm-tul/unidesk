@@ -11,6 +11,8 @@ using Unidesk.Utils;
 using System.Text.Json;
 using Unidesk.Utils.Extensions;
 using BCrypt.Net;
+using Unidesk.Db.Core;
+using Unidesk.Exceptions;
 
 namespace Unidesk.Controllers;
 
@@ -144,10 +146,17 @@ public class AccountController : ControllerBase
             return BadRequest();
         }
 
-        var candidates = await _userService.FindAsync(shibboRequest);
+        var candidates = await _userService.FindAsync(shibboRequest, includeNotActive: true);
         User? dbUser = null;
         await candidates.HandleCountAsync(
-            singleItem => Task.FromResult(dbUser = singleItem),
+            singleItem =>
+            {
+                if (singleItem.State == StateEntity.Blocked)
+                {
+                    throw new NotAllowedException("You don't have access to this application");
+                }
+                return Task.FromResult(dbUser = singleItem);
+            },
             _ => throw new ArgumentException("Multiple users found with the same email! Email: {Email}", shibboRequest.Eppn),
             async () =>
             {

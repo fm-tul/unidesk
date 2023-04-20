@@ -145,7 +145,7 @@ public static class ServiceCollectionExtensions
         var payload = new LoginShibboRequest
         {
             Affiliation = "admin",
-            Eppn = "admin@unidesk.tul.cz",
+            Eppn = "admin@temata.fm.tul.cz",
             Rnd = new Random().Next(),
             Time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
         };
