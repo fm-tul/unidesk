@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
 using Unidesk.Db.Models.Internships;
+using Unidesk.Dtos;
 using Unidesk.Dtos.Internships;
 using Unidesk.Dtos.Requests;
 using Unidesk.Exceptions;
@@ -99,7 +100,7 @@ public class InternshipController : Controller
     
     [HttpDelete, Route("delete")]
     [SwaggerOperation(OperationId = nameof(DeleteOne))]
-    [ProducesResponseType(typeof(InternshipDto), 200)]
+    [ProducesResponseType(typeof(SimpleJsonResponse), 200)]
     public async Task<IActionResult> DeleteOne(Guid id, CancellationToken ct)
     {
         var item = await _internshipService.GetOneAsync(id, ct)
@@ -112,7 +113,11 @@ public class InternshipController : Controller
         }
 
         await _internshipService.DeleteAsync(item, ct);
-        return Ok();
+        return Ok(new SimpleJsonResponse
+        {
+            Success = true,
+            Message = "Internship deleted",
+        });
     }
     
     [HttpGet, Route("change-status")]
