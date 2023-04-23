@@ -5,6 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.FileProviders;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+using Serilog.Formatting.Display;
+using Serilog.Formatting.Json;
+using Unidesk.Configurations;
 using Unidesk.Db;
 using Unidesk.Dtos;
 using Unidesk.Server.Converters;
@@ -17,7 +23,6 @@ namespace Unidesk.Server;
 [ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
-    
     public static void PrintConfiguration(this IConfigurationRoot configuration)
     {
         Console.WriteLine("Configuration values:");
@@ -33,7 +38,7 @@ public static class ServiceCollectionExtensions
         Console.WriteLine("Files in working directory:");
         foreach (var file in Directory.GetFiles(Environment.CurrentDirectory)) Console.WriteLine($" - {file}");
     }
-    
+
     public static IServiceCollection AddDevCors(this IServiceCollection services)
     {
         services.AddCors(options =>
@@ -114,6 +119,9 @@ public static class ServiceCollectionExtensions
     public static async Task<WebApplication> MigrateDbAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<UnideskDbContext>>();
+        logger.LogInformation("Migrating database");
+
         var db = scope.ServiceProvider.GetRequiredService<UnideskDbContext>();
         var firstTime = !await (db.Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator)!.ExistsAsync();
         await db.Database.MigrateAsync();
@@ -152,5 +160,42 @@ public static class ServiceCollectionExtensions
         var payloadJson = JsonSerializer.Serialize(payload);
         var base64 = cryptography.EncryptText(payloadJson);
         Console.WriteLine(base64);
+    }
+
+    public static Logger AddSerilogLogging(this WebApplicationBuilder builder, AppOptions appOptions)
+    {
+        var isDebug = Environment.GetEnvironmentVariable("UNIDESK_DEBUG") == "1" || true;
+        var logDir = new DirectoryInfo(Path.GetFullPath(appOptions.LogDir));
+        if (!logDir.Exists)
+        {
+            try
+            {
+                logDir.Create();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to create log dir {logDir.FullName}: {e.Message}");
+                logDir = new DirectoryInfo(Path.GetFullPath(".")); // fallback to current dir
+            }
+        }
+
+
+        // add serilog as service, which can be injected
+        var logger = new LoggerConfiguration()
+            // minimum level is either debug or information
+           .Enrich.FromLogContext()
+           .MinimumLevel.Is(isDebug ? LogEventLevel.Debug : LogEventLevel.Information)
+           .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+           .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+           .WriteTo.Console(LogEventLevel.Debug, "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext} - {UserName} - {Message:lj}{NewLine}{Exception}")
+           .WriteTo.File(new JsonFormatter(), $"{logDir}/logs.json", restrictedToMinimumLevel: LogEventLevel.Information, rollingInterval: RollingInterval.Day)
+           .WriteTo.File(new MessageTemplateTextFormatter("{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext} - {UserName} - {Message:lj}{NewLine}{Exception}"),
+                $"{logDir}/logs.txt", restrictedToMinimumLevel: isDebug ? LogEventLevel.Debug : LogEventLevel.Information, rollingInterval: RollingInterval.Day)
+           .Enrich.WithProperty("UserName", "[anon]")
+           .CreateLogger();
+
+        builder.Host.UseSerilog(logger);
+
+        return logger;
     }
 }

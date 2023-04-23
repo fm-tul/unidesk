@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Display;
+using Serilog.Formatting.Json;
 using Unidesk.Client;
 using Unidesk.Configurations;
 using Unidesk.Db;
@@ -10,6 +14,7 @@ using Unidesk.Db.Core;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Exceptions;
+using Unidesk.Logging;
 using Unidesk.Reports;
 using Unidesk.Reports.Templates;
 using Unidesk.Security;
@@ -41,6 +46,16 @@ var configuration = builder.Configuration
    .AddJsonFile($"appsettings.secret.{environmentType}.json", true)
    .AddJsonFile($"appsettings.secret.{Environment.UserName}.json", true)
    .Build();
+
+// configs
+var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>()!;
+appOptions.Environment = Enum.Parse<EnvironmentType>(environmentType);
+var emailOptions = configuration.GetSection(nameof(EmailOptions)).Get<EmailOptions>()!;
+var connectionString = configuration.GetValue<string>("UNIDESK_CONNECTION_STRING")
+                    ?? configuration.GetConnectionString(nameof(UnideskDbContext));
+
+var logger = builder.AddSerilogLogging(appOptions);
+logger.Information("Starting application");
 
 if (isVerbose)
 {
@@ -92,13 +107,6 @@ if (isDev)
 services.AddSingleton(MapsterConfiguration.CreateMapsterConfig());
 services.AddScoped<IMapper, ServiceMapper>();
 
-// configs
-var appOptions = configuration.GetSection(nameof(AppOptions)).Get<AppOptions>()!;
-appOptions.Environment = Enum.Parse<EnvironmentType>(environmentType);
-var emailOptions = configuration.GetSection(nameof(EmailOptions)).Get<EmailOptions>()!;
-var connectionString = configuration.GetValue<string>("UNIDESK_CONNECTION_STRING")
-                    ?? configuration.GetConnectionString(nameof(UnideskDbContext));
-
 // singleton
 services.AddSingleton(appOptions);
 services.AddSingleton(emailOptions!);
@@ -127,6 +135,16 @@ services.AddScoped<ThesisTransitionService>();
 
 
 var app = builder.Build();
+app.UseSerilogRequestLogging(options =>
+{
+    options.Logger = logger;
+    options.MessageTemplate = "{RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+    options.IncludeQueryInRequestPath = true;
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("UserName", httpContext.User.Identity?.Name ?? "[anon]");
+    };
+});
 
 if (generateModel)
 {
@@ -158,6 +176,7 @@ app.UseRouting();
 app.UseCors();
 
 app.UseAuthentication();
+app.UseMiddleware<LogUserNameMiddleware>();
 app.UseAuthorization();
 
 app.UseOutputCache();
@@ -204,10 +223,11 @@ apiEnums.MapGet("All/list", ([FromServices] UnideskDbContext db, [FromServices] 
 
 
 api.MapGet("enum/Cache/reset", async ([FromServices] IOutputCacheStore cache, CancellationToken ct) =>
-{
-    await cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
-    return new SimpleJsonResponse { Success = true, Message = "Ok" };
-}).Produces<SimpleJsonResponse>();
+    {
+        await cache.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
+        return new SimpleJsonResponse { Success = true, Message = "Ok" };
+    })
+   .Produces<SimpleJsonResponse>();
 
 
 var evaluationApi = api.MapGroup("evaluation")

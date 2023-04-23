@@ -155,7 +155,7 @@ public class UserService
 
     public IEnumerable<KeyValuePair<string, string>> GetUserClaimableProperties(User user)
     {
-        yield return new KeyValuePair<string, string>(ClaimTypes.Name, user.Username ?? string.Empty);
+        yield return new KeyValuePair<string, string>(ClaimTypes.Name, user.Username ?? user.Email?.UsernameFromEmail() ?? user.Id.ToString());
         yield return new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, user.Id.ToString());
         yield return new KeyValuePair<string, string>("Grants", string.Join(",", user.Roles.SelectMany(i => i.Grants.Select(j => j.Id))));
         yield return new KeyValuePair<string, string>("Created", $"{user.Created:O}");

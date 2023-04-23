@@ -22,6 +22,8 @@ public class AppOptions
     public EmailOptions EmailOptions { get; set; } = null!;
     
     public EnvironmentType Environment { get; set; }
+
+    public string LogDir { get; set; } = ".";
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
