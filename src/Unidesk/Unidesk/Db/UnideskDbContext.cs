@@ -57,6 +57,7 @@ public class UnideskDbContext : DbContext
     public  DbSet<KeywordInternship> KeywordInternships { get; set; }
 
     public  DbSet<ChangeLog> ChangeLogs { get; set; }
+    public  DbSet<EmailMessage> Emails { get; set; }
 
     private bool _interceptorsEnabled = true;
 

@@ -128,7 +128,7 @@ public class InternshipService
                         {
                             InternshipUrl = $"{_serverService.UrlBase}/internships/{item.Id}",
                         });
-                    await _emailService.SendTextEmailAsync(email, InternshipTemplates.InternshipApprovedCzeTemplate.Subject, body, ct);
+                    await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipApprovedCzeTemplate.Subject, body, ct);
                 }
                 else
                 {
@@ -138,7 +138,7 @@ public class InternshipService
                         {
                             InternshipUrl = $"{_serverService.UrlBase}/internships/{item.Id}",
                         });
-                    await _emailService.SendTextEmailAsync(email, InternshipTemplates.InternshipUpdatedCzeTemplate.Subject, body, ct);
+                    await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipUpdatedCzeTemplate.Subject, body, ct);
                 }
             }
         }
@@ -159,7 +159,7 @@ public class InternshipService
     public async Task NotifyManagerAboutSubmittedInternshipAsync(CancellationToken ct)
     {
         var submittedInternships = await GetSubmittedInternships(ct);
-        if (submittedInternships.IsEmpty())
+        if (submittedInternships.Empty())
         {
             _logger.LogInformation("No submitted internships found");
             return;
@@ -200,7 +200,7 @@ public class InternshipService
 
                 try
                 {
-                    await _emailService.SendTextEmailAsync(email, InternshipTemplates.NewInternshipSubmittedCzeTemplate.Subject, message, ct);
+                    await _emailService.QueueTextEmailAsync(email, InternshipTemplates.NewInternshipSubmittedCzeTemplate.Subject, message, ct);
                     emailsSent.Add(email);
                 }
                 catch (Exception e)

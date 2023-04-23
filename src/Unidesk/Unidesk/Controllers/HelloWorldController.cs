@@ -28,16 +28,16 @@ public class HelloWorldController : ControllerBase
 
     [HttpGet]
     [Route("helloworld")]
-    [RequireGrant(Grants.User_SuperAdmin)]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(ReportQuestion), 200)]
     [ProducesResponseType(typeof(TextQuestion), 200)]
     public async Task<string> HelloWorld()
     {
-        await _emailService.SendTextEmailAsync("jan.hybs@tul.cz", "Database migrated", $"Database migrated at {DateTime.Now}", CancellationToken.None);
+        await _emailService.QueueTextEmailAsync("jan.hybs@tul.cz", "Database migrated", $"Database migrated at {DateTime.Now}", CancellationToken.None);
         return $"Hello {_userProvider.CurrentUser?.Email}";
     }
     
-    [AllowAnonymous]
+    
     [HttpGet]
     [Route("foo")]
     public async Task<IActionResult> Foo([FromQuery] ReportModel model)

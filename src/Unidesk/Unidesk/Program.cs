@@ -100,6 +100,7 @@ services.AddSingleton<TemplateFactory>();
 
 // hosted services
 services.AddHostedService<InternshipTask>();
+services.AddHostedService<EmailScheduler>();
 
 
 // mapper

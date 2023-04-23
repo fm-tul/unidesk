@@ -57,4 +57,7 @@ public enum Grants
     
     [GrantInfo("AB9E609C-995E-4347-866F-7B9491E37680", nameof(Action_Unblock_User), "Unblock User")]
     Action_Unblock_User = 17,
+    
+    [GrantInfo("9C6DCCE2-9754-4915-A111-C14F891592A7", nameof(Action_Import_From_Stag), "Email View")]
+    Email_View = 18,
 }

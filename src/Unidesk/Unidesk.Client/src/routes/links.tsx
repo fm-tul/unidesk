@@ -1,4 +1,4 @@
-import { User_Admin, User_SuperAdmin, Internship_Manage } from "@api-client/constants/Grants";
+import { User_Admin, User_SuperAdmin, Internship_Manage, Email_View } from "@api-client/constants/Grants";
 
 import { link_admin, link_adminManageEnum } from "./admin/links";
 import { PageStagImportComponent } from "./admin/links.pageStagImport";
@@ -12,6 +12,7 @@ import { PageTeamDetailComponent, PageTeamEditComponent, PageTeamListComponent }
 import { PageMyThesisListComponent, PageThesisDetailComponent, PageThesisEditComponent, PageThesisListComponent } from "./links.pageThesis";
 import { PageUserDetailComponent, PageUserListComponent, PageUserProfileComponent } from "./links.pageUser";
 import { link_settings, link_settingsManageSettings } from "./settings/links";
+import { PageEmailListComponent } from "./links.pageEmail";
 
 export const link_stagImport: ExtraRouteProps = {
   title: "link.import",
@@ -185,6 +186,15 @@ export const link_pageInternshipDetail: ExtraRoutePropsWithGoto = {
   navigate: (id: string) => `/internships/${id}`,
 };
 
+// emails
+export const link_pageEmailList: ExtraRouteProps = {
+  title: "link.emails",
+  path: "/emails",
+  visible: true,
+  element: PageEmailListComponent,
+  requiredGrants: [Email_View.id],
+};
+
 export const links = [
   link_pageHome,
   link_stagImport,
@@ -193,6 +203,7 @@ export const links = [
   link_pageUserList,
   link_pageMyProfile,
   link_pageUserProfile,
+  link_pageEmailList,
 
   // link_pageKeywordDetail,
   // link_pageKeywordList,

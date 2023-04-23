@@ -204,6 +204,7 @@ export const en = {
   "link.evaluation-edit": "Edit Evaluation",
   "link.internships": "Internships",
   "link.internship": "Internship",
+  "link.emails": "Emails",
 
   "link.keywords": "Keywords",
   "link.keyword": "Keyword",
@@ -335,6 +336,10 @@ export const en = {
   "internship.status.cancelled": "Internship application was cancelled.",
   "internship.status.finished": "Internship application was finished.",
   "internship.status.defended": "Internship application was finished and defended.",
+
+
+  // emails
+
 };
 
 export default en;

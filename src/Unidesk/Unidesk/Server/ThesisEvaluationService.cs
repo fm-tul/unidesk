@@ -442,7 +442,7 @@ public class ThesisEvaluationService
                 ThesisEvaluationUrl = $"{url}/evaluation/{item.Id}",
             });
 
-        await _emailService.SendTextEmailAsync(
+        await _emailService.QueueTextEmailAsync(
             to: item.Email,
             subject: "Thesis evaluation invitation",
             body: body,

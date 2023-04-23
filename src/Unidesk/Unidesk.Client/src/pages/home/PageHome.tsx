@@ -12,7 +12,6 @@ export const PageHome = () => {
   const { user: me } = useContext(UserContext);
   const { language } = useContext(LanguageContext);
   const { translate } = useTranslation(language);
-  
   return (
     <UnideskComponent name="PageHome" className="">
       <h1 className="text-1xl font-extralight">{translate("home.welcome-to-temata", me.firstName ?? me.fullName)}</h1>
@@ -36,14 +35,14 @@ export const PageHome = () => {
           {translate("home.i-want-to-create-thesis")}
         </Link> */}
 
-        
-        <Link to={link_pageInternshipDetail.navigate("new")}
+        <Link
+          to={link_pageInternshipDetail.navigate("new")}
           className={classnames(
-            "grow rounded-sm p-12 text-lg transition-all text-center group",
+            "group grow rounded-sm p-12 text-center text-lg transition-all",
             "bg-sky-500/10 shadow-sky-600/50",
-            "hocus:bg-sky-600 hocus:text-white hocus:shadow-xl hocus:text-2xl"
+            "hocus:bg-sky-600 hocus:text-2xl hocus:text-white hocus:shadow-xl"
           )}
-      >     
+        >
           {translate("home.i-want-to-register-internship")}
         </Link>
       </div>

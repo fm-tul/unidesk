@@ -327,7 +327,7 @@ public class UserService
                 Token = token,
             });
         
-        await _emailService.SendTextEmailAsync(
+        await _emailService.QueueTextEmailAsync(
             existingUser.Email!,
             "Password Reset",
             body,

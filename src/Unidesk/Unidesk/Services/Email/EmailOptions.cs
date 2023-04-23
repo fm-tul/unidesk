@@ -11,4 +11,6 @@ public class EmailOptions
     
     public required string From { get; set; }
     public string? RedirectAllEmailsTo { get; set; }
+    
+    public int MaxAttempts { get; set; } = 3;
 }

@@ -31,7 +31,7 @@ public class InternshipTask : BackgroundService
                .ToArray();
 
 
-            var closestTimePoint = futureTimePoints.IsEmpty()
+            var closestTimePoint = futureTimePoints.Empty()
                 ? _timePoints.MinBy(i => i)
                 : _timePoints
                    .Where(i => i > nowTimeOnly)

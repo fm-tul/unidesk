@@ -204,6 +204,7 @@ export const cs: ILocale = {
   "link.evaluation-edit": "Upravit hodnocení",
   "link.internships": "Praxe",
   "link.internship": "Praxe",
+  "link.emails": "E-maily",
 
   "link.keywords": "Klíčová slova",
   "link.keyword": "Klíčové slovo",

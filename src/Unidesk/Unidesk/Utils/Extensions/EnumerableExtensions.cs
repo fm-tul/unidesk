@@ -14,7 +14,7 @@ public static class EnumerableExtensions
         }
     }
     
-    public static bool IsEmpty<T>(this IEnumerable<T> items)
+    public static bool Empty<T>(this IEnumerable<T> items)
     {
         return !items.Any();
     }
