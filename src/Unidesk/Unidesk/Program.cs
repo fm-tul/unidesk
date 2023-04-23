@@ -140,6 +140,23 @@ app.UseSerilogRequestLogging(options =>
     options.Logger = logger;
     options.MessageTemplate = "{RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
     options.IncludeQueryInRequestPath = true;
+    options.GetLevel = (context, duration, ex) =>
+    {
+        if (ex != null)
+        {
+            return LogEventLevel.Error;
+        }
+        if (duration > TimeSpan.FromSeconds(1).TotalMilliseconds)
+        {
+            return LogEventLevel.Warning;
+        }
+        if (context.Request.Path.ToString().StartsWith("/assets/"))
+        {
+            return LogEventLevel.Verbose;
+        }
+        
+        return LogEventLevel.Information;
+    };
     options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
     {
         diagnosticContext.Set("UserName", httpContext.User.Identity?.Name ?? "[anon]");
