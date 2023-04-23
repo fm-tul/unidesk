@@ -25,7 +25,7 @@ public class Internship : TrackedEntity
     [Required]
     public string CompanyName { get; set; }
 
-    public string Department { get; set; }
+    public string Department { get; set; } = string.Empty;
 
     [Required]
     public string Location { get; set; }
@@ -36,7 +36,7 @@ public class Internship : TrackedEntity
 
     public DateTime EndDate { get; set; }
     
-    public long DutationDays => (EndDate - StartDate).Days;
+    public long DurationDays => (EndDate - StartDate).Days;
 
     
     // under who

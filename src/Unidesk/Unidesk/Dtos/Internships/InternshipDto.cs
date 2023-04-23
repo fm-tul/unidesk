@@ -19,7 +19,7 @@ public class InternshipDto : TrackedEntityDto
     [Required]
     public string CompanyName { get; set; }
 
-    public string? Department { get; set; }
+    public string? Department { get; set; } = string.Empty;
 
     [Required]
     public string Location { get; set; }
