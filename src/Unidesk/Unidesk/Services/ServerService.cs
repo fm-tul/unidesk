@@ -12,9 +12,10 @@ public class ServerService
         _server = server;
     }
 
-    public string UrlBase => _server.Features
-                                .Get<IServerAddressesFeature>()
-                               ?.Addresses
-                                .MaxBy(i => i.StartsWith("https"))
-                          ?? "https://localhost:3000";
+    public string UrlBase => "https://temata.fm.tul.cz";
+    //   _server.Features
+    //       .Get<IServerAddressesFeature>()
+    //      ?.Addresses
+    //       .MaxBy(i => i.StartsWith("https"))
+    // ?? "https://localhost:3000";
 }
