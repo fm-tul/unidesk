@@ -14,6 +14,11 @@ public static class EnumerableExtensions
         }
     }
     
+    public static bool IsEmpty<T>(this IEnumerable<T> items)
+    {
+        return !items.Any();
+    }
+    
     /// <summary>
     /// check whether the collection contains the specified items optionally (in any order) but no other items
     ///

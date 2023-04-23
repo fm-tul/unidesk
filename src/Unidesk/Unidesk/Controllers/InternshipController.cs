@@ -97,6 +97,24 @@ public class InternshipController : Controller
         return Ok(result);
     }
     
+    [HttpDelete, Route("delete")]
+    [SwaggerOperation(OperationId = nameof(DeleteOne))]
+    [ProducesResponseType(typeof(InternshipDto), 200)]
+    public async Task<IActionResult> DeleteOne(Guid id, CancellationToken ct)
+    {
+        var item = await _internshipService.GetOneAsync(id, ct)
+                ?? throw new NotFoundException("Internship not found");
+
+        var isManager = _userProvider.HasGrant(Grants.Internship_Manage);
+        if (!isManager && item.StudentId != _userProvider.CurrentUser.Id)
+        {
+            throw new NotAllowedException("You are not allowed to delete internships for other students");
+        }
+
+        await _internshipService.DeleteAsync(item, ct);
+        return Ok();
+    }
+    
     [HttpGet, Route("change-status")]
     [SwaggerOperation(OperationId = nameof(ChangeStatus))]
     [ProducesResponseType(typeof(InternshipDto), 200)]

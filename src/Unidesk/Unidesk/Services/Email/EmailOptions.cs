@@ -8,5 +8,7 @@ public class EmailOptions
     public required string Password { get; set; }
     public required bool UseSsl { get; set; }
     
+    
+    public required string From { get; set; }
     public string? RedirectAllEmailsTo { get; set; }
 }

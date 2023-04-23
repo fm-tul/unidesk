@@ -1,8 +1,8 @@
 import { UserDto } from "@api-client";
 import { GUID_EMPTY } from "@core/config";
 import { R } from "@locales/R";
-import { useContext } from "react";
-import { Link, NavLink, Route, Routes, useMatch, useResolvedPath } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { Link, NavLink, Route, Routes, useLocation, useMatch, useResolvedPath } from "react-router-dom";
 
 import { Button } from "ui/Button";
 
@@ -11,6 +11,10 @@ import { UserMenu } from "./components/UserMenu";
 import { ExtraRouteProps } from "./routes/core";
 import { link_pageHome, links } from "./routes/links";
 import { UserContext } from "./user/UserContext";
+import { setTitleDetails } from "models/PageTitleControl";
+import { LanguageContext } from "@locales/LanguageContext";
+import { useTranslation } from "@locales/translationHooks";
+import { EnKeys } from "@locales/all";
 
 const renderMenu = (available_links: ExtraRouteProps[]) => {
   return (
@@ -19,9 +23,9 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
         <div className="flex items-center gap-2 p-4">
           {/* name and logo */}
           <Link to={link_pageHome.path} style={{ fontFamily: "Cairo Play" }} className="text-info-800">
-            <div className="" >
+            <div className="">
               <div className="text-2xl">Témata</div>
-              <div className="text-xl -mt-3">.fm.tul.cz</div>
+              <div className="-mt-3 text-xl">.fm.tul.cz</div>
             </div>
           </Link>
 
@@ -34,13 +38,7 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
                 let match = useMatch({ path: resolved.pathname, end: true });
 
                 return (
-                  <Button
-                    text
-                    key={i.path}
-                    to={i.path}
-                    component={NavLink}
-                    className={match ? "selected" : ""}
-                  >
+                  <Button text key={i.path} to={i.path} component={NavLink} className={match ? "selected" : ""}>
                     {R(i.title)}
                   </Button>
                 );
@@ -64,6 +62,23 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
 export const App = () => {
   const { user } = useContext(UserContext);
   const available_links = links.filter(i => hasAccess(i, user));
+  const {language} = useContext(LanguageContext);
+  const { translateName, translateVal, translate } = useTranslation(language);
+
+  const activeLinks = available_links.filter(i => useMatch({ path: useResolvedPath(i.path).pathname, end: true }));
+  if (activeLinks.length == 1) {
+    setTitleDetails(translate(activeLinks[0].title as EnKeys) as string);
+  }
+  // detect route change
+  // const location = useLocation();
+  // useEffect(() => {
+  //   console.log(useRouteMatch(location.pathname));
+  //   // useResolvedPath(available_links[0].path)
+  //     // const activeLink = available_links.find(i => useMatch({ path: useResolvedPath(i.path).pathname, end: true }));
+  //     // console.log("activeLink", activeLink);
+  //     // let resolved = useResolvedPath(i.path);
+  //     // let match = useMatch({ path: resolved.pathname, end: true });
+  // }, [location.pathname]);
 
   // min-w-max
   return (

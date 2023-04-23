@@ -36,4 +36,14 @@ public static class UserExtensions
         var combined = functions.Combine();
         return (user.UserFunction & combined) > 0;
     }
+    
+    public static string? GetEmail(this User user)
+    {
+        return user.Email ?? user.Aliases.FirstOrDefault()?.Email;
+    }
+    
+    public static bool IsAdmin(this User user)
+    {
+        return user.Email == "admin@temata.fm.tul.cz";
+    }
 }

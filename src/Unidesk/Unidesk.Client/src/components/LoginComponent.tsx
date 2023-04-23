@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { classnames } from "ui/shared";
 import { TulLogo } from "assets/images/tul.svg.jsx";
 import { FaUserGraduate } from "react-icons/fa";
-import { API_URL, VITE_DEBUG_LOGIN, VITE_DEBUG_LOGIN_ADMIN } from "@core/config";
+import { API_URL, VITE_DEBUG_LOGIN, VITE_DEBUG_LOGIN_ADMIN, VITE_DEBUG_LOGIN_STUDENT } from "@core/config";
 import { Fade } from "./mui/Fade";
 import { httpClient } from "@core/init";
 import { useQueryClient } from "react-query";
@@ -106,7 +106,7 @@ export const LoginComponent = (props: LoginComponentProps) => {
             <LoginForm open={localLogin} />
           </div>
 
-          {(!!VITE_DEBUG_LOGIN_ADMIN || !!VITE_DEBUG_LOGIN) && (
+          {(!!VITE_DEBUG_LOGIN_ADMIN || !!VITE_DEBUG_LOGIN || VITE_DEBUG_LOGIN_STUDENT) && (
             <div className="flex gap-4">
               {!!VITE_DEBUG_LOGIN_ADMIN && (
                 <button
@@ -127,7 +127,18 @@ export const LoginComponent = (props: LoginComponentProps) => {
                   )}
                   onClick={() => doDebugLogin(VITE_DEBUG_LOGIN)}
                 >
-                  Login Debug
+                  Login Debug JH
+                </button>
+              )}
+              {!!VITE_DEBUG_LOGIN_STUDENT && (
+                <button
+                  className={classnames(
+                    "flex w-full items-center gap-8 rounded-sm bg-violet-500/10 p-4 text-lg transition-all",
+                    "hocus:rounded-xl hocus:bg-violet-700 hocus:text-white hocus:shadow-xl hocus:shadow-violet-500/50"
+                  )}
+                  onClick={() => doDebugLogin(VITE_DEBUG_LOGIN_STUDENT)}
+                >
+                  Login Debug Student
                 </button>
               )}
             </div>

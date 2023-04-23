@@ -146,14 +146,14 @@ public static class ServiceCollectionExtensions
         return app;
     }
 
-    public static void GenerateAdminShibbo(this IHost app)
+    public static void GenerateShibbo(this IHost app, string eppn = "admin@temata.fm.tul.cz")
     {
         using var scope = app.Services.CreateScope();
         var cryptography = scope.ServiceProvider.GetRequiredService<CryptographyUtils>();
         var payload = new LoginShibboRequest
         {
-            Affiliation = "admin",
-            Eppn = "admin@temata.fm.tul.cz",
+            Affiliation = eppn.UsernameFromEmail() ?? "admin",
+            Eppn = eppn,
             Rnd = new Random().Next(),
             Time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
         };

@@ -27,6 +27,7 @@ using Unidesk.Services.Enums;
 using Unidesk.Services.Reports;
 using Unidesk.Services.Stag;
 using Unidesk.Services.ThesisTransitions;
+using Unidesk.Tasks;
 using Unidesk.Utils;
 using OneOfExtensions = Unidesk.Utils.OneOfExtensions;
 
@@ -97,6 +98,9 @@ services.AddScoped<IThesisEvaluation, ThesisEvaluation_Opponent_FM_Eng>();
 services.AddSingleton<WordGeneratorService>();
 services.AddSingleton<TemplateFactory>();
 
+// hosted services
+services.AddHostedService<InternshipTask>();
+
 
 // mapper
 if (isDev)
@@ -163,13 +167,14 @@ app.UseSerilogRequestLogging(options =>
     };
 });
 
-if (generateModel)
+if (generateModel || true)
 {
     var constantsDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "Unidesk.Client", "src", "api-client", "constants");
     app.GenerateModels<Program>(Path.GetFullPath(constantsDir));
-    Console.WriteLine("Models generated");
+    logger.Information("Generated models");
 }
-else
+
+if (!generateModel)
 {
     await app.MigrateDbAsync();
 }

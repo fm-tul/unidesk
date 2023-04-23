@@ -115,6 +115,7 @@ export const link_pageUserList: ExtraRouteProps = {
   path: "/users",
   visible: true,
   element: PageUserListComponent,
+  requiredGrants: [User_Admin.id, User_SuperAdmin.id],
 };
 
 // teams
@@ -193,20 +194,20 @@ export const links = [
   link_pageMyProfile,
   link_pageUserProfile,
 
-  link_pageKeywordDetail,
-  link_pageKeywordList,
+  // link_pageKeywordDetail,
+  // link_pageKeywordList,
 
-  link_pageThesisList,
-  link_pageMyThesisList,
-  link_pageThesisDetail,
-  link_pageThesisEdit,
-  link_pageThesisCreate,
+  // link_pageThesisList,
+  // link_pageMyThesisList,
+  // link_pageThesisDetail,
+  // link_pageThesisEdit,
+  // link_pageThesisCreate,
 
-  link_pageTeamDetail,
-  link_pageTeamList,
-  link_pageTeamEdit,
+  // link_pageTeamDetail,
+  // link_pageTeamList,
+  // link_pageTeamEdit,
 
-  link_styles,
+  // link_styles,
 
   link_admin,
   link_adminManageEnum,
@@ -214,9 +215,9 @@ export const links = [
   link_settings,
   link_settingsManageSettings,
 
-  link_pageEvaluationManage,
-  link_pageEvaluationEdit,
-  link_pageEvaluationView,
+  // link_pageEvaluationManage,
+  // link_pageEvaluationEdit,
+  // link_pageEvaluationView,
 
   // internships
   link_pageInternshipList,

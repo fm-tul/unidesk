@@ -7,27 +7,27 @@ namespace Unidesk.Db.Models.Internships;
 [GenerateModel(Name = "InternshipStatus", ForType = typeof(InternshipStatus), GenerateAggregation = true)]
 public enum InternshipStatus
 {
-    [MultiLang("Návrh", "Draft")]
+    [MultiLang("Draft", "Návrh")]
     Draft = 0,
 
-    [MultiLang("Odesláno", "Submitted")]
+    [MultiLang("Submitted for approval", "Odesláno ke schválení")]
     Submitted = 1,
 
-    [MultiLang("Schváleno", "Approved")]
+    [MultiLang("Approved", "Schváleno")]
     Approved = 2,
 
-    [MultiLang("Zamítnuto", "Rejected")]
+    [MultiLang("Rejected", "Zamítnuto")]
     Rejected = 3,
     
-    [MultiLang("Znovu otevřeno", "Reopened")]
+    [MultiLang("Reopened", "Znovu otevřeno")]
     Reopened = 4,
 
-    [MultiLang("Zrušeno", "Cancelled")]
+    [MultiLang("Cancelled", "Zrušeno")]
     Cancelled = 5,
 
-    [MultiLang("Dokončeno", "Finished")]
+    [MultiLang("Finished", "Dokončeno")]
     Finished = 6,
 
-    [MultiLang("Obhájeno", "Defended")]
+    [MultiLang("Defended", "Obhájeno")]
     Defended = 7,
 }

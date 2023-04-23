@@ -3,6 +3,7 @@ import { InternshipStatusAll } from "@api-client/constants/InternshipStatus";
 import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
+import { EnKeys } from "@locales/all";
 import { LanguagesId } from "@locales/common";
 import { translateValFor, useTranslation } from "@locales/translationHooks";
 import { InternshipDto } from "@models/InternshipDto";
@@ -59,24 +60,22 @@ const schema = z.object({
   keywords: z.array(z.any()).optional(),
 });
 
-const getInternshipMessage = (dto: InternshipDto) => {
+const getInternshipMessageKey = (dto: InternshipDto):EnKeys|null => {
   switch (dto.status) {
-    case InternshipStatus.DRAFT:
-      return null;
     case InternshipStatus.SUBMITTED:
-      return "Internship application was submitted and is waiting for approval. You will be notified when it is approved.";
+      return "internship.status.submitted";
     case InternshipStatus.APPROVED:
-      return "Internship application was approved!";
+      return "internship.status.approved";
     case InternshipStatus.REJECTED:
-      return "Internship application was rejected.";
+      return "internship.status.rejected";
     case InternshipStatus.REOPENED:
-      return "Internship application was not approved and was reopened for changes. Fix the issues and submit it again.";
+      return "internship.status.reopened";
     case InternshipStatus.CANCELLED:
-      return "Internship application was cancelled.";
+      return "internship.status.cancelled";
     case InternshipStatus.FINISHED:
-      return "Internship application was finished.";
+      return "internship.status.finished";
     case InternshipStatus.DEFENDED:
-      return "Internship application was finished and defended.";
+      return "internship.status.defended";
     default:
       return null;
   }
@@ -89,12 +88,12 @@ export const PageInternshipDetail = () => {
   const { language } = useContext(LanguageContext);
   const { translate } = useTranslation(language);
 
-  const { dto, setDto, getPropsText, getHelperProps, setQuery } = useModel(
+  const { dto, setDto, getPropsText, getHelperProps, setQuery, deleteQuery } = useModel(
     id!,
     { student: me as any, id: id === "new" ? GUID_EMPTY : id, status: InternshipStatus.DRAFT },
     () => httpClient.internship.getOne({ id: id! }),
     (dto: InternshipDto) => httpClient.internship.upsert({ requestBody: dto }),
-    () => void 0 as any,
+    (id: string) => httpClient.internship.deleteOne({ id }),
     [id],
     schema,
     false,
@@ -120,25 +119,25 @@ export const PageInternshipDetail = () => {
     type,
   });
 
-  const deleteQuery = (() => {}) as any;
-
   const duration = calculateDuration(dtoOrEmpty.startDate, dtoOrEmpty.endDate);
   const durationDays = duration?.asDays();
   const datesServerError = !!getHelperProps("startDate").helperText || !!getHelperProps("endDate").helperText;
   const datesInvalid = datesServerError || (durationDays != undefined && durationDays <= 0);
 
-  const canDelete = (isDraft || me.grantIds.includes(Grants.User_SuperAdmin.id)) && id !== "new";
+  const canDelete = (isDraft || me.grantIds.includes(Grants.Internship_Manage.id)) && id !== "new";
 
   const changeStatusQuery = useMutation((status: InternshipStatus) => httpClient.internship.changeStatus({ id: id!, status }), {
     onSuccess: setDto,
   });
+
+  const internshipMessage = getInternshipMessageKey(dtoOrEmpty as InternshipDto) as EnKeys|null;
 
   return (
     <div className="flex flex-col gap-2">
       {!isDraft && (
         <div>
           <div className="bg-warning-100 p-4 text-center  text-sm ring-2 ring-warning-500/30">
-            {getInternshipMessage(dtoOrEmpty as InternshipDto)}
+            {internshipMessage !== null && translate(internshipMessage)}
           </div>
         </div>
       )}
@@ -208,12 +207,12 @@ export const PageInternshipDetail = () => {
       <RowField
         required
         title="internship.supervisor-phone"
-        Field={<FormField {...getPropsTextWithType("supervisorPhone")} label={translate("internship.supervisor-phone")} />}
+        Field={<FormField {...getPropsTextWithType("supervisorPhone")} label={translate("internship.supervisor-phone")} name="phone" />}
       />
       <RowField
         required
         title="internship.supervisor-email"
-        Field={<FormField {...getPropsTextWithType("supervisorEmail")} label={translate("internship.supervisor-email")} />}
+        Field={<FormField {...getPropsTextWithType("supervisorEmail")} label={translate("internship.supervisor-email")} name="email" type="email" />}
       />
 
       <Section title={"internship.section.job-description"}></Section>
@@ -267,10 +266,10 @@ export const PageInternshipDetail = () => {
 
       <div className="btn-group col-start-2 justify-end">
         <Button onClick={() => setQuery.mutate(dtoOrEmpty as InternshipDto)} loading={setQuery.isLoading} if={isDraft}>
-          {dtoOrEmpty.id === GUID_EMPTY ? translate("add-new") : translate("update")}
+          {dtoOrEmpty.id === GUID_EMPTY ? translate("internship.create-new") : translate("internship.edit")}
         </Button>
 
-        <Button onConfirmedClick={() => deleteQuery.mutate(dtoOrEmpty.id)} error loading={deleteQuery.isLoading} if={canDelete}>
+        <Button onConfirmedClick={() => deleteQuery.mutate(dtoOrEmpty.id!)} error loading={deleteQuery.isLoading} if={canDelete}>
           {translate("delete")}
         </Button>
 
@@ -314,7 +313,7 @@ export const PageInternshipDetail = () => {
               {translate("internship.mark-as-defended")}
             </Button>
             <Button
-              if={!isDraft && !isReopened}
+              if={!isDraft && !isReopened && dtoOrEmpty.status !== InternshipStatus.SUBMITTED}
               onClick={() => changeStatusQuery.mutate(InternshipStatus.REOPENED)}
               loading={changeStatusQuery.isLoading}
               warning

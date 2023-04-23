@@ -14,17 +14,16 @@ public class UserRole : TrackedEntity
 
     public string? Description { get; set; }
     
-    [IgnoreMapping]
-    public List<User> Users { get; set; } = new List<User>();
+    public List<User> Users { get; set; } = new();
 
     [Column("Grants")]
-    internal string _grants { get; set; } = "";
+    public string _grantsRaw { get; set; } = "";
 
     [NotMapped]
     [Required]
     public List<Grant> Grants
     {
-        get => _grants
+        get => _grantsRaw
             .Split(',')
             .Where(g => !string.IsNullOrWhiteSpace(g))
             .Select(Guid.Parse)
@@ -33,7 +32,7 @@ public class UserRole : TrackedEntity
             .Cast<Grant>()
             .ToList();
 
-        set => _grants = string.Join(",", value.Select(i => i.Id));
+        set => _grantsRaw = string.Join(",", value.Select(i => i.Id));
     }
 }
 

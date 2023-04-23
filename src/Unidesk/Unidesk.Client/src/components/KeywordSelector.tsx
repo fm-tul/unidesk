@@ -27,7 +27,7 @@ interface KeywordSelectorProps {
 export const KeywordSelector = (props: KeywordSelectorProps) => {
   const { keywords = [], onChange, max = 100, disabled=false } = props;
   const { language } = useContext(LanguageContext);
-  const { translateName, translateVal, translate } = useTranslation(language);
+  const { translate } = useTranslation(language);
 
   const [keyword, setKeyword, debounceKw] = useDebounceState<string>("");
 
@@ -74,6 +74,9 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
   };
 
   const removeKeyword = (keyword: KeywordDto) => {
+    if (disabled) {
+      return;
+    }
     setKeyworsdWithChange(keywords.filter(k => k.value !== keyword.value || k.locale !== keyword.locale));
   };
 
@@ -95,7 +98,7 @@ export const KeywordSelector = (props: KeywordSelectorProps) => {
                 )}
               >
                 {k.value}
-                <MdClear className="opacity-50 transition group-hover:opacity-100" />
+                {!disabled && <MdClear className="opacity-50 transition group-hover:opacity-100" />}
               </div>
             ))}
           </div>

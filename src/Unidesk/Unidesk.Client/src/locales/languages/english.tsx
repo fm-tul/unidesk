@@ -268,6 +268,7 @@ export const en = {
 
   "confirm-dialog.are-you-sure-you-want-to-delete-this-team": "Are you sure you want to delete this team?",
 
+  "home.welcome-to-temata": (username: string) => `Welcome to Témata FM TUL, ${username}!`,
   "home.i-am-looking-for-thesis": (
     <>
       I am{" "}
@@ -282,6 +283,13 @@ export const en = {
       thesis
     </>
   ),
+  "home.i-want-to-register-internship": (
+    <>
+      I want to{" "}
+      <span className="group-hover:font-bold group-hover:underline group-hover:decoration-white/70 group-hover:decoration-2">register</span>{" "}
+      a new internship
+    </>
+  ),
 
   // internships
   "internship.student": "Student",
@@ -293,6 +301,8 @@ export const en = {
   "internship.start-date": "Start Date",
   "internship.end-date": "End Date",
   "internship.period": "Internship Period",
+  "internship.create-new": "Create new internship",
+  "internship.edit": "Edit internship",
 
   "internship.no-internships": "No internships found",
   "internship.submit-for-approval": "Submit for approval",
@@ -317,6 +327,14 @@ export const en = {
   "internship.warning.duration-6-weeks": "The internship duration is less than 6 weeks. Please check the dates.",
   "internship.warning.internalship-not-ended": "This internship has not ended yet.",
   "internship.error.start-date-must-be-before-end-date": "Start date must be before end date",
+
+  "internship.status.submitted": "Internship application was submitted and is waiting for approval. You will be notified when it is approved.",
+  "internship.status.approved": "Internship application was approved!",
+  "internship.status.rejected": "Internship application was rejected.",
+  "internship.status.reopened": "Internship application was not approved and was reopened for changes. Fix the issues and submit it again.",
+  "internship.status.cancelled": "Internship application was cancelled.",
+  "internship.status.finished": "Internship application was finished.",
+  "internship.status.defended": "Internship application was finished and defended.",
 };
 
 export default en;
