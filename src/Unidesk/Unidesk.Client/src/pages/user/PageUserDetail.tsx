@@ -57,14 +57,16 @@ export const PageUserDetail = () => {
       <LoadingWrapper isLoading={isLoading} error={error}>
         <>
           {!!data && (
-            <h1 className="text-2xl">
-              <Link to={link_pageUserProfile.navigate(data.id)}>{renderUserFull(data)}</Link>
-              <HistoryInfoIcon item={data} />
-            </h1>
+            <Button text>
+              <h1 className="flex items-center gap-2 text-2xl">
+                <Link to={link_pageUserProfile.navigate(data.id)}>{renderUserFull(data)}</Link>
+                <HistoryInfoIcon item={data} />
+              </h1>
+            </Button>
           )}
 
           {hasThesis && (
-            <>
+            <div className="p-2">
               <h2 className="text-xl">Stats</h2>
               <div className="flex flex-col gap-px">
                 {byStatus
@@ -81,74 +83,98 @@ export const PageUserDetail = () => {
                     </div>
                   ))}
               </div>
-            </>
+
+              <h3 className="text-xl">{translate("link.thesis")}</h3>
+              <FormField
+                as={SelectField<ViewMode>}
+                size="sm"
+                value={viewMode}
+                options={["all", "by-status", "by-function", "by-year", "by-thesis-type"]}
+                onValue={items => setViewMode(items[0])}
+                width="min-w-xs"
+              />
+
+              {!hasThesis && <div className="text-gray-500">{translate("no-thesis-found")}</div>}
+              {viewMode === "all" && (
+                <ThesisListRenderer rows={allThesis} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} />
+              )}
+              {viewMode === "by-status" && (
+                <>
+                  {byStatus
+                    .sort((a, b) => b[1].length - a[1].length)
+                    .map(([status, theses]) => (
+                      <div key={status}>
+                        <Section title={() => renderThesisStatus(status, language)} />
+                        <ThesisListRenderer
+                          rows={theses}
+                          onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))}
+                          className="ml-8"
+                        />
+                      </div>
+                    ))}
+                </>
+              )}
+              {viewMode === "by-function" && (
+                <>
+                  {[...groupBy(allUserThesis, i => i.function).entries()]
+                    .sort((a, b) => b[1].length - a[1].length)
+                    .map(([functionName, theses]) => (
+                      <div key={functionName}>
+                        <Section title={`user-function.${functionName.toLowerCase()}` as EnKeys} />
+                        <ThesisListRenderer
+                          rows={theses.map(i => i.thesis)}
+                          onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))}
+                          className="ml-8"
+                        />
+                      </div>
+                    ))}
+                </>
+              )}
+              {viewMode === "by-year" && (
+                <>
+                  {[...groupBy(allUserThesis, i => i.thesis.schoolYearId).entries()]
+                    .sort((a, b) => b[1].length - a[1].length)
+                    .map(([yearId, theses]) => (
+                      <div key={yearId}>
+                        <Section title={() => enums.schoolYears.find(i => i.id === yearId)?.name ?? "Year"} />
+                        <ThesisListRenderer
+                          rows={theses.map(i => i.thesis)}
+                          onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))}
+                          className="ml-8"
+                        />
+                      </div>
+                    ))}
+                </>
+              )}
+              {viewMode === "by-thesis-type" && (
+                <>
+                  {[...groupBy(allUserThesis, i => i.thesis.thesisTypeId).entries()]
+                    .sort((a, b) => b[1].length - a[1].length)
+                    .map(([thesisTypeId, theses]) => (
+                      <div key={thesisTypeId}>
+                        <Section title={() => translateType(enums.thesisTypes.find(i => i.id === thesisTypeId)) ?? ""} />
+                        <ThesisListRenderer
+                          rows={theses.map(i => i.thesis)}
+                          onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))}
+                          className="ml-8"
+                        />
+                      </div>
+                    ))}
+                </>
+              )}
+            </div>
           )}
 
-          <h3 className="text-xl">{translate("link.thesis")}</h3>
-          <FormField
-            as={SelectField<ViewMode>}
-            size="sm"
-            value={viewMode}
-            options={["all", "by-status", "by-function", "by-year", "by-thesis-type"]}
-            onValue={items => setViewMode(items[0])}
-            width="min-w-xs"
-          />
-
-          {!hasThesis && <div className="text-gray-500">{translate("no-thesis-found")}</div>}
-          {viewMode === "all" && <ThesisListRenderer rows={allThesis} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} />}
-          {viewMode === "by-status" && (
-            <>
-              {byStatus
-                .sort((a, b) => b[1].length - a[1].length)
-                .map(([status, theses]) => (
-                  <div key={status}>
-                    <Section title={() => renderThesisStatus(status, language)}/>
-                    <ThesisListRenderer rows={theses} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8" />
-                  </div>
-                ))}
-            </>
-          )}
-          {viewMode === "by-function" && (
-            <>
-              {[...groupBy(allUserThesis, i => i.function).entries()]
-                .sort((a, b) => b[1].length - a[1].length)
-                .map(([functionName, theses]) => (
-                  <div key={functionName}>
-                    <Section title={`user-function.${functionName.toLowerCase()}` as EnKeys} />
-                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8"  />
-                  </div>
-                ))}
-            </>
-          )}
-          {viewMode === "by-year" && (
-            <>
-              {[...groupBy(allUserThesis, i => i.thesis.schoolYearId).entries()]
-                .sort((a, b) => b[1].length - a[1].length)
-                .map(([yearId, theses]) => (
-                  <div key={yearId}>
-                    <Section title={() => enums.schoolYears.find(i => i.id === yearId)?.name ?? "Year"}/>
-                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8" />
-                  </div>
-                ))}
-            </>
-          )}
-          {viewMode === "by-thesis-type" && (
-            <>
-              {[...groupBy(allUserThesis, i => i.thesis.thesisTypeId).entries()]
-                .sort((a, b) => b[1].length - a[1].length)
-                .map(([thesisTypeId, theses]) => (
-                  <div key={thesisTypeId}>
-                    <Section title={() => translateType(enums.thesisTypes.find(i => i.id === thesisTypeId)) ?? ""} />
-                    <ThesisListRenderer rows={theses.map(i => i.thesis)} onRowClick={i => navigate(link_pageThesisDetail.navigate(i.id))} className="ml-8"  />
-                  </div>
-                ))}
-            </>
+          {!hasThesis && (
+            <div className="text-center italic text-black/20 p-8 text-xl font-extrabold select-none">{translate("thesis.no-thesis")}</div>
           )}
 
           {!hasThesis && me.grantIds.includes(Grants.User_Admin.id) && (
-            <Button onClick={deleteUser} error>
-              {translate("delete-user")}
-            </Button>
+            <div className="flex justify-end">
+              <Button onClick={deleteUser} error text sm>
+                {translate("delete-user")}
+              </Button>
+            </div>
           )}
         </>
       </LoadingWrapper>

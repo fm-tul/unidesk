@@ -292,6 +292,10 @@ export const en = {
     </>
   ),
 
+  // thesis
+  "thesis.no-thesis": "No thesis found",
+  
+
   // internships
   "internship.student": "Student",
   "internship.student.locked-description": "You cannot edit selected student, missing grants.",

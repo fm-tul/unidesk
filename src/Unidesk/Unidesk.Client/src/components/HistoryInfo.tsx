@@ -65,7 +65,7 @@ export const HistoryInfoIcon = (props: IHistoryInfoProps) => {
   const titleModified = R("modified-by-user-at-time", modifiedBy, modifiedFromNow);
 
   return (
-    <div className="inline-flex items-center gap-1 text-gray-300">
+    <div className="inline-flex items-center gap-1">
       <time className="flex items-center gap-1" title={`${titleCreated}, ${titleModified}`}>
         <FaCalendar />
       </time>

@@ -15,6 +15,7 @@ import { setTitleDetails } from "models/PageTitleControl";
 import { LanguageContext } from "@locales/LanguageContext";
 import { useTranslation } from "@locales/translationHooks";
 import { EnKeys } from "@locales/all";
+import { classnames } from "ui/shared";
 
 const renderMenu = (available_links: ExtraRouteProps[]) => {
   return (
@@ -62,7 +63,7 @@ const renderMenu = (available_links: ExtraRouteProps[]) => {
 export const App = () => {
   const { user } = useContext(UserContext);
   const available_links = links.filter(i => hasAccess(i, user));
-  const {language} = useContext(LanguageContext);
+  const { language } = useContext(LanguageContext);
   const { translateName, translateVal, translate } = useTranslation(language);
 
   const activeLinks = available_links.filter(i => useMatch({ path: useResolvedPath(i.path).pathname, end: true }));
@@ -80,6 +81,12 @@ export const App = () => {
   //     // let match = useMatch({ path: resolved.pathname, end: true });
   // }, [location.pathname]);
 
+  const innerWidth = window.innerWidth;
+  const innerHeight = window.innerHeight;
+
+  const outerWidth = window.outerWidth;
+  const outerHeight = window.outerHeight;
+
   // min-w-max
   return (
     <>
@@ -88,7 +95,16 @@ export const App = () => {
       <div className="min-h-screen">
         {renderMenu(available_links)}
 
-        <div className="container mx-auto mt-4 grid print:max-w-[90vw]">
+        <div
+          className={classnames(
+            "mx-auto rounded-md bg-white/90 p-6 shadow",
+            "w-full max-w-[100%]",
+            "md:max-w-md",
+            "lg:max-w-lg",
+            "xl:max-w-xl",
+            "print:shadow-none"
+          )}
+        >
           {/* content */}
           <div className="rounded-md bg-white/90 p-6 shadow print:shadow-none">
             <Routes>
@@ -99,6 +115,12 @@ export const App = () => {
           </div>
         </div>
         <div className="h-[50vh]"></div>
+      </div>
+
+      <div>
+        {innerWidth}x{innerHeight}
+        <br />
+        {outerWidth}x{outerHeight}
       </div>
     </>
   );

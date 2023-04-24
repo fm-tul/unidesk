@@ -319,7 +319,7 @@ export const SelectField = <T,>(props: SelectFieldProps<T>) => {
 
       <div className="relative">
         {isOpen && (
-          <div className="modal-wrapper">
+          <div className="modal-wrapper ">
             {/* modal backdrop */}
             <div className="fixed inset-0 z-20 h-screen bg-black opacity-0" onClick={onClose} />
 

@@ -43,7 +43,7 @@ export const renderUserFull = (user: UserSimpleDto) => {
       {!!middleName && <span>{` ${middleName}`}</span>}
       <span>{` ${firstName}`}</span>
       <span>{titleAfter}</span>
-      {!!email && <span className="italic">{` <${email}>`}</span>}
+      {!!email && <span className="italic text-lg">{` <${email}>`}</span>}
     </span>
   );
 };

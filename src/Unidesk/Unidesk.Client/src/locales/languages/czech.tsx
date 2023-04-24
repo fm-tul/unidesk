@@ -275,7 +275,9 @@ export const cs: ILocale = {
   ) as any,
   "home.i-want-to-create-thesis": (
     <>
-      <span className="group-hover:font-bold group-hover:underline group-hover:decoration-white/70 group-hover:decoration-2">Mám nápad</span>{" "}
+      <span className="group-hover:font-bold group-hover:underline group-hover:decoration-white/70 group-hover:decoration-2">
+        Mám nápad
+      </span>{" "}
       na projekt nebo závěrečnou práci
     </>
   ) as any,
@@ -287,48 +289,51 @@ export const cs: ILocale = {
     </>
   ) as any,
 
-// internships
-"internship.student": "Student",
-"internship.student.locked-description": "Nelze upravit vybraného studenta, nemáte potřebná oprávnění.",
-"internship.title": "Název stáže",
-"internship.company-name": "Název společnosti",
-"internship.department": "Oddělení",
-"internship.location": "Lokalita",
-"internship.start-date": "Datum zahájení",
-"internship.end-date": "Datum ukončení",
-"internship.period": "Období stáže",
-"internship.create-new": "Vytvořit novou stáž",
-"internship.edit": "Upravit stáž",
+  // thesis
+  "thesis.no-thesis": "Nebyly nalezeny žádné práce",
 
-"internship.no-internships": "Nebyly nalezeny žádné stáže",
-"internship.submit-for-approval": "Odeslat ke schválení",
-"internship.approve-internship": "Schválit stáž",
-"internship.reopen-internship": "Znovu otevřít stáž",
-"internship.reject-internship": "Zamítnout stáž",
-"internship.mark-as-finished": "Označit jako dokončené",
-"internship.mark-as-defended": "Označit jako obhájené",
+  // internships
+  "internship.student": "Student",
+  "internship.student.locked-description": "Nelze upravit vybraného studenta, nemáte potřebná oprávnění.",
+  "internship.title": "Název stáže",
+  "internship.company-name": "Název společnosti",
+  "internship.department": "Oddělení",
+  "internship.location": "Lokalita",
+  "internship.start-date": "Datum zahájení",
+  "internship.end-date": "Datum ukončení",
+  "internship.period": "Období stáže",
+  "internship.create-new": "Vytvořit novou stáž",
+  "internship.edit": "Upravit stáž",
 
-"internship.section.general": "Obecné informace",
-"internship.section.dates": "Termíny",
-"internship.section.contact": "Kontaktní informace",
-"internship.section.job-description": "Popis práce",
+  "internship.no-internships": "Nebyly nalezeny žádné stáže",
+  "internship.submit-for-approval": "Odeslat ke schválení",
+  "internship.approve-internship": "Schválit stáž",
+  "internship.reopen-internship": "Znovu otevřít stáž",
+  "internship.reject-internship": "Zamítnout stáž",
+  "internship.mark-as-finished": "Označit jako dokončené",
+  "internship.mark-as-defended": "Označit jako obhájené",
 
-"internship.supervisor-name": "Jméno vedoucího",
-"internship.supervisor-phone": "Telefon vedoucího",
-"internship.supervisor-email": "E-mail vedoucího",
-"internship.requirements": "Požadavky",
-"internship.abstract": "Abstrakt",
-"internship.keywords": "Klíčová slova",
-"internship.comments": "Komentáře",
-"internship.warning.duration-6-weeks": "Doba trvání stáže je kratší než 6 týdnů. Zkontrolujte prosím data.",
-"internship.warning.internalship-not-ended": "Tato stáž ještě neskončila.",
-"internship.error.start-date-must-be-before-end-date": "Datum zahájení musí být před datem ukončení",
+  "internship.section.general": "Obecné informace",
+  "internship.section.dates": "Termíny",
+  "internship.section.contact": "Kontaktní informace",
+  "internship.section.job-description": "Popis práce",
 
-"internship.status.submitted": "Přihláška na stáž byla odeslána a čeká na schválení. Budete informováni, jakmile bude schválena.",
-"internship.status.approved": "Přihláška na stáž byla schválena!",
-"internship.status.rejected": "Přihláška na stáž byla zamítnuta.",
-"internship.status.reopened": "Přihláška na stáž nebyla schválena a byla znovu otevřena pro změny. Opravte problémy a odešlete ji znovu.",
-"internship.status.cancelled": "Přihláška na stáž byla zrušena.",
-"internship.status.finished": "Přihláška na stáž byla dokončena.",
-"internship.status.defended": "Přihláška na stáž byla dokončena a obhájena.",
+  "internship.supervisor-name": "Jméno vedoucího",
+  "internship.supervisor-phone": "Telefon vedoucího",
+  "internship.supervisor-email": "E-mail vedoucího",
+  "internship.requirements": "Požadavky",
+  "internship.abstract": "Abstrakt",
+  "internship.keywords": "Klíčová slova",
+  "internship.comments": "Komentáře",
+  "internship.warning.duration-6-weeks": "Doba trvání stáže je kratší než 6 týdnů. Zkontrolujte prosím data.",
+  "internship.warning.internalship-not-ended": "Tato stáž ještě neskončila.",
+  "internship.error.start-date-must-be-before-end-date": "Datum zahájení musí být před datem ukončení",
+
+  "internship.status.submitted": "Přihláška na stáž byla odeslána a čeká na schválení. Budete informováni, jakmile bude schválena.",
+  "internship.status.approved": "Přihláška na stáž byla schválena!",
+  "internship.status.rejected": "Přihláška na stáž byla zamítnuta.",
+  "internship.status.reopened": "Přihláška na stáž nebyla schválena a byla znovu otevřena pro změny. Opravte problémy a odešlete ji znovu.",
+  "internship.status.cancelled": "Přihláška na stáž byla zrušena.",
+  "internship.status.finished": "Přihláška na stáž byla dokončena.",
+  "internship.status.defended": "Přihláška na stáž byla dokončena a obhájena.",
 };

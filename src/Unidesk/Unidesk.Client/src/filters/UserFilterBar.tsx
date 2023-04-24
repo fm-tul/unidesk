@@ -36,7 +36,7 @@ export const UserFilterBar = (props: UserFilterBarProps) => {
   const pageModel = usePaging({ pageSize: 20 });
   const { paging, setPaging } = pageModel;
   const { isLoading, refresh } = usePagedQuery({
-    queryFn: (i) => httpClient.users.find(i),
+    queryFn: i => httpClient.users.find(i),
     queryKey: ["thesis", "find", debounceFilter],
     pageModel,
     filter,
@@ -59,6 +59,17 @@ export const UserFilterBar = (props: UserFilterBarProps) => {
     <div className="flex flex-col gap-2">
       <FilterBar disabled={isLoading}>
         <FormField
+          as={TextField}
+          loading={isLoading}
+          fullWidth={false}
+          classNameField="grow"
+          value={filter.keyword}
+          onValue={(v: string) => setFilter({ ...filter, keyword: v })}
+          label={translate("search")}
+          onEnter={refresh}
+        />
+
+        <FormField
           as={Select<UserFunction>}
           options={userFunctionOptions}
           value={filter.userFunctions!}
@@ -79,17 +90,6 @@ export const UserFilterBar = (props: UserFilterBarProps) => {
           getTitle={(i: boolean) => (i ? OptionYes[language] : OptionNo[language])}
           width="w-full min-w-[200px]"
           clearable
-        />
-
-        <FormField
-          as={TextField}
-          loading={isLoading}
-          fullWidth={false}
-          classNameField="grow"
-          value={filter.keyword}
-          onValue={(v: string) => setFilter({ ...filter, keyword: v })}
-          label={translate("search")}
-          onEnter={refresh}
         />
 
         <Paging className="ml-auto" paging={paging} onValue={updatePagination} />

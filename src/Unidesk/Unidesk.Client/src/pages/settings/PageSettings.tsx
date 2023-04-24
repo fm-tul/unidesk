@@ -21,6 +21,7 @@ import { Table } from "ui/Table";
 import { TextField } from "ui/TextField";
 import { UnideskComponent } from "components/UnideskComponent";
 import { useMutation, useQuery, useQueryClient } from "react-query";
+import { SelectField } from "ui/SelectField";
 
 interface SettingsRoute {
   name: EnKeys;
@@ -174,15 +175,15 @@ const RolesAndGrants = () => {
           />
           <FormField
             classNameField="min-w-[200px] max-w-md"
-            as={Select<string>}
+            as={SelectField<string>}
             value={item.grants.map(i => i.id)}
-            options={userGrantsOtions}
+            options={GrantsAll.map(i => i.id)}
+            getTitle={renderGrant}
             label="Grants"
             multiple
             clearable
             searchable
-            onMultiValue={(grants: string[]) => setItem({ ...item, grants: grants.map(i => GrantsAll.find(j => j.id === i)!) })}
-            optionRender={renderGrant}
+            onValue={(grants: string[]) => setItem({ ...item, grants: grants.map(i => GrantsAll.find(j => j.id === i)!) })}
           />
           <Button className="ml-auto" success onClick={() => saveMutation.mutate(item)}>
             {item.id === GUID_EMPTY ? RR("add-new", language) : RR("update", language)}

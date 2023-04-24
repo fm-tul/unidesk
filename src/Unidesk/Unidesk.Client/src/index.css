@@ -2,7 +2,7 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "https://cdn.jsdelivr.net/npm/pretty-print-json@1.3/dist/pretty-print-json.css";
-@import url('https://fonts.googleapis.com/css2?family=Cairo+Play:wght@900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cairo+Play:wght@900&display=swap");
 
 @import "./styles/buttons.css";
 @import "./styles/pill.css";
@@ -15,7 +15,7 @@
 
 @layer components {
   .disabled-style {
-    @apply border-solid border rounded-sm cursor-not-allowed border-neutral-400 bg-black/10 opacity-80;
+    @apply cursor-not-allowed rounded-sm border border-solid border-neutral-400 bg-black/10 opacity-80;
   }
 }
 
@@ -55,12 +55,24 @@
   overflow: hidden;
 }
 
-.root-bg.a { background-image: linear-gradient(17deg, #fff1eb 0%, #ace0f9 100%) }
-.root-bg.b { background-image: linear-gradient(17deg, #e9defa 0%, #fbfcdb 100%); }
-.root-bg.c { background-image: linear-gradient(-225deg, #E3FDF5 0%, #FFE6FA 100%); }
-.root-bg.d { background-image: linear-gradient(-225deg, #2315573f 0%, #44107a3d 29%, #ff136130 67%, #fff80081 100%); }
-.root-bg.e { background-image: linear-gradient(17deg, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%); }
-.root-bg { background-image: linear-gradient(17deg, #efd6da 0%, #e1edff 49%, #e3ffe9 100%); }
+.root-bg.a {
+  background-image: linear-gradient(17deg, #fff1eb 0%, #ace0f9 100%);
+}
+.root-bg.b {
+  background-image: linear-gradient(17deg, #e9defa 0%, #fbfcdb 100%);
+}
+.root-bg.c {
+  background-image: linear-gradient(-225deg, #e3fdf5 0%, #ffe6fa 100%);
+}
+.root-bg.d {
+  background-image: linear-gradient(-225deg, #2315573f 0%, #44107a3d 29%, #ff136130 67%, #fff80081 100%);
+}
+.root-bg.e {
+  background-image: linear-gradient(17deg, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%);
+}
+.root-bg {
+  background-image: linear-gradient(17deg, #efd6da 0%, #e1edff 49%, #e3ffe9 100%);
+}
 
 .flow {
   @apply flex items-center gap-1;
@@ -75,5 +87,34 @@
 }
 
 .form-section {
-  @apply font-light text-2xl text-gray-700 border-b border-gray-300 my-4;
+  @apply my-4 border-b border-gray-300 text-2xl font-light text-gray-700;
+}
+
+.container2 {
+  width: 100%;
+}
+@media (min-width: 320px) {
+  .container2 {
+    max-width: 480px;
+  }
+}
+@media (min-width: 480px) {
+  .container2 {
+    max-width: 480px;
+  }
+}
+@media (min-width: 768px) {
+  .container2 {
+    max-width: 768px;
+  }
+}
+@media (min-width: 976px) {
+  .container2 {
+    max-width: 976px;
+  }
+}
+@media (min-width: 1440px) {
+  .container2 {
+    max-width: 1440px;
+  }
 }
