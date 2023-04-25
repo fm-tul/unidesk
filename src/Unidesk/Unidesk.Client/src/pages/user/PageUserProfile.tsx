@@ -1,9 +1,7 @@
-import { StateEntity, TeamLookupDto, TeamRole, UserDto, UserFunction, UserInTeamStatus, UserLookupDto } from "@api-client";
+import { StateEntity, UserDto, UserFunction, UserInTeamStatus, UserLookupDto } from "@api-client";
 import { All as UserFunctionAll } from "@api-client/constants/UserFunction";
 import { httpClient } from "@core/init";
-import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
-import { RR } from "@locales/R";
 import { useContext, useState } from "react";
 import { MdEdit } from "react-icons/md";
 import { Link, useParams } from "react-router-dom";
@@ -19,7 +17,7 @@ import { classnames } from "ui/shared";
 import { TextField } from "ui/TextField";
 import { UserContext } from "user/UserContext";
 import { Debug } from "components/Debug";
-import { compact, exceptIf } from "utils/arrays";
+import { compact, exceptIf, limit } from "utils/arrays";
 import { toast } from "react-toastify";
 import { UnideskComponent } from "components/UnideskComponent";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -32,15 +30,17 @@ import { Table } from "ui/Table";
 import { link_pageTeamDetail } from "routes/links";
 import { Collapse } from "components/mui/Collapse";
 import { UserInTeamStatusRenderer } from "models/itemRenderers/UserInTeamStatusRenderer";
-import { Confirm, confirmDialog } from "ui/Confirm";
+import { useTranslation } from "@locales/translationHooks";
+import { PreferencesAll } from "@api-client/constants/Preferences";
+import Checkbox from "ui/Checkbox";
 
 type StatusUpdate = {
   status: UserInTeamStatus;
   teamId: string;
 };
 export const PageUserProfile = () => {
-  const { language } = useContext(LanguageContext);
-  const translate = (value: EnKeys) => RR(value, language);
+  const {language} = useContext(LanguageContext);
+  const { translate } = useTranslation(language);
   const { enums } = useContext(EnumsContext);
 
   const { user: me } = useContext(UserContext);
@@ -80,7 +80,7 @@ export const PageUserProfile = () => {
   const handleSave = async () => {
     const userWithoutTheses = { ...user! };
     userWithoutTheses.allThesis = [];
-    const result = await httpClient.users.update({ requestBody: userWithoutTheses }).catch(e => {
+    const result = await httpClient.users.update({ requestBody: userWithoutTheses }).catch(() => {
       return null;
     });
     if (result) {
@@ -106,15 +106,6 @@ export const PageUserProfile = () => {
     }
   };
 
-  const updateUserTeams = async (teamSimple: TeamLookupDto[]) => {
-    const teams = teamSimple.map(t => ({
-      team: t,
-      role: TeamRole.MEMBER,
-      status: UserInTeamStatus.REQUESTED,
-    }));
-
-    setUser({ ...user!, teams });
-  };
 
   const userFunctions = (user?.userFunction.split(",").map(i => i.trim()) ?? []) as UserFunction[];
   const userTeams = user?.teams ?? [];
@@ -128,11 +119,26 @@ export const PageUserProfile = () => {
         toast.success("Status changed");
         queryClient.invalidateQueries(["user", id ?? me.id]);
       },
-      onError: (e: any) => {
+      onError: () => {
         toast.error("Error");
       },
     }
   );
+
+  const updatePreference = (preferenceId:string, value:boolean) => {
+    const preferences = user?.preferences ?? {preferences: []}
+    const preference = preferences.preferences.find(i => i.preferenceId === preferenceId);
+    if (!preference) {
+      preferences.preferences.push({preferenceId, value: value.toString(), type: "boolean"});
+    } else {
+      preference.value = value.toString();
+    }
+    setUser({...user!, preferences});
+  }
+
+
+  const [functions, remainingFunctions] = limit(user?.userFunction.split(",") ?? [], 3);
+  const [grants, remainingGrants] = limit(user?.grantIds ?? [], 5);
 
   return (
     <UnideskComponent name="PageUserProfile">
@@ -147,20 +153,30 @@ export const PageUserProfile = () => {
 
               {/* user functions */}
               <div className="flow flex-wrap">
-                {user.userFunction.split(",").map(i => (
+                {functions.map(i => (
                   <span key={i} className="flow rounded-full bg-gray-200 px-2 py-1">
                     <span className="text-xs">{i}</span>
                   </span>
                 ))}
+                {remainingFunctions > 0 && (
+                  <span className="flow rounded-full bg-gray-200 px-2 py-1">
+                    <span className="text-xs">{translate("and-x-more", remainingFunctions)}</span>
+                  </span>
+                )}
               </div>
 
               {/* user grants */}
               <div className="flow flex-wrap">
-                {user.grantIds.map(i => (
+                {grants.map(i => (
                   <span key={i} className="flow rounded-full bg-gray-200 px-2 py-1">
                     <span className="text-xs">{GrantsAll.find(j => j.id === i)?.name}</span>
                   </span>
                 ))}
+                {remainingGrants > 0 && (
+                  <span className="flow rounded-full bg-gray-200 px-2 py-1">
+                    <span className="text-xs">{translate("and-x-more", remainingGrants)}</span>
+                  </span>
+                )}
               </div>
             </div>
 
@@ -244,6 +260,20 @@ export const PageUserProfile = () => {
                 <FormField as={TextField} {...getProps("email")} />
               </div>
 
+              <Section title="section.preferences" />
+              {PreferencesAll.map(i => {
+                return <RowField
+                  key={i.id}
+                  title="empty_string"
+                  Field={
+                    <Checkbox label={i.description} 
+                    value={user.preferences?.preferences.find(j => j.preferenceId === i.id)?.value === "true"}
+                    onValue={value => updatePreference(i.id, value)}
+                    />
+                  }
+                />
+              })}
+              
               <Section title="section.functions-and-aliases" />
               <RowField
                 title="user-function"

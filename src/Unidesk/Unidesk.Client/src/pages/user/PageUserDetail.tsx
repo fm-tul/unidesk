@@ -171,7 +171,7 @@ export const PageUserDetail = () => {
 
           {!hasThesis && me.grantIds.includes(Grants.User_Admin.id) && (
             <div className="flex justify-end">
-              <Button onClick={deleteUser} error text sm>
+              <Button onConfirmedClick={deleteUser} error text sm>
                 {translate("delete-user")}
               </Button>
             </div>

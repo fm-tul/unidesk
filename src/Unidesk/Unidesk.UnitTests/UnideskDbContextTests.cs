@@ -122,8 +122,8 @@ public class UnideskDbContextTests
         var userRole = db.UserRoles.First(i => i.Name == "Teacher");
         userRole.Grants = new List<Grant>()
         {
-            Grants.User_Admin.AsGrant(),
-            Grants.User_Student.AsGrant(),
+            Grants.User_Admin.AsAttributeInfo().AsGrant(),
+            Grants.User_Student.AsAttributeInfo().AsGrant(),
         };
 
         var userA = new User { Email = "userA@unidesk.com" };

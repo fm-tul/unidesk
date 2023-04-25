@@ -92,3 +92,15 @@ export const compact = <T>(items: T[], defaultValue?: T) => {
   }
   return filtered;
 };
+
+
+export const limit = <T>(items: T[], limit: number = 3) => {
+  const len = items.length;
+  const remaining = len - limit;
+
+  if (remaining > 1) {
+    return [items.slice(0, limit), remaining] as [T[], number];
+  } else {
+    return [items, 0] as [T[], number];
+  }
+};

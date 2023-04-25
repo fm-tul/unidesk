@@ -97,7 +97,7 @@ export const App = () => {
 
         <div
           className={classnames(
-            "mx-auto rounded-md bg-white/90 p-6 shadow",
+            "mx-auto rounded-md bg-white/90 p-6 shadow mt-4",
             "w-full max-w-[100%]",
             "md:max-w-md",
             "lg:max-w-lg",

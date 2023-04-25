@@ -13,6 +13,8 @@ using Unidesk.Utils.Extensions;
 using BCrypt.Net;
 using Unidesk.Db.Core;
 using Unidesk.Exceptions;
+using Unidesk.Security;
+using Unidesk.ServiceFilters;
 
 namespace Unidesk.Controllers;
 
@@ -80,28 +82,30 @@ public class AccountController : ControllerBase
     }
     
     [HttpPost, Route("register")]
-    [AllowAnonymous]
+    [RequireGrant(Grants.Action_Create_User)]
     [SwaggerOperation(OperationId = nameof(Register))]
-    [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    [ProducesResponseType(typeof(ToastResponse<bool>), 200)]
+    public async Task<IActionResult> Register(RegisterRequest request, CancellationToken ct)
     {
-        var httpContext = _httpContextAccessor.HttpContext
-                       ?? throw new ArgumentNullException(nameof(_httpContextAccessor));
-
-        var dbUser = _userService.RegisterFromRequest(request)
+        var dbUser = await _userService.RegisterFromRequestAsync(request, ct, usePassword: false)
                   ?? throw new Exception("User not found");
 
-        await _userService.SignInAsync(httpContext, dbUser);
-        _logger.LogInformation("User {Email} logged in at {Time}", request.Eppn, DateTime.UtcNow);
-
-        var dto = _mapper.Map<UserWhoamiDto>(dbUser);
-        dto.Environment = _appOptions.Environment;
-
-        return Ok(new ToastResponse<UserWhoamiDto>
+        return Ok(new ToastResponse<bool>
         {
-            Message = "User logged in successfully",
-            Data = dto,
+            Message = $"User {dbUser.Email} registered successfully",
+            Data = true,
         });
+        // await _userService.SignInAsync(httpContext, dbUser);
+        // _logger.LogInformation("User {Email} logged in at {Time}", request.Eppn, DateTime.UtcNow);
+        //
+        // var dto = _mapper.Map<UserWhoamiDto>(dbUser);
+        // dto.Environment = _appOptions.Environment;
+        //
+        // return Ok(new ToastResponse<UserWhoamiDto>
+        // {
+        //     Message = "User logged in successfully",
+        //     Data = dto,
+        // });
     }
     
     [HttpPost, Route("reset-password")]

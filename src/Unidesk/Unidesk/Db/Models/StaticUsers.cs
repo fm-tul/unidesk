@@ -20,7 +20,7 @@ public static class StaticUsers
                 Name = "Guest",
                 Grants = new List<Grant>()
                 {
-                    Grants.User_Guest.AsGrant(),
+                    Grants.User_Guest.AsAttributeInfo().AsGrant(),
                 },
             },
         },
@@ -41,7 +41,7 @@ public static class StaticUsers
                 Name = "Import",
                 Grants = new List<Grant>()
                 {
-                    Grants.User_SuperAdmin.AsGrant(),
+                    Grants.User_SuperAdmin.AsAttributeInfo().AsGrant(),
                 },
             },
         },
@@ -62,7 +62,7 @@ public static class StaticUsers
                 Name = "InitialSeed",
                 Grants = new List<Grant>()
                 {
-                    Grants.User_SuperAdmin.AsGrant(),
+                    Grants.User_SuperAdmin.AsAttributeInfo().AsGrant(),
                 },
             },
         },

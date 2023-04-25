@@ -106,5 +106,23 @@ public class InternshipTemplates
 
         public required string InternshipUrl;
     }
+    
+    public class InternshipContactPersonMissingCzeTemplate : ITemplateContext
+    {
+        public const string Subject = "Chybí kontaktní osoba pro stáž";
+        public const string TemplateBody = """
+        Dobrý den,
+
+        V systému Témata FM TUL chybí kontaktní osoba pro stáž. Prosím, doplňte ji v sekci "Stáže" v administraci.
+        Pro zobrazení podrobností klikněte na níže uvedený odkaz:
+
+        {{ InternshipUrl }}
+
+        S pozdravem,
+        Témata FM TUL
+        """;
+        
+        public required string InternshipUrl;
+    }
 
 }

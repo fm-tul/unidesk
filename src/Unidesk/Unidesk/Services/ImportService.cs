@@ -181,7 +181,7 @@ public class ImportService
         }
         
         var user = Db.Users.FirstOrDefault(i => i.StagId == student.StagId)
-                   ?? Db.Users.AddAndReturn(new User()
+                   ?? Db.Users.AddAndReturn(new User
                    {
                        StagId = student.StagId,
                        Username = student.Username,

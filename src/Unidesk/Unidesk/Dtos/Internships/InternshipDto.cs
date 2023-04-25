@@ -29,20 +29,16 @@ public class InternshipDto : TrackedEntityDto
     [Required]
     public DateOnly EndDate { get; set; }
 
-    [Required]
-    public string SupervisorName { get; set; }
+    public string? SupervisorName { get; set; } = string.Empty;
 
-    [Required]
-    public string SupervisorPhone { get; set; }
+    public string? SupervisorPhone { get; set; } = string.Empty;
 
-    [Required]
-    public string SupervisorEmail { get; set; }
+    public string? SupervisorEmail { get; set; } = string.Empty;
 
     [Required]
     public string Requirements { get; set; }
 
-    [Required]
-    public string Abstract { get; set; }
+    public string? Abstract { get; set; } = string.Empty;
     
     [Required]
     public string Comments { get; set; } = string.Empty;
@@ -64,10 +60,13 @@ public class InternshipDtoValidator : AbstractValidator<InternshipDto>
         RuleFor(x => x.Location).NotNull();
         RuleFor(x => x.StartDate).GreaterThan(DateOnly.MinValue).WithMessage("Start date must be set").NotNull();
         RuleFor(x => x.EndDate).GreaterThan(DateOnly.MinValue).WithMessage("End date must be set").NotNull();
-        RuleFor(x => x.SupervisorName).NotNull();
-        RuleFor(x => x.SupervisorPhone).NotNull().MinimumLength(6);
-        RuleFor(x => x.SupervisorEmail).NotNull().EmailAddress();
         RuleFor(x => x.Requirements).NotNull();
-        RuleFor(x => x.Abstract).NotNull();
     }
+    
+    public static readonly string[] CanBeChangedWhenSubmittedProps = {
+        nameof(Internship.SupervisorName),
+        nameof(Internship.SupervisorEmail),
+        nameof(Internship.SupervisorPhone),
+        nameof(Internship.Department),
+    };
 }

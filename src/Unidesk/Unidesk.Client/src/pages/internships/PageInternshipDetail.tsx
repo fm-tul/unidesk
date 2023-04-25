@@ -52,11 +52,11 @@ const schema = z.object({
   location: z.string(),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  supervisorName: z.string(),
-  supervisorPhone: z.string().min(6),
-  supervisorEmail: z.string().email(),
+  supervisorName: z.string().optional(),
+  supervisorPhone: z.string().min(6).optional(),
+  supervisorEmail: z.string().email().optional(),
   requirements: z.string().nonempty(),
-  abstract: z.string().nonempty(),
+  abstract: z.string().optional(),
   keywords: z.array(z.any()).optional(),
 });
 
@@ -109,12 +109,19 @@ export const PageInternshipDetail = () => {
   const isManager = me.grantIds.includes(Grants.Internship_Manage.id);
   const isDraft = dtoOrEmpty.status === InternshipStatus.DRAFT;
   const isReopened = dtoOrEmpty.status === InternshipStatus.REOPENED;
+  const isPartiallyEditable = [InternshipStatus.REOPENED, InternshipStatus.SUBMITTED, InternshipStatus.APPROVED].includes(dtoOrEmpty.status!);
   const isNew = id === "new";
-  const isEditable = isDraft || isReopened;
+  const isEditable = isDraft || isReopened
   const disabled = !isEditable;
   const getPropsTextWithType = (key: keyof InternshipDto, type?: string) => ({
     ...getPropsText(key),
     disabled,
+    as: TextField,
+    type,
+  });
+  const getPropsTextWithType2 = (key: keyof InternshipDto, type?: string) => ({
+    ...getPropsText(key),
+    disabled: !isPartiallyEditable,
     as: TextField,
     type,
   });
@@ -163,7 +170,7 @@ export const PageInternshipDetail = () => {
       />
       <RowField
         title="internship.department"
-        Field={<FormField {...getPropsTextWithType("department")} label={translate("internship.department")} />}
+        Field={<FormField {...getPropsTextWithType2("department")} label={translate("internship.department")} />}
       />
       <RowField
         required
@@ -200,19 +207,16 @@ export const PageInternshipDetail = () => {
       />
       <Section title={"internship.section.contact"}></Section>
       <RowField
-        required
         title="internship.supervisor-name"
-        Field={<FormField {...getPropsTextWithType("supervisorName")} label={translate("internship.supervisor-name")} />}
+        Field={<FormField {...getPropsTextWithType2("supervisorName")} label={translate("internship.supervisor-name")} />}
       />
       <RowField
-        required
         title="internship.supervisor-phone"
-        Field={<FormField {...getPropsTextWithType("supervisorPhone")} label={translate("internship.supervisor-phone")} name="phone" />}
+        Field={<FormField {...getPropsTextWithType2("supervisorPhone")} label={translate("internship.supervisor-phone")} name="phone" />}
       />
       <RowField
-        required
         title="internship.supervisor-email"
-        Field={<FormField {...getPropsTextWithType("supervisorEmail")} label={translate("internship.supervisor-email")} name="email" type="email" />}
+        Field={<FormField {...getPropsTextWithType2("supervisorEmail")} label={translate("internship.supervisor-email")} name="email" type="email" />}
       />
 
       <Section title={"internship.section.job-description"}></Section>
@@ -231,7 +235,6 @@ export const PageInternshipDetail = () => {
         }
       />
       <RowField
-        required
         title="internship.abstract"
         Field={
           <FormField
@@ -265,7 +268,7 @@ export const PageInternshipDetail = () => {
       <DrawTimelime status={dtoOrEmpty.status} language={language} />
 
       <div className="btn-group col-start-2 justify-end">
-        <Button onClick={() => setQuery.mutate(dtoOrEmpty as InternshipDto)} loading={setQuery.isLoading} if={isDraft}>
+        <Button onClick={() => setQuery.mutate(dtoOrEmpty as InternshipDto)} loading={setQuery.isLoading} if={isDraft || isEditable || isPartiallyEditable}>
           {dtoOrEmpty.id === GUID_EMPTY ? translate("internship.create-new") : translate("internship.edit")}
         </Button>
 
@@ -337,3 +340,28 @@ export const PageInternshipDetail = () => {
 };
 
 export default PageInternshipDetail;
+
+
+/*
+Optional: kontrola dva týdny po začátku stáže (mailem upozornit)
+Supervisor Name
+Supervisor Phone
+Supervisor Email
+
+
+po schválení možnost upravovat Kontaktní informace & Oddělení
+přidat toolbar s defaulat filtrem na aktuální akademický rok
+
+
+automaticky označit na jako dokončené pokud budou obsahovat
+ - Potvrzení zaměstnavatele o absolvování odborné praxe
+ - Závěrečná zpráva z odborné bakalářské praxe (pdf?)
+
+
+dvojazyčný email
+
+
+dana.skrbkova@tul.cz
+marketa.janska@tul.cz
+libor.tuma@tul.cz
+*/

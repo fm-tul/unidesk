@@ -94,6 +94,7 @@ services.AddScoped<InternshipService>();
 services.AddScoped<ChangeTrackerService>();
 services.AddScoped<ServerService>();
 services.AddScoped<IThesisEvaluation, ThesisEvaluation_Opponent_FM_Eng>();
+services.AddScoped<IClock, SystemClock>();
 
 services.AddSingleton<WordGeneratorService>();
 services.AddSingleton<TemplateFactory>();

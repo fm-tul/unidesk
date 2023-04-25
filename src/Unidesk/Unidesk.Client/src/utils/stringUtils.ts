@@ -49,3 +49,45 @@ export const takeFirstPart = (str: string|undefined|null, separator: string = ".
   const parts = str.split(separator);
   return parts[0];
 }
+
+
+export const joinPretty = <T>(arr: T[], and: string, separator: string = ", ") => {
+  if (arr.length === 0) {
+    return "";
+  }
+  if (arr.length === 1) {
+    return arr[0];
+  }
+  if (arr.length === 2) {
+    return `${arr[0]} ${and} ${arr[1]}`;
+  }
+  return `${arr.slice(0, -1).join(separator)} ${and} ${arr[arr.length - 1]}`;
+}
+
+export const mapComplex = <T>(arr: T[], and: string, separator: string = ", ", mapper: (item: T|null, concatStr: string|null, index: number) => any) => {
+  const len = arr.length;
+  if (len === 0) {
+    return [];
+  }
+  if (len === 1) {
+    return arr.map(i => mapper(i, null, 0));
+  }
+  if (len === 2) {
+    return [
+      mapper(arr[0], null, 0),
+      mapper(null, and, 1),
+      mapper(arr[1], null, 2)
+    ];
+  }
+  
+  const items = [];
+  let j = 0;
+  for (let i = 0; i < len - 2; i++) {
+    items.push(mapper(arr[i], null, j++));
+    items.push(mapper(null, separator, j++));
+  }
+  items.push(mapper(arr[len - 2], null, j++));
+  items.push(mapper(null, and, j++));
+  items.push(mapper(arr[len - 1], null, j++));
+  return items;
+}

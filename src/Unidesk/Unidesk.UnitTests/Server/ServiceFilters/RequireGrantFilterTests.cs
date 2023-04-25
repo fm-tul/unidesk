@@ -14,8 +14,8 @@ public class RequireGrantFilterTests
     [Fact]
     public void Test_Should_Fail_If_Grant_Requirements_Are_Not_Met()
     {
-        var requiredGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
-        var userGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
+        var requiredGrants = new List<Grant> { Grants.User_SuperAdmin.AsAttributeInfo().AsGrant() };
+        var userGrants = new List<Grant> { Grants.User_SuperAdmin.AsAttributeInfo().AsGrant() };
         var (granted, error, status) = GrantCheck.HasAccess(requiredGrants, userGrants);
 
         granted.Should().BeTrue();
@@ -31,7 +31,7 @@ public class RequireGrantFilterTests
             new(Grants.User_SuperAdmin),
         };
 
-        var userGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
+        var userGrants = new List<Grant> { Grants.User_SuperAdmin.AsAttributeInfo().AsGrant() };
         var (granted, error, status) = GrantCheck.HasAccess(requiredAttributes, userGrants);
 
         granted.Should().BeTrue();
@@ -42,8 +42,8 @@ public class RequireGrantFilterTests
     [Fact]
     public void Test_Shoudl_Fail_If_Grant_Is_Missing()
     {
-        var requiredGrants = new List<Grant> { Grants.User_SuperAdmin.AsGrant() };
-        var userGrants = new List<Grant> { Grants.User_Admin.AsGrant(), Grants.User_Teacher.AsGrant() };
+        var requiredGrants = new List<Grant> { Grants.User_SuperAdmin.AsAttributeInfo().AsGrant() };
+        var userGrants = new List<Grant> { Grants.User_Admin.AsAttributeInfo().AsGrant(), Grants.User_Teacher.AsAttributeInfo().AsGrant() };
         
         var (granted, error, status) = GrantCheck.HasAccess(requiredGrants, userGrants);
         granted.Should().BeFalse();

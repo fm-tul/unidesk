@@ -25,7 +25,7 @@ public static class CookieAuthentication
             context.RejectPrincipal();
             return;
         }
-        
+
         // try to get a user from the cookies
         var claims = ClaimsObject.Create(principal);
         var user = await userService.FindAsync(claims.NameIdentifier);
@@ -36,14 +36,14 @@ public static class CookieAuthentication
             userProvider.CurrentUser = user;
             return;
         }
-        
+
         // we allow users which are not yet in the db only if settings allow it
         if (options.AllowLocalAccounts)
         {
             userProvider.CurrentUser = userService.FromClaims(claims);
             return;
         }
-        
+
         // reject the user
         userProvider.CurrentUser = null;
         context.RejectPrincipal();
@@ -57,15 +57,15 @@ public class ClaimsObject
     public DateTime Created { get; init; }
     public string Fingerprint { get; init; }
     public ClaimsPrincipal _principal { get; init; }
-    
-    public List<Grant> Grants { get; init; }
-    
-    public List<KeyValuePair<string, string>> Claims => _principal.Claims
-        .Select(c => new KeyValuePair<string, string>(c.Type, c.Value))
-        .ToList();
 
-    public bool IsValid => CryptographyUtils.Hash(Claims) == Fingerprint;  
-    
+    public List<Grant> Grants { get; init; }
+
+    public List<KeyValuePair<string, string>> Claims => _principal.Claims
+       .Select(c => new KeyValuePair<string, string>(c.Type, c.Value))
+       .ToList();
+
+    public bool IsValid => CryptographyUtils.Hash(Claims) == Fingerprint;
+
     public static ClaimsObject Create(ClaimsPrincipal principal)
     {
         var allGrants = UserGrants.All.ToList();
@@ -76,15 +76,14 @@ public class ClaimsObject
             NameIdentifier = Guid.Parse(principal.FindFirstValue(ClaimTypes.NameIdentifier)!),
             Created = DateTime.Parse(principal.FindFirstValue("Created")!),
             Grants = principal.FindFirstValue("Grants")!
-                .Split(',')
-                .Where(i => !string.IsNullOrWhiteSpace(i))
-                .Select(i => Guid.Parse(i))
-                .Select(i => allGrants.FirstOrDefault(g => g.Id == i))
-                .Where(i => i is not null)
-                .OfType<Grant>()
-                .ToList(),
+               .Split(',')
+               .Where(i => !string.IsNullOrWhiteSpace(i))
+               .Select(Guid.Parse)
+               .Select(i => allGrants.FirstOrDefault(g => g.Id == i))
+               .Where(i => i is not null)
+               .Select(i => i!.AsGrant())
+               .ToList(),
             Fingerprint = principal.FindFirstValue("Fingerprint")!,
         };
     }
-
 }

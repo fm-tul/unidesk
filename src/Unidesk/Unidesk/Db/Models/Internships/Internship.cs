@@ -36,8 +36,14 @@ public class Internship : TrackedEntity
 
     public DateTime EndDate { get; set; }
     
+    [NotMapped]
+    public TimeSpan AfterStart => DateTime.Now - StartDate;
+    
+    [NotMapped]
+    public TimeSpan AfterEnd => DateTime.Now - EndDate;
+    
+    [NotMapped]
     public long DurationDays => (EndDate - StartDate).Days;
-
     
     // under who
     [Required]

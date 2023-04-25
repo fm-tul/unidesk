@@ -93,6 +93,13 @@ public class UnideskDbContext : DbContext
                 navBuilder.OwnsMany(j => j.Details);
             });
         
+        modelBuilder.Entity<User>().OwnsOne(
+            i => i.Preferences, navBuilder =>
+            {
+                navBuilder.ToJson();
+                navBuilder.OwnsMany(j => j.Preferences);
+            });
+        
         // manually set cascade on delete for certain relations
         modelBuilder.Entity<Document>()
            .HasOne(i => i.DocumentContent)

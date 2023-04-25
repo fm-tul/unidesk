@@ -11,6 +11,7 @@ using Unidesk.Exceptions;
 using Unidesk.Security;
 using Unidesk.ServiceFilters;
 using Unidesk.Services;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Controllers;
 
@@ -88,12 +89,33 @@ public class InternshipController : Controller
         var isManager = _userProvider.HasGrant(Grants.Internship_Manage);
         InternshipDto.ValidateAndThrow(dto);
 
-        if (!isManager && dto.Student.Id != _userProvider.CurrentUser.Id)
+        if (!isManager)
         {
-            throw new NotAllowedException("You are not allowed to create or edit internships for other students");
+            // while editing
+            if (!dto.Id.IsEmpty())
+            {
+                var existing = await _internshipService.GetOneAsync(dto.Id, ct)
+                    ?? throw new NotFoundException("Internship not found");
+                
+                // if you are trying to change the status
+                NotAllowedException.ThrowIf(existing.Status != dto.Status, "You are not allowed to change the status of an internship");
+                
+                // if you are not the owner
+                NotAllowedException.ThrowIf(existing.StudentId != _userProvider.CurrentUser.Id, "You are not allowed to create or edit internships for other students");
+                
+                // if the internship is not in draft or reopened
+                NotAllowedException.ThrowIf(existing.Status.NotIn(InternshipStatus.Draft, InternshipStatus.Reopened, InternshipStatus.Submitted), "You are not allowed to edit internships that are not in draft or reopened");
+            }
         }
-        
-        var item = await _internshipService.UpsertAsync(dto, ct);
+
+        var item = await _internshipService.UpsertAsync(dto, ct, (item, modifiedProps) =>
+        {
+            if (item.Status == InternshipStatus.Submitted)
+            {
+                var notAllowedPropsChanged = modifiedProps.Any(p => !InternshipDtoValidator.CanBeChangedWhenSubmittedProps.Contains(p));
+                NotAllowedException.ThrowIf(notAllowedPropsChanged, "You are not allowed to change some of the properties of this internship because it is already submitted");
+            }
+        });
         var result = _mapper.Map<InternshipDto>(item);
         return Ok(result);
     }

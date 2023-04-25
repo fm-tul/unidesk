@@ -294,6 +294,8 @@ public class DateTimeConverter : JsonConverter
 [ExcludeFromCodeCoverage]
 public class Student : ISimpleUser
 {
+    public Guid Id { get; set; } = Guid.NewGuid();
+    
     [JsonProperty("osCislo")]
     public string? StagId { get; set; }
 

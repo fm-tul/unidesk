@@ -11,8 +11,8 @@ public class LoginRequest : ILoginRequest
 public class RegisterRequest
 {
     public string Eppn { get; set; }
-    public string PasswordBase64 { get; set; }
-    public string PasswordBase64Repeat { get; set; }
+    public string? PasswordBase64 { get; set; }
+    public string? PasswordBase64Repeat { get; set; }
 }
 
 public class ResetPasswordRequest {

@@ -98,6 +98,8 @@ export const en = {
   "add-new": "Add New",
   expand: "Expand",
   collapse: "Collapse",
+  and: "and",
+  "and-x-more": (x: number) => `and ${x} more`,
 
   teams: "Teams",
   "user-roles": "User Roles",
@@ -236,6 +238,7 @@ export const en = {
   "section.roles-and-grants": "Roles & Grants",
   "section.teams-and-groups": "Teams & Groups",
   "section.teams": "Teams",
+  "section.preferences": "Preferences",
 
   "section.team-information": "Team Information",
   "section.team-composition": "Team Composition",
@@ -294,12 +297,19 @@ export const en = {
 
   // thesis
   "thesis.no-thesis": "No thesis found",
+
+  // user
+  "user.create-new-user": "Create new user",
+  "user.function.are": "are",
+  "user.function.is": "is",
+  "user.function.no-functions": "has no functions",
+  "empty_string": "",
   
 
   // internships
   "internship.student": "Student",
   "internship.student.locked-description": "You cannot edit selected student, missing grants.",
-  "internship.title": "Internship Title",
+  "internship.title": "Proffesional Internship",
   "internship.company-name": "Company Name",
   "internship.department": "Department",
   "internship.location": "Location",

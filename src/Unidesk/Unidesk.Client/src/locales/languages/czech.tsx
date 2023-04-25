@@ -99,6 +99,8 @@ export const cs: ILocale = {
   "add-new": "Přidat nový",
   expand: "Rozbalit",
   collapse: "Sbalit",
+  and: "a",
+  "and-x-more": (x: number) => x >= 5 ?`a dalších ${x}` : `a další ${x}`,
 
   teams: "Týmy",
   "user-roles": "Role uživatele",
@@ -233,6 +235,7 @@ export const cs: ILocale = {
   "section.roles-and-grants": "Role & Oprávnění",
   "section.teams-and-groups": "Týmy & Skupiny",
   "section.teams": "Týmy",
+  "section.preferences": "Předvolby",
 
   "section.team-information": "Informace o týmu",
   "section.team-composition": "Složení týmu",
@@ -292,10 +295,17 @@ export const cs: ILocale = {
   // thesis
   "thesis.no-thesis": "Nebyly nalezeny žádné práce",
 
+  // user
+  "user.create-new-user": "Vytvořit nového uživatele",
+  "user.function.are": "je",
+  "user.function.is": "je",
+  "user.function.no-functions": "nemá žádné funkce",
+  "empty_string": "",
+
   // internships
   "internship.student": "Student",
   "internship.student.locked-description": "Nelze upravit vybraného studenta, nemáte potřebná oprávnění.",
-  "internship.title": "Název stáže",
+  "internship.title": "Odborná praxe",
   "internship.company-name": "Název společnosti",
   "internship.department": "Oddělení",
   "internship.location": "Lokalita",
@@ -321,7 +331,7 @@ export const cs: ILocale = {
   "internship.supervisor-name": "Jméno vedoucího",
   "internship.supervisor-phone": "Telefon vedoucího",
   "internship.supervisor-email": "E-mail vedoucího",
-  "internship.requirements": "Požadavky",
+  "internship.requirements": "Náplň stáže",
   "internship.abstract": "Abstrakt",
   "internship.keywords": "Klíčová slova",
   "internship.comments": "Komentáře",

@@ -28,6 +28,8 @@ public class UserDto : UserSimpleDto
     [Required]
     public List<ThesisSimpleWithUserDto> AllThesis { get; set; } = new();
     
+    public UserPreferenceOptions? Preferences { get; set; }
+    
     [Required]
     public StateEntity State { get; set; }
 }

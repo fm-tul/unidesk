@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Unidesk.Db.Models;
 using Unidesk.Security;
 using Unidesk.Services;
 
@@ -50,8 +51,8 @@ public static class ModelGenerator
                         .GetCustomAttributes<MultiLangAttribute>()
                         .ToList();
 
-                    var grantInfoAttribute = field
-                       .GetCustomAttributes<GrantInfoAttribute>()
+                    var attributeInfo = field
+                       .GetCustomAttributes<AttributeInfo>()
                        .FirstOrDefault();
                     
                     if (multiLangAttributes.Any())
@@ -61,9 +62,9 @@ public static class ModelGenerator
                         var str = WebJsonSerializer.Serialize(multiLangDict);
                         output.AppendLine($"export const {field.Name} = {str};");
                     }
-                    else if (grantInfoAttribute is not null)
+                    else if (attributeInfo is not null)
                     {
-                        var str = WebJsonSerializer.Serialize(grantInfoAttribute.AsGrant());
+                        var str = WebJsonSerializer.Serialize(attributeInfo.AsAttributeInfoItem());
                         output.AppendLine($"export const {field.Name} = {str};");
                     }
                     else

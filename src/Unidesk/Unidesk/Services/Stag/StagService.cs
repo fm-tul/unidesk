@@ -13,34 +13,49 @@ namespace Unidesk.Services.Stag;
 public class StagService
 {
     // e.g.  "https://stag-ws.tul.cz/ws/services/rest2/kvalifikacniprace/getKvalifikacniPrace?rokZadani=2021&outputFormat=json&katedra=NTI";
-    private const string URL_TEMPALTE =
-        "https://stag-ws.tul.cz/ws/services/rest2/kvalifikacniprace/getKvalifikacniPrace?rokZadani={0}&katedra={1}&outputFormat=json";
+    private const string StagUrlRoot = "https://stag-ws.tul.cz";
+    private const string UrlTemplate = StagUrlRoot + "/ws/services/rest2/kvalifikacniprace/getKvalifikacniPraceAuth?rokZadani={0}&katedra={1}&outputFormat=json";
+    private const string LoginUrl = StagUrlRoot + "/ws/login?originalURL=";
+    private const string TestUrl = StagUrlRoot + "/ws/services/rest2/help/testService";
 
     private readonly AppOptions _appOptions;
     private readonly ImportService _import;
     private readonly ILogger<StagService> _logger;
+    
+    private string? _cookie { get; set; }
+    private DateTime _cookieExpires { get; set; }
 
     public StagService(AppOptions appOptions, ImportService importService, ILogger<StagService> logger)
     {
         _appOptions = appOptions;
         _import = importService;
         _logger = logger;
+        // _cookieExpires = DateTime.MaxValue;
+        // _cookie = "WSCOOKIE=2a9f0667098307725804370eed18ac9085eee98b7e9f28aa65a877867179ea6b; Path=/ws; Secure; HttpOnly; SameSite=Lax";
     }
 
-    private HttpClient CreateClient()
+    private HttpClient CreateClient(bool useCookie)
     {
         var client = new HttpClient();
-        // var username = _appOptions.StagUsername;
-        // var password = _appOptions.StagPassword;
-        // var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
-        // client.DefaultRequestHeaders.Add("Authorization", $"Basic {encoded}");
+        if (useCookie)
+        {
+            client.DefaultRequestHeaders.Add("Cookie", _cookie);
+        }
+        else
+        {
+            var username = _appOptions.StagUsername;
+            var password = _appOptions.StagPassword;
+            var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
+            client.DefaultRequestHeaders.Add("Authorization", $"Basic {encoded}");
+        }
         return client;
     }
 
     private async Task<List<KvalifikacniPrace>> LoadItems(string url, string? saveAs)
     {
-        var response = await CreateClient().GetAsync(url);
+        var response = await CreateClient(useCookie: true).GetAsync(url);
         var json = await response.Content.ReadAsStringAsync();
+        
         var result = JsonConvert.DeserializeObject<KvalifikacniPraceList>(json)
                      ?? throw new Exception("Cannot deserialize json");
 
@@ -52,11 +67,33 @@ public class StagService
         return result.KvalifikacniPrace;
     }
 
+    private async Task<string> GetCookieFromLoginAsync()
+    {
+        // cookie lasts 30 minutes
+        var cookieAge = DateTime.Now - _cookieExpires;
+        if (_cookie is not null && cookieAge.TotalMinutes < 30)
+        {
+            return _cookie;
+        }
+
+        var loginUrl = LoginUrl + Uri.EscapeDataString(TestUrl) + "&basic=1";
+        var response = await CreateClient(useCookie: false).GetAsync(loginUrl);
+        var data = await response.Content.ReadAsStringAsync();
+        var cookies = response.Headers.GetValues("Set-Cookie").ToList();
+        _cookie = cookies.First();
+        _cookieExpires = DateTime.Now.AddMinutes(30);
+        return _cookie;
+    }
+    
+    // https://stag-ws.tul.cz/ws/services/rest2/kvalifikacniprace/getKvalifikacniPrace?rokZadani=2022&katedra=NTI&outputFormat=json&stagUser=JAN_HYBS
+    // https://stag-ws.tul.cz/ws/services/rest2/kvalifikacniprace/getKvalifikacniPraceAuth?rokZadani=2022&katedra=NTI&outputFormat=json
 
     public async Task<List<Thesis>> ImportFromStagAsync(int year, string departmentCode)
     {
         var sw = Stopwatch.StartNew();
-        var url = string.Format(URL_TEMPALTE, year, departmentCode);
+        await GetCookieFromLoginAsync();
+        var url = string.Format(UrlTemplate, year, departmentCode);
+            
         var saveAs = $"stag-{year}-{departmentCode}.json";
         var dtos = await LoadItems(url, saveAs);
         var imported = new List<Thesis>();

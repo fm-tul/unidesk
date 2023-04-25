@@ -24,7 +24,7 @@ export const Tooltip = (props: React.PropsWithChildren<TooltipProps>) => {
   const { children, content } = props;
 
   return (
-    <TooltipImpl overlay={content} overlayClassName="shadow-xl max-w-xs rounded-lg" mouseLeaveDelay={0.15} showArrow={false}>
+    <TooltipImpl overlay={content} overlayClassName="shadow-xl max-w-sm rounded-lg" mouseLeaveDelay={0.15} showArrow={false}>
       <span>{children as any}</span>
     </TooltipImpl>
   );

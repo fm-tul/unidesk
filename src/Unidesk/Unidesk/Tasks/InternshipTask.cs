@@ -38,9 +38,8 @@ public class InternshipTask : BackgroundService
                    .MinBy(i => nowTimeOnly - i);
 
             var timeToWait = closestTimePoint - nowTimeOnly;
-            Console.WriteLine($"Waiting for {timeToWait}");
             await Task.Delay(timeToWait, stoppingToken);
-
+            
             if (stoppingToken.IsCancellationRequested)
             {
                 return;
@@ -48,7 +47,9 @@ public class InternshipTask : BackgroundService
 
             using var scope = _serviceProvider.CreateScope();
             var internshipService = scope.ServiceProvider.GetRequiredService<InternshipService>();
+            
             await internshipService.NotifyManagerAboutSubmittedInternshipAsync(stoppingToken);
+            await internshipService.NotifyStudentsContactPersonMissingAsync(stoppingToken);
         }
     }
 }

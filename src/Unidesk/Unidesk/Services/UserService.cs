@@ -155,7 +155,7 @@ public class UserService
 
     public IEnumerable<KeyValuePair<string, string>> GetUserClaimableProperties(User user)
     {
-        yield return new KeyValuePair<string, string>(ClaimTypes.Name, user.Username ?? user.Email?.UsernameFromEmail() ?? user.Id.ToString());
+        yield return new KeyValuePair<string, string>(ClaimTypes.Name, user.FullName());
         yield return new KeyValuePair<string, string>(ClaimTypes.NameIdentifier, user.Id.ToString());
         yield return new KeyValuePair<string, string>("Grants", string.Join(",", user.Roles.SelectMany(i => i.Grants.Select(j => j.Id))));
         yield return new KeyValuePair<string, string>("Created", $"{user.Created:O}");
@@ -273,11 +273,19 @@ public class UserService
         return user;
     }
     
-    public User RegisterFromRequest(RegisterRequest request)
+    public async Task<User> RegisterFromRequestAsync(RegisterRequest request, CancellationToken ct, bool usePassword = true)
     {
-        if (request.PasswordBase64 != request.PasswordBase64Repeat)
+        if (usePassword)
         {
-            throw new Exception("Passwords do not match");
+            if (request.PasswordBase64 != request.PasswordBase64Repeat)
+            {
+                throw new Exception("Passwords do not match");
+            }
+            if (string.IsNullOrWhiteSpace(request.PasswordBase64))
+            {
+                throw new Exception("Password is empty");
+            }
+            ValidatePasswordAndThrow(request.PasswordBase64);
         }
         
         var user = new User
@@ -286,17 +294,18 @@ public class UserService
             Email = request.Eppn.ValidEmailOrDefault() ?? throw new Exception("Invalid email"),
         };
 
-        ValidatePasswordAndThrow(request.PasswordBase64);
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.PasswordBase64)!;
+        if (usePassword)
+        {
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.PasswordBase64)!;
+        }
         
-        var existingUser = _db.Users.FirstOrDefault(i => i.Email == user.Email);
-        if (existingUser != null)
+        if (await _db.Users.AnyAsync(i => i.Email == user.Email, ct))
         {
             throw new Exception("User with this email already exists");
         }
 
         _db.Users.Add(user);
-        _db.SaveChanges();
+        await _db.SaveChangesAsync(ct);
 
         return user;
     }

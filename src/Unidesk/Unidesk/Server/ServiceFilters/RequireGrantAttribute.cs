@@ -10,6 +10,6 @@ public class RequireGrantAttribute : Attribute
 
     public RequireGrantAttribute(Grants grant)
     {
-        Grant = grant.AsGrant();
+        Grant = grant.AsAttributeInfo().AsGrant();
     }
 }

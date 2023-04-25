@@ -14,15 +14,71 @@ import { useDebounceLocalStorageState } from "hooks/useDebounceState";
 import { UserFilter } from "@models/UserFilter";
 import { UserFunction } from "@models/UserFunction";
 import { distinct } from "utils/arrays";
+import { FloatingAction } from "components/mui/FloatingAction";
+import { TranslateFunc, useTranslation } from "@locales/translationHooks";
+import { UserContext } from "user/UserContext";
+import { Grants } from "@api-client/constants/Grants";
+import { RegisterRequest } from "@api-client/index";
+import { Modal } from "ui/Modal";
+import { TextField } from "ui/TextField";
+import { ButtonGroup } from "components/FilterBar";
+import { httpClient } from "@core/init";
+import { mapComplex } from "utils/stringUtils";
 
-const orderByOptions = [
-  { value: "LastName", label: "lastname" },
-  { value: "FirstName", label: "firstname" },
-];
+interface UserRoleRendererProps {
+  user: UserLookupDto;
+  translate: TranslateFunc;
+  onRoleClick?: (role: string) => void;
+}
+const UserFunctionRenderer = (props: UserRoleRendererProps) => {
+  const { user, onRoleClick, translate } = props;
+
+  const functions = user.userFunction.split(",");
+  const and = translate("and") as string;
+  const isNone = functions.length === 1 && functions[0] === UserFunction.NONE;
+
+  return (
+    <div className="flex flex-col">
+      <span className="flow">
+        {isNone ? (
+          translate("user.function.no-functions")
+        ) : (
+          <>
+            {translate("user.function.is")}
+            <span className="flow text-rose-600">
+              {mapComplex(functions, and, ", ", (i, sep, index) => {
+                return !!sep ? (
+                  <span className="text-black" key={index}>
+                    {sep}
+                  </span>
+                ) : (
+                  <button onClick={() => onRoleClick?.(i!)} key={i}>
+                    {i}
+                  </button>
+                );
+              })}
+            </span>
+          </>
+        )}
+      </span>
+      <span className="text-xs">
+        {user.stagId && (
+          <>
+            stagId <span className="text-rose-600">{user.stagId}</span>
+          </>
+        )}
+      </span>
+    </div>
+  );
+};
 
 type UserFilterOnly = Omit<UserFilter, "filter">;
 export const PageUserList = () => {
   const { language } = useContext(LanguageContext);
+  const { translate } = useTranslation(language);
+  const { user: me } = useContext(UserContext);
+  const [newUser, setNewUser] = useState<RegisterRequest | null>(null);
+
   const [data, setData] = useState<UserLookupDto[]>([]);
 
   const [filter, setFilter, debounceFilter] = useDebounceLocalStorageState<UserFilterOnly>("main.user-filter-bar", {
@@ -39,6 +95,14 @@ export const PageUserList = () => {
     const userFunctions = distinct([...validUserFunc, userFunc.value]) as UserFunction[];
     setFilter({ ...filter, userFunctions });
   };
+
+  const createNewUser = async () => {
+    if (!newUser) {
+      return;
+    }
+    await httpClient.account.register({ requestBody: newUser });
+  };
+
   return (
     <UnideskComponent name="PageUserList">
       <LoadingWrapper isLoading={false} error={null} className="flex flex-col gap-4">
@@ -48,40 +112,39 @@ export const PageUserList = () => {
           {data &&
             data.map(user => (
               <div key={user.id} className="flex items-center gap-1">
-                <Tooltip
-                  content={
-                    <div className="flex flex-col">
-                      <span className="flow">
-                        is
-                        <span className="flow text-rose-600">
-                          {user.userFunction.split(",").map(i => (
-                            <button onClick={() => addUseFunctionToFilter(i)} key={i}>
-                              {i}
-                            </button>
-                          ))}
-                        </span>
-                      </span>
-                      <span className="text-xs">
-                        {user.stagId && (
-                          <>
-                            stagId <span className="text-rose-600">{user.stagId}</span>
-                          </>
-                        )}
-                      </span>
-                    </div>
-                  }
-                >
+                <Tooltip content={<UserFunctionRenderer user={user} onRoleClick={addUseFunctionToFilter} translate={translate} />}>
                   <Button component={Link} to={link_pageUserDetail.navigate(user.id)} sm text>
                     <span className="flex items-center gap-1">
-                      <span className="min-w-[26px] text-right text-xs text-gray-500">{user.titleBefore}</span>
+                      <span className="min-w-[26px] text-right text-xs text-gray-500 normal-case">{user.titleBefore}</span>
                       {user.fullName}
-                      {user.titleAfter && <span className="text-xs text-gray-500">{user.titleAfter}</span>}
+                      {user.titleAfter && <span className="text-xs text-gray-500 normal-case">{user.titleAfter}</span>}
                     </span>
                   </Button>
                 </Tooltip>
               </div>
             ))}
         </div>
+        {me.grantIds.includes(Grants.Action_Create_User.id) && (
+          <FloatingAction tooltip={translate("create")} onClick={() => setNewUser({})} />
+        )}
+        {newUser && (
+          <Modal open={true} onClose={() => setNewUser(null)} width="md" className="rounded bg-white p-4">
+            <h1 className="text-2xl font-bold">{translate("user.create-new-user")}</h1>
+            <TextField
+              label="Email"
+              type="email"
+              className=" my-4"
+              value={newUser.eppn}
+              onChange={e => setNewUser({ ...newUser, eppn: e.target.value })}
+            />
+            <ButtonGroup className="justify-end" variant="text">
+              <Button onClick={() => setNewUser(null)} warning>
+                {translate("cancel")}
+              </Button>
+              <Button onClick={createNewUser}>{translate("create")}</Button>
+            </ButtonGroup>
+          </Modal>
+        )}
       </LoadingWrapper>
     </UnideskComponent>
   );
