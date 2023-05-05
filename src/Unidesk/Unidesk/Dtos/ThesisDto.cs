@@ -91,6 +91,9 @@ public class ThesisDto : TrackedEntityDto
     public List<ThesisLookupUserDto> ThesisUsers { get; set; } = new();
     
     [Required]
+    public List<EvaluationBasicDto> Evaluations { get; set; } = new();
+    
+    [Required]
     public List<ThesisLookupUserDto> Authors => ThesisUsers.Where(x => x.Function == UserFunction.Author).ToList();
     
     [Required]

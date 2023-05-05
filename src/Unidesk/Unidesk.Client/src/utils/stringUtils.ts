@@ -91,3 +91,13 @@ export const mapComplex = <T>(arr: T[], and: string, separator: string = ", ", m
   items.push(mapper(arr[len - 1], null, j++));
   return items;
 }
+
+
+export const isNullOrEmpty = (str: string|null|undefined) => {
+  return !str || str.trim().length === 0;
+}
+
+
+export const isAllNotNullOrEmpty = (...strs: (string|null|undefined)[]) => {
+  return strs.every(s => !isNullOrEmpty(s));
+}

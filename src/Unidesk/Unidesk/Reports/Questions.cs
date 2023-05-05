@@ -314,6 +314,99 @@ public static class Questions
             Question = "Pracoviště oponenta",
             Rows = 1,
         };
+        
+        // internship report
+
+        public static ReportQuestion InternshipStudentName_CZ = new TextQuestion
+        {
+            Id = new Guid("EF46CB5F-9479-421B-92DE-F5B5627DB81B"),
+            Question = "Jméno a příjmení studenta",
+            Rows = 1,
+        };
+        
+        public static ReportQuestion InternshipCompanyName_CZ = new TextQuestion
+        {
+            Id = new Guid("62353E63-9B0B-41BB-AB93-F95C8764692C"),
+            Question = "Název společnosti",
+            Rows = 1,
+        };
+        
+        public static ReportQuestion InternshipStudyProgram_CZ = new TextQuestion
+        {
+            Id = new Guid("E0984C0D-5D58-4C90-B65B-875FAAA9AB0E"),
+            Question = "Studijní program",
+            Rows = 1,
+        };
+        public static ReportQuestion InternshipStudentId_CZ = new TextQuestion
+        {
+            Id = new Guid("2ED2754E-A7E9-42B4-A000-F751832B45E7"),
+            Question = "Číslo studenta",
+            Rows = 1,
+        };
+        
+        public static ReportQuestion InternshipDateFrom_CZ = new TextQuestion
+        {
+            Id = new Guid("84D9E6AC-A171-4AB6-B4E3-3EAC4823B26B"),
+            Question = "Datum od",
+            Type = "date",
+            Rows = 1,
+        };
+        
+        public static ReportQuestion InternshipDateTo_CZ = new TextQuestion
+        {
+            Id = new Guid("5CA08895-A3FE-4883-991F-6F65EB627362"),
+            Question = "Datum do",
+            Type = "date",
+            Rows = 1,
+        };
+
+        public static ReportQuestion InternshipPosition_CZ = new TextQuestion
+        {
+            Id = new Guid("43E7665E-1ABC-4262-AAC3-3FF1D9637175"),
+            Question = "Pozice v rámci stáže",
+            Rows = 1,
+        };
+        
+        public static ReportQuestion InternshipJobDescription_CZ = new TextQuestion
+        {
+            Id = new Guid("CA631035-ACEB-42B4-ABDE-FDD83BF229D6"),
+            Question = "Náplň práce",
+            Rows = 10,
+        };
+        
+        public static ReportQuestion InternshipOverallAssessment_CZ = new TextQuestion
+        {
+            Id = new Guid("96B4B226-EC1E-4FD2-BC81-1D4522B567A8"),
+            Question = "Zhodnocení praxe a kvality odvedené práce",
+            Rows = 10,
+        };
+        
+        public static ReportQuestion InternshipInCity_CZ = new TextQuestion
+        {
+            Id = new Guid("D91873FA-C409-44FB-99DA-410E711C543D"),
+            Question = "V",
+            Rows = 1,
+        };
+        
+        public static ReportQuestion InternshipOnDay_CZ = new TextQuestion
+        {
+            Id = new Guid("525D507A-DED9-4A87-9ADF-0D683A865960"),
+            Question = "dne",
+            Type = "date",
+            Rows = 1,
+        };   
+        public static ReportQuestion InternshipSupervisorName_CZ = new TextQuestion
+        {
+            Id = new Guid("54F94567-978E-45A7-8A36-A1E6FD89D7FD"),
+            Question = "Jméno a příjmení vedoucího stáže",
+            Rows = 1,
+        };        
+        public static ReportQuestion InternshipSupervisorPosition_CZ = new TextQuestion
+        {
+            Id = new Guid("47EA3C18-FB47-4586-8B6E-A145F20B22ED"),
+            Question = "Pozice vedoucího stáže",
+            Rows = 1,
+        };
     }
 
     public static class CustomChoiceQuestions
@@ -345,7 +438,7 @@ public static class Questions
         // regex for guid: "\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
     }
 
-    public static ReportQuestion Section(string name, string guid, Padding? padding = null) =>
+    public static ReportQuestion Section(string name, string? guid = null, Padding? padding = null) =>
         new SectionQuestion
         {
             Id = guid.IsNullOrEmpty() ? Guid.NewGuid() : Guid.Parse(guid),

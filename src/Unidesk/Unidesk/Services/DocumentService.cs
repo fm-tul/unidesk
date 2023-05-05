@@ -9,6 +9,9 @@ namespace Unidesk.Services;
 public class DocumentService
 {
     private readonly UnideskDbContext _db;
+
+    public const string ApplicationPdf = "application/pdf";
+
     public DocumentService(UnideskDbContext db)
     {
         _db = db;
@@ -23,18 +26,17 @@ public class DocumentService
     /// <returns></returns>
     public async Task<Document?> UpdateDocumentAsync(Document? doc, DocumentDto dto, CancellationToken ct)
     {
-        
         // Guid.Empty DocumentContentId means we are creating a new document
         // null DocumentContentId means we are deleting the document
         var documentId = doc?.Id;
-        
+
         // handle deletion
         if (dto.DocumentContentId is null && documentId is not null)
         {
             _db.Documents.Remove(doc!);
             return null;
         }
-        
+
         if (dto.DocumentContentId != Guid.Empty)
         {
             return null;
@@ -65,5 +67,85 @@ public class DocumentService
         }
 
         return document;
+    }
+
+    public Document CreateDocument(IFormFile file)
+    {
+        var contentData = ReadFromFile(file);
+        var content = new DocumentContent
+        {
+            Content = contentData,
+        };
+
+        var doc = new Document
+        {
+            Name = file.FileName,
+            ContentType = file.ContentType,
+            Size = file.Length,
+            Extension = Path.GetExtension(file.FileName),
+            DocumentContent = content,
+            DocumentContentId = content.Id,
+            Description = string.Empty,
+        };
+        content.DocumentId = doc.Id;
+
+        return doc;
+    }
+
+    public void UpdateDocument(Document doc, IFormFile file)
+    {
+        var contentData = ReadFromFile(file);
+        doc.DocumentContent.Content = contentData;
+
+        doc.Name = file.FileName;
+        doc.ContentType = file.ContentType;
+        doc.Size = file.Length;
+        doc.Extension = Path.GetExtension(file.FileName);
+    }
+
+    private byte[] ReadFromFile(IFormFile file)
+    {
+        var contentData = new byte[file.Length];
+        var read = file.OpenReadStream()
+           .Read(contentData, 0, (int)file.Length);
+        if (read != file.Length)
+        {
+            throw new Exception("Could not read the file");
+        }
+
+        return contentData;
+    }
+
+    public Document CreateDocument(byte[] data, string filename, string contentType = ApplicationPdf)
+    {
+        var content = new DocumentContent
+        {
+            Content = data,
+        };
+
+        var doc = new Document
+        {
+            Name = filename,
+            ContentType = contentType,
+            Size = data.Length,
+            Extension = Path.GetExtension(filename),
+            DocumentContent = content,
+            DocumentContentId = content.Id,
+            Description = string.Empty,
+        };
+
+        content.DocumentId = doc.Id;
+
+        return doc;
+    }
+
+    public void UpdateDocument(Document doc, byte[] data, string filename, string contentType = ApplicationPdf)
+    {
+        doc.DocumentContent.Content = data;
+        
+        doc.Name = filename;
+        doc.ContentType = contentType;
+        doc.Size = data.Length;
+        doc.Extension = Path.GetExtension(filename);
     }
 }

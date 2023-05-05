@@ -2,7 +2,7 @@
 
 namespace Unidesk.Reports;
 
-public interface IThesisEvaluation
+public interface IEvaluationTemplate
 {
     bool CanProcess(ThesisEvaluationContext context);
     string TemplateName { get; }

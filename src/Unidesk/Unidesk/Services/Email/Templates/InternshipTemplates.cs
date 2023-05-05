@@ -64,12 +64,17 @@ public class InternshipTemplates
         Vaše žádost o stáž byla schválena. Pro zobrazení podrobností klikněte na níže uvedený odkaz:
 
         {{ InternshipUrl }}
+        {{ if Note }}
+
+        Poznámka od schvalujícího: {{ Note }}
+        {{ end }}
 
         S pozdravem,
         Témata FM TUL
         """;
 
         public required string InternshipUrl;
+        public string? Note { get; set; }
     }
     
         

@@ -19,7 +19,7 @@ public class User : TrackedEntity, ISimpleUser, IStateEntity
     public string? TitleAfter { get; set; }
 
     [NotMapped]
-    public string? FullName => this.FullName();
+    public string FullName => this.FullName();
 
     public string? Email { get; set; }
     /// <summary>

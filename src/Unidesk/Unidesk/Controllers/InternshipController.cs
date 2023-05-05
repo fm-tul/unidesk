@@ -145,7 +145,7 @@ public class InternshipController : Controller
     [HttpGet, Route("change-status")]
     [SwaggerOperation(OperationId = nameof(ChangeStatus))]
     [ProducesResponseType(typeof(InternshipDto), 200)]
-    public async Task<IActionResult> ChangeStatus(Guid id, InternshipStatus status, CancellationToken ct)
+    public async Task<IActionResult> ChangeStatus(Guid id, InternshipStatus status, string? note, CancellationToken ct)
     {
         var item = await _internshipService.GetOneAsync(id, ct)
                 ?? throw new NotFoundException("Internship not found");
@@ -156,7 +156,7 @@ public class InternshipController : Controller
             throw new NotAllowedException("You are not allowed to change the status of internships for other students");
         }
 
-        var newItem = await _internshipService.ChangeStatusAsync(item, status, isManager, ct);
+        var newItem = await _internshipService.ChangeStatusAsync(item, status, isManager, note, ct);
         var result = _mapper.Map<InternshipDto>(newItem);
         return Ok(result);
     }

@@ -208,11 +208,11 @@ export const links = [
   // link_pageKeywordDetail,
   // link_pageKeywordList,
 
-  // link_pageThesisList,
-  // link_pageMyThesisList,
-  // link_pageThesisDetail,
-  // link_pageThesisEdit,
-  // link_pageThesisCreate,
+  link_pageThesisList,
+  link_pageMyThesisList,
+  link_pageThesisDetail,
+  link_pageThesisEdit,
+  link_pageThesisCreate,
 
   // link_pageTeamDetail,
   // link_pageTeamList,
@@ -226,9 +226,9 @@ export const links = [
   link_settings,
   link_settingsManageSettings,
 
-  // link_pageEvaluationManage,
-  // link_pageEvaluationEdit,
-  // link_pageEvaluationView,
+  link_pageEvaluationManage,
+  link_pageEvaluationEdit,
+  link_pageEvaluationView,
 
   // internships
   link_pageInternshipList,

@@ -58,19 +58,16 @@ public class Internship : TrackedEntity
 
     
     // what should be done
-    [Required]
     public string Requirements { get; set; }
-
-    [Required]
     public string Abstract { get; set; }
-    
-    [Required]
-    public string Comments { get; set; }
+    public string Comments { get; set; } 
+    public string Note { get; set; }
 
     /// <summary>
     /// List of keywords for the internship (both English and Czech)
     /// </summary>
     public List<KeywordInternship> KeywordInternship { get; set; } = new();
+    public List<Evaluation> Evaluations { get; set; } = new();
     
     [NotMapped]
     public List<Keyword> Keywords => KeywordInternship.Select(x => x.Keyword).ToList();

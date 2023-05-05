@@ -21,6 +21,8 @@ public class EmailService
         _logger = logger;
     }
 
+    public string ContactEmail => _emailOptions.ContactEmail;
+
     private async Task<SmtpClient> GetSmtpClient()
     {
         var client = new SmtpClient();
@@ -30,8 +32,14 @@ public class EmailService
         return client;
     }
 
-    public async Task<EmailMessage> QueueTextEmailAsync(string to, string subject, string body, CancellationToken ct, Action<EmailMessage>? tagMessage = null)
+    public async Task<EmailMessage?> QueueTextEmailAsync(string to, string subject, string body, CancellationToken ct, Action<EmailMessage>? tagMessage = null)
     {
+        // if (_emailOptions.RedirectAllEmailsTo.IsNotNullOrEmpty())
+        // {
+        //     _logger.LogDebug("ignoring email sending because all emails are redirected to {RedirectAllEmailsTo}", _emailOptions.RedirectAllEmailsTo);
+        //     return null;
+        // }
+        
         var email = new EmailMessage
         {
             From = _emailOptions.From,
@@ -46,24 +54,6 @@ public class EmailService
         _db.Emails.Add(email);
         await _db.SaveChangesAsync(ct);
         return email;
-    }
-
-    public async Task SendTextEmailAsync(string to, string subject, string body, CancellationToken ct, Action<EmailMessage>? tagMessage = null)
-    {
-        var email = new EmailMessage
-        {
-            From = _emailOptions.From,
-            To = to,
-            Subject = subject,
-            Body = body,
-            Status = EmailStatus.InQueue,
-            ScheduledToBeSent = DateTime.Now,
-        };
-
-        tagMessage?.Invoke(email);
-        _db.Emails.Add(email);
-        await SendTextEmailAsync(email, ct);
-        await _db.SaveChangesAsync(ct);
     }
 
     public async Task<bool> SendTextEmailAsync(EmailMessage email, CancellationToken ct)

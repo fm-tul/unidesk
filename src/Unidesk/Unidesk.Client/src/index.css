@@ -12,6 +12,7 @@
 @import "./styles/table.css";
 @import "./styles/textfields.css";
 @import "./styles/thesis-states.css";
+@import "./styles/modal.css";
 
 @layer components {
   .disabled-style {
@@ -117,4 +118,13 @@
   .container2 {
     max-width: 1440px;
   }
+}
+
+
+.app-center {
+  @apply mx-auto;
+}
+
+.file-input > label {
+  width: inherit;
 }

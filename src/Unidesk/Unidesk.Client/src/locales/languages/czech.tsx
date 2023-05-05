@@ -5,6 +5,20 @@ export const cs: ILocale = {
   flag: "🇨🇿",
   language: "Čeština",
 
+  // common
+  "common.upload": "Upload",
+  "common.download": "Download",
+  "common.clear": "Smazat",
+  "common.invitation-sent": "Pozvánka byla odeslána",
+  "common.save-first-before-contiuining": "Nejprve uložte formulář, než budete pokračovat.",
+  "common.upload.drop-files-here": "Nahrajte soubory přetažením sem",
+  "common.remove-file": "Odstranit soubor",
+  "common.file-removed-from-server": "Soubor byl odstraněn ze serveru",
+  "common.error.failed-to-send-invitation": "Nepodařilo se odeslat pozvánku",
+  "common.error.failed-to-remove-file-from-server": "Nepodařilo se odstranit soubor ze serveru",
+  "common.upload.error.file-too-large-x": (x: string) => `Soubor je příliš velký. Maximální velikost souboru je ${x}.`,
+  "common.upload.error.file-not-supported-x": (x: string) => `Soubor  není podporován. Podporované typy souborů jsou ${x}.`,
+
   // users
   "user-function": "Funkce uživatele",
   "linked-with-stag": "Propojeno se STAG",
@@ -18,6 +32,12 @@ export const cs: ILocale = {
   "report.section.general": "Obecné",
   "report.section.evaluation": "Hodnocení",
   "report.section.overall-evaluation": "Celkové hodnocení",
+
+  // report internships
+  "report.section.internship.company-info": "Informace o firmě",
+  "report.section.internship.student-info": "Informace o studentovi",
+  "report.section.internship.internship-info": "Informace o stáži",
+  "report.section.internship.date-and-place": "Datum a místo",
 
   edit: "Upravit",
   view: "Zobrazit",
@@ -69,6 +89,7 @@ export const cs: ILocale = {
   "evalution.submitted-error": "Chyba při odesílání hodnocení",
   "evalution.submitted-success": "Hodnocení úspěšně odesláno",
   "evalution.submitted-success-message": "Hodnocení úspěšně odesláno. Nyní můžete zavřít toto okno.",
+  "evaluation.invited": "E-mail s pozvánkou k hodnocení byl odeslán uživateli.",
 
   ok: "Ok",
   cancel: "Zrušit",
@@ -315,19 +336,29 @@ export const cs: ILocale = {
   "internship.create-new": "Vytvořit novou stáž",
   "internship.edit": "Upravit stáž",
 
+  "internship.add-note": "Přidat poznámku",
+  "internship.note-from-supervisor": "Poznámka od vedoucího",
   "internship.no-internships": "Nebyly nalezeny žádné stáže",
   "internship.submit-for-approval": "Odeslat ke schválení",
   "internship.approve-internship": "Schválit stáž",
+  "internship.approve-internship-with-notes": "Schválit stáž s poznámkou",
   "internship.reopen-internship": "Znovu otevřít stáž",
   "internship.reject-internship": "Zamítnout stáž",
   "internship.mark-as-finished": "Označit jako dokončené",
   "internship.mark-as-defended": "Označit jako obhájené",
 
+  "internship.section.next-steps": "Co je potřeba udělat dále?",
   "internship.section.general": "Obecné informace",
   "internship.section.dates": "Termíny",
   "internship.section.contact": "Kontaktní informace",
   "internship.section.job-description": "Popis práce",
 
+  "internship.next-steps.upload-final-report": "Nahrát závěrečnou zprávu z odborné bakalářské praxe",
+  "internship.next-steps.invite-supervisor-to-evaluate": "Pozvat vedoucího k vyhodnocení stáže",
+  "internship.next-steps.wait-for-supervisor-to-evaluate": "Počkat, až vedoucí odevzdá hodnotící formulář",
+  "internship.next-steps.supervisor-contact-info-not-filled": "Kontaktní informace vedoucího nejsou vyplněny, prosím doplňte je.",
+  "internship.next-steps.supervisor-invited": "Vedoucí byl pozván k vyhodnocení stáže. Až bude stáž vyhodnocena, budete informováni.",
+  
   "internship.supervisor-name": "Jméno vedoucího",
   "internship.supervisor-phone": "Telefon vedoucího",
   "internship.supervisor-email": "E-mail vedoucího",

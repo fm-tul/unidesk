@@ -50,7 +50,7 @@ public class UnideskDbContext : DbContext
     public  DbSet<Team> Teams { get; set; }
     public  DbSet<UserInTeam> UserInTeams { get; set; }
     
-    public DbSet<ThesisEvaluation> ThesisEvaluations { get; set; }
+    public DbSet<Evaluation> Evaluations { get; set; }
 
     // internship
     public  DbSet<Internship> Internships { get; set; }

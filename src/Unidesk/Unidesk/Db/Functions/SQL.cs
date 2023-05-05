@@ -7,7 +7,7 @@ public static class SQL
 {
 
     public const string LevenshteinFunctionCreateSql = """
-             -- =============================================
+        -- =============================================
         -- Computes and returns the Levenshtein edit distance between two strings, i.e. the
         -- number of insertion, deletion, and substitution edits required to transform one
         -- string to the other, or NULL if @max is exceeded. Comparisons use the case-

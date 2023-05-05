@@ -19,6 +19,8 @@ public class ReportQuestion
     public required string Question { get; init; }
 
     public string? Description { get; init; }
+    
+    public string? Type { get; init; }
 }
 
 public class SectionQuestion : ReportQuestion

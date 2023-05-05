@@ -8,7 +8,9 @@ import { PagingModel } from "./usePaging";
 import { useMutation, useQuery } from "react-query";
 import { GUID_EMPTY } from "@core/config";
 import { ZodObject } from "zod";
-import { extractErrors, useDto } from "utils/forms";
+import { FormErrors, extractErrors, useDto } from "utils/forms";
+import { TranslateFunc } from "@locales/translationHooks";
+import { toast } from "react-toastify";
 
 export const useModel = <T>(
   id: string,
@@ -154,4 +156,110 @@ export const extractPagedResponse = <T>(promise: Promise<PagedResponse<T>>): Pro
       })
       .catch(reject);
   });
+};
+
+interface UseModelOptions<T> {
+  id?: string;
+  initialValues: T;
+  deps?: DependencyList;
+
+  translate?: TranslateFunc;
+  autoToaster?: boolean;
+  getFunc?: () => Promise<T>;
+  setFunc?: (data: T) => Promise<T>;
+  delFunc?: (id: string) => Promise<SimpleJsonResponse>;
+
+  onGetSuccess?: (data: T) => void;
+  onSetSuccess?: (data: T) => void;
+  onDelSuccess?: (data: unknown) => void;
+
+  onGetError?: (error: SimpleJsonResponse) => void;
+  onSetError?: (error: SimpleJsonResponse) => void;
+  onDelError?: (error: SimpleJsonResponse) => void;
+}
+export const useModelQuery = <T>(options: UseModelOptions<T>) => {
+  const { getFunc, setFunc, delFunc } = options;
+  const { id, deps = [], initialValues, translate, autoToaster } = options;
+  const { onGetSuccess, onSetSuccess, onDelSuccess } = options;
+  const { onGetError, onSetError, onDelError } = options;
+
+  const [dto, setDto] = useState<T>(initialValues);
+  const [touched, setTouched] = useState<boolean>(false);
+  const [errors, setErrors] = useState<FormErrors<T>>({});
+
+  const updateDtoFromServer = (data: T) => {
+    setDto(data);
+    setErrors({});
+    setTouched(false);
+  };
+
+  const changeDto = (data: T) => {
+    setDto(data);
+    setTouched(true);
+  };
+
+  const getQuery = !getFunc
+    ? undefined
+    : useQuery({
+        queryKey: [...deps, id],
+        queryFn: getFunc,
+        onSuccess: (data: T) => {
+          updateDtoFromServer(data);
+          onGetSuccess?.(data);
+        },
+        onError: (error: SimpleJsonResponse) => {
+          setErrors(extractErrors(error));
+          onGetError?.(error);
+        },
+        enabled: !!id && id !== GUID_EMPTY && id !== "new",
+      });
+
+  const setQuery = !setFunc
+    ? undefined
+    : useMutation(setFunc, {
+        onSuccess: (data: T) => {
+          updateDtoFromServer(data);
+          onSetSuccess?.(data);
+          if (autoToaster && translate) {
+            toast.success(translate("saved"));
+          }
+        },
+        onError: (error: SimpleJsonResponse) => {
+          setErrors(extractErrors(error));
+          onSetError?.(error);
+        },
+      });
+
+  const delQuery = !delFunc
+    ? undefined
+    : useMutation(delFunc, {
+        onSuccess: (data: unknown) => {
+          updateDtoFromServer(initialValues);
+          onDelSuccess?.(data);
+          if (autoToaster && translate) {
+            toast.success(translate("deleted"));
+          }
+        },
+        onError: (error: SimpleJsonResponse) => {
+          setErrors(extractErrors(error));
+          onDelError?.(error);
+        },
+      });
+
+  const isLoading = getQuery?.isLoading || setQuery?.isLoading || delQuery?.isLoading;
+  const error = getQuery?.error || setQuery?.error || delQuery?.error;
+
+  return {
+    dto,
+    isLoading,
+    error,
+    touched,
+    setDto,
+    changeDto,
+    getQuery,
+    setQuery,
+    delQuery,
+    errors,
+    setErrors,
+  };
 };

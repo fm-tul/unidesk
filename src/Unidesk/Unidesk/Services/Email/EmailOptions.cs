@@ -13,4 +13,5 @@ public class EmailOptions
     public string? RedirectAllEmailsTo { get; set; }
     
     public int MaxAttempts { get; set; } = 3;
+    public string ContactEmail { get; set; } = "jan.hybs@tul.cz";
 }

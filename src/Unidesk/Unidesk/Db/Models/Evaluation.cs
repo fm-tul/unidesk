@@ -1,4 +1,6 @@
-﻿using Unidesk.Db.Core;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Unidesk.Db.Core;
+using Unidesk.Db.Models.Internships;
 using Unidesk.Locales;
 
 namespace Unidesk.Db.Models;
@@ -12,16 +14,28 @@ namespace Unidesk.Db.Models;
 /// To secure the evaluation process, each Evaluation is assigned a unique token. This token is used to identify evaluator (by the email address)
 /// Another layer of security is the passphrase. This passphrase is sent to the evaluator and is used to identify the evaluation.
 /// </summary>
-public class ThesisEvaluation : TrackedEntity
+public class Evaluation : TrackedEntity
 {
-    public Guid ThesisId { get; set; }
-    public required Thesis Thesis { get; set; }
+    public Guid? ThesisId { get; set; }
+    public Thesis? Thesis { get; set; }
+    
+    [NotMapped]
+    public bool IsForInternship => InternshipId.HasValue;
+    
+    [NotMapped]
+    public bool IsForThesis => ThesisId.HasValue;
+    
+    public Guid? InternshipId { get; set; }
+    public Internship? Internship { get; set; }
     
     public Guid CreatedByUserId { get; set; }
-    public required User CreatedByUser { get; set; }
+    public User CreatedByUser { get; set; }
     
     public string? Response { get; set; }
     public string? Format { get; set; }
+    
+    public Guid? DocumentId { get; set; }
+    public Document? Document { get; set; }
     
     // security stuff
     public string? Token { get; set; }
@@ -30,9 +44,9 @@ public class ThesisEvaluation : TrackedEntity
     public EvaluationStatus Status { get; set; }
     
     // props which define the evaluation request
-    public required Language Language { get; set; }
-    public required string Email { get; set; }
-    public required UserFunction UserFunction { get; set; }
+    public Language Language { get; set; }
+    public string Email { get; set; }
+    public UserFunction UserFunction { get; set; }
 
     // after the evaluation is done, user will exist in the system and we can link it here
     public Guid? EvaluatorId { get; set; }

@@ -5,10 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Display;
-using Serilog.Formatting.Json;
 using Unidesk.Client;
 using Unidesk.Configurations;
+using Unidesk.Controllers;
 using Unidesk.Db;
 using Unidesk.Db.Core;
 using Unidesk.Db.Models;
@@ -87,13 +86,14 @@ services.AddScoped<KeywordsService>();
 services.AddScoped<AdminService>();
 services.AddScoped<ReportService>();
 services.AddScoped<SettingsService>();
-services.AddScoped<ThesisEvaluationService>();
+services.AddScoped<EvaluationService>();
 services.AddScoped<EmailService>();
 services.AddScoped<DocumentService>();
 services.AddScoped<InternshipService>();
 services.AddScoped<ChangeTrackerService>();
 services.AddScoped<ServerService>();
-services.AddScoped<IThesisEvaluation, ThesisEvaluation_Opponent_FM_Eng>();
+services.AddScoped<IEvaluationTemplate, ThesisiEvaluationTemplateOpponentFmEng>();
+services.AddScoped<IEvaluationTemplate, InternshipEvaluationTemplateSupervisorCz>();
 services.AddScoped<IClock, SystemClock>();
 
 services.AddSingleton<WordGeneratorService>();
@@ -254,74 +254,10 @@ api.MapGet("enum/Cache/reset", async ([FromServices] IOutputCacheStore cache, Ca
    .Produces<SimpleJsonResponse>();
 
 
-var evaluationApi = api.MapGroup("evaluation")
+api.MapGroup("evaluation")
    .WithTags("Evaluations")
-   .RequireAuthorization();
-
-evaluationApi.MapGet("/list/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, CancellationToken ct)
-        => await service.GetAllAsync(id, ct))
-   .WithName("GetAll")
-   .Produces<List<ThesisEvaluationDto>>();
-
-evaluationApi.MapGet("/get/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, string? pass, CancellationToken ct)
-        => await service.GetOneAsync(id, pass, ct))
-   .WithName("GetOne")
-   .AllowAnonymous()
-   .Produces<ThesisEvaluationDetailDto>();
-
-evaluationApi.MapGet("/peek/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, CancellationToken ct)
-        => await service.PeekAsync(id, ct))
-   .WithName("Peek")
-   .AllowAnonymous()
-   .Produces<ThesisEvaluationPeekDto>();
-
-evaluationApi.MapGet("/reject/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, string pass, string? reason, CancellationToken ct)
-        => await service.RejectAsync(id, pass, reason, ct))
-   .WithName("Reject")
-   .AllowAnonymous();
-
-evaluationApi.MapPost("/upsert", async ([FromServices] ThesisEvaluationService service, ThesisEvaluationDto dto, CancellationToken ct)
-        => await OneOfExtensions.MatchAsync(service
-           .Upsert(dto, ct), i => i, e => throw e)
-    )
-   .WithName("Upsert")
-   .Produces<ThesisEvaluationPeekDto>()
-   .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
-
-evaluationApi.MapPost("/update-one", async ([FromServices] ThesisEvaluationService service, ThesisEvaluationDetailDto dto, string pass, CancellationToken ct)
-        => await OneOfExtensions.MatchAsync(service
-           .UpdateOne(dto, pass, ct), i => i, e => throw e)
-    )
-   .WithName("UpdateOne")
-   .AllowAnonymous()
-   .Produces<ThesisEvaluationDetailDto>();
-
-evaluationApi.MapPut("/change-status", async ([FromServices] ThesisEvaluationService service, Guid id, EvaluationStatus status, CancellationToken ct)
-        => await service.ChangeStatus(id, status, null, ct))
-   .WithName("ChangeStatus")
-   .Produces<ThesisEvaluationDto>()
-   .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
-
-evaluationApi.MapPut("/change-status-pass", async ([FromServices] ThesisEvaluationService service, Guid id, EvaluationStatus status, string? pass, CancellationToken ct)
-        => await service.ChangeStatus(id, status, pass, ct))
-   .WithName("ChangeStatusWithPass")
-   .AllowAnonymous()
-   .Produces<ThesisEvaluationDto>();
-
-evaluationApi.MapGet("/pdf-preview", async ([FromServices] ThesisEvaluationService service, Guid id, string? pass, CancellationToken ct)
-        =>
-    {
-        var bytes = await service.PdfPreviewAsync(id, pass, ct);
-        return Results.Bytes(bytes, "application/pdf");
-    })
-   .WithName("GetPdfPreview")
-   .AllowAnonymous()
-   .Produces<IResult>();
-
-evaluationApi.MapDelete("/delete/{id:guid}", async ([FromServices] ThesisEvaluationService service, Guid id, CancellationToken ct)
-        => await service.DeleteOne(id, ct))
-   .WithName("DeleteOne")
-   .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
+   .RequireAuthorization()
+   .MapEvaluationApi();
 
 app.MapControllerRoute(
     name: "default",

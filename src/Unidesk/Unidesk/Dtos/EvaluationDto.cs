@@ -1,16 +1,33 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 using Unidesk.Db.Models;
+using Unidesk.Dtos.Internships;
 using Unidesk.Dtos.ReadOnly;
 using Unidesk.Locales;
 using Unidesk.Reports.Elements;
 
 namespace Unidesk.Dtos;
 
-public class ThesisEvaluationDto : TrackedEntityDto
+
+public class EvaluationBasicDto
 {
     [Required]
-    public Guid ThesisId { get; set; }
+    public Guid Id { get; set; }
+    
+    [Required]
+    public EvaluationStatus Status { get; set; }
+    
+    [Required]
+    public UserFunction UserFunction { get; set; }
+    
+    [Required]
+    public string Email { get; set; } = null!;
+}
+
+public class EvaluationDto : TrackedEntityDto
+{
+    public Guid? ThesisId { get; set; }
+    public Guid? InternshipId { get; set; }
 
     [Required]
     public EvaluationStatus Status { get; set; }
@@ -39,13 +56,13 @@ public class ThesisEvaluationDto : TrackedEntityDto
     [Required]
     public UserLookupDto CreatedByUser { get; set; } = null!;
 
-    public static void Validate(ThesisEvaluationDto dto)
+    public static void Validate(EvaluationDto dto)
     {
-        new ThesisEvaluationDtoValidator().ValidateAndThrow(dto);
+        new EvaluationDtoValidator().ValidateAndThrow(dto);
     }
 }
 
-public class ThesisEvaluationDetailDto : ThesisEvaluationPeekDto
+public class EvaluationDetailDto : EvaluationPeekDto
 {
     public object? Response { get; set; }
 
@@ -58,18 +75,16 @@ public class ThesisEvaluationDetailDto : ThesisEvaluationPeekDto
     public List<string> FormatCandidates { get; set; } = new();
 }
 
-public class ThesisEvaluationPeekDto : ThesisEvaluationDto
+public class EvaluationPeekDto : EvaluationDto
 {
-    [Required]
-    public required ThesisLookupDto Thesis { get; set; }
-    // props which define the evaluation request
+    public ThesisLookupDto? Thesis { get; set; }
+    public InternshipDto? Internship { get; set; }
 }
 
-public class ThesisEvaluationDtoValidator : AbstractValidator<ThesisEvaluationDto>
+public class EvaluationDtoValidator : AbstractValidator<EvaluationDto>
 {
-    public ThesisEvaluationDtoValidator()
+    public EvaluationDtoValidator()
     {
-        RuleFor(x => x.ThesisId).NotEmpty();
         RuleFor(x => x.Email).NotEmpty().EmailAddress();
     }
 }

@@ -1,32 +1,43 @@
 import { Grants } from "@api-client/constants/Grants";
 import { InternshipStatusAll } from "@api-client/constants/InternshipStatus";
+import { UserFunction } from "@api-client/constants/UserFunction";
 import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { EnKeys } from "@locales/all";
 import { LanguagesId } from "@locales/common";
 import { translateValFor, useTranslation } from "@locales/translationHooks";
+import { EvaluationStatus } from "@models/EvaluationStatus";
 import { InternshipDto } from "@models/InternshipDto";
 import { InternshipStatus } from "@models/InternshipStatus";
+import { ButtonGroup } from "components/FilterBar";
 import { KeywordSelector } from "components/KeywordSelector";
 import Timeline from "components/Timeline";
 import { RowField } from "components/mui/RowField";
 import { Section } from "components/mui/Section";
-import { useModel } from "hooks/useFetch";
+import { useModel, useModelQuery } from "hooks/useFetch";
+import { useOpenClose } from "hooks/useOpenClose";
 import moment from "moment";
-import { useContext } from "react";
+import { useContext, useState } from "react";
+import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
 import { useMutation } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { link_pageInternshipDetail } from "routes/links";
 import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
+import { Modal } from "ui/Modal";
 import { TextArea } from "ui/TextArea";
 import { TextField } from "ui/TextField";
 import { UserSelectFormField } from "ui/UserSelectFormField";
 import { UserContext } from "user/UserContext";
 import { calculateDuration } from "utils/dateUtils";
+import { downloadBlob } from "utils/downloadFile";
 import { z } from "zod";
+import { FileUploader } from "react-drag-drop-files";
+import FileInput, { FileControl } from "components/FileInput";
+import InternshipGoals from "./InternshipGoals";
+import { FormErrors, getPropsFactory } from "utils/forms";
 
 const humanInternshipStatuses = InternshipStatusAll.filter(
   i => i.value != InternshipStatus.CANCELLED && i.value != InternshipStatus.REJECTED && i.value != InternshipStatus.REOPENED
@@ -60,7 +71,7 @@ const schema = z.object({
   keywords: z.array(z.any()).optional(),
 });
 
-const getInternshipMessageKey = (dto: InternshipDto):EnKeys|null => {
+const getInternshipMessageKey = (dto: InternshipDto): EnKeys | null => {
   switch (dto.status) {
     case InternshipStatus.SUBMITTED:
       return "internship.status.submitted";
@@ -87,31 +98,42 @@ export const PageInternshipDetail = () => {
   const { user: me } = useContext(UserContext);
   const { language } = useContext(LanguageContext);
   const { translate } = useTranslation(language);
+  const addingNote = useOpenClose();
 
-  const { dto, setDto, getPropsText, getHelperProps, setQuery, deleteQuery } = useModel(
-    id!,
-    { student: me as any, id: id === "new" ? GUID_EMPTY : id, status: InternshipStatus.DRAFT },
-    () => httpClient.internship.getOne({ id: id! }),
-    (dto: InternshipDto) => httpClient.internship.upsert({ requestBody: dto }),
-    (id: string) => httpClient.internship.deleteOne({ id }),
-    [id],
-    schema,
-    false,
-    data => {
-      toast.success(translate("saved"));
-      if (id === "new") {
-        navigate(link_pageInternshipDetail.navigate(data.id));
-      }
-    }
-  );
-  const dtoOrEmpty = dto ?? {};
+  // const { dto, setDto, getPropsText, getHelperProps, getQuery, setQuery, deleteQuery } = useModel(
+  //   id!,
+  //   { student: me as any, id: id === "new" ? GUID_EMPTY : id, status: InternshipStatus.DRAFT },
+  //   () => httpClient.internship.getOne({ id: id! }),
+  //   (dto: InternshipDto) => httpClient.internship.upsert({ requestBody: dto }),
+  //   (id: string) => httpClient.internship.deleteOne({ id }),
+  //   [id],
+  //   schema,
+  //   false,
+  //   data => {
+  //     toast.success(translate("saved"));
+  //     if (id === "new") {
+  //       navigate(link_pageInternshipDetail.navigate(data.id));
+  //     }
+  //   }
+  // );
+  const { dto, changeDto: setDto, getQuery, setQuery, delQuery, errors, touched } = useModelQuery({
+    id: id!,
+    initialValues: { student: me as any, id: id === "new" ? GUID_EMPTY : id!, status: InternshipStatus.DRAFT } as InternshipDto,
+    getFunc: () => httpClient.internship.getOne({ id: id! }),
+    setFunc: (dto: InternshipDto) => httpClient.internship.upsert({ requestBody: dto }),
+    delFunc: (id: string) => httpClient.internship.deleteOne({ id }),
+  });
+  const { getPropsText, getHelperProps } = getPropsFactory(dto, setDto, errors);
 
   const isManager = me.grantIds.includes(Grants.Internship_Manage.id);
-  const isDraft = dtoOrEmpty.status === InternshipStatus.DRAFT;
-  const isReopened = dtoOrEmpty.status === InternshipStatus.REOPENED;
-  const isPartiallyEditable = [InternshipStatus.REOPENED, InternshipStatus.SUBMITTED, InternshipStatus.APPROVED].includes(dtoOrEmpty.status!);
+  const isDraft = dto.status === InternshipStatus.DRAFT;
+  const isReopened = dto.status === InternshipStatus.REOPENED;
+  const isApproved = dto.status === InternshipStatus.APPROVED;
+  const isPartiallyEditable = [InternshipStatus.REOPENED, InternshipStatus.SUBMITTED, InternshipStatus.APPROVED].includes(
+    dto.status!
+  );
   const isNew = id === "new";
-  const isEditable = isDraft || isReopened
+  const isEditable = isDraft || isReopened;
   const disabled = !isEditable;
   const getPropsTextWithType = (key: keyof InternshipDto, type?: string) => ({
     ...getPropsText(key),
@@ -121,12 +143,12 @@ export const PageInternshipDetail = () => {
   });
   const getPropsTextWithType2 = (key: keyof InternshipDto, type?: string) => ({
     ...getPropsText(key),
-    disabled: !isPartiallyEditable,
+    disabled: !isPartiallyEditable && disabled,
     as: TextField,
     type,
   });
 
-  const duration = calculateDuration(dtoOrEmpty.startDate, dtoOrEmpty.endDate);
+  const duration = calculateDuration(dto.startDate, dto.endDate);
   const durationDays = duration?.asDays();
   const datesServerError = !!getHelperProps("startDate").helperText || !!getHelperProps("endDate").helperText;
   const datesInvalid = datesServerError || (durationDays != undefined && durationDays <= 0);
@@ -134,21 +156,56 @@ export const PageInternshipDetail = () => {
   const canDelete = (isDraft || me.grantIds.includes(Grants.Internship_Manage.id)) && id !== "new";
 
   const changeStatusQuery = useMutation((status: InternshipStatus) => httpClient.internship.changeStatus({ id: id!, status }), {
-    onSuccess: setDto,
+    onSuccess: data => {
+      setDto(data);
+      toast.success(translate("saved"));
+    },
   });
 
-  const internshipMessage = getInternshipMessageKey(dtoOrEmpty as InternshipDto) as EnKeys|null;
+  const changeStatusWithNote = useMutation(
+    (status: InternshipStatus) => {
+      if (!isApproved) {
+        return httpClient.internship.changeStatus({ id: id!, status, note: dto.note! });
+      } else {
+        return setQuery!.mutateAsync(dto as InternshipDto);
+      }
+    },
+    {
+      onSuccess: data => {
+        setDto(data);
+        addingNote.close();
+        if (!isApproved) {
+          toast.success(translate("saved"));
+        }
+      },
+    }
+  );
+
+  const internshipMessage = getInternshipMessageKey(dto as InternshipDto) as EnKeys | null;
 
   return (
     <div className="flex flex-col gap-2">
       {!isDraft && (
         <div>
-          <div className="bg-warning-100 p-4 text-center  text-sm ring-2 ring-warning-500/30">
+          <div className="flex flex-col  gap-1 bg-warning-100 p-4 text-sm ring-2 ring-warning-500/30">
             {internshipMessage !== null && translate(internshipMessage)}
+            {!!dto.note && (
+              <>
+                <span className="font-bold">{translate("internship.note-from-supervisor")}: </span>
+                <span>{dto.note}</span>
+              </>
+            )}
+            {isManager && (
+              <Button text sm success className="self-center" onClick={addingNote.open}>
+                {translate("internship.add-note")}
+              </Button>
+            )}
           </div>
         </div>
       )}
-      <DrawTimelime status={dtoOrEmpty.status} language={language} />
+
+      <DrawTimelime status={dto.status} language={language} />
+      {isApproved && <InternshipGoals item={dto as InternshipDto} onRefreshNeeded={() => getQuery!.refetch()} needsSave={touched} />}
       <Section title={"internship.section.general"}></Section>
       <RowField
         required
@@ -208,7 +265,7 @@ export const PageInternshipDetail = () => {
       <Section title={"internship.section.contact"}></Section>
       <RowField
         title="internship.supervisor-name"
-        Field={<FormField {...getPropsTextWithType2("supervisorName")} label={translate("internship.supervisor-name")} />}
+        Field={<FormField {...getPropsTextWithType2("supervisorName")} label={translate("internship.supervisor-name")} name="name" />}
       />
       <RowField
         title="internship.supervisor-phone"
@@ -216,7 +273,14 @@ export const PageInternshipDetail = () => {
       />
       <RowField
         title="internship.supervisor-email"
-        Field={<FormField {...getPropsTextWithType2("supervisorEmail")} label={translate("internship.supervisor-email")} name="email" type="email" />}
+        Field={
+          <FormField
+            {...getPropsTextWithType2("supervisorEmail")}
+            label={translate("internship.supervisor-email")}
+            name="email"
+            type="email"
+          />
+        }
       />
 
       <Section title={"internship.section.job-description"}></Section>
@@ -265,21 +329,25 @@ export const PageInternshipDetail = () => {
         Field={<KeywordSelector disabled={disabled} onChange={i => setDto({ ...dto!, keywords: i })} keywords={dto?.keywords} />}
       />
 
-      <DrawTimelime status={dtoOrEmpty.status} language={language} />
+      <DrawTimelime status={dto.status} language={language} />
 
       <div className="btn-group col-start-2 justify-end">
-        <Button onClick={() => setQuery.mutate(dtoOrEmpty as InternshipDto)} loading={setQuery.isLoading} if={isDraft || isEditable || isPartiallyEditable}>
-          {dtoOrEmpty.id === GUID_EMPTY ? translate("internship.create-new") : translate("internship.edit")}
+        <Button
+          onClick={() => setQuery!.mutate(dto as InternshipDto)}
+          loading={setQuery!.isLoading}
+          if={isDraft || isEditable || isPartiallyEditable}
+        >
+          {dto.id === GUID_EMPTY ? translate("internship.create-new") : translate("internship.edit")}
         </Button>
 
-        <Button onConfirmedClick={() => deleteQuery.mutate(dtoOrEmpty.id!)} error loading={deleteQuery.isLoading} if={canDelete}>
+        <Button onConfirmedClick={() => delQuery!.mutate(dto.id!)} error loading={delQuery!.isLoading} if={canDelete}>
           {translate("delete")}
         </Button>
 
         {isManager && (
           <>
             <Button
-              if={dtoOrEmpty.status === InternshipStatus.SUBMITTED}
+              if={dto.status === InternshipStatus.SUBMITTED}
               onClick={() => changeStatusQuery.mutate(InternshipStatus.APPROVED)}
               loading={changeStatusQuery.isLoading}
               success
@@ -287,7 +355,39 @@ export const PageInternshipDetail = () => {
               {translate("internship.approve-internship")}
             </Button>
             <Button
-              if={dtoOrEmpty.status === InternshipStatus.SUBMITTED}
+              if={dto.status === InternshipStatus.SUBMITTED}
+              onClick={addingNote.open}
+              loading={changeStatusQuery.isLoading}
+              success
+            >
+              {translate("internship.approve-internship-with-notes")}
+            </Button>
+            {addingNote.isOpen && (
+              <Modal open={addingNote.isOpen} onClose={addingNote.close} width="sm" fullWidth cannotBeClosed>
+                <h4 className="text-lg font-bold">{translate("internship.approve-internship-with-notes")}</h4>
+                <TextArea
+                  minRows={3}
+                  label={translate("internship.approve-internship-with-notes")}
+                  {...getPropsText("note")}
+                  className="my-2"
+                />
+                <ButtonGroup variant="text" className="justify-end">
+                  <Button warning onClick={addingNote.close}>
+                    {translate("cancel")}
+                  </Button>
+                  <Button
+                    success
+                    onClick={() => changeStatusWithNote.mutate(InternshipStatus.APPROVED)}
+                    loading={changeStatusQuery.isLoading}
+                    disabled={!isApproved ? (dto?.note?.length ?? 0) <= 3 : false}
+                  >
+                    {translate(!isApproved ? "internship.approve-internship" : "edit")}
+                  </Button>
+                </ButtonGroup>
+              </Modal>
+            )}
+            <Button
+              if={dto.status === InternshipStatus.SUBMITTED}
               onClick={() => changeStatusQuery.mutate(InternshipStatus.REJECTED)}
               loading={changeStatusQuery.isLoading}
               error
@@ -295,20 +395,20 @@ export const PageInternshipDetail = () => {
               {translate("internship.reject-internship")}
             </Button>
             <Button
-              if={dtoOrEmpty.status === InternshipStatus.APPROVED}
+              if={dto.status === InternshipStatus.APPROVED}
               onClick={() => changeStatusQuery.mutate(InternshipStatus.FINISHED)}
               loading={changeStatusQuery.isLoading}
               success
             >
               <div>
                 {translate("internship.mark-as-finished")}
-                {moment(dtoOrEmpty.endDate).isAfter(moment()) && (
+                {moment(dto.endDate).isAfter(moment()) && (
                   <div className="text-xs">({translate("internship.warning.internalship-not-ended")})</div>
                 )}
               </div>
             </Button>
             <Button
-              if={dtoOrEmpty.status === InternshipStatus.FINISHED}
+              if={dto.status === InternshipStatus.FINISHED}
               onClick={() => changeStatusQuery.mutate(InternshipStatus.DEFENDED)}
               loading={changeStatusQuery.isLoading}
               success
@@ -316,7 +416,7 @@ export const PageInternshipDetail = () => {
               {translate("internship.mark-as-defended")}
             </Button>
             <Button
-              if={!isDraft && !isReopened && dtoOrEmpty.status !== InternshipStatus.SUBMITTED}
+              if={!isDraft && !isReopened && dto.status !== InternshipStatus.SUBMITTED}
               onClick={() => changeStatusQuery.mutate(InternshipStatus.REOPENED)}
               loading={changeStatusQuery.isLoading}
               warning
@@ -340,7 +440,6 @@ export const PageInternshipDetail = () => {
 };
 
 export default PageInternshipDetail;
-
 
 /*
 Optional: kontrola dva týdny po začátku stáže (mailem upozornit)

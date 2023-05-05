@@ -5,6 +5,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using Unidesk.Client;
 using Unidesk.Db.Models;
+using Unidesk.Exceptions;
 using Unidesk.Locales;
 using Unidesk.Reports.Elements;
 using Unidesk.Services;
@@ -12,25 +13,40 @@ using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Reports.Templates;
 
-public class ThesisEvaluation_Opponent_FM_Eng : IThesisEvaluation
+public class ThesisiEvaluationTemplateOpponentFmEng : IEvaluationTemplate
 {
     public string TemplateName => "ThesisEvaluation_Opponent_FM_Eng";
     public List<ReportQuestion> GetQuestions(ThesisEvaluationContext context) => Model.ReportQuestions;
 
     public object GetModel(ThesisEvaluationContext context)
     {
-        var item = context.ThesisEvaluation;
+        var item = context.Evaluation;
         if (string.IsNullOrEmpty(item.Response))
         {
             return Model.CreateEmptyModel(context);
         }
 
-        return WebJsonSerializer.Deserialize<Model>(item.Response)!;
+        var model = WebJsonSerializer.Deserialize<Model>(item.Response)
+                 ?? throw new ValidationException("Response is not valid");
+        
+        var answers = Model.ReportQuestions
+           .Where(i => i is not SectionQuestion)
+           .Select(i => new ReportAnswer { Id = i.Id, Answer = null })
+           .ToList();
+        
+        // remove answers for deleted questions
+        model.Answers = model.Answers.Where(i => answers.Any(a => a.Id == i.Id)).ToList();
+        
+        // add answers for new questions
+        var missingAnswers = answers.Where(i => model.Answers.All(a => a.Id != i.Id)).ToList();
+        model.Answers.AddRange(missingAnswers);
+
+        return model;
     }
 
     public Task ValidateAndThrowAsync(ThesisEvaluationContext context)
     {
-        var item = context.ThesisEvaluation;
+        var item = context.Evaluation;
         if (string.IsNullOrEmpty(item.Response))
         {
             throw new ValidationException("Response is empty");
@@ -39,10 +55,12 @@ public class ThesisEvaluation_Opponent_FM_Eng : IThesisEvaluation
         var model = WebJsonSerializer.Deserialize<Model>(item.Response)
                  ?? throw new ValidationException("Response is not valid");
 
-        var missingAnswers = model.Answers.Where(x => x.Answer == null).ToList();
+        var missingAnswers = model.Answers.Where(x => x.Answer == null)
+           .ToList();
         if (missingAnswers.Any())
         {
-            var missingQuestions = Model.ReportQuestions.Where(x => missingAnswers.Any(y => y.Id == x.Id)).ToList();
+            var missingQuestions = Model.ReportQuestions.Where(x => missingAnswers.Any(y => y.Id == x.Id))
+               .ToList();
             throw new ValidationException($"Missing answers: {string.Join(", ", missingQuestions.Select(x => x.Question))}");
         }
 
@@ -50,31 +68,40 @@ public class ThesisEvaluation_Opponent_FM_Eng : IThesisEvaluation
         {
             throw new ValidationException("Author name is empty");
         }
-        
-        
-        var allQuestionsIds = Model.ReportQuestions.Where(i => i is not SectionQuestion).Select(i => i.Id).ToList();
-        var unknownQuestions = model.Answers.Where(x => !allQuestionsIds.Contains(x.Id)).ToList();
+
+
+        var allQuestionsIds = Model.ReportQuestions.Where(i => i is not SectionQuestion)
+           .Select(i => i.Id)
+           .ToList();
+        var unknownQuestions = model.Answers.Where(x => !allQuestionsIds.Contains(x.Id))
+           .ToList();
         if (unknownQuestions.Any())
         {
             throw new ValidationException($"Unknown questions: {string.Join(", ", unknownQuestions.Select(x => x.Id))}");
         }
-        
-        var missingQuestionsIds = allQuestionsIds.Where(x => model.Answers.All(y => y.Id != x)).ToList();
+
+        var missingQuestionsIds = allQuestionsIds.Where(x => model.Answers.All(y => y.Id != x))
+           .ToList();
         if (missingQuestionsIds.Any())
         {
             throw new ValidationException($"Missing questions: {string.Join(", ", missingQuestionsIds)}");
         }
-        
+
 
         return Task.CompletedTask;
     }
 
-
     public bool CanProcess(ThesisEvaluationContext context)
     {
-        Thesis thesis = context.Thesis;
-        Language language = context.Language;
-        UserFunction userFunction = context.UserFunction;
+        if (!context.Evaluation.IsForThesis || context.Thesis is null)
+        {
+            Console.WriteLine("This evaluation is not for thesis");
+            return false;
+        }
+
+        var thesis = context.Thesis;
+        var language = context.Language;
+        var userFunction = context.UserFunction;
 
         if (!thesis.Status.In(ThesisStatus.Submitted, ThesisStatus.Finished))
         {
@@ -104,10 +131,6 @@ public class ThesisEvaluation_Opponent_FM_Eng : IThesisEvaluation
     }
 }
 
-public interface IEvaluationModel
-{
-    public List<ReportAnswer> Answers { get; set; }
-}
 
 file class Model : IEvaluationModel
 {
@@ -182,11 +205,14 @@ file class Model : IEvaluationModel
            .ToList();
 
         // prefill some answers
-        answers.First(i => i.Id == Questions.TextQuestions.OpponentName.Id).Answer = context.ThesisEvaluation.EvaluatorFullName;
+        answers.First(i => i.Id == Questions.TextQuestions.OpponentName.Id).Answer = context.Evaluation.EvaluatorFullName;
+        var authorFullName = context.Thesis.Authors.FirstOrDefault()
+                               ?.FullName
+                          ?? throw new InvalidStateException("There are no authors for this thesis.");
 
         var model = new Model
         {
-            AuthorName = context.Thesis.Authors.First().FullName!,
+            AuthorName = authorFullName,
             ThesisTitle = context.Thesis.NameEng,
             Answers = answers,
         };

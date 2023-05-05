@@ -36,15 +36,19 @@ public class InternshipDto : TrackedEntityDto
     public string? SupervisorEmail { get; set; } = string.Empty;
 
     [Required]
-    public string Requirements { get; set; }
+    public string Requirements { get; set; } = string.Empty;
 
     public string? Abstract { get; set; } = string.Empty;
     
-    [Required]
     public string Comments { get; set; } = string.Empty;
+    
+    public string Note { get; set; } = string.Empty;
 
     [Required]
     public List<KeywordDto> Keywords { get; set; } = new();
+    
+    [Required]
+    public List<EvaluationBasicDto> Evaluations { get; set; } = new();
     
     public static void ValidateAndThrow(InternshipDto item) => new InternshipDtoValidator().ValidateAndThrow(item);
 }

@@ -8,11 +8,11 @@ import { useTranslation } from "@locales/translationHooks";
 import { EvaluationStatus } from "@models/EvaluationStatus";
 import { ReportQuestion } from "@models/ReportQuestion";
 import { TextQuestion } from "@models/TextQuestion";
-import { ThesisEvaluationDetailDto } from "@models/ThesisEvaluationDetailDto";
+import { EvaluationDetailDto } from "@models/EvaluationDetailDto";
 import { FilterBar } from "components/FilterBar";
 import { useAutoSave } from "hooks/useAutoSave";
 import moment from "moment";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useMutation, useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -36,7 +36,7 @@ export const PageEvaluationEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { language } = useContext(LanguageContext);
-  const { translateName, translateVal, translate } = useTranslation(language);
+  const { translateName } = useTranslation(language);
   const [pass, setPass] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [reason, setRejectionReason] = useState("");
@@ -165,7 +165,7 @@ export const PageEvaluationEdit = () => {
 
 interface EvaluationDetailProps {
   id: string;
-  pass: string|null;
+  pass: string | null;
 }
 const questionStyle = `
   p-4 gap-4 transition duration-200 rounded-lg
@@ -177,7 +177,7 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   const { language } = useContext(LanguageContext);
   const { translateName, translateVal, translate } = useTranslation(language);
   const { getValue: getAnswers, saveValue: saveAnswer, destroyHistory } = useAutoSave<any[]>(id);
-  const [item, setItem] = useState<ThesisEvaluationDetailDto>();
+  const [item, setItem] = useState<EvaluationDetailDto>();
   const [pdfPreview, setPdfPreview] = useState(true);
   const [pdfPreviewRng, setPdfPreviewRng] = useState(Date.now());
   const [restoredWorkDt, setRestoredWorkDt] = useState<number>();
@@ -190,7 +190,19 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
     onSuccess: setItem,
   });
 
-  const updateMutation = useMutation((item: ThesisEvaluationDetailDto) => httpClient.evaluations.updateOne({ requestBody: item!, pass: pass! }), {
+  useEffect(() => {
+    const appContent = document.getElementById("app-content")!;
+    if (pdfPreview) {
+      appContent.classList.remove("app-center");
+    } else {
+      appContent.classList.add("app-center");
+    }
+    return () => {
+      appContent.classList.add("app-center");
+    };
+  }, [pdfPreview]);
+
+  const updateMutation = useMutation((item: EvaluationDetailDto) => httpClient.evaluations.updateOne({ requestBody: item!, pass: pass! }), {
     onSuccess: data => {
       toast.success(translate("saved"), { position: "bottom-left" });
       setItem(data);
@@ -200,15 +212,15 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   });
 
   const changeStatusMutation = useMutation(
-    (dto: ThesisEvaluationDetailDto) =>
+    (dto: EvaluationDetailDto) =>
       httpClient.evaluations.changeStatusWithPass({ id: dto.id, status: EvaluationStatus.SUBMITTED, pass: pass! }),
     {
       onSuccess: data => {
-        toast.success(translate("evalution.submitted"));
+        toast.success(translate("evalution.submitted"), { position: "bottom-left" });
         item!.status = data.status;
       },
       onError: () => {
-        toast.error(translate("evalution.submitted-error"));
+        toast.error(translate("evalution.submitted-error"), { position: "bottom-left" });
       },
     }
   );
@@ -299,8 +311,8 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   return (
     <div>
       {!!item && (
-        <div className="flex gap-2">
-          <div className="flex flex-col items-stretch gap-2">
+        <div className="flex gap-2 w-full">
+          <div className="flex flex-col items-stretch gap-2 w-full">
             <h1 className="text-3xl font-bold">Evaluation of Thesis {translateName(item.thesis)}</h1>
             <div className="text-sm italic">Invited by {item.createdByUser.fullName}</div>
 
@@ -365,11 +377,6 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
                       <div key={q.id} className={classnames("flex items-baseline", qText.rows > 1 && "flex-col", questionStyle)}>
                         <div className="w-full grow">
                           <div>{q.question}</div>
-                          <Button variant="text" size="sm" color="neutral" if={qText.rows === 1} onClick={() => toggleExpandQuestion(q.id)}>
-                            <span className="text-xxs text-neutral-500">
-                              {qText._expanded ? translate("collapse") : translate("expand")}
-                            </span>
-                          </Button>
                           <div className="text-sm italic">{q.description}</div>
                         </div>
                         {qText.rows > 1 ? (
@@ -385,6 +392,7 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
                         ) : (
                           <FormField
                             as={TextField}
+                            type={q.type === "date" ? "date" : "text"}
                             value={getAnswer(q.id)?.answer ?? ""}
                             onValue={v => updateQuestion(q.id, v)}
                             width="min-w-xs"
@@ -449,7 +457,7 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
             <div className="mb-40"></div>
           </div>
           {pdfPreview && (
-            <div className="fixed right-0">
+            <div className="fixed right-0 z-10 shadow-2xl">
               <embed src={pdfUrl} type="application/pdf" width="520px" height="800px" />
             </div>
           )}
@@ -458,6 +466,5 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
     </div>
   );
 };
-
 
 export default PageEvaluationEdit;

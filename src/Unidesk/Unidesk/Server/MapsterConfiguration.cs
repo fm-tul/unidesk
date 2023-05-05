@@ -67,6 +67,7 @@ public static class MapsterConfiguration
         config.ForType<ThesisDto, Thesis>()
            .Ignore(i => i.ThesisUsers)
            .Ignore(i => i.KeywordThesis)
+           .Ignore(i => i.Evaluations)
            .Ignore(i => i.Teams)
            .Map(dto => dto.Literature, type => StringListParser.Serialize(type.Literature))
            .Map(dto => dto.Guidelines, type => StringListParser.Serialize(type.Guidelines));
@@ -81,11 +82,11 @@ public static class MapsterConfiguration
            .Ignore(i => i.AllThesis)
            .TwoWays();
 
-        config.ForType<ThesisEvaluationDto, ThesisEvaluation>()
+        config.ForType<EvaluationDto, Evaluation>()
            .Ignore(i => i.Evaluator)
            .Ignore(i => i.Thesis);
 
-        config.ForType<ThesisEvaluationDetailDto, ThesisEvaluation>()
+        config.ForType<EvaluationDetailDto, Evaluation>()
            .Ignore(i => i.Evaluator)
            .Ignore(i => i.Thesis);
         
@@ -101,6 +102,7 @@ public static class MapsterConfiguration
 
         config.ForType<InternshipDto, Internship>()
           .Ignore(i => i.KeywordInternship)
+          .Ignore(i => i.Evaluations)
           .Ignore(i => i.Student);
 
         return config;

@@ -14,7 +14,8 @@ public class StagService
 {
     // e.g.  "https://stag-ws.tul.cz/ws/services/rest2/kvalifikacniprace/getKvalifikacniPrace?rokZadani=2021&outputFormat=json&katedra=NTI";
     private const string StagUrlRoot = "https://stag-ws.tul.cz";
-    private const string UrlTemplate = StagUrlRoot + "/ws/services/rest2/kvalifikacniprace/getKvalifikacniPraceAuth?rokZadani={0}&katedra={1}&outputFormat=json";
+    // private const string UrlTemplate = StagUrlRoot + "/ws/services/rest2/kvalifikacniprace/getKvalifikacniPraceAuth?rokZadani={0}&katedra={1}&outputFormat=json";
+    private const string UrlTemplate = StagUrlRoot + "/ws/services/rest2/kvalifikacniprace/getKvalifikacniPrace?rokZadani={0}&katedra={1}&outputFormat=json";
     private const string LoginUrl = StagUrlRoot + "/ws/login?originalURL=";
     private const string TestUrl = StagUrlRoot + "/ws/services/rest2/help/testService";
 
@@ -37,17 +38,17 @@ public class StagService
     private HttpClient CreateClient(bool useCookie)
     {
         var client = new HttpClient();
-        if (useCookie)
-        {
-            client.DefaultRequestHeaders.Add("Cookie", _cookie);
-        }
-        else
-        {
-            var username = _appOptions.StagUsername;
-            var password = _appOptions.StagPassword;
-            var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
-            client.DefaultRequestHeaders.Add("Authorization", $"Basic {encoded}");
-        }
+        // if (useCookie)
+        // {
+        //     client.DefaultRequestHeaders.Add("Cookie", _cookie);
+        // }
+        // else
+        // {
+        //     var username = _appOptions.StagUsername;
+        //     var password = _appOptions.StagPassword;
+        //     var encoded = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
+        //     client.DefaultRequestHeaders.Add("Authorization", $"Basic {encoded}");
+        // }
         return client;
     }
 

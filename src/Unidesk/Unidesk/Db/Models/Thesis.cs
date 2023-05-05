@@ -100,6 +100,9 @@ public class Thesis : TrackedEntity
     public List<ThesisType> ThesisTypeCandidates { get; set; } = new();
     [NotMapped]
     public IEnumerable<Guid> ThesisTypeCandidateIds => ThesisTypeCandidates.Select(x => x.Id).ToList();
+    
+    [NotMapped]
+    public ThesisType? SingleTypeOrDefault => ThesisType ?? (ThesisTypeCandidates.Count == 1 ? ThesisTypeCandidates[0] : null);
 
 
     /// <summary>
@@ -162,5 +165,5 @@ public class Thesis : TrackedEntity
     ///List of teams who are assigned to the thesis, after the thesis is accepted must contain at least one user (or one team)
     /// </summary>
     public List<Team> Teams { get; set; } = new();
-    public List<ThesisEvaluation> ThesisEvaluations { get; set; } = new();
+    public List<Evaluation> Evaluations { get; set; } = new();
 }

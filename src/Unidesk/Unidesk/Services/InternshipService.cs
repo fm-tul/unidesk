@@ -93,7 +93,7 @@ public class InternshipService
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task<Internship> ChangeStatusAsync(Internship item, InternshipStatus status, bool isManager, CancellationToken ct)
+    public async Task<Internship> ChangeStatusAsync(Internship item, InternshipStatus status, bool isManager, string? note, CancellationToken ct)
     {
         var oldStatus = item.Status;
         item.Status = (item.Status, status, isManager) switch
@@ -127,11 +127,13 @@ public class InternshipService
             {
                 if (item.Status == InternshipStatus.Approved)
                 {
+                    item.Note = note ?? string.Empty;
                     var body = _templateFactory
                        .LoadTemplate(InternshipTemplates.InternshipApprovedCzeTemplate.TemplateBody)
                        .RenderTemplate(new InternshipTemplates.InternshipApprovedCzeTemplate
                         {
                             InternshipUrl = $"{_serverService.UrlBase}/internships/{item.Id}",
+                            Note = note,
                         });
                     await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipApprovedCzeTemplate.Subject, body, ct);
                 }

@@ -1,8 +1,8 @@
 import { UserDto } from "@api-client";
 import { GUID_EMPTY } from "@core/config";
 import { R } from "@locales/R";
-import { useContext, useEffect } from "react";
-import { Link, NavLink, Route, Routes, useLocation, useMatch, useResolvedPath } from "react-router-dom";
+import { useContext } from "react";
+import { Link, NavLink, Route, Routes, useMatch, useResolvedPath } from "react-router-dom";
 
 import { Button } from "ui/Button";
 
@@ -64,7 +64,7 @@ export const App = () => {
   const { user } = useContext(UserContext);
   const available_links = links.filter(i => hasAccess(i, user));
   const { language } = useContext(LanguageContext);
-  const { translateName, translateVal, translate } = useTranslation(language);
+  const { translate } = useTranslation(language);
 
   const activeLinks = available_links.filter(i => useMatch({ path: useResolvedPath(i.path).pathname, end: true }));
   if (activeLinks.length == 1) {
@@ -96,8 +96,9 @@ export const App = () => {
         {renderMenu(available_links)}
 
         <div
+          id="app-content"
           className={classnames(
-            "mx-auto rounded-md bg-white/90 p-6 shadow mt-4",
+            "app-center mx-4 mt-4 rounded-md bg-white/90 p-6 shadow",
             "w-full max-w-[100%]",
             "md:max-w-md",
             "lg:max-w-lg",

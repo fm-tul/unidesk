@@ -3,6 +3,21 @@ export const en = {
   flag: "🇺🇸",
   language: "English",
 
+  // common
+  "common.upload": "Upload",
+  "common.download": "Download",
+  "common.clear": "Clear",
+  "common.invitation-sent": "Invitation sent",
+  "common.save-first-before-contiuining": "Save first before continuing",
+  "common.upload.drop-files-here": "Drop files here to upload",
+  "common.remove-file": "Remove file",
+  "common.file-removed-from-server": "File removed from server",
+  "common.error.failed-to-send-invitation": "Failed to send invitation",
+  "common.error.failed-to-remove-file-from-server": "Failed to remove file from server",
+  "common.upload.error.file-too-large-x": (x: string) => `File too large. Maximum file size is ${x}.`,
+  "common.upload.error.file-not-supported-x": (x: string) => `File type not supported. Supported file types are ${x}.`,
+
+
   // users
   "user-function": "User Function",
   "linked-with-stag": "Linked with STAG",
@@ -16,6 +31,12 @@ export const en = {
   "report.section.general": "General",
   "report.section.evaluation": "Evaluation",
   "report.section.overall-evaluation": "Overall Evaluation",
+
+  // report internships
+  "report.section.internship.company-info": "Company Info",
+  "report.section.internship.student-info": "Info about Student",
+  "report.section.internship.internship-info": "Internship Details",
+  "report.section.internship.date-and-place": "Date and Place",
 
   edit: "Edit",
   view: "View",
@@ -68,6 +89,7 @@ export const en = {
   "evalution.submitted-error": "Error while submitting evaluation",
   "evalution.submitted-success": "Evaluation submitted successfully",
   "evalution.submitted-success-message": "Evaluation submitted successfully. You can now close this window.",
+  "evaluation.invited": "Email with evaluation invitation has been sent to the user.",
 
   ok: "Ok",
   cancel: "Cancel",
@@ -319,9 +341,12 @@ export const en = {
   "internship.create-new": "Create new internship",
   "internship.edit": "Edit internship",
 
+  "internship.add-note": "Add note",
+  "internship.note-from-supervisor": "Note from supervisor",
   "internship.no-internships": "No internships found",
   "internship.submit-for-approval": "Submit for approval",
   "internship.approve-internship": "Approve internship",
+  "internship.approve-internship-with-notes": "Approve internship with Note",
   "internship.reopen-internship": "Reopen internship",
   "internship.reject-internship": "Reject internship",
   "internship.mark-as-finished": "Mark as finished",
@@ -331,6 +356,13 @@ export const en = {
   "internship.section.dates": "Dates",
   "internship.section.contact": "Contact's Information",
   "internship.section.job-description": "Job Description",
+  "internship.section.next-steps": "What needs to be done next?",
+
+  "internship.next-steps.upload-final-report": "Upload final report of internship in PDF format",
+  "internship.next-steps.invite-supervisor-to-evaluate": "Invite supervisor to evaluate internship",
+  "internship.next-steps.wait-for-supervisor-to-evaluate": "Wait for supervisor to evaluate internship",
+  "internship.next-steps.supervisor-contact-info-not-filled": "Supervisor contact information is not filled. Please fill it in the form below.",
+  "internship.next-steps.supervisor-invited": "Supervisor was invited to evaluate internship. You will be notified when it is done.",
 
   "internship.supervisor-name": "Supervisor Name",
   "internship.supervisor-phone": "Supervisor Phone",

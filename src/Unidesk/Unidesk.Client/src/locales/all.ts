@@ -3,7 +3,7 @@ import { cs } from "./languages/czech";
 import { LanguagesId as Lid } from "./common";
 
 export type EnKeys = keyof typeof en;
-type TranslationOrFunction = string | ((args: any) => string);
+type TranslationOrFunction = string | ((args: any) => string)  | ((args1: any, args2: any) => string);
 export type ILocale = {
   [key in EnKeys]?: TranslationOrFunction;
 } & { id: string; flag: string; language: string };

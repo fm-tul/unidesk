@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unidesk.Db;
 
@@ -11,9 +12,11 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    partial class UnideskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230503090215_Add_Internship_Evaluation")]
+    partial class AddInternshipEvaluation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -238,9 +241,6 @@ namespace Unidesk.Migrations
                     b.Property<Guid>("CreatedByUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("DocumentId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -291,8 +291,6 @@ namespace Unidesk.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("DocumentId");
 
                     b.HasIndex("EvaluatorId");
 
@@ -387,10 +385,6 @@ namespace Unidesk.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Requirements")
@@ -1173,11 +1167,6 @@ namespace Unidesk.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Unidesk.Db.Models.Document", "Document")
-                        .WithMany()
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Unidesk.Db.Models.User", "Evaluator")
                         .WithMany()
                         .HasForeignKey("EvaluatorId")
@@ -1194,8 +1183,6 @@ namespace Unidesk.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CreatedByUser");
-
-                    b.Navigation("Document");
 
                     b.Navigation("Evaluator");
 

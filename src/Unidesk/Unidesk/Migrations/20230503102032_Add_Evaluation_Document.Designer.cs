@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unidesk.Db;
 
@@ -11,9 +12,11 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    partial class UnideskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230503102032_Add_Evaluation_Document")]
+    partial class AddEvaluationDocument
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -387,10 +390,6 @@ namespace Unidesk.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Note")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Requirements")

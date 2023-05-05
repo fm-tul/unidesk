@@ -1,10 +1,10 @@
 import { UserFunction as UserFunctions } from "@api-client/constants/UserFunction";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
-import { ThesisEvaluationDto } from "@models/ThesisEvaluationDto";
+import { EvaluationDto } from "@models/EvaluationDto";
 import { FloatingAction } from "components/mui/FloatingAction";
 import { UnideskComponent } from "components/UnideskComponent";
-import { extractPagedResponse, useModel } from "hooks/useFetch";
+import { extractPagedResponse, useModel, useModelQuery } from "hooks/useFetch";
 import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import { useContext, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -27,12 +27,13 @@ import { RowField } from "components/mui/RowField";
 import { dateColumn } from "ui/TableColumns";
 import { ButtonGroup } from "components/FilterBar";
 import { z } from "zod";
-import { ThesisEvaluationPeekDto } from "@models/ThesisEvaluationPeekDto";
-import { link_pageEvaluationEdit, link_pageEvaluationView } from "routes/links";
+import { EvaluationPeekDto } from "@models/EvaluationPeekDto";
+import { link_pageEvaluationView } from "routes/links";
 import { UserFunction, UserLookupDto } from "@api-client/index";
+import { getPropsFactory } from "utils/forms";
 
 const supportedUserFunctions = [UserFunctions.Opponent, UserFunctions.Supervisor, UserFunctions.External];
-const initialDto = { id: GUID_EMPTY, status: EvaluationStatus.PREPARED } as ThesisEvaluationDto;
+const initialDto = { id: GUID_EMPTY, status: EvaluationStatus.PREPARED } as EvaluationDto;
 export const PageEvaluationManage = () => {
   const { id } = useParams();
   const { language } = useContext(LanguageContext);
@@ -40,9 +41,9 @@ export const PageEvaluationManage = () => {
   const queryClient = useQueryClient();
 
   const [editMode, setEditMode] = useState(false);
-  const [dto, setDto] = useState<ThesisEvaluationDto>({ ...initialDto });
+  const [dto, setDto] = useState<EvaluationDto>({ ...initialDto });
 
-  const handleRowClick = (item: ThesisEvaluationDto) => {
+  const handleRowClick = (item: EvaluationDto) => {
     switch (item.status) {
       // can edit
       case EvaluationStatus.PREPARED:
@@ -120,7 +121,7 @@ export const PageEvaluationManage = () => {
             dateColumn("modified", language, translate),
             {
               id: "actions",
-              field: (item: ThesisEvaluationDto) => (
+              field: (item: EvaluationDto) => (
                 <ButtonGroup className="flow" variant="text" size="sm">
                   <Button if={item.status === EvaluationStatus.PREPARED} success onClick={() => handleRowClick(item)}>
                     {translate("edit")}
@@ -160,7 +161,7 @@ const evalutationRequestSchema = z.object({
 });
 
 interface EvaluationRequestEditorProps {
-  dto: ThesisEvaluationDto;
+  dto: EvaluationDto;
   thesisId: string;
   onCancel: () => void;
 }
@@ -171,33 +172,33 @@ const EvaluationRequestEditor = (props: EvaluationRequestEditorProps) => {
   const [canProceed, setCanProceed] = useState(false);
   const queryClient = useQueryClient();
 
-  const { dto, setDto, getPropsText, getPropsSelect, errors, setErrors, validateAndSetErrors, setQuery, deleteQuery } =
-    useModel<ThesisEvaluationPeekDto>(
-      props.dto?.id ?? GUID_EMPTY,
-      props.dto,
-      () => httpClient.evaluations.peek({ id: props.dto.id }),
-      dto => {
-        return httpClient.evaluations.upsert({ requestBody: dto }).finally(() => {
-          queryClient.invalidateQueries(["evaluation", "thesis", thesisId]);
-        });
-      },
-      (id: string) => httpClient.evaluations.deleteOne({ id: id }),
-      [props.dto.id],
-      evalutationRequestSchema
-    );
+  const invalidateAndClose = () => {
+    queryClient.invalidateQueries(["evaluation", "thesis", thesisId]);
+    onCancel();
+  };
+
+  const { dto, setDto, setQuery, delQuery, errors } = useModelQuery<EvaluationPeekDto>({
+    getFunc: () => httpClient.evaluations.peek({ id: props.dto.id }),
+    setFunc: dto => httpClient.evaluations.upsert({ requestBody: dto }),
+    delFunc: id => httpClient.evaluations.deleteOne({ id: id }),
+    initialValues: props.dto,
+    autoToaster: true,
+    translate,
+    onDelSuccess: invalidateAndClose,
+  });
+  const { getPropsText, getPropsSelect } = getPropsFactory(dto, setDto, errors);
 
   const changeStatusMutation = useMutation(
-    (dto: ThesisEvaluationDto) => httpClient.evaluations.changeStatus({ id: dto.id, status: EvaluationStatus.INVITED }),
+    (dto: EvaluationDto) => httpClient.evaluations.changeStatus({ id: dto.id, status: EvaluationStatus.INVITED }),
     {
       onSuccess: () => {
-        toast.success(translate("saved"));
-        queryClient.invalidateQueries(["evaluation", "thesis", thesisId]);
-        onCancel();
+        toast.success(translate("evaluation.invited"));
+        invalidateAndClose();
       },
     }
   );
 
-  const dtoOrEmpty = (dto ?? { ...initialDto, thesisId }) as ThesisEvaluationPeekDto;
+  const dtoOrEmpty = (dto ?? { ...initialDto, thesisId }) as EvaluationPeekDto;
 
   return (
     <div>
@@ -229,8 +230,8 @@ const EvaluationRequestEditor = (props: EvaluationRequestEditorProps) => {
           }
         />
 
-        <RowField title="evaluation.evaluator-name" Field={<FormField as={TextField} {...getPropsText("evaluatorFullName")} />} />
-        <RowField title="evaluation.evaluator-email" Field={<FormField as={TextField} {...getPropsText("email")} />} />
+        <RowField title="evaluation.evaluator-name" Field={<FormField as={TextField} {...getPropsText<any>("evaluatorFullName")} />} />
+        <RowField title="evaluation.evaluator-email" Field={<FormField as={TextField} {...getPropsText<any>("email")} />} />
 
         <RowField
           title="evaluation.evaluator-relation"
@@ -253,10 +254,10 @@ const EvaluationRequestEditor = (props: EvaluationRequestEditorProps) => {
           <Button onClick={onCancel} color="neutral" text>
             {translate("cancel")}
           </Button>
-          <Button onClick={() => setQuery.mutate(dtoOrEmpty)} loading={setQuery.isLoading}>
+          <Button onClick={() => setQuery?.mutate(dtoOrEmpty)} loading={setQuery?.isLoading}>
             {dtoOrEmpty.id === GUID_EMPTY ? translate("add-new") : translate("update")}
           </Button>
-          <Button onClick={() => deleteQuery.mutate(dtoOrEmpty.id)} error loading={deleteQuery.isLoading} if={dtoOrEmpty.id !== GUID_EMPTY}>
+          <Button onClick={() => delQuery?.mutate(dtoOrEmpty.id)} error loading={delQuery?.isLoading} if={dtoOrEmpty.id !== GUID_EMPTY}>
             {translate("delete")}
           </Button>
         </div>

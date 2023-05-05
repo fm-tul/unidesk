@@ -2,9 +2,11 @@ import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
 import { modalStack } from "./ModalStack";
+import { classnames } from "./shared";
 
 export interface ModalProps {
   open: boolean;
+  cannotBeClosed?: boolean;
   onClose: () => void;
 
   x?: "left" | "center" | "right";
@@ -16,8 +18,61 @@ export interface ModalProps {
   className?: string;
 }
 
-
 export const Modal = (props: PropsWithChildren<ModalProps>) => {
+  const { children, open, onClose, cannotBeClosed = false, width = "container", height = "auto", fullWidth } = props;
+  const [ref, setRef] = useState<HTMLDialogElement | null>(null);
+
+  const widthCss = WIDTH_CSS[width];
+  const heightCss = HEIGHT_CSS[height];
+
+  const fullWidthCss = fullWidth ? "w-full" : "";
+
+  const close = useCallback(() => {
+    if (ref) {
+      ref.close();
+    }
+    onClose();
+  }, [ref]);
+
+  const onClosing = useCallback(() => {
+    if (!cannotBeClosed) {
+      close();
+    }
+  }, [onClose]);
+
+  // Eventlistener: trigger onclose when click outside
+  const onClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    if (!cannotBeClosed && e.target === ref) {
+      close();
+    }
+  };
+
+  useEffect(() => {
+    if (ref && open) {
+      try {
+        ref.showModal();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }, [ref, open]);
+
+  return (
+    <dialog
+      ref={setRef}
+      onClose={onClosing}
+      onCancel={onClosing}
+      onClick={onClick}
+      className={classnames("modal rounded p-0", !open && "modal--closing", widthCss, heightCss, fullWidthCss)}
+    >
+      <div onClick={e => e.stopPropagation()} className="rounded-sm bg-white p-4">
+        {children}
+      </div>
+    </dialog>
+  );
+};
+
+export const Modal2 = (props: PropsWithChildren<ModalProps>) => {
   const {
     open,
     onClose,

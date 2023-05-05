@@ -6,8 +6,8 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build --sourcemap --emptyOutDir",
     "preview": "vite preview",
-    "generate-api": "npx openapi-typescript-codegen -i http://localhost:3401/swagger/v1/swagger.json -c axios -o src/api-client --name ApiClient --useOptions",
-    "generate": "npx openapi-typescript-codegen -i swagger.json -c axios -o src/api-client --name ApiClient --useOptions"
+    "generate-api": "npx openapi-typescript-codegen -i http://localhost:3401/swagger/v1/swagger.json -c axios -o src/api-client --name ApiClient --useOptions --request src/core/request.ts",
+    "generate": "npx openapi-typescript-codegen -i swagger.json -c axios -o src/api-client --name ApiClient --useOptions --request src/core/request.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
@@ -30,6 +30,7 @@
     "react": "^18.2.0",
     "react-cropper": "^2.3.2",
     "react-dom": "^18.2.0",
+    "react-drag-drop-files": "^2.3.10",
     "react-icons": "^4.6.0",
     "react-latex": "^2.0.0",
     "react-modal-promise": "^1.0.2",
