@@ -32,6 +32,11 @@ public class SettingsService
            .GetOrCreateFromDto(_mapper, dto, ct);
         NotFoundException.ThrowIfNullOrEmpty(item);
 
+        if (isNew)
+        {
+            await _db.UserRoles.AddAsync(item, ct);
+        }
+
         await _db.SaveChangesAsync(ct);
         return item;
     }
