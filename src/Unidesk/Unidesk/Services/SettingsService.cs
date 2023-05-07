@@ -1,9 +1,11 @@
 ﻿using MapsterMapper;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Exceptions;
+using Unidesk.Server;
 using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Services;
@@ -13,12 +15,14 @@ public class SettingsService
     private readonly UnideskDbContext _db;
     private readonly ILogger<SettingsService> _logger;
     private readonly IMapper _mapper;
+    private readonly IOutputCacheStore _cacheStore;
 
-    public SettingsService(UnideskDbContext db, ILogger<SettingsService> logger, IMapper mapper)
+    public SettingsService(UnideskDbContext db, ILogger<SettingsService> logger, IMapper mapper, IOutputCacheStore cacheStore)
     {
         _db = db;
         _logger = logger;
         _mapper = mapper;
+        _cacheStore = cacheStore;
     }
 
     public async Task<IEnumerable<UserRole>> GetRolesAsync()
@@ -38,6 +42,7 @@ public class SettingsService
         }
 
         await _db.SaveChangesAsync(ct);
+        await _cacheStore.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
         return item;
     }
 
@@ -55,6 +60,7 @@ public class SettingsService
 
         _db.UserRoles.Remove(item);
         await _db.SaveChangesAsync(ct);
+        await _cacheStore.EvictByTagAsync(EnumsCachedEndpoint.EnumsCacheTag, ct);
         return true;
     }
 }
