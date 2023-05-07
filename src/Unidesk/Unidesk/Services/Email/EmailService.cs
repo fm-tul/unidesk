@@ -32,14 +32,8 @@ public class EmailService
         return client;
     }
 
-    public async Task<EmailMessage?> QueueTextEmailAsync(string to, string subject, string body, CancellationToken ct, Action<EmailMessage>? tagMessage = null)
+    public async Task<EmailMessage?> QueueTextEmailAsync(string to, string subject, string body, CancellationToken ct, Action<EmailMessage>? tagMessage = null, Guid? documentId = null)
     {
-        // if (_emailOptions.RedirectAllEmailsTo.IsNotNullOrEmpty())
-        // {
-        //     _logger.LogDebug("ignoring email sending because all emails are redirected to {RedirectAllEmailsTo}", _emailOptions.RedirectAllEmailsTo);
-        //     return null;
-        // }
-        
         var email = new EmailMessage
         {
             From = _emailOptions.From,
@@ -48,11 +42,11 @@ public class EmailService
             Body = body,
             Status = EmailStatus.InQueue,
             ScheduledToBeSent = DateTime.Now,
+            DocumentId = documentId,
         };
 
         tagMessage?.Invoke(email);
-        _db.Emails.Add(email);
-        await _db.SaveChangesAsync(ct);
+        await _db.Emails.AddAsync(email, ct);
         return email;
     }
 
@@ -73,10 +67,43 @@ public class EmailService
             message.To.Add(new MailboxAddress(email.To, email.To));
         }
 
-        message.Body = new TextPart("plain")
+        if (email.DocumentId is not null)
         {
-            Text = body,
-        };
+            var doc = await _db.Documents
+               .Query()
+               .FirstOrDefaultAsync(email.DocumentId.Value, ct);
+
+            if (doc is null)
+            {
+                _logger.LogWarning("Document with id {Id} not found", email.DocumentId);
+            }
+            else
+            {
+                var attachment = new MimePart(doc.ContentType)
+                {
+                    Content = new MimeContent(new MemoryStream(doc.DocumentContent.Content)),
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    FileName = doc.Name,
+                };
+                
+                message.Body = new Multipart("mixed")
+                {
+                    attachment,
+                    new TextPart("plain")
+                    {
+                        Text = body,
+                    },
+                };
+            }
+        }
+        else
+        {
+            message.Body = new TextPart("plain")
+            {
+                Text = body,
+            };
+        }
 
         using var client = await GetSmtpClient();
         try
@@ -106,8 +133,8 @@ public class EmailService
     }
 
 
-    
-    private static DateTime LastLogMessage = DateTime.MinValue; 
+    private static DateTime LastLogMessage = DateTime.MinValue;
+
     public async Task SendQueuedEmailsAsync(CancellationToken stoppingToken)
     {
         var emails = _db.Emails
@@ -121,9 +148,10 @@ public class EmailService
                 _logger.LogDebug("No emails to send");
                 LastLogMessage = DateTime.Now;
             }
+
             return;
         }
-        
+
         _logger.LogInformation("Sending {Count} emails", emails.Count);
 
         var successCount = 0;
@@ -140,22 +168,22 @@ public class EmailService
                 failCount++;
             }
         }
-        
+
         _logger.LogInformation("Sent {SuccessCount} emails, failed to send {FailCount}", successCount, failCount);
         await _db.SaveChangesAsync(stoppingToken);
     }
 
-    public IQueryable<EmailMessage> Where(EmailFilter query)
+    public IQueryable<EmailMessage> Where(EmailFilter filter)
     {
-        var queryable = _db.Emails.AsQueryable();
-        
-        queryable.WhereIf(query.From.IsNotNullOrEmpty(), e => e.From == query.From);
-        queryable.WhereIf(query.To.IsNotNullOrEmpty(), e => e.To == query.To);
-        queryable.WhereIf(query.Subject.IsNotNullOrEmpty(), e => e.Subject == query.Subject);
-        queryable.WhereIf(query.Body.IsNotNullOrEmpty(), e => e.Body.Contains(query.Body!));
-        queryable.WhereIf(query.Status.HasValue, e => e.Status == query.Status!.Value);
-        queryable.WhereIf(query.Module.HasValue, e => e.Module == query.Module!.Value);
-        
-        return queryable;
+        var query = _db.Emails.AsQueryable();
+
+        query = query.WhereIf(filter.From.IsNotNullOrEmpty(), e => e.From == filter.From);
+        query = query.WhereIf(filter.To.IsNotNullOrEmpty(), e => e.To == filter.To);
+        query = query.WhereIf(filter.Subject.IsNotNullOrEmpty(), e => e.Subject == filter.Subject);
+        query = query.WhereIf(filter.Body.IsNotNullOrEmpty(), e => e.Body.Contains(filter.Body!));
+        query = query.WhereIf(filter.Status.HasValue, e => e.Status == filter.Status!.Value);
+        query = query.WhereIf(filter.Module.HasValue, e => e.Module == filter.Module!.Value);
+
+        return query;
     }
 }

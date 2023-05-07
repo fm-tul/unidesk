@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Security;
+using Unidesk.ServiceFilters;
 using Unidesk.Services;
 
 namespace Unidesk.Controllers;
@@ -35,13 +37,25 @@ public class SettingsController : Controller
     [HttpPost, Route("save-role")]
     [SwaggerOperation(OperationId = nameof(SaveRole))]
     [ProducesResponseType(typeof(UserRoleDto), 200)]
-    public async Task<IActionResult> SaveRole([FromBody] UserRoleDto dto)
+    [RequireGrant(Grants.Action_ManageRolesAndGrants)]
+    public async Task<IActionResult> SaveRole([FromBody] UserRoleDto dto, CancellationToken ct)
     {
         _userProvider.ValidateAndThrow(UserRoleDto.ValidateAndThrow, dto);
         
-        var item = _mapper.Map<UserRole>(dto);
-        var savedItem = await _settingsService.SaveRoleAsync(item);
+        var savedItem = await _settingsService.SaveRoleAsync(dto, ct);
         var savedDto = _mapper.Map<UserRoleDto>(savedItem);
         return Ok(savedDto);
     }
+    
+    [HttpDelete, Route("delete-role/{id:guid}")]
+    [SwaggerOperation(OperationId = nameof(DeleteRole))]
+    [ProducesResponseType(typeof(bool), 200)]
+    [RequireGrant(Grants.Action_ManageRolesAndGrants)]
+    public async Task<IActionResult> DeleteRole(Guid id, CancellationToken ct)
+    {
+        var item = await _settingsService.DeleteRoleAsync(id, ct);
+        return Ok(item);
+    }
+    
+    
 }

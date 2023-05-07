@@ -2,6 +2,7 @@
 using Unidesk.Db.Core;
 using Unidesk.Db.Models.Internships;
 using Unidesk.Locales;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Db.Models;
 

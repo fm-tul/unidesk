@@ -69,7 +69,7 @@ public class TeamService
            .Query()
            .Include(i => i.ProfileImage)
            .ThenInclude(i => i.DocumentContent)
-           .GetOrCreateFromDto(_mapper, dto);
+           .GetOrCreateFromDto(_mapper, dto, ct);
         
         NotFoundException.ThrowIfNullOrEmpty(item);
         
@@ -108,7 +108,7 @@ public class TeamService
         MakeSureOwnerIsValid(item);
         await _db.SaveChangesAsync(ct);
 
-        var fresh = await _db.Teams.Query().FirstOrDefaultAsync(item.Id);
+        var fresh = await _db.Teams.Query().FirstOrDefaultAsync(item.Id, ct);
         NotFoundException.ThrowIfNullOrEmpty(fresh);
         return fresh;
     }
@@ -143,9 +143,9 @@ public class TeamService
         }
     }
 
-    public async Task<Team> ChangeStatus(UserInTeam userInTeam, UserInTeamStatus status)
+    public async Task<Team> ChangeStatus(UserInTeam userInTeam, UserInTeamStatus status, CancellationToken ct)
     {
-        var team = await _db.Teams.Query().FirstOrDefaultAsync(userInTeam.TeamId);
+        var team = await _db.Teams.Query().FirstOrDefaultAsync(userInTeam.TeamId, ct);
         NotFoundException.ThrowIfNullOrEmpty(team);
         
         switch (status)

@@ -22,6 +22,7 @@ import { TextField } from "ui/TextField";
 import { UnideskComponent } from "components/UnideskComponent";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { SelectField } from "ui/SelectField";
+import { ButtonGroup } from "components/FilterBar";
 
 interface SettingsRoute {
   name: EnKeys;
@@ -74,6 +75,13 @@ const RolesAndGrants = () => {
       queryClient.invalidateQueries("roles-and-grants");
     },
   });
+  const deleteMutation = useMutation((id: string) => httpClient.settings.deleteRole({ id }), {
+    onSuccess: () => {
+      toast.success(translate("deleted"));
+      queryClient.invalidateQueries("roles-and-grants");
+      setItem(undefined);
+    },
+  });
   const { data } = useQuery({
     queryKey: "roles-and-grants",
     queryFn: () => httpClient.settings.getRolesAndGrants(),
@@ -98,10 +106,6 @@ const RolesAndGrants = () => {
     );
   };
 
-  const userGrantsOtions = generatePrimitive(
-    GrantsAll.map(i => i.id),
-    renderGrant
-  );
 
   return (
     <UnideskComponent name="RolesAndGrants">
@@ -185,9 +189,14 @@ const RolesAndGrants = () => {
             searchable
             onValue={(grants: string[]) => setItem({ ...item, grants: grants.map(i => GrantsAll.find(j => j.id === i)!) })}
           />
-          <Button className="ml-auto" success onClick={() => saveMutation.mutate(item)}>
-            {item.id === GUID_EMPTY ? RR("add-new", language) : RR("update", language)}
-          </Button>
+          <ButtonGroup className="ml-auto" size="sm">
+            <Button success onClick={() => saveMutation.mutate(item)}>
+              {item.id === GUID_EMPTY ? RR("add-new", language) : RR("update", language)}
+            </Button>
+            <Button error onConfirmedClick={() => deleteMutation.mutate(item.id)}>
+              {RR("delete", language)}
+            </Button>
+          </ButtonGroup>
         </div>
       )}
     </UnideskComponent>

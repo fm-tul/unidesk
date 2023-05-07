@@ -2,7 +2,10 @@ import { InternshipStatusAll } from "@api-client/constants/InternshipStatus";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { useTranslation } from "@locales/translationHooks";
+import { InternshipFilter } from "@models/InternshipFilter";
 import { FloatingAction } from "components/mui/FloatingAction";
+import InternshipFilterBar from "filters/InternshipFilterBar";
+import { EnumsContext } from "models/EnumsContext";
 import { RenderDate } from "models/cellRenderers/MetadataRenderer";
 import { renderUserLookup } from "models/cellRenderers/UserRenderer";
 import moment from "moment";
@@ -15,15 +18,21 @@ import { dateColumn, idColumn } from "ui/TableColumns";
 
 export const PageInternshipList = () => {
   const navigate = useNavigate();
+  const { enums } = useContext(EnumsContext);
+  const now = new Date();
   const { language } = useContext(LanguageContext);
-  const { translateName, translateVal, translate } = useTranslation(language);
+  const { translateVal, translate } = useTranslation(language);
+  const filterModel = useState<InternshipFilter>({
+    paging: { page: 1, pageSize: 100 },
+    schoolYearId: enums.schoolYears.find(i => new Date(i.start) <= now && new Date(i.end) >= now)?.id,
+  });
 
   const query = useQuery({
-    queryKey: ["internships"],
+    queryKey: ["internships", filterModel[0]],
     queryFn: () =>
       httpClient.internship.find({
-        requestBody: {
-          paging: { page: 1, pageSize: 10 },
+        requestBody: { 
+          ...filterModel[0]
         },
       }),
   });
@@ -32,10 +41,19 @@ export const PageInternshipList = () => {
 
   return (
     <>
+      <div className="flex w-full">
+        <div className="ml-auto">
+          <InternshipFilterBar filterModel={filterModel} pageModel={undefined as any} />
+        </div>
+      </div>
       <Table
         clientSort
         onRowClick={i => navigate(link_pageInternshipDetail.navigate(i.id))}
-        EmptyContent={<div className="text-center italic text-black/20 p-8 text-xl font-extrabold select-none">{translate("internship.no-internships")}</div>}
+        EmptyContent={
+          <div className="select-none p-8 text-center text-xl font-extrabold italic text-black/20">
+            {translate("internship.no-internships")}
+          </div>
+        }
         rows={data}
         columns={[
           idColumn,

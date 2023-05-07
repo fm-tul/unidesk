@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos.Documents;
+using Unidesk.Utils.Extensions;
 
 namespace Unidesk.Services;
 
@@ -116,7 +117,7 @@ public class DocumentService
         return contentData;
     }
 
-    public Document CreateDocument(byte[] data, string filename, string contentType = ApplicationPdf)
+    public Document CreateDocument(byte[] data, string filename, string contentType = ApplicationPdf,  Guid? desiredAccessKey = null)
     {
         var content = new DocumentContent
         {
@@ -133,10 +134,37 @@ public class DocumentService
             DocumentContentId = content.Id,
             Description = string.Empty,
         };
-
+        
+        doc.AccessKey = desiredAccessKey ?? doc.AccessKey;
         content.DocumentId = doc.Id;
 
         return doc;
+    }
+    
+    public async Task<IResult> GetDocumentByAccessKey(string accessKey, CancellationToken ct)
+    {
+        Document? doc = null;
+        var isShortGuid = accessKey.TryParseShortForm(out var guid);
+        if (isShortGuid)
+        {
+            doc = await _db.Documents
+               .Query()
+               .FirstOrDefaultAsync(d => d.AccessKey == guid, ct);
+        }
+        else
+        {
+            var isGuid = Guid.TryParse(accessKey, out guid);
+            if (isGuid)
+            {
+                doc = await _db.Documents
+                   .Query()
+                   .FirstOrDefaultAsync(d => d.AccessKey == guid, ct);
+            }
+        }
+    
+        return doc == null 
+            ? Results.NotFound() 
+            : Results.Bytes(doc.DocumentContent.Content, doc.ContentType, doc.Name);
     }
 
     public void UpdateDocument(Document doc, byte[] data, string filename, string contentType = ApplicationPdf)

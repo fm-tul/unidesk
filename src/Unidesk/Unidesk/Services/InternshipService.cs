@@ -52,18 +52,26 @@ public class InternshipService
     public IQueryable<Internship> Where(InternshipFilter filter)
     {
         var query = _db.Internships.Query();
-
-        query.WhereIf(filter.StudentId.HasValue, i => i.StudentId == filter.StudentId);
-        query.WhereIf(filter.Status.HasValue, i => i.Status == filter.Status);
-
+        
+        query = query.WhereIf(filter.StudentId.HasValue, i => i.StudentId == filter.StudentId);
+        query = query.WhereIf(filter.Status.HasValue, i => i.Status == filter.Status!.Value);
+        if (filter.SchoolYearId.HasValue)
+        {
+            var schoolYear = _db.SchoolYears.FirstOrDefault(i => i.Id == filter.SchoolYearId);
+            if (schoolYear != null)
+            {
+                query = query.Where(i => i.StartDate >= schoolYear._start && i.StartDate <= schoolYear._end);
+            }
+        }
+        
         return query;
     }
 
     public async Task<Internship> UpsertAsync(InternshipDto dto, CancellationToken ct, Action<Internship, IEnumerable<string>>? onBeforeSave = null)
     {
         var (isNew, item) = await _db.Internships.Query()
-           .GetOrCreateFromDto(_mapper, dto);
-        
+           .GetOrCreateFromDto(_mapper, dto, ct);
+
         NotFoundException.ThrowIfNullOrEmpty(item);
 
         if (isNew)
@@ -129,23 +137,23 @@ public class InternshipService
                 {
                     item.Note = note ?? string.Empty;
                     var body = _templateFactory
-                       .LoadTemplate(InternshipTemplates.InternshipApprovedCzeTemplate.TemplateBody)
-                       .RenderTemplate(new InternshipTemplates.InternshipApprovedCzeTemplate
+                       .LoadTemplate<InternshipTemplates.InternshipApprovedMultiLangTemplate>()
+                       .Render(new InternshipTemplates.InternshipApprovedMultiLangTemplate
                         {
                             InternshipUrl = $"{_serverService.UrlBase}/internships/{item.Id}",
                             Note = note,
                         });
-                    await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipApprovedCzeTemplate.Subject, body, ct);
+                    await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipApprovedMultiLangTemplate.Subject, body, ct);
                 }
                 else
                 {
                     var body = _templateFactory
-                       .LoadTemplate(InternshipTemplates.InternshipUpdatedCzeTemplate.TemplateBody)
-                       .RenderTemplate(new InternshipTemplates.InternshipUpdatedCzeTemplate
+                       .LoadTemplate<InternshipTemplates.InternshipUpdatedMultiLangTemplate>()
+                       .Render(new InternshipTemplates.InternshipUpdatedMultiLangTemplate
                         {
                             InternshipUrl = $"{_serverService.UrlBase}/internships/{item.Id}",
                         });
-                    await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipUpdatedCzeTemplate.Subject, body, ct);
+                    await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipUpdatedMultiLangTemplate.Subject, body, ct);
                 }
             }
         }
@@ -184,6 +192,38 @@ public class InternshipService
             return;
         }
 
+        var (availableManagerEmails, allManagerEmails) = await GetManagerEmailsAvailableAsync(ct);
+
+        var emailsSent = new HashSet<string>();
+        foreach (var email in availableManagerEmails)
+        {
+            var message = _templateFactory
+               .LoadTemplate<InternshipTemplates.NewInternshipSubmittedMultiLangTemplate>()
+               .Render(new InternshipTemplates.NewInternshipSubmittedMultiLangTemplate
+                {
+                    InternshipCount = submittedInternships.Count,
+                    InternshipUrl = $"{_serverService.UrlBase}/internships",
+                });
+
+            await _emailService.QueueTextEmailAsync(email, InternshipTemplates.NewInternshipSubmittedMultiLangTemplate.Subject, message, ct);
+            emailsSent.Add(email);
+        }
+
+        if (emailsSent.Count > 0)
+        {
+            _logger.LogInformation("Emails about new submitted internships were sent to {EmailsCount} managers", emailsSent.Count);
+        }
+        else
+        {
+            _logger.LogWarning("No emails about new submitted internships were sent! "
+                             + "There are {ManagersCount} managers, but none of them has email set or has opted out from emails. "
+                             + "There are {SubmittedInternshipsCount} submitted internships",
+                allManagerEmails.Count, submittedInternships.Count);
+        }
+    }
+
+    public async Task<(List<string> AvailableManagers, List<string> AllManagers)> GetManagerEmailsAvailableAsync(CancellationToken ct)
+    {
         var managerGrantId = Grants.Internship_Manage.GrantId();
         var managers = await _db.UserRoles
            .Where(i => i._grantsRaw.Contains(managerGrantId.ToString()))
@@ -196,53 +236,28 @@ public class InternshipService
            .Where(i => !i.IsAdmin())
            .ToList();
 
+        var allManagers = new List<string>();
+        var availableManagers = new List<string>();
 
-        var emailsSent = new HashSet<string>();
         foreach (var manager in managers)
         {
-            if (manager.HasPreferenceChecked(Preferences.OptOutFromEmailsAboutInternships) == true)
+            var email = manager.GetEmail();
+            if (email.IsNullOrEmpty())
             {
-                _logger.LogDebug("Manager {UserName} has opted out from emails", manager.FullName());
                 continue;
             }
-            
-            var email = manager.GetEmail();
-            if (email.IsNotNullOrEmpty())
+
+            allManagers.Add(email);
+
+            if (manager.HasPreferenceChecked(Preferences.OptOutFromEmailsAboutInternships) == true)
             {
-                if (emailsSent.Contains(email))
-                {
-                    _logger.LogWarning("Manager {UserName} has already been notified", manager.FullName());
-                    continue;
-                }
-
-                var message = _templateFactory
-                   .LoadTemplate(InternshipTemplates.NewInternshipSubmittedCzeTemplate.TemplateBody)
-                   .RenderTemplate(new InternshipTemplates.NewInternshipSubmittedCzeTemplate
-                    {
-                        InternshipCount = submittedInternships.Count,
-                        InternshipUrl = $"{_serverService.UrlBase}/internships",
-                    });
-
-                await _emailService.QueueTextEmailAsync(email, InternshipTemplates.NewInternshipSubmittedCzeTemplate.Subject, message, ct);
-                emailsSent.Add(email);
+                continue;
             }
-            else
-            {
-                _logger.LogWarning("Manager {UserName} has no email", manager.FullName());
-            }
+
+            availableManagers.Add(email);
         }
 
-        if (emailsSent.Count > 0)
-        {
-            _logger.LogInformation("Emails about new submitted internships were sent to {EmailsCount} managers", emailsSent.Count);
-        }
-        else
-        {
-            _logger.LogWarning("No emails about new submitted internships were sent! "
-                             + "There are {ManagersCount} managers, but none of them has email set or has opted out from emails. "
-                             + "There are {SubmittedInternshipsCount} submitted internships",
-                managers.Count, submittedInternships.Count);
-        }
+        return (availableManagers.Distinct().ToList(), allManagers.Distinct().ToList());
     }
 
     public async Task NotifyStudentsContactPersonMissingAsync(CancellationToken ct)
@@ -270,23 +285,45 @@ public class InternshipService
             if (email.IsNotNullOrEmpty())
             {
                 var message = _templateFactory
-                   .LoadTemplate(InternshipTemplates.InternshipContactPersonMissingCzeTemplate.TemplateBody)
-                   .RenderTemplate(new InternshipTemplates.InternshipContactPersonMissingCzeTemplate
+                   .LoadTemplate<InternshipTemplates.InternshipContactPersonMissingMultiLangTemplate>()
+                   .Render(new InternshipTemplates.InternshipContactPersonMissingMultiLangTemplate
                     {
                         InternshipUrl = $"{_serverService.UrlBase}/internships/{item.Id}",
                     });
 
-                await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipContactPersonMissingCzeTemplate.Subject, message, ct);
+                await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipContactPersonMissingMultiLangTemplate.Subject, message, ct);
                 item.Modified = _clock.Now;
                 notified++;
-            } 
+            }
             else
             {
                 _logger.LogWarning("Student {UserName} has no email", item.Student.FullName());
             }
         }
-        
+
         _logger.LogInformation("Emails about missing contact person were sent to {NotifiedCount} students", notified);
         await _db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// internship can be finished if:
+    /// - it is approved
+    /// - it is after the end date
+    /// - we have evaluation from the author (status Approved)
+    /// - we have evaluation from the supervisor (status Approved)
+    /// </summary>
+    /// <param name="internship"></param>
+    /// <returns></returns>
+    public bool CanBeFinished(Internship internship)
+    {
+        var studentEvaluation = internship.Evaluations.FirstOrDefault(i => i.UserFunction == UserFunction.Author);
+        var supervisorEvaluation = internship.Evaluations.FirstOrDefault(i => i.UserFunction == UserFunction.Supervisor);
+
+        var canBeFinished = internship.Status == InternshipStatus.Approved
+                         && _clock.Now >= internship.EndDate
+                         && studentEvaluation?.Status == EvaluationStatus.Approved
+                         && supervisorEvaluation?.Status == EvaluationStatus.Approved;
+
+        return canBeFinished;
     }
 }

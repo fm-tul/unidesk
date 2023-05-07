@@ -39,7 +39,7 @@ public class UserServiceTests
     [Fact]
     public async Task Test_Should_Get_User_By_Id()
     {
-        var userService = new UserService(_db);
+        var userService = new UserService(_db, null, null, null);
         _db.Users.Add(StaticUsers.ImportUser);
         _db.Users.Add(StaticUsers.Guest);
         _db.SaveChanges();
@@ -62,7 +62,7 @@ public class UserServiceTests
     [Fact]
     public void Test_Should_Get_Correct_Claims_For_User()
     {
-        var userService = new UserService(_db);
+        var userService = new UserService(_db, null, null, null);
         var claims = userService.GetClaims(StaticUsers.ImportUser).ToList();
         claims.First(i => i.Type == ClaimTypes.NameIdentifier)
             .Value.Should().Be(StaticUsers.ImportUser.Id.ToString());
@@ -88,7 +88,7 @@ public class UserServiceTests
     [Fact]
     public async Task Test_Should_Reconstruct_User_From_Claims()
     {
-        var userService = new UserService(_db);
+        var userService = new UserService(_db, null, null, null);
         var importUser = userService.FromClaims(new ClaimsObject
         {
             NameIdentifier = StaticUsers.ImportUser.Id,

@@ -92,7 +92,7 @@ public class TeamController : ControllerBase
     [SwaggerOperation(OperationId = nameof(ChangeStatus))]
     [ProducesResponseType(typeof(SimpleJsonResponse), 200)]
     [ProducesResponseType(typeof(SimpleJsonResponse), 500)]
-    public async Task<IActionResult> ChangeStatus(Guid userId, Guid teamId, UserInTeamStatus status)
+    public async Task<IActionResult> ChangeStatus(Guid userId, Guid teamId, UserInTeamStatus status, CancellationToken ct)
     {
         var userInTeam = await _teamService.GetOneUserInTeamAsync(teamId, userId)
             ?? throw new Exception("User not found in team");
@@ -103,7 +103,7 @@ public class TeamController : ControllerBase
             return Forbid();
         }
 
-        await _teamService.ChangeStatus(userInTeam, status);
+        await _teamService.ChangeStatus(userInTeam, status, ct);
         return Ok(new SimpleJsonResponse());
     }
     

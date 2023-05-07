@@ -161,7 +161,7 @@ public class ThesisController : Controller
     [ProducesResponseType(typeof(ThesisDto), 200)]
     [ProducesResponseType(typeof(SimpleJsonResponse), 500)]
     [RequireGrant(Grants.Entity_Thesis_Edit)]
-    public async Task<IActionResult> Upsert([FromBody] ThesisDto dto)
+    public async Task<IActionResult> Upsert([FromBody] ThesisDto dto, CancellationToken ct)
     {
         ThesisDtoValidator.ValidateAndThrow(dto);
         var isNew = dto.Id == Guid.Empty;
@@ -169,7 +169,7 @@ public class ThesisController : Controller
             ? new Thesis()
             : await _db.Theses
                  .Query()
-                 .FirstOrDefaultAsync(dto.Id)
+                 .FirstOrDefaultAsync(dto.Id, ct)
            ?? throw new Exception("Thesis not found");
 
         await _thesisTransitionService

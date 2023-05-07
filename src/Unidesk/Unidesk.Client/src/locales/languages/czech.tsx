@@ -9,6 +9,8 @@ export const cs: ILocale = {
   "common.upload": "Upload",
   "common.download": "Download",
   "common.clear": "Smazat",
+  "common.approve": "Schválit",
+  "common.reject": "Zamítnout",
   "common.invitation-sent": "Pozvánka byla odeslána",
   "common.save-first-before-contiuining": "Nejprve uložte formulář, než budete pokračovat.",
   "common.upload.drop-files-here": "Nahrajte soubory přetažením sem",
@@ -352,10 +354,14 @@ export const cs: ILocale = {
   "internship.section.dates": "Termíny",
   "internship.section.contact": "Kontaktní informace",
   "internship.section.job-description": "Popis práce",
+  "internship.section.files-to-download": "Soubory ke stažení",
+  "internship.download-evaluation-author": "Stáhnout závěrečnou zprávu",
+  "internship.download-evaluation-supervisor": "Stáhnout hodnocení od vedoucího stáže",
 
   "internship.next-steps.upload-final-report": "Nahrát závěrečnou zprávu z odborné bakalářské praxe",
   "internship.next-steps.invite-supervisor-to-evaluate": "Pozvat vedoucího k vyhodnocení stáže",
   "internship.next-steps.wait-for-supervisor-to-evaluate": "Počkat, až vedoucí odevzdá hodnotící formulář",
+  "internship.next-steps.wait-for-manager-to-approve": "Počkat, až správce schválí hodnocení stáže",
   "internship.next-steps.supervisor-contact-info-not-filled": "Kontaktní informace vedoucího nejsou vyplněny, prosím doplňte je.",
   "internship.next-steps.supervisor-invited": "Vedoucí byl pozván k vyhodnocení stáže. Až bude stáž vyhodnocena, budete informováni.",
   

@@ -93,7 +93,7 @@ public static class EvaluationApi
                     Guid id, CancellationToken ct)
                 =>
             {
-                var document = await service.DownloadFileAsync(id, ct);
+                var document = await service.DownloadEvaluationFileAsync(id, ct);
                 return Results.Bytes(document.DocumentContent.Content, document.ContentType, document.Name);
             })
            .WithName("DownloadFileInternship")

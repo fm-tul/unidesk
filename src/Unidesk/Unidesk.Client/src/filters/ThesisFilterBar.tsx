@@ -1,8 +1,6 @@
 import { No as OptionNo, Yes as OptionYes } from "@api-client/constants/YesNo";
 import { httpClient } from "@core/init";
-import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
-import { RR } from "@locales/R";
 import { QueryPaging } from "@models/QueryPaging";
 import { ThesisFilter } from "@models/ThesisFilter";
 import { ThesisLookupDto } from "@models/ThesisLookupDto";

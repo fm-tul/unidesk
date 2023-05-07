@@ -8,6 +8,26 @@ public class TemplateFactory
     {
         return Template.Parse(templateBody.Trim());
     }
+    
+    public TemplateInstance<T> LoadTemplate<T>() where T: ITemplateContext
+    {
+        return new TemplateInstance<T>(Template.Parse(T.TemplateBody.Trim()));
+    }
+}
+
+public class TemplateInstance<T> where T : ITemplateContext
+{
+    public TemplateInstance(Template template)
+    {
+        Template = template;
+    }
+    
+    public Template Template { get; }
+    
+    public string Render(T context)
+    {
+        return Template.RenderTemplate(context);
+    }
 }
 
 public static class TemplateExtensions

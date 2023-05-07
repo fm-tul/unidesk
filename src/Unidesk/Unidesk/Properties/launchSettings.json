@@ -11,7 +11,7 @@
     "Unidesk-Local": {
       "commandName": "Project",
       "launchBrowser": false,
-      "applicationUrl": "https://localhost:3400;http://localhost:3401",
+      "applicationUrl": "https://0.0.0.0:3400;http://0.0.0.0:3401",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy",

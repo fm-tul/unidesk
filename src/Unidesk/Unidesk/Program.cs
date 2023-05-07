@@ -18,6 +18,7 @@ using Unidesk.Reports;
 using Unidesk.Reports.Templates;
 using Unidesk.Security;
 using Unidesk.Server;
+using Unidesk.Server.Permalinks;
 using Unidesk.Server.ServiceFilters;
 using Unidesk.Services;
 using Unidesk.Services.Email;
@@ -28,6 +29,7 @@ using Unidesk.Services.Stag;
 using Unidesk.Services.ThesisTransitions;
 using Unidesk.Tasks;
 using Unidesk.Utils;
+using Unidesk.Utils.Extensions;
 using OneOfExtensions = Unidesk.Utils.OneOfExtensions;
 
 
@@ -152,21 +154,20 @@ app.UseSerilogRequestLogging(options =>
         {
             return LogEventLevel.Error;
         }
+
         if (duration > TimeSpan.FromSeconds(1).TotalMilliseconds)
         {
             return LogEventLevel.Warning;
         }
+
         if (context.Request.Path.ToString().StartsWith("/assets/"))
         {
             return LogEventLevel.Verbose;
         }
-        
+
         return LogEventLevel.Information;
     };
-    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-    {
-        diagnosticContext.Set("UserName", httpContext.User.Identity?.Name ?? "[anon]");
-    };
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) => { diagnosticContext.Set("UserName", httpContext.User.Identity?.Name ?? "[anon]"); };
 });
 
 if (generateModel || true)
@@ -211,6 +212,9 @@ app.UseExceptionHandler(exceptionHandlerApp
 // hello world / endpoint
 app.MapGet("/test", () => "Hello World!");
 
+app.MapGet(PermalinksExtensions.DocumentEndpoint, async ([FromServices] DocumentService documentService, string id, CancellationToken ct)
+    => await documentService.GetDocumentByAccessKey(id, ct));
+
 var api = app.MapGroup("/api")
    .RequireAuthorization()
    .AddEndpointFilter<RequireGrantEndpointFilter>();
@@ -219,7 +223,7 @@ var apiEnums = api
    .MapGroup("/enums/")
    .CacheOutput(policyBuilder =>
     {
-        policyBuilder.Expire(TimeSpan.FromMinutes(15));
+        policyBuilder.Expire(TimeSpan.FromMinutes(1));
         policyBuilder.Tag(EnumsCachedEndpoint.EnumsCacheTag);
         policyBuilder.AddPolicy(typeof(OutputCachingPolicy));
     });
@@ -236,7 +240,7 @@ apiEnums.MapGet("All/list", ([FromServices] UnideskDbContext db, [FromServices] 
     {
         Departments = mapper.Map<List<DepartmentDto>>(db.Departments.ToList()),
         Faculties = mapper.Map<List<FacultyDto>>(db.Faculties.ToList()),
-        SchoolYears = mapper.Map<List<SchoolYearDto>>(db.SchoolYears.ToList()),
+        SchoolYears = mapper.Map<List<SchoolYearDto>>(db.SchoolYears.OrderByDescending(i => i._start).ToList()),
         ThesisOutcomes = mapper.Map<List<ThesisOutcomeDto>>(db.ThesisOutcomes.ToList()),
         ThesisTypes = mapper.Map<List<ThesisTypeDto>>(db.ThesisTypes.ToList()),
         StudyProgrammes = mapper.Map<List<StudyProgrammeDto>>(db.StudyProgrammes.ToList()),

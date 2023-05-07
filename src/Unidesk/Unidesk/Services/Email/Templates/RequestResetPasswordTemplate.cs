@@ -2,7 +2,8 @@
 
 public class RequestResetPasswordTemplate: ITemplateContext
 {
-    public const string TemplateBody = """
+    public static string Subject => "Password Reset Request";
+    public static string TemplateBody => """
     Dear {{ Email }},
 
     You have requested a password reset for your Unidesk account. Enter the following token into the reset password form:
@@ -15,6 +16,7 @@ public class RequestResetPasswordTemplate: ITemplateContext
     Temata FM
     Technical University of Liberec
     """;
+
 
     public required string Email;
     public required string Token;

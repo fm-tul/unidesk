@@ -10,4 +10,5 @@ public class InternshipFilter : IFilter
     public Operator Operator { get; set; }
     
     public InternshipStatus? Status { get; set; }
+    public Guid? SchoolYearId { get; set; }
 }

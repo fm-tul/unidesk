@@ -1,13 +1,11 @@
 import { Grants } from "@api-client/constants/Grants";
 import { InternshipStatusAll } from "@api-client/constants/InternshipStatus";
-import { UserFunction } from "@api-client/constants/UserFunction";
 import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { EnKeys } from "@locales/all";
 import { LanguagesId } from "@locales/common";
 import { translateValFor, useTranslation } from "@locales/translationHooks";
-import { EvaluationStatus } from "@models/EvaluationStatus";
 import { InternshipDto } from "@models/InternshipDto";
 import { InternshipStatus } from "@models/InternshipStatus";
 import { ButtonGroup } from "components/FilterBar";
@@ -15,15 +13,13 @@ import { KeywordSelector } from "components/KeywordSelector";
 import Timeline from "components/Timeline";
 import { RowField } from "components/mui/RowField";
 import { Section } from "components/mui/Section";
-import { useModel, useModelQuery } from "hooks/useFetch";
+import { useModelQuery } from "hooks/useFetch";
 import { useOpenClose } from "hooks/useOpenClose";
 import moment from "moment";
-import { useContext, useState } from "react";
-import { FaCheck, FaTimes, FaTrash } from "react-icons/fa";
+import { useContext } from "react";
 import { useMutation } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { link_pageInternshipDetail } from "routes/links";
 import { Button } from "ui/Button";
 import { FormField } from "ui/FormField";
 import { Modal } from "ui/Modal";
@@ -32,12 +28,12 @@ import { TextField } from "ui/TextField";
 import { UserSelectFormField } from "ui/UserSelectFormField";
 import { UserContext } from "user/UserContext";
 import { calculateDuration } from "utils/dateUtils";
-import { downloadBlob } from "utils/downloadFile";
 import { z } from "zod";
-import { FileUploader } from "react-drag-drop-files";
-import FileInput, { FileControl } from "components/FileInput";
 import InternshipGoals from "./InternshipGoals";
-import { FormErrors, getPropsFactory } from "utils/forms";
+import { getPropsFactory } from "utils/forms";
+import { UserFunction } from "@models/UserFunction";
+import { downloadBlob } from "utils/downloadFile";
+import { FaDownload } from "react-icons/fa";
 
 const humanInternshipStatuses = InternshipStatusAll.filter(
   i => i.value != InternshipStatus.CANCELLED && i.value != InternshipStatus.REJECTED && i.value != InternshipStatus.REOPENED
@@ -100,24 +96,18 @@ export const PageInternshipDetail = () => {
   const { translate } = useTranslation(language);
   const addingNote = useOpenClose();
 
-  // const { dto, setDto, getPropsText, getHelperProps, getQuery, setQuery, deleteQuery } = useModel(
-  //   id!,
-  //   { student: me as any, id: id === "new" ? GUID_EMPTY : id, status: InternshipStatus.DRAFT },
-  //   () => httpClient.internship.getOne({ id: id! }),
-  //   (dto: InternshipDto) => httpClient.internship.upsert({ requestBody: dto }),
-  //   (id: string) => httpClient.internship.deleteOne({ id }),
-  //   [id],
-  //   schema,
-  //   false,
-  //   data => {
-  //     toast.success(translate("saved"));
-  //     if (id === "new") {
-  //       navigate(link_pageInternshipDetail.navigate(data.id));
-  //     }
-  //   }
-  // );
-  const { dto, changeDto: setDto, getQuery, setQuery, delQuery, errors, touched } = useModelQuery({
+  const {
+    dto,
+    changeDto: setDto,
+    getQuery,
+    setQuery,
+    delQuery,
+    errors,
+    touched,
+  } = useModelQuery({
     id: id!,
+    autoToaster: true,
+    translate,
     initialValues: { student: me as any, id: id === "new" ? GUID_EMPTY : id!, status: InternshipStatus.DRAFT } as InternshipDto,
     getFunc: () => httpClient.internship.getOne({ id: id! }),
     setFunc: (dto: InternshipDto) => httpClient.internship.upsert({ requestBody: dto }),
@@ -129,9 +119,8 @@ export const PageInternshipDetail = () => {
   const isDraft = dto.status === InternshipStatus.DRAFT;
   const isReopened = dto.status === InternshipStatus.REOPENED;
   const isApproved = dto.status === InternshipStatus.APPROVED;
-  const isPartiallyEditable = [InternshipStatus.REOPENED, InternshipStatus.SUBMITTED, InternshipStatus.APPROVED].includes(
-    dto.status!
-  );
+  const isFinishedOrDefended = dto.status === InternshipStatus.FINISHED || dto.status === InternshipStatus.DEFENDED;
+  const isPartiallyEditable = [InternshipStatus.REOPENED, InternshipStatus.SUBMITTED, InternshipStatus.APPROVED].includes(dto.status!);
   const isNew = id === "new";
   const isEditable = isDraft || isReopened;
   const disabled = !isEditable;
@@ -206,7 +195,22 @@ export const PageInternshipDetail = () => {
 
       <DrawTimelime status={dto.status} language={language} />
       {isApproved && <InternshipGoals item={dto as InternshipDto} onRefreshNeeded={() => getQuery!.refetch()} needsSave={touched} />}
-      <Section title={"internship.section.general"}></Section>
+      {isFinishedOrDefended && (
+        <div>
+          <Section title={"internship.section.files-to-download"} />
+          <div className="flex flex-col gap-2 items-start justify-items-stretch">
+            <Button text onClick={async () => downloadBlob(await httpClient.evaluations.downloadFileInternship({ id: dto.evaluations.find(i => i.userFunction === UserFunction.AUTHOR)!.id! }))}>
+              <FaDownload className="ml-2" />
+              {translate("internship.download-evaluation-author")}
+            </Button>
+            <Button text onClick={async () => downloadBlob(await httpClient.evaluations.downloadFileInternship({ id: dto.evaluations.find(i => i.userFunction === UserFunction.SUPERVISOR)!.id! }))}>
+              <FaDownload className="ml-2" />
+              {translate("internship.download-evaluation-supervisor")}
+            </Button>
+          </div>
+        </div>
+      )}
+      <Section title={"internship.section.general"}/>
       <RowField
         required
         title="internship.student"
@@ -262,7 +266,7 @@ export const PageInternshipDetail = () => {
           </div>
         }
       />
-      <Section title={"internship.section.contact"}></Section>
+      <Section title={"internship.section.contact"}/>
       <RowField
         title="internship.supervisor-name"
         Field={<FormField {...getPropsTextWithType2("supervisorName")} label={translate("internship.supervisor-name")} name="name" />}
@@ -283,7 +287,7 @@ export const PageInternshipDetail = () => {
         }
       />
 
-      <Section title={"internship.section.job-description"}></Section>
+      <Section title={"internship.section.job-description"}/>
       <RowField
         required
         title="internship.requirements"
@@ -354,12 +358,7 @@ export const PageInternshipDetail = () => {
             >
               {translate("internship.approve-internship")}
             </Button>
-            <Button
-              if={dto.status === InternshipStatus.SUBMITTED}
-              onClick={addingNote.open}
-              loading={changeStatusQuery.isLoading}
-              success
-            >
+            <Button if={dto.status === InternshipStatus.SUBMITTED} onClick={addingNote.open} loading={changeStatusQuery.isLoading} success>
               {translate("internship.approve-internship-with-notes")}
             </Button>
             {addingNote.isOpen && (

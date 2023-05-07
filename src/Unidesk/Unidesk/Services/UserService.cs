@@ -329,8 +329,8 @@ public class UserService
         await _db.SaveChangesAsync(ct);
         
         var body = _templateFactory
-           .LoadTemplate(RequestResetPasswordTemplate.TemplateBody)
-           .RenderTemplate(new RequestResetPasswordTemplate
+           .LoadTemplate<RequestResetPasswordTemplate>()
+           .Render(new RequestResetPasswordTemplate
             {
                 Email = existingUser.Email!,
                 Token = token,
@@ -368,11 +368,11 @@ public class UserService
         return user;
     }
 
-    public async Task<User> FixRolesAsync(User user)
+    public async Task<User> FixRolesAsync(User user, CancellationToken ct)
     {
         if (user.Email == "admin@temata.fm.tul.cz")
         {
-            var superAdminRole = await _db.UserRoles.FirstOrDefaultAsync(UserRoles.SuperAdmin.Id);
+            var superAdminRole = await _db.UserRoles.FirstOrDefaultAsync(UserRoles.SuperAdmin.Id, ct);
             var needsSave = false;
             
             if (superAdminRole is null)

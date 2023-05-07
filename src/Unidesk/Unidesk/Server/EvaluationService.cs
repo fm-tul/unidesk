@@ -13,6 +13,7 @@ using Unidesk.Reports;
 using Unidesk.Reports.Elements;
 using Unidesk.Reports.Templates;
 using Unidesk.Security;
+using Unidesk.Server.Permalinks;
 using Unidesk.Services;
 using Unidesk.Services.Email;
 using Unidesk.Services.Email.Templates;
@@ -27,24 +28,27 @@ public partial class EvaluationService
     private readonly IMapper _mapper;
     private readonly WordGeneratorService _wordGeneratorService;
     private readonly IUserProvider _userProvider;
-    private readonly IEnumerable<IEvaluationTemplate> _thesisEvaluations;
+    private readonly IEnumerable<IEvaluationTemplate> _evaluationsTemplates;
     private readonly EmailService _emailService;
     private readonly TemplateFactory _templateFactory;
     private readonly ServerService _serverService;
     private readonly DocumentService _documentService;
+    private readonly InternshipService _internshipService;
 
     public EvaluationService(UnideskDbContext db, IMapper mapper, WordGeneratorService wordGeneratorService, IUserProvider userProvider,
-        IEnumerable<IEvaluationTemplate> thesisEvaluations, EmailService emailService, TemplateFactory templateFactory, ServerService serverService, DocumentService documentService)
+        IEnumerable<IEvaluationTemplate> evaluationsTemplates, EmailService emailService, TemplateFactory templateFactory, ServerService serverService, DocumentService documentService,
+        InternshipService internshipService)
     {
         _db = db;
         _mapper = mapper;
         _wordGeneratorService = wordGeneratorService;
         _userProvider = userProvider;
-        _thesisEvaluations = thesisEvaluations;
+        _evaluationsTemplates = evaluationsTemplates;
         _emailService = emailService;
         _templateFactory = templateFactory;
         _serverService = serverService;
         _documentService = documentService;
+        _internshipService = internshipService;
     }
 
     private async Task<Evaluation> GetWithPassword(Guid id, string pass, CancellationToken ct)
@@ -103,10 +107,19 @@ public partial class EvaluationService
 
         var context = GetContext(item);
 
-        var candidates = _thesisEvaluations.Where(i => i.CanProcess(context))
+        var candidates = _evaluationsTemplates.Where(i => i.CanProcess(context))
            .ToList();
+
         dto.FormatCandidates = candidates.Select(i => i.TemplateName)
            .ToList();
+
+        // if there is only one format candidate, set it as format
+        if (dto.Format.IsNullOrEmpty() && dto.FormatCandidates.Count == 1)
+        {
+            dto.Format = dto.FormatCandidates.First();
+            item.Format = dto.Format;
+            await _db.SaveChangesAsync(ct);
+        }
 
         if (dto.Format.IsNotNullOrEmpty())
         {
@@ -135,26 +148,26 @@ public partial class EvaluationService
     public async Task<byte[]> PdfPreviewAsync(Guid id, string? pass, CancellationToken ct)
     {
         var detailDto = await GetOneAsync(id, pass, ct);
-        return PdfPreview(detailDto, ct);
+        return PdfPreview(detailDto);
     }
 
-    public async Task<byte[]> PdfPreviewAsync(Evaluation item, CancellationToken ct)
+    public async Task<byte[]> PdfPreviewAsync(Evaluation item, CancellationToken ct, string? permalink = null)
     {
         var detailDto = await GetOneAsync(item, ct);
-        return PdfPreview(detailDto, ct);
+        return PdfPreview(detailDto, permalink);
     }
 
-    private byte[] PdfPreview(EvaluationDetailDto detailDto, CancellationToken ct)
+    private byte[] PdfPreview(EvaluationDetailDto detailDto, string? permalink = null)
     {
         if (detailDto.InternshipId is not null)
         {
-            var internshipPdf = GetInternshipPdfPreview(detailDto, ct);
+            var internshipPdf = GetInternshipPdf(detailDto, permalink);
             return internshipPdf.GeneratePdf();
         }
 
         if (detailDto.ThesisId is not null)
         {
-            var thesisPdf = GetThesisPdfPreview(detailDto);
+            var thesisPdf = GetThesisPdf(detailDto, permalink);
             return thesisPdf.GeneratePdf();
         }
 
@@ -163,7 +176,7 @@ public partial class EvaluationService
 
     private IEvaluationTemplate? GetModel(string templateName)
     {
-        return _thesisEvaluations.FirstOrDefault(i => i.TemplateName == templateName);
+        return _evaluationsTemplates.FirstOrDefault(i => i.TemplateName == templateName);
     }
 
     private async Task TryUpdateStatusWhenUnlockedAsync(CancellationToken ct, Evaluation item)
@@ -248,6 +261,21 @@ public partial class EvaluationService
             }
         }
 
+        // meaning someone checked the evaluation and approved it
+        if (status == EvaluationStatus.Approved)
+        {
+            await ChangeStatusToApprovedAsync(id, ct);
+            await _db.SaveChangesAsync(ct);
+            return await GetOneAsync(id, pass, ct);
+        }
+        
+        if (status == EvaluationStatus.Reopened)
+        {
+            await ChangeStatusToReopenedAsync(id, ct);
+            await _db.SaveChangesAsync(ct);
+            return await GetOneAsync(id, pass, ct);
+        }
+
         throw new NotAllowedException("Cannot change status of the evaluation this way");
     }
 
@@ -267,8 +295,8 @@ public partial class EvaluationService
 
         var title = thesis.NameEng;
         var body = _templateFactory
-           .LoadTemplate(ThesisEvaluationInviteTemplate.TemplateBody)
-           .RenderTemplate(new ThesisEvaluationInviteTemplate
+           .LoadTemplate<ThesisTemplates.EvaluationInviteML>()
+           .Render(new ThesisTemplates.EvaluationInviteML
             {
                 SupervisorName = item.Evaluator?.FullName ?? item.EvaluatorFullName,
                 StudentName = studentName,
@@ -290,18 +318,17 @@ public partial class EvaluationService
 
     private async Task InviteToInternshipEvaluationAsync(Evaluation item, CancellationToken ct)
     {
-        var url = _serverService.UrlBase;
+        item.Status = EvaluationStatus.Invited;
         var passphrase = _wordGeneratorService.GeneratePassPhrase();
         item.PassphraseHash = BCrypt.Net.BCrypt.HashPassword(passphrase);
-        item.Status = EvaluationStatus.Invited;
 
         var internship = item.Internship
                       ?? throw new InvalidOperationException("Internship is not set");
         var studentName = internship.Student.FullName ?? "student";
         var title = internship.InternshipTitle;
         var body = _templateFactory
-           .LoadTemplate(InternshipEvaluationInviteTemplate.TemplateBody)
-           .RenderTemplate(new InternshipEvaluationInviteTemplate
+           .LoadTemplate<InternshipTemplates.EvaluationInviteML>()
+           .Render(new InternshipTemplates.EvaluationInviteML
             {
                 SupervisorName = item.Evaluator?.FullName ?? item.EvaluatorFullName,
                 StudentName = studentName,
@@ -310,12 +337,46 @@ public partial class EvaluationService
                 InternshipEvaluationDeadline = DateTime.Now.AddDays(14)
                    .ToLongDateString(),
                 InternshipEvaluationPassword = passphrase,
-                InternshipEvaluationUrl = $"{url}/evaluation/{item.Id}",
+                InternshipEvaluationUrl = $"{_serverService.UrlBase}/evaluation/{item.Id}",
             });
 
         await _emailService.QueueTextEmailAsync(
             to: item.Email,
-            subject: "Internship evaluation invitation",
+            subject: InternshipTemplates.EvaluationInviteML.Subject,
+            body: body,
+            ct: ct
+        );
+    }
+    
+    private async Task ChangeStatusToReopenedAsync(Guid id, CancellationToken ct)
+    {
+        var item = await _db.Evaluations
+           .Query()
+           .FirstOrDefaultAsync(i => i.Id == id, ct);
+        if (item == null)
+        {
+            throw new NotFoundException("Evaluation not found");
+        }
+
+        item.Status = EvaluationStatus.Reopened;
+        var passphrase = _wordGeneratorService.GeneratePassPhrase();
+        item.PassphraseHash = BCrypt.Net.BCrypt.HashPassword(passphrase);
+
+        var internship = item.Internship
+                      ?? throw new InvalidOperationException("Internship is not set");
+        var studentName = internship.Student.FullName;
+        var body = _templateFactory
+           .LoadTemplate<InternshipTemplates.EvaluationReopenedSupervisor>()
+           .Render(new InternshipTemplates.EvaluationReopenedSupervisor
+            {
+                StudentName = studentName,
+                InternshipEvaluationPassword = passphrase,
+                InternshipEvaluationUrl = $"{_serverService.UrlBase}/evaluation/{item.Id}",
+            });
+
+        await _emailService.QueueTextEmailAsync(
+            to: item.Email,
+            subject: InternshipTemplates.EvaluationReopenedSupervisor.Subject,
             body: body,
             ct: ct
         );
@@ -323,21 +384,122 @@ public partial class EvaluationService
 
     private async Task ChangeStatusToSubmittedAsync(Evaluation item, string pass, CancellationToken ct)
     {
+        var desiredAccessKey = Guid.NewGuid();
+        var pdf = await PdfPreviewAsync(item, ct, permalink: desiredAccessKey.GetPermalinkForDocument());
+
+        // we will delete the old document if it exists
+        if (item.Document is not null)
+        {
+            _db.Documents.Remove(item.Document);
+            item.Document = null;
+            item.DocumentId = null;
+            await _db.SaveChangesAsync(ct);
+        }
+
         item.Status = EvaluationStatus.Submitted;
-        var pdf = await PdfPreviewAsync(item, ct);
         if (item.Document is null)
         {
-            item.Document = _documentService.CreateDocument(pdf, "internship-evaluation.pdf");
+            item.Document = _documentService.CreateDocument(pdf, "internship-evaluation.pdf", desiredAccessKey: desiredAccessKey);
             item.DocumentId = item.Document.Id;
 
             // add document to db
             await _db.Documents.AddAsync(item.Document, ct);
+            await _db.DocumentContents.AddAsync(item.Document.DocumentContent, ct);
         }
         else
         {
-            _documentService.UpdateDocument(item.Document, pdf, "internship-evaluation.pdf");
+            // should never happen
+            throw new InvalidOperationException("Document already exists");
         }
-        // TODO: email service here
+
+        // for internship evaluations, we will notify the manager, that the evaluation is ready to be reviewed
+        if (item.IsForInternship)
+        {
+            var internship = item.Internship
+                          ?? throw new InvalidOperationException("Internship is not set");
+
+            await NotifyManagersAboutNewSubmissionAsync(internship, ct);
+            await NotifySupervisorAboutNewSubmissionAsync(internship, item.DocumentId, ct);
+        }
+    }
+
+    private async Task NotifyManagersAboutNewSubmissionAsync(Internship internship, CancellationToken ct)
+    {
+        var body = _templateFactory.LoadTemplate<InternshipTemplates.NewEvaluationSubmitted>()
+           .Render(new InternshipTemplates.NewEvaluationSubmitted
+            {
+                StudentName = internship.Student.FullName,
+                InternshipTitle = internship.InternshipTitle,
+                InternshipEvaluationUrl = $"{_serverService.UrlBase}/{internship.GetPermalink()}",
+                ContactEmail = _emailService.ContactEmail,
+            });
+
+        var (avail, all) = await _internshipService.GetManagerEmailsAvailableAsync(ct);
+        if (avail.Empty())
+        {
+            avail.Add(_emailService.ContactEmail);
+        }
+
+        foreach (var emailAddress in avail)
+        {
+            await _emailService.QueueTextEmailAsync(
+                to: emailAddress,
+                body: body,
+                subject: InternshipTemplates.NewEvaluationSubmitted.Subject,
+                ct: ct);
+        }
+    }
+
+    private async Task NotifySupervisorAboutNewSubmissionAsync(Internship internship, Guid? documentId, CancellationToken ct)
+    {
+        var body = _templateFactory.LoadTemplate<InternshipTemplates.NewEvaluationSubmittedSupervisor>()
+           .Render(new InternshipTemplates.NewEvaluationSubmittedSupervisor
+            {
+                StudentName = internship.Student.FullName,
+            });
+
+        var email = internship.SupervisorEmail.Value()
+                 ?? throw new InvalidOperationException("Supervisor email is not set");
+
+        await _emailService.QueueTextEmailAsync(
+            to: email,
+            body: body,
+            subject: InternshipTemplates.NewEvaluationSubmittedSupervisor.Subject,
+            documentId: documentId,
+            ct: ct);
+    }
+    
+    private async Task ChangeStatusToApprovedAsync(Guid id, CancellationToken ct)
+    {
+        var item = await GetWithGrant(id, ct);
+        item.Status = EvaluationStatus.Approved;
+
+        // for internship evaluations, we will notify the student, that the evaluation was approved
+        if (item.IsForInternship)
+        {
+            var internship = item.Internship
+                          ?? throw new InvalidOperationException("Internship is not set");
+
+            var email = internship.Student.GetEmail()
+                     ?? throw new InvalidOperationException("Student email is not set");
+
+            var body = _templateFactory.LoadTemplate<InternshipTemplates.EvaluationApproved>()
+               .Render(new InternshipTemplates.EvaluationApproved
+                {
+                    InternshipEvaluationUrl = $"{_serverService.UrlBase}/{internship.GetPermalink()}",
+                });
+
+            await _emailService.QueueTextEmailAsync(
+                to: email,
+                body: body,
+                subject: InternshipTemplates.EvaluationApproved.Subject,
+                ct: ct);
+
+            if (_internshipService.CanBeFinished(internship))
+            {
+                internship.Status = InternshipStatus.Finished;
+            }
+        }
     }
 
     public async Task DeleteOne(Guid id, CancellationToken ct)
@@ -398,7 +560,7 @@ public partial class EvaluationService
     {
         var (isNew, evaluation) = await _db.Evaluations
            .Include(i => i.Document.DocumentContent)
-           .GetOrCreateById(evaluationId);
+           .GetOrCreateById(evaluationId, ct);
 
         var internship = await _db.Internships
                             .Query()
@@ -443,9 +605,15 @@ public partial class EvaluationService
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task<Document> DownloadFileAsync(Guid id, CancellationToken ct)
+    public async Task<Document> DownloadEvaluationFileAsync(Guid id, CancellationToken ct)
     {
         var evaluation = await GetOneOrThrowAsync(id, ct);
+        if (evaluation.Status != EvaluationStatus.Approved)
+        {
+            NotAllowedException.ThrowIf(!_userProvider.HasSomeOfGrants(Grants.Internship_Manage, Grants.User_SuperAdmin),
+                "You cannot download evaluation file that is not approved");
+        }
+
         var document = evaluation.Document
                     ?? throw new NotFoundException("Thesis evaluation document not found");
         return document;
@@ -467,11 +635,11 @@ public partial class EvaluationService
     }
 
 
-    public async Task InviteSupervisorToInternshipAsync(Guid internshipId, Guid evaluationId, CancellationToken ct)
+    public async Task<bool> InviteSupervisorToInternshipAsync(Guid internshipId, Guid evaluationId, CancellationToken ct)
     {
         var (isNew, evaluation) = await _db.Evaluations
            .Query()
-           .GetOrCreateById(evaluationId);
+           .GetOrCreateById(evaluationId, ct);
 
         var internship = await _db.Internships
                             .Query()
@@ -508,6 +676,7 @@ public partial class EvaluationService
         await _db.Evaluations.AddAsync(evaluation, ct);
         await InviteToInternshipEvaluationAsync(evaluation, ct);
         await _db.SaveChangesAsync(ct);
+        return true;
     }
 
 

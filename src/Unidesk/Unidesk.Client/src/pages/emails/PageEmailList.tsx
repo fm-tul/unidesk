@@ -12,6 +12,8 @@ import { Modal } from "ui/Modal";
 import { Table } from "ui/Table";
 import { dateColumn } from "ui/TableColumns";
 import { formatDate } from "utils/dateUtils";
+import { enrichPlaintext } from "utils/stringUtils";
+import sanitizeHtml from 'sanitize-html';
 
 export interface PageEmailProps {}
 export const PageEmailList = () => {
@@ -85,7 +87,8 @@ export const PageEmailList = () => {
               </>
             )}
 
-            <pre className="prose-sm col-span-2 mt-2 rounded bg-neutral-100 p-4 ring-2 ring-neutral-300">{emailDetail.body}</pre>
+            <div className="prose col-span-2 mt-2 whitespace-pre-wrap rounded bg-neutral-100 p-4 ring-2 ring-neutral-300 min-w-md" 
+            dangerouslySetInnerHTML={{ __html: enrichPlaintext(sanitizeHtml(emailDetail.body ?? "")) }} />
           </div>
 
           <div className="mt-4 flex justify-end">

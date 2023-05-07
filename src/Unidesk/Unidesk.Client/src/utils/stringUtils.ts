@@ -101,3 +101,11 @@ export const isNullOrEmpty = (str: string|null|undefined) => {
 export const isAllNotNullOrEmpty = (...strs: (string|null|undefined)[]) => {
   return strs.every(s => !isNullOrEmpty(s));
 }
+
+// find links in text and replace them with <a> tags
+export const enrichPlaintext = (text: string) => {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, (url) => {
+    return `<a href="${url}" target="_blank">${url}</a>`;
+  });
+}

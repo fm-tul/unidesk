@@ -23,7 +23,7 @@ const isStringWithValue = (value: any): value is string => {
   return isString(value) && value !== "";
 };
 
-const isBlob = (value: any): value is Blob => {
+export const isBlob = (value: any): value is Blob => {
   return (
     typeof value === "object" &&
     typeof value.type === "string" &&
@@ -193,8 +193,8 @@ const getRequestBody = (options: ApiRequestOptions): any => {
   return undefined;
 };
 
-const isAttachmentExpected = (options: AxiosRequestConfig): boolean => {
-  const url = options.url ?? "";
+const isAttachmentExpected = (options?: AxiosRequestConfig, orUrl?: string): boolean => {
+  const url = orUrl ?? options?.url ?? "";
   return url.includes("/download/") || url.includes("/export/");
 };
 
@@ -230,6 +230,9 @@ const sendRequest = async <T>(
     const axiosError = error as AxiosError<T>;
     if (axiosError.response) {
       return axiosError.response;
+    }
+    if (isBlob(error)) {
+      return await extractJsonFromBlob(error);
     }
     throw error;
   }
@@ -307,8 +310,8 @@ const extractAttachmentName = (response: AxiosResponse<any>): string | null => {
  */
 export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> => {
   return new CancelablePromise(async (resolve, reject, onCancel) => {
+    const url = getUrl(config, options);
     try {
-      const url = getUrl(config, options);
       const formData = getFormData(options);
       const body = getRequestBody(options);
       const headers = await getHeaders(config, options, formData);
@@ -319,7 +322,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
         const responseHeader = getResponseHeader(response, options.responseHeader);
 
         const blobResponse =
-          response.request.responseType !== "blob"
+          response.request.responseType !== "blob" || response.status >= 400
             ? null
             : {
                 data: responseBody,
@@ -339,11 +342,18 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
         resolve(result.body);
       }
     } catch (error) {
-      reject(error);
+      // this can be blob response error, so we need to extract the error message
+      if (isBlob(error)) {
+        reject(await extractJsonFromBlob(error));
+      } else {
+        reject(error);
+      }
     }
   });
 };
 
 
-const a = "NTI-DPG-webov%C3%A9%20slu%C5%BEby-rest.pdf"
-const b = decodeURIComponent(a)
+export const extractJsonFromBlob = async (blob: Blob): Promise<any> => {
+  const text = await blob.text();
+  return JSON.parse(text);
+}

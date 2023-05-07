@@ -134,6 +134,10 @@ interface FileControlProps {
   onRemove?: () => void;
   onClear?: () => void;
 
+  uploadLoading?: boolean;
+  removeLoading?: boolean;
+  downloadLoading?: boolean;
+
   file: File | null;
   hasServerFile?: boolean;
   onChange: (file: File | null) => void;
@@ -147,29 +151,32 @@ export const FileControl = (props: FileControlProps) => {
   const { hideUpload, hideDownload, hideRemove, hideClear, file, hasServerFile=false, label } = props;
   const { onDownload, onUpload, onRemove, onChange, onClear } = props;
   const { pdf, types, maxSize } = props;
+  const { uploadLoading, removeLoading, downloadLoading } = props;
   const { language } = useContext(LanguageContext);
   const { translate } = useTranslation(language);
+
+  const somethingLoading = uploadLoading || removeLoading || downloadLoading;
 
   return (
     <div>
       <FileInput label={label} onChange={onChange} file={file} pdf={pdf} types={types} maxSize={maxSize} />
       <ButtonGroup variant="text" size="sm">
         {/* download file from server */}
-        <Button if={!hideDownload && hasServerFile} info onClick={onDownload}>
+        <Button if={!hideDownload && hasServerFile} info onClick={onDownload} loading={downloadLoading} disabled={somethingLoading}>
           {translate("common.download")}
         </Button>
         {/* remove file from server */}
-        <Button error if={!hideRemove && hasServerFile} onConfirmedClick={onRemove}>
+        <Button error if={!hideRemove && hasServerFile} onConfirmedClick={onRemove} loading={removeLoading} disabled={somethingLoading}>
           {translate("common.remove-file")}
         </Button>
 
         {/* upload file to server */}
-        <Button success if={!hideUpload && !!file} onClick={() => onUpload?.(file!)}>
+        <Button success if={!hideUpload && !!file} onClick={() => onUpload?.(file!)} loading={uploadLoading} disabled={somethingLoading}>
           {translate("common.upload")}
         </Button>
 
         {/* clear file selection */}
-        <Button if={!hideClear && !!file} onClick={onClear}>
+        <Button if={!hideClear && !!file} onClick={onClear} disabled={somethingLoading}>
           {translate("common.clear")}
         </Button>
       </ButtonGroup>

@@ -10,7 +10,7 @@ namespace Unidesk.Server;
 
 public partial class EvaluationService
 {
-    private static QuestPDF.Fluent.Document GetThesisPdfPreview(EvaluationDetailDto detailDto)
+    private static Document GetThesisPdf(EvaluationDetailDto detailDto, string? permalink = null)
     {
         var pdf = QuestPDF.Fluent.Document.Create(container =>
         {

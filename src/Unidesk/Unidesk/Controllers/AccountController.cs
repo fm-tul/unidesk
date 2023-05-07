@@ -67,7 +67,7 @@ public class AccountController : ControllerBase
         var dbUser = await _userService.FromLoginRequestAsync(request, ct)
                   ?? throw new Exception("User not found or password is incorrect");
 
-        await _userService.FixRolesAsync(dbUser);
+        await _userService.FixRolesAsync(dbUser, ct);
         await _userService.SignInAsync(httpContext, dbUser);
         _logger.LogInformation("User {Email} logged in at {Time}", request.Eppn, DateTime.UtcNow);
 
@@ -136,7 +136,7 @@ public class AccountController : ControllerBase
     [AllowAnonymous]
     [SwaggerOperation(OperationId = nameof(LoginSSO))]
     [ProducesResponseType(typeof(ToastResponse<UserWhoamiDto>), 200)]
-    public async Task<IActionResult> LoginSSO(string path)
+    public async Task<IActionResult> LoginSSO(string path, CancellationToken ct)
     {
         var plainText = _cryptography.DecryptText(path);
         var httpContext = _httpContextAccessor.HttpContext
@@ -180,7 +180,7 @@ public class AccountController : ControllerBase
             return Forbid();
         }
 
-        await _userService.FixRolesAsync(dbUser);
+        await _userService.FixRolesAsync(dbUser, ct);
         await _userService.SignInAsync(httpContext, dbUser);
         _logger.LogInformation("User {Email} logged in at {Time}", shibboRequest.Eppn, DateTime.UtcNow);
 

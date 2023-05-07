@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { ApiClient } from "../api-client";
 import { API_URL } from "./config";
 import { getToastMessageOrDefault } from "./utils";
+import { extractJsonFromBlob, isBlob } from "./request";
 
 // spa reload
 (axios.interceptors.response as any).handlers = [];
@@ -12,7 +13,7 @@ import { getToastMessageOrDefault } from "./utils";
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 export const axiosOptions = {
   interceptors: true,
-}
+};
 
 // register global error
 axios.interceptors.response.use(
@@ -28,7 +29,7 @@ axios.interceptors.response.use(
     }
     return response;
   },
-  error => {
+  async error => {
     if (axiosOptions.interceptors === false) {
       return Promise.reject(error);
     }
@@ -38,15 +39,15 @@ axios.interceptors.response.use(
 
     // detect 401 first
     if (error?.response?.status === 401) {
-      toast.error(makeMessage(
-        "Unauthorized",
-        "You are not authorized to access this resource",
-        () => window.location.pathname = "/login"
-        ), {
-        toastId: "unauthorized",
-      });
+      toast.error(
+        makeMessage("Unauthorized", "You are not authorized to access this resource", () => (window.location.pathname = "/login")),
+        {
+          toastId: "unauthorized",
+        }
+      );
     } else {
-      const jsonResponse = extractErrorMessage(error?.response?.data);
+      const errorData = isBlob(error?.response?.data) ? await extractJsonFromBlob(error?.response?.data) : error?.response?.data;
+      const jsonResponse = extractErrorMessage(errorData);
       toast.error(
         makeMessage(jsonResponse?.message ?? error.message, jsonResponse?.debugMessage ?? jsonResponse?.stackTrace?.join("\n") ?? ""),
         {

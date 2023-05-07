@@ -17,6 +17,10 @@ public class EmailMessage : TrackedEntity
     
     public EmailStatus Status { get; set; }
     public ApplicationModule Module { get; set; }
+    
+    // NOTE: this is not a foreign key, because the document can be deleted
+    // and we still want to keep the email in the database
+    public Guid? DocumentId { get; set; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
