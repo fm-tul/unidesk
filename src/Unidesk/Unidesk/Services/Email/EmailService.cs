@@ -1,6 +1,7 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using Unidesk.Configurations;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Dtos.Requests;
@@ -13,12 +14,14 @@ public class EmailService
     private readonly EmailOptions _emailOptions;
     private readonly UnideskDbContext _db;
     private readonly ILogger<EmailService> _logger;
+    private readonly InMemoryOptions _inMemoryOptions;
 
-    public EmailService(EmailOptions emailOptions, UnideskDbContext db, ILogger<EmailService> logger)
+    public EmailService(EmailOptions emailOptions, UnideskDbContext db, ILogger<EmailService> logger, InMemoryOptions inMemoryOptions)
     {
         _emailOptions = emailOptions;
         _db = db;
         _logger = logger;
+        _inMemoryOptions = inMemoryOptions;
     }
 
     public string ContactEmail => _emailOptions.ContactEmail;
@@ -34,6 +37,12 @@ public class EmailService
 
     public async Task<EmailMessage?> QueueTextEmailAsync(string to, string subject, string body, CancellationToken ct, Action<EmailMessage>? tagMessage = null, Guid? documentId = null)
     {
+        if (_inMemoryOptions.DisableEmails)
+        {
+            _logger.LogInformation("Emails are disabled, not sending email to {To} with subject {Subject}", to, subject);
+            return null;
+        }
+        
         var email = new EmailMessage
         {
             From = _emailOptions.From,

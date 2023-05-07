@@ -1,4 +1,4 @@
-import { DepartmentDto, FacultyDto, SchoolYearDto, StudyProgrammeDto, ThesisOutcomeDto, ThesisTypeDto } from "@api-client";
+import { DepartmentDto, FacultyDto, InMemoryOptions, SchoolYearDto, StudyProgrammeDto, ThesisOutcomeDto, ThesisTypeDto } from "@api-client";
 import { httpClient } from "@core/init";
 import { R } from "@locales/R";
 import { Link, useParams } from "react-router-dom";
@@ -22,9 +22,17 @@ import { UnideskComponent } from "components/UnideskComponent";
 import { EditorPropertiesOf } from "models/typing";
 import { Section } from "components/mui/Section";
 import { ChangeTracker } from "./ChangeTracker";
+import { useMutation, useQuery } from "react-query";
+import { useContext, useState } from "react";
+import { LanguageContext } from "@locales/LanguageContext";
+import { useTranslation } from "@locales/translationHooks";
+import { Modal } from "ui/Modal";
+import { ButtonGroup } from "components/FilterBar";
 
 export const PageAdministrator = () => {
   const { enumName } = useParams();
+  const [inMemoryEditorOpen, setInMemoryEditorOpen] = useState(false);
+
   // departments, faculties, schoolYears, thesisOutcomes, thesisTypes, studyProgrammes
   const enumsList = [
     {
@@ -114,8 +122,8 @@ export const PageAdministrator = () => {
     {
       name: "Change Tracker",
       path: "change-tracker",
-      component: <ChangeTracker />
-    }
+      component: <ChangeTracker />,
+    },
   ];
 
   const validEnum = enumsList.find(e => e.path === enumName);
@@ -138,20 +146,61 @@ export const PageAdministrator = () => {
 
       <div>
         <Section title="administration-actions" />
-        <div
-          className={classnames(
-            "grid gap-4",
-            validEnum ? "mb-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]" : "grid-cols-[repeat(auto-fit,minmax(250px,1fr))]"
-          )}
-        >
-          <Button lg outlined component={Link} to={link_stagImport.path} className="max-w-[250px]">
+        <div className={classnames("grid gap-4", "mb-4 grid-cols-[repeat(auto-fit,minmax(150px,250px))]")}>
+          <Button lg outlined component={Link} to={link_stagImport.path}>
             <span className={classnames("p-1")}>{R(link_stagImport.title)}</span>
+          </Button>
+          <Button lg outlined onClick={() => setInMemoryEditorOpen(true)}>
+            <span className={classnames("p-1")}>Update In-Memory Options</span>
           </Button>
         </div>
       </div>
+      {inMemoryEditorOpen && (
+        <Modal open={inMemoryEditorOpen} onClose={() => setInMemoryEditorOpen(false)} width="sm" fullWidth>
+          <InMemoryOptionsEditor onClose={() => setInMemoryEditorOpen(false)} />
+        </Modal>
+      )}
       {validEnum && <h1 className="text-xl">{R("admin-manage-x", validEnum.name)}</h1>}
       {validEnum && <>{validEnum.component}</>}
     </UnideskComponent>
+  );
+};
+
+interface InMemoryOptionsEditorProps {
+  onClose: () => void;
+}
+
+export const InMemoryOptionsEditor = (props: InMemoryOptionsEditorProps) => {
+  const { onClose } = props;
+
+  const { language } = useContext(LanguageContext);
+  const { translate } = useTranslation(language);
+  const [dto, setDto] = useState<InMemoryOptions | undefined>(undefined);
+
+  const getQUery = useQuery({
+    queryKey: "inMemoryOptions",
+    queryFn: () => httpClient.settings.getInMemoryOptions(),
+    onSuccess: setDto,
+  });
+
+  const setQuery = useMutation((dto: InMemoryOptions) => httpClient.settings.setInMemoryOptions({ requestBody: dto! }), {
+    onSuccess: setDto,
+  });
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>Disable Emails: </div>
+        <input type="checkbox" checked={dto?.disableEmails} onChange={e => setDto({ ...dto!, disableEmails: e.target.checked })} />
+
+        <ButtonGroup className="col-span-2 flex w-full justify-end" variant="text" size="sm">
+          <Button onClick={onClose} warning>
+            {R("close")}
+          </Button>
+          <Button onClick={() => setQuery.mutate(dto!)}>{translate("update")}</Button>
+        </ButtonGroup>
+      </div>
+    </div>
   );
 };
 

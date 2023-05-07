@@ -100,6 +100,7 @@ services.AddScoped<IClock, SystemClock>();
 
 services.AddSingleton<WordGeneratorService>();
 services.AddSingleton<TemplateFactory>();
+services.AddSingleton<InMemoryOptions>();
 
 // hosted services
 services.AddHostedService<InternshipTask>();
@@ -218,6 +219,19 @@ app.MapGet(PermalinksExtensions.DocumentEndpoint, async ([FromServices] Document
 var api = app.MapGroup("/api")
    .RequireAuthorization()
    .AddEndpointFilter<RequireGrantEndpointFilter>();
+
+var settings = api.MapGroup("/settings")
+   .RequireGrant(Grants.User_SuperAdmin)
+   .WithTags("Settings");
+
+settings.MapGet("get", ([FromServices] InMemoryOptions options) => options)
+   .Produces<InMemoryOptions>()
+   .WithName($"Get{nameof(InMemoryOptions)}");
+
+settings.MapPost("set", ([FromServices] InMemoryOptions options, [FromBody] InMemoryOptions newOptions) => options.CopyFrom(newOptions))
+   .Produces<InMemoryOptions>()
+   .WithName($"Set{nameof(InMemoryOptions)}");
+
 
 var apiEnums = api
    .MapGroup("/enums/")

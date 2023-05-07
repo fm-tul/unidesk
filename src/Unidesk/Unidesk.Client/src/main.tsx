@@ -24,6 +24,7 @@ import { LanguagesId } from "@locales/common";
 import { LoginComponent } from "components/LoginComponent";
 import { BrowserRouter } from "react-router-dom";
 import EnvTag from "components/EnvTag";
+import { setLocale } from "@core/momentProvider";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,10 +36,14 @@ const queryClient = new QueryClient({
 });
 const AppWithProviders = () => {
   const [language, setLanguage] = useLocalStorage<LanguagesId>("locale", languages[0].id as LanguagesId);
+  const activeLanguage = languages.find(l => l.id === language)!;
+  setLocale(activeLanguage.locale as string);
+
   const [user, setUser] = useLocalStorage("user", userGuest);
   const [enums, setEnums] = useState<EnumsDto>(defaultEnumsContext.enums);
   const resetUser = () => setUser(userGuest);
   const isLoggedIn = !!user && user.id != GUID_EMPTY;
+
   // path does not start with /evaluation/...
   const location = window.location.pathname;
   const requireLogin = !location.startsWith("/evaluation/");
@@ -59,6 +64,7 @@ const AppWithProviders = () => {
       setUser(userGuest);
     },
   });
+
 
   useQuery({
     queryKey: "enums",

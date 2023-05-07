@@ -34,6 +34,7 @@ import { getPropsFactory } from "utils/forms";
 import { UserFunction } from "@models/UserFunction";
 import { downloadBlob } from "utils/downloadFile";
 import { FaDownload } from "react-icons/fa";
+import { link_pageInternshipDetail } from "routes/links";
 
 const humanInternshipStatuses = InternshipStatusAll.filter(
   i => i.value != InternshipStatus.CANCELLED && i.value != InternshipStatus.REJECTED && i.value != InternshipStatus.REOPENED
@@ -112,6 +113,12 @@ export const PageInternshipDetail = () => {
     getFunc: () => httpClient.internship.getOne({ id: id! }),
     setFunc: (dto: InternshipDto) => httpClient.internship.upsert({ requestBody: dto }),
     delFunc: (id: string) => httpClient.internship.deleteOne({ id }),
+
+    onSetSuccess: data => {
+      if (data.id) {
+        navigate(link_pageInternshipDetail.navigate(data.id));
+      }
+    },
   });
   const { getPropsText, getHelperProps } = getPropsFactory(dto, setDto, errors);
 
@@ -141,7 +148,6 @@ export const PageInternshipDetail = () => {
   const durationDays = duration?.asDays();
   const datesServerError = !!getHelperProps("startDate").helperText || !!getHelperProps("endDate").helperText;
   const datesInvalid = datesServerError || (durationDays != undefined && durationDays <= 0);
-
   const canDelete = (isDraft || me.grantIds.includes(Grants.Internship_Manage.id)) && id !== "new";
 
   const changeStatusQuery = useMutation((status: InternshipStatus) => httpClient.internship.changeStatus({ id: id!, status }), {
@@ -172,6 +178,93 @@ export const PageInternshipDetail = () => {
 
   const internshipMessage = getInternshipMessageKey(dto as InternshipDto) as EnKeys | null;
 
+  const internshipActions = () => {
+    return (
+      <div className="ml-auto">
+        <ButtonGroup size="sm">
+          <Button
+            onClick={() => setQuery!.mutate(dto as InternshipDto)}
+            loading={setQuery!.isLoading}
+            if={isDraft || isEditable || isPartiallyEditable}
+          >
+            {dto.id === GUID_EMPTY ? translate("internship.create-new") : translate("internship.edit")}
+          </Button>
+
+          <Button onConfirmedClick={() => delQuery!.mutate(dto.id!)} error loading={delQuery!.isLoading} if={canDelete}>
+            {translate("delete")}
+          </Button>
+
+          {isManager && (
+            <>
+              <Button
+                if={dto.status === InternshipStatus.SUBMITTED}
+                onClick={() => changeStatusQuery.mutate(InternshipStatus.APPROVED)}
+                loading={changeStatusQuery.isLoading}
+                success
+              >
+                {translate("internship.approve-internship")}
+              </Button>
+              <Button
+                if={dto.status === InternshipStatus.SUBMITTED}
+                onClick={addingNote.open}
+                loading={changeStatusQuery.isLoading}
+                success
+              >
+                {translate("internship.approve-internship-with-notes")}
+              </Button>
+              <Button
+                if={dto.status === InternshipStatus.SUBMITTED}
+                onClick={() => changeStatusQuery.mutate(InternshipStatus.REJECTED)}
+                loading={changeStatusQuery.isLoading}
+                error
+              >
+                {translate("internship.reject-internship")}
+              </Button>
+              <Button
+                if={dto.status === InternshipStatus.APPROVED}
+                onClick={() => changeStatusQuery.mutate(InternshipStatus.FINISHED)}
+                loading={changeStatusQuery.isLoading}
+                success
+              >
+                <div>
+                  {translate("internship.mark-as-finished")}
+                  {moment(dto.endDate).isAfter(moment()) && (
+                    <div className="text-xs">({translate("internship.warning.internalship-not-ended")})</div>
+                  )}
+                </div>
+              </Button>
+              <Button
+                if={dto.status === InternshipStatus.FINISHED}
+                onClick={() => changeStatusQuery.mutate(InternshipStatus.DEFENDED)}
+                loading={changeStatusQuery.isLoading}
+                success
+              >
+                {translate("internship.mark-as-defended")}
+              </Button>
+              <Button
+                if={!isDraft && !isReopened && dto.status !== InternshipStatus.SUBMITTED}
+                onClick={() => changeStatusQuery.mutate(InternshipStatus.REOPENED)}
+                loading={changeStatusQuery.isLoading}
+                warning
+              >
+                {translate("internship.reopen-internship")}
+              </Button>
+            </>
+          )}
+
+          <Button
+            if={isEditable && !isNew}
+            onClick={() => changeStatusQuery.mutate(InternshipStatus.SUBMITTED)}
+            loading={changeStatusQuery.isLoading}
+            success
+          >
+            {translate("internship.submit-for-approval")}
+          </Button>
+        </ButtonGroup>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-2">
       {!isDraft && (
@@ -193,24 +286,44 @@ export const PageInternshipDetail = () => {
         </div>
       )}
 
+      <div className="sticky top-0 z-[1] flex w-full bg-white p-2">{internshipActions()}</div>
+
       <DrawTimelime status={dto.status} language={language} />
       {isApproved && <InternshipGoals item={dto as InternshipDto} onRefreshNeeded={() => getQuery!.refetch()} needsSave={touched} />}
       {isFinishedOrDefended && (
         <div>
           <Section title={"internship.section.files-to-download"} />
-          <div className="flex flex-col gap-2 items-start justify-items-stretch">
-            <Button text onClick={async () => downloadBlob(await httpClient.evaluations.downloadFileInternship({ id: dto.evaluations.find(i => i.userFunction === UserFunction.AUTHOR)!.id! }))}>
+          <div className="flex flex-col items-start justify-items-stretch gap-2">
+            <Button
+              text
+              onClick={async () =>
+                downloadBlob(
+                  await httpClient.evaluations.downloadFileInternship({
+                    id: dto.evaluations.find(i => i.userFunction === UserFunction.AUTHOR)!.id!,
+                  })
+                )
+              }
+            >
               <FaDownload className="ml-2" />
               {translate("internship.download-evaluation-author")}
             </Button>
-            <Button text onClick={async () => downloadBlob(await httpClient.evaluations.downloadFileInternship({ id: dto.evaluations.find(i => i.userFunction === UserFunction.SUPERVISOR)!.id! }))}>
+            <Button
+              text
+              onClick={async () =>
+                downloadBlob(
+                  await httpClient.evaluations.downloadFileInternship({
+                    id: dto.evaluations.find(i => i.userFunction === UserFunction.SUPERVISOR)!.id!,
+                  })
+                )
+              }
+            >
               <FaDownload className="ml-2" />
               {translate("internship.download-evaluation-supervisor")}
             </Button>
           </div>
         </div>
       )}
-      <Section title={"internship.section.general"}/>
+      <Section title={"internship.section.general"} />
       <RowField
         required
         title="internship.student"
@@ -266,7 +379,7 @@ export const PageInternshipDetail = () => {
           </div>
         }
       />
-      <Section title={"internship.section.contact"}/>
+      <Section title={"internship.section.contact"} />
       <RowField
         title="internship.supervisor-name"
         Field={<FormField {...getPropsTextWithType2("supervisorName")} label={translate("internship.supervisor-name")} name="name" />}
@@ -287,7 +400,7 @@ export const PageInternshipDetail = () => {
         }
       />
 
-      <Section title={"internship.section.job-description"}/>
+      <Section title={"internship.section.job-description"} />
       <RowField
         required
         title="internship.requirements"
@@ -335,105 +448,27 @@ export const PageInternshipDetail = () => {
 
       <DrawTimelime status={dto.status} language={language} />
 
-      <div className="btn-group col-start-2 justify-end">
-        <Button
-          onClick={() => setQuery!.mutate(dto as InternshipDto)}
-          loading={setQuery!.isLoading}
-          if={isDraft || isEditable || isPartiallyEditable}
-        >
-          {dto.id === GUID_EMPTY ? translate("internship.create-new") : translate("internship.edit")}
-        </Button>
+      {internshipActions()}
 
-        <Button onConfirmedClick={() => delQuery!.mutate(dto.id!)} error loading={delQuery!.isLoading} if={canDelete}>
-          {translate("delete")}
-        </Button>
-
-        {isManager && (
-          <>
+      {addingNote.isOpen && (
+        <Modal open={addingNote.isOpen} onClose={addingNote.close} width="sm" fullWidth cannotBeClosed>
+          <h4 className="text-lg font-bold">{translate("internship.approve-internship-with-notes")}</h4>
+          <TextArea minRows={3} label={translate("internship.approve-internship-with-notes")} {...getPropsText("note")} className="my-2" />
+          <ButtonGroup variant="text" className="justify-end">
+            <Button warning onClick={addingNote.close}>
+              {translate("cancel")}
+            </Button>
             <Button
-              if={dto.status === InternshipStatus.SUBMITTED}
-              onClick={() => changeStatusQuery.mutate(InternshipStatus.APPROVED)}
-              loading={changeStatusQuery.isLoading}
               success
-            >
-              {translate("internship.approve-internship")}
-            </Button>
-            <Button if={dto.status === InternshipStatus.SUBMITTED} onClick={addingNote.open} loading={changeStatusQuery.isLoading} success>
-              {translate("internship.approve-internship-with-notes")}
-            </Button>
-            {addingNote.isOpen && (
-              <Modal open={addingNote.isOpen} onClose={addingNote.close} width="sm" fullWidth cannotBeClosed>
-                <h4 className="text-lg font-bold">{translate("internship.approve-internship-with-notes")}</h4>
-                <TextArea
-                  minRows={3}
-                  label={translate("internship.approve-internship-with-notes")}
-                  {...getPropsText("note")}
-                  className="my-2"
-                />
-                <ButtonGroup variant="text" className="justify-end">
-                  <Button warning onClick={addingNote.close}>
-                    {translate("cancel")}
-                  </Button>
-                  <Button
-                    success
-                    onClick={() => changeStatusWithNote.mutate(InternshipStatus.APPROVED)}
-                    loading={changeStatusQuery.isLoading}
-                    disabled={!isApproved ? (dto?.note?.length ?? 0) <= 3 : false}
-                  >
-                    {translate(!isApproved ? "internship.approve-internship" : "edit")}
-                  </Button>
-                </ButtonGroup>
-              </Modal>
-            )}
-            <Button
-              if={dto.status === InternshipStatus.SUBMITTED}
-              onClick={() => changeStatusQuery.mutate(InternshipStatus.REJECTED)}
+              onClick={() => changeStatusWithNote.mutate(InternshipStatus.APPROVED)}
               loading={changeStatusQuery.isLoading}
-              error
+              disabled={!isApproved ? (dto?.note?.length ?? 0) <= 3 : false}
             >
-              {translate("internship.reject-internship")}
+              {translate(!isApproved ? "internship.approve-internship" : "edit")}
             </Button>
-            <Button
-              if={dto.status === InternshipStatus.APPROVED}
-              onClick={() => changeStatusQuery.mutate(InternshipStatus.FINISHED)}
-              loading={changeStatusQuery.isLoading}
-              success
-            >
-              <div>
-                {translate("internship.mark-as-finished")}
-                {moment(dto.endDate).isAfter(moment()) && (
-                  <div className="text-xs">({translate("internship.warning.internalship-not-ended")})</div>
-                )}
-              </div>
-            </Button>
-            <Button
-              if={dto.status === InternshipStatus.FINISHED}
-              onClick={() => changeStatusQuery.mutate(InternshipStatus.DEFENDED)}
-              loading={changeStatusQuery.isLoading}
-              success
-            >
-              {translate("internship.mark-as-defended")}
-            </Button>
-            <Button
-              if={!isDraft && !isReopened && dto.status !== InternshipStatus.SUBMITTED}
-              onClick={() => changeStatusQuery.mutate(InternshipStatus.REOPENED)}
-              loading={changeStatusQuery.isLoading}
-              warning
-            >
-              {translate("internship.reopen-internship")}
-            </Button>
-          </>
-        )}
-
-        <Button
-          if={isEditable && !isNew}
-          onClick={() => changeStatusQuery.mutate(InternshipStatus.SUBMITTED)}
-          loading={changeStatusQuery.isLoading}
-          success
-        >
-          {translate("internship.submit-for-approval")}
-        </Button>
-      </div>
+          </ButtonGroup>
+        </Modal>
+      )}
     </div>
   );
 };

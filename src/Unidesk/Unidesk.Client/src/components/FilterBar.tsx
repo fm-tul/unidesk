@@ -37,7 +37,6 @@ export const FilterBar: React.FC<ToolbarProps> = props => {
   return <div className={classnames(className, type)}>{clonedChildren}</div>;
 };
 
-
 export const ButtonGroup: React.FC<ToolbarProps> = props => {
   const { disabled, className = "", children, type = "btn-group", loading = false } = props;
   const size = getSize(props);
@@ -47,10 +46,7 @@ export const ButtonGroup: React.FC<ToolbarProps> = props => {
     return null;
   }
 
-  const clonedChildren = React.Children.map(children, child => {
-    if (!React.isValidElement(child)) {
-      return child;
-    }
+  const clonedChildren = recursiveChildMap(children, child => {
     return React.cloneElement(child as any, {
       variant: (child as any).props.variant ?? variant,
       size: (child as any).props.size ?? size,
@@ -60,4 +56,18 @@ export const ButtonGroup: React.FC<ToolbarProps> = props => {
   });
 
   return <div className={classnames(className, type)}>{clonedChildren}</div>;
+};
+
+const recursiveChildMap = (children: React.ReactNode, callback: (child: React.ReactNode) => React.ReactNode): any => {
+  return React.Children.map(children, child => {
+    if (!React.isValidElement(child)) {
+      return child;
+    }
+    if (React.isValidElement(child)) {
+      if (child.type === React.Fragment) {
+        return recursiveChildMap(child.props.children, callback);
+      }
+    }
+    return callback(child);
+  });
 };

@@ -1,5 +1,6 @@
 export const en = {
   id: "eng",
+  locale: "en-UK",
   flag: "🇺🇸",
   language: "English",
 
@@ -363,6 +364,7 @@ export const en = {
   "internship.section.next-steps": "What needs to be done next?",
   "internship.section.files-to-download": "Files to download",
 
+  "internship.next-steps.wait-until-internship-ends": "Wait until internship ends",
   "internship.next-steps.upload-final-report": "Upload final report of internship in PDF format",
   "internship.next-steps.invite-supervisor-to-evaluate": "Invite supervisor to evaluate internship",
   "internship.next-steps.wait-for-supervisor-to-evaluate": "Wait for supervisor to evaluate internship",

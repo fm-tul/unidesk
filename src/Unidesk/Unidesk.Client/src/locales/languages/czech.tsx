@@ -2,6 +2,7 @@ import { ILocale } from "../all";
 
 export const cs: ILocale = {
   id: "cze",
+  locale: "cs",
   flag: "🇨🇿",
   language: "Čeština",
 
@@ -358,6 +359,7 @@ export const cs: ILocale = {
   "internship.download-evaluation-author": "Stáhnout závěrečnou zprávu",
   "internship.download-evaluation-supervisor": "Stáhnout hodnocení od vedoucího stáže",
 
+  "internship.next-steps.wait-until-internship-ends": "Počkat, až stáž skončí",
   "internship.next-steps.upload-final-report": "Nahrát závěrečnou zprávu z odborné bakalářské praxe",
   "internship.next-steps.invite-supervisor-to-evaluate": "Pozvat vedoucího k vyhodnocení stáže",
   "internship.next-steps.wait-for-supervisor-to-evaluate": "Počkat, až vedoucí odevzdá hodnotící formulář",

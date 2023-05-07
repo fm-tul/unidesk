@@ -74,3 +74,9 @@ export const countWorkdays = (startDate: moment.Moment, endDate: moment.Moment):
 
   return workdays;
 };
+
+export const formatDateRelative = (date: DateLike, now: DateLike = new Date()) => {
+  const momentDate = getMoment(date);
+  const momentNow = getMoment(now);
+  return momentDate.from(momentNow);
+}

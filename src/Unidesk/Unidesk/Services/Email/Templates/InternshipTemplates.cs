@@ -64,6 +64,9 @@ public class InternshipTemplates
         {{ InternshipUrl }}
         {{ if Note }}
 
+        Note from the approver: {{ Note }}
+        {{ end }}
+
         Sincerely,
         Témata FM TUL
         """;

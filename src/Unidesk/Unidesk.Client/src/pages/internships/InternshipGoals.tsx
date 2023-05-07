@@ -8,12 +8,14 @@ import { InternshipDto } from "@models/InternshipDto";
 import { FileControl } from "components/FileInput";
 import { ButtonGroup } from "components/FilterBar";
 import { Section } from "components/mui/Section";
+import { DateOnlyRenderer } from "models/cellRenderers/DateOnlyRenderer";
 import { useContext, useState } from "react";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { useMutation } from "react-query";
 import { toast } from "react-toastify";
 import { Button } from "ui/Button";
 import { UserContext } from "user/UserContext";
+import { formatDateRelative } from "utils/dateUtils";
 import { downloadBlob } from "utils/downloadFile";
 import { isAllNotNullOrEmpty } from "utils/stringUtils";
 
@@ -39,6 +41,7 @@ export const InternshipGoals = (props: InternshipGoalsProps) => {
   const supervisorEvaluated = supervisorApproved || supervisorEvaluation?.status === EvaluationStatus.SUBMITTED;
   const supervisorInvited = !!supervisorEvaluation;
   const uploadFinalReport = !!finalReportEvaluation;
+  const waitUntilInternshipEnds = new Date() > new Date(item.endDate);
 
   const isContantPersonFilled = isAllNotNullOrEmpty(item.supervisorEmail, item.supervisorName, item.supervisorPhone);
 
@@ -64,10 +67,17 @@ export const InternshipGoals = (props: InternshipGoalsProps) => {
   });
 
   return (
-    <div className="bg-warning-50 p-4">
+    <div className=" p-4">
       <Section title={"internship.section.next-steps"}></Section>
 
       <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 p-2 transition-colors hover:bg-yellow-100">
+          {waitUntilInternshipEnds ? <FaCheck className="text-success-700" /> : <FaTimes className="text-error-700" />}
+          <span>{translate("internship.next-steps.wait-until-internship-ends")}</span>
+          <div className="ml-auto">
+            {!waitUntilInternshipEnds && formatDateRelative(item.endDate)}
+          </div>
+        </div>
         <div className="flex items-center gap-2 p-2 transition-colors hover:bg-yellow-100">
           {uploadFinalReport ? <FaCheck className="text-success-700" /> : <FaTimes className="text-error-700" />}
           <span>{translate("internship.next-steps.upload-final-report")}</span>
@@ -105,9 +115,7 @@ export const InternshipGoals = (props: InternshipGoalsProps) => {
             <>
               {supervisorInvited ? (
                 <>
-                {!supervisorApproved &&
-                  <span className="text-success-800">{translate("internship.next-steps.supervisor-invited")}</span>
-                }
+                  {!supervisorApproved && <span className="text-success-800">{translate("internship.next-steps.supervisor-invited")}</span>}
                 </>
               ) : (
                 <>
