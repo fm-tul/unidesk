@@ -1,3 +1,4 @@
+import ReactMarkdown from "react-markdown";
 import { EnKeys } from "./all";
 import { LanguagesId } from "./common";
 import { RR } from "./R";
@@ -15,8 +16,9 @@ export const translateValFor = (value: EntityWithVal | undefined, locale: Langua
 export const useTranslation = (locale: LanguagesId) => {
   const translateName = (value: EntityWithName | undefined) => translateNameFor(value, locale);
   const translateVal = (value: EntityWithVal | undefined) => translateValFor(value, locale);
-  const translate: TranslateFunc = (value: EnKeys, ...args: any) => RR(value, locale, args);
-  return { translateName, translateVal, translate };
+  const translate: TranslateFunc = (value: EnKeys, ...args: any) => RR(value, locale, ...args);
+  const translateMD: TranslateFunc = (value: EnKeys, ...args: any) => <ReactMarkdown children={RR(value, locale, ...args) as string} />;
+  return { translateName, translateVal, translate, translateMD };
 };
 
 

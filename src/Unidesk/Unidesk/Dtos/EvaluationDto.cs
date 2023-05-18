@@ -73,6 +73,8 @@ public class EvaluationDetailDto : EvaluationPeekDto
 
     [Required]
     public List<string> FormatCandidates { get; set; } = new();
+    
+    public Guid? DocumentId { get; set; }
 }
 
 public class EvaluationPeekDto : EvaluationDto

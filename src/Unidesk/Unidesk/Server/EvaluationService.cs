@@ -51,10 +51,9 @@ public partial class EvaluationService
         _internshipService = internshipService;
     }
 
-    private async Task<Evaluation> GetWithPassword(Guid id, string pass, CancellationToken ct)
+    private async Task<Evaluation> GetWithPassword(Guid id, string pass, CancellationToken ct, IQueryable<Evaluation>? customQuery = null)
     {
-        var item = await _db.Evaluations
-                      .Query()
+        var item = await (customQuery ?? _db.Evaluations.Query().Include(i => i.Document.DocumentContent))
                       .FirstOrDefaultAsync(i => i.Id == id, ct)
                 ?? throw new NotFoundException("Thesis evaluation not found");
 
@@ -75,6 +74,7 @@ public partial class EvaluationService
 
         return await _db.Evaluations
                   .Query()
+                  .Include(i => i.Document.DocumentContent)
                   .FirstOrDefaultAsync(i => i.Id == id, ct)
             ?? throw new NotFoundException("Thesis evaluation not found");
     }
@@ -268,7 +268,7 @@ public partial class EvaluationService
             await _db.SaveChangesAsync(ct);
             return await GetOneAsync(id, pass, ct);
         }
-        
+
         if (status == EvaluationStatus.Reopened)
         {
             await ChangeStatusToReopenedAsync(id, ct);
@@ -347,7 +347,7 @@ public partial class EvaluationService
             ct: ct
         );
     }
-    
+
     private async Task ChangeStatusToReopenedAsync(Guid id, CancellationToken ct)
     {
         var item = await _db.Evaluations
@@ -384,32 +384,37 @@ public partial class EvaluationService
 
     private async Task ChangeStatusToSubmittedAsync(Evaluation item, string pass, CancellationToken ct)
     {
-        var desiredAccessKey = Guid.NewGuid();
-        var pdf = await PdfPreviewAsync(item, ct, permalink: desiredAccessKey.GetPermalinkForDocument());
-
-        // we will delete the old document if it exists
-        if (item.Document is not null)
-        {
-            _db.Documents.Remove(item.Document);
-            item.Document = null;
-            item.DocumentId = null;
-            await _db.SaveChangesAsync(ct);
-        }
-
         item.Status = EvaluationStatus.Submitted;
-        if (item.Document is null)
+        
+        // we have already attached the pdf, so no need generate it
+        if (item.Document == null)
         {
-            item.Document = _documentService.CreateDocument(pdf, "internship-evaluation.pdf", desiredAccessKey: desiredAccessKey);
-            item.DocumentId = item.Document.Id;
+            var desiredAccessKey = Guid.NewGuid();
+            var pdf = await PdfPreviewAsync(item, ct, permalink: desiredAccessKey.GetPermalinkForDocument());
 
-            // add document to db
-            await _db.Documents.AddAsync(item.Document, ct);
-            await _db.DocumentContents.AddAsync(item.Document.DocumentContent, ct);
-        }
-        else
-        {
-            // should never happen
-            throw new InvalidOperationException("Document already exists");
+            // we will delete the old document if it exists
+            if (item.Document is not null)
+            {
+                _db.Documents.Remove(item.Document);
+                item.Document = null;
+                item.DocumentId = null;
+                await _db.SaveChangesAsync(ct);
+            }
+
+            if (item.Document is null)
+            {
+                item.Document = _documentService.CreateDocument(pdf, "internship-evaluation.pdf", desiredAccessKey: desiredAccessKey);
+                item.DocumentId = item.Document.Id;
+
+                // add document to db
+                await _db.Documents.AddAsync(item.Document, ct);
+                await _db.DocumentContents.AddAsync(item.Document.DocumentContent, ct);
+            }
+            else
+            {
+                // should never happen
+                throw new InvalidOperationException("Document already exists");
+            }
         }
 
         // for internship evaluations, we will notify the manager, that the evaluation is ready to be reviewed
@@ -468,7 +473,7 @@ public partial class EvaluationService
             documentId: documentId,
             ct: ct);
     }
-    
+
     private async Task ChangeStatusToApprovedAsync(Guid id, CancellationToken ct)
     {
         var item = await GetWithGrant(id, ct);
@@ -556,7 +561,7 @@ public partial class EvaluationService
         await _db.SaveChangesAsync(ct);
     }
 
-    public async Task UploadFileAsync(Guid internshipId, Guid evaluationId, IFormFile file, CancellationToken ct)
+    public async Task UploadAuthorFileAsync(Guid internshipId, Guid evaluationId, IFormFile file, CancellationToken ct)
     {
         var (isNew, evaluation) = await _db.Evaluations
            .Include(i => i.Document.DocumentContent)
@@ -605,6 +610,36 @@ public partial class EvaluationService
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task UploadSupervisorFileAsync(Guid internshipId, Guid evaluationId, string pass, IFormFile file, CancellationToken ct)
+    {
+        var query = _db.Evaluations.Query().Include(i => i.Document.DocumentContent);
+        var evaluation = await GetWithPassword(evaluationId, pass, ct, query);
+
+        var internship = await _db.Internships
+                            .Query()
+                            .FirstOrDefaultAsync(i => i.Id == internshipId, ct)
+                      ?? throw new NotFoundException("Internship not found");
+
+        NotFoundException.ThrowIfNullOrEmpty(evaluation);
+        NotAllowedException.ThrowIf(!CasAccess(internship), "You are not allowed to access this internship");
+
+        if (evaluation.Document != null)
+        {
+            // replace Content
+            _documentService.UpdateDocument(evaluation.Document, file);
+        }
+        else
+        {
+            // create new document
+            evaluation.Status = EvaluationStatus.Draft;
+            evaluation.Document = _documentService.CreateDocument(file);
+            evaluation.DocumentId = evaluation.Document.Id;
+            await _db.Documents.AddAsync(evaluation.Document, ct);
+        }
+
+        await _db.SaveChangesAsync(ct);
+    }
+
     public async Task<Document> DownloadEvaluationFileAsync(Guid id, CancellationToken ct)
     {
         var evaluation = await GetOneOrThrowAsync(id, ct);
@@ -619,9 +654,31 @@ public partial class EvaluationService
         return document;
     }
 
+    public async Task<Document> DownloadSupervisorEvaluationFileAsync(Guid id, string pass, CancellationToken ct)
+    {
+        var evaluation = await GetWithPassword(id, pass, ct);
+        return evaluation.Document
+            ?? throw new NotFoundException("Thesis evaluation document not found");
+    }
+
     public async Task<bool> RemoveFileAsync(Guid id, CancellationToken ct)
     {
         var evaluation = await GetOneOrThrowAsync(id, ct);
+
+        if (evaluation.Document != null)
+        {
+            evaluation.Status = EvaluationStatus.Draft;
+            _db.Documents.Remove(evaluation.Document);
+            await _db.SaveChangesAsync(ct);
+            return true;
+        }
+
+        return false;
+    }
+
+    public async Task<bool> RemoveSupervisorFileAsync(Guid id, string pass, CancellationToken ct)
+    {
+        var evaluation = await GetWithPassword(id, pass, ct);
 
         if (evaluation.Document != null)
         {

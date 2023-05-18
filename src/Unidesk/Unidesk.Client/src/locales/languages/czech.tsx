@@ -12,6 +12,7 @@ export const cs: ILocale = {
   "common.clear": "Smazat",
   "common.approve": "Schválit",
   "common.reject": "Zamítnout",
+  "common.turn-down": "Odmítnout",
   "common.invitation-sent": "Pozvánka byla odeslána",
   "common.save-first-before-contiuining": "Nejprve uložte formulář, než budete pokračovat.",
   "common.upload.drop-files-here": "Nahrajte soubory přetažením sem",
@@ -216,6 +217,27 @@ export const cs: ILocale = {
   "evaluation.evaluator-name": "Jméno hodnotitele",
   "evaluation.evaluator-relation": "Vztah k hodnotiteli",
   "evaluation.language": "Jazyk hodnocení",
+  "evaluation.evaluation-of-x": (x: string) => `Hodnocení ${x}`,
+  "evaluation.invited-by-x": (x: string) => `Pozvánka od ${x}`,
+  "evaluation.you-have-been-invited-to-perform-evaluation-on-x-under-role-y": (x: string, y: string) => `Byli jste pozváni k vyhodnocení **${x}** v roli **${y}**.`,
+  "evaluation.enter-passphrase-to-unlock": "Zadejte heslo pro odemčení",
+
+  "evaluation.accept-and-unlock": "Přijmout a odemknout",
+  "evaluation.reopen-and-unlock": "Znovu otevřít a odemknout",
+  "evaluation.continue-with-evaluation": "Pokračovat v hodnocení",
+  "evaluation.provide-reason-for-rejection": "Uveďte prosím důvod k odmítnutí",
+  "evaluation.attach-existing-pdf": "Nahrát existující PDF",
+
+  "evaluation.appears-to-be-complete": "Hodnocení je kompletní. Pokud jste připraveni, můžete toto hodnocení odeslat.",
+  "evaluation.cannot-be-edited-after-submission": "Poznámka: Toto hodnocení již **nebude** možné po odeslání upravit.",
+  "evaluation.double-check-your-answers": "Před odesláním si zkontrolujte své odpovědi.",
+  "evaluation.ready-to-submit": "Jsem připraven odeslat toto hodnocení.",
+
+  "evaluation.status.rejected": "Toto hodnocení bylo zamítnuto, důvod: ",
+  "evaluation.status.submitted": "Toto hodnocení bylo odesláno, děkujeme!",
+  "evaluation.status.approved": "Toto hodnocení bylo schváleno, děkujeme!",
+  "evaluation.status.published": "Toto hodnocení bylo publikováno a je k dispozici pro veřejnost. Děkujeme!",
+  
 
   // links
   "link.import": "Import ze STAGu",

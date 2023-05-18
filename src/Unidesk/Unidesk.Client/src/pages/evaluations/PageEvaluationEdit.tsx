@@ -13,7 +13,7 @@ import { FilterBar } from "components/FilterBar";
 import { useAutoSave } from "hooks/useAutoSave";
 import moment from "moment";
 import { useContext, useEffect, useState } from "react";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { link_pageHome } from "routes/links";
@@ -26,6 +26,8 @@ import { TextField } from "ui/TextField";
 import { Tooltip } from "utils/Tooltip";
 import { BsFilePdfFill } from "react-icons/bs";
 import { API_URL } from "@core/config";
+import { FileControl } from "components/FileInput";
+import { downloadBlob } from "utils/downloadFile";
 
 type ReportQuestionWithType<T extends ReportQuestion> = T & {
   $type: "grade" | "text" | "choice" | "separator" | "section";
@@ -36,7 +38,7 @@ export const PageEvaluationEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { language } = useContext(LanguageContext);
-  const { translateName } = useTranslation(language);
+  const { translateName, translate, translateMD } = useTranslation(language);
   const [pass, setPass] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [reason, setRejectionReason] = useState("");
@@ -62,6 +64,10 @@ export const PageEvaluationEdit = () => {
     }
   );
 
+  const onCompleted = () => {
+    setUnlocked(false);
+  }
+
   return (
     <div>
       {!item ? (
@@ -71,10 +77,11 @@ export const PageEvaluationEdit = () => {
           {!unlocked ? (
             <div className="flex flex-col gap-4">
               <div className="text-center text-xl">
-                You've been invited to perform evaluation on
-                <span className="font-bold"> {translateName(item.thesis)} </span>
-                under role of
-                <span className="font-bold"> {item.userFunction}</span>
+                {translateMD(
+                  "evaluation.you-have-been-invited-to-perform-evaluation-on-x-under-role-y",
+                  item.thesisId ? translateName(item.thesis) : item.internship?.internshipTitle ?? "",
+                  item.userFunction
+                )}
               </div>
 
               {/* INVITED, ACCEPTED, DRAFT, REOPENED */}
@@ -83,7 +90,7 @@ export const PageEvaluationEdit = () => {
                 item.status === EvaluationStatus.REOPENED ||
                 item.status === EvaluationStatus.DRAFT) && (
                 <>
-                  <div className="text-center text-xl">Enter passphase to unlock</div>
+                  <div className="text-center text-xl">{translate("evaluation.enter-passphrase-to-unlock")}</div>
                   <input
                     type="text"
                     value={pass}
@@ -92,23 +99,27 @@ export const PageEvaluationEdit = () => {
                   />
                   {rejectMode ? (
                     <div className="flow-col content-center">
-                      <div className="text-center text-xl">Please, provide a reason for rejection</div>
+                      <div className="text-center text-xl">{translate("evaluation.provide-reason-for-rejection")}</div>
                       <TextField label="Reason" className="max-w-xs" value={reason} onValue={setRejectionReason} />
                       <Button onClick={() => rejectMution.mutate({ pass, reason })} lg error fullWidth className="max-w-xs">
-                        reject
+                        {translate("common.turn-down")}
                       </Button>
                     </div>
                   ) : (
                     <div className="flow-col">
                       <Button onClick={() => unlockMution.mutate(pass)} lg>
-                        {item.status === EvaluationStatus.INVITED && <span className="text-2xl">Accept &amp; Unlock</span>}
-                        {(item.status === EvaluationStatus.ACCEPTED || item.status === EvaluationStatus.DRAFT) && (
-                          <span className="text-2xl">Continue with evaluation</span>
+                        {item.status === EvaluationStatus.INVITED && (
+                          <span className="text-2xl">{translate("evaluation.accept-and-unlock")}</span>
                         )}
-                        {item.status === EvaluationStatus.REOPENED && <span className="text-2xl">Reopen &amp; Unlock</span>}
+                        {(item.status === EvaluationStatus.ACCEPTED || item.status === EvaluationStatus.DRAFT) && (
+                          <span className="text-2xl">{translate("evaluation.continue-with-evaluation")}</span>
+                        )}
+                        {item.status === EvaluationStatus.REOPENED && (
+                          <span className="text-2xl">{translate("evaluation.reopen-and-unlock")}</span>
+                        )}
                       </Button>
                       <Button onClick={() => setRejectMode(true)} lg error>
-                        <span className="text-2xl">Reject</span>
+                        <span className="text-2xl">{translate("common.turn-down")}</span>
                       </Button>
                     </div>
                   )}
@@ -118,7 +129,7 @@ export const PageEvaluationEdit = () => {
               {/* REJECTED */}
               {item.status === EvaluationStatus.REJECTED && (
                 <div className="rounded-lg bg-error-700/10 p-6 text-center text-xl ring ring-error-700/50">
-                  You've rejected this evaluation, reason:
+                  {translate("evaluation.status.rejected")}:
                   {item.rejectionReason ? (
                     <div className="text-center text-xl">
                       <span className="font-bold"> {item.rejectionReason} </span>
@@ -134,27 +145,27 @@ export const PageEvaluationEdit = () => {
               {/* SUBMITTED */}
               {item.status === EvaluationStatus.SUBMITTED && (
                 <div className="rounded-lg bg-success-700/10 p-6 text-center text-xl ring ring-success-700/50">
-                  You've submitted this evaluation, thank you!
+                  {translate("evaluation.status.submitted")}
                 </div>
               )}
 
               {/* APPROVED */}
               {item.status === EvaluationStatus.APPROVED && (
                 <div className="rounded-lg bg-success-700/10 p-6 text-center text-xl ring ring-success-700/50">
-                  This evaluation has been approved, thank you!
+                  {translate("evaluation.status.approved")}
                 </div>
               )}
 
               {/* PUBLISHED */}
               {item.status === EvaluationStatus.PUBLISHED && (
                 <div className="rounded-lg bg-success-700/10 p-6 text-center text-xl ring ring-success-700/50">
-                  This evaluation has been published and is available for public. Thank you!
+                  {translate("evaluation.status.published")}
                 </div>
               )}
             </div>
           ) : (
             <>
-              <EvaluationDetail id={id!} pass={pass} />
+              <EvaluationDetail id={id!} pass={pass} onCompleted={onCompleted} />
             </>
           )}
         </>
@@ -166,6 +177,7 @@ export const PageEvaluationEdit = () => {
 interface EvaluationDetailProps {
   id: string;
   pass: string | null;
+  onCompleted?: () => void;
 }
 const questionStyle = `
   p-4 gap-4 transition duration-200 rounded-lg
@@ -173,9 +185,9 @@ const questionStyle = `
   focus-within:bg-info-500/10 focus-within:ring-2 focus-within:ring-info-500/20
 `;
 export const EvaluationDetail = (props: EvaluationDetailProps) => {
-  const { id, pass } = props;
+  const { id, pass, onCompleted } = props;
   const { language } = useContext(LanguageContext);
-  const { translateName, translateVal, translate } = useTranslation(language);
+  const { translateName, translateVal, translate, translateMD } = useTranslation(language);
   const { getValue: getAnswers, saveValue: saveAnswer, destroyHistory } = useAutoSave<any[]>(id);
   const [item, setItem] = useState<EvaluationDetailDto>();
   const [pdfPreview, setPdfPreview] = useState(true);
@@ -183,8 +195,10 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   const [restoredWorkDt, setRestoredWorkDt] = useState<number>();
   const [canProceed, setCanProceed] = useState(false);
   const [unsaved, setUnsaved] = useState(false);
+  const [manualFile, setManualFile] = useState<File | null>(null);
+  const queryClient = useQueryClient();
 
-  const {} = useQuery({
+  const getQuery = useQuery({
     queryKey: ["evaluation", id],
     queryFn: () => httpClient.evaluations.getOne({ id, pass: pass! }),
     onSuccess: setItem,
@@ -218,12 +232,41 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
       onSuccess: data => {
         toast.success(translate("evalution.submitted"), { position: "bottom-left" });
         item!.status = data.status;
+        queryClient.invalidateQueries(["evaluation", id]);
+        queryClient.invalidateQueries(["evaluation", "peek", id]);
+        onCompleted?.();
       },
       onError: () => {
         toast.error(translate("evalution.submitted-error"), { position: "bottom-left" });
       },
     }
   );
+
+  const downloadMutation = useMutation(async () => {
+    const blob = await httpClient.evaluations.downloadSupervisorFileInternship({
+      id: item!.id!,
+      pass: pass!,
+    });
+    downloadBlob(blob);
+  });
+
+  const uploadMutation = useMutation(async (file: File) => {
+    await httpClient.evaluations.uploadSupervisorFileInternship({
+      evaluationId: item!.id!,
+      internshipId: item!.internshipId!,
+      pass: pass!,
+      formData: { file },
+    });
+    getQuery.refetch();
+  });
+
+  const deleteMutation = useMutation(async () => {
+    await httpClient.evaluations.removeFileInternshipSupervisor({
+      id: item!.id!,
+      pass: pass!,
+    });
+    getQuery.refetch();
+  });
 
   const getAnswer = (qid: string) => item?.response?.answers?.find((a: any) => a.id === qid);
 
@@ -253,6 +296,7 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   const pdfUrl = `${API_URL}/api/evaluation/pdf-preview?id=${id}&pass=${pass}&t=${pdfPreviewRng}`;
   const autoSavedData = getAnswers();
   const percentFilled = !!item ? (item.response?.answers?.filter((a: any) => !!a.answer).length / item.response?.answers?.length) * 100 : 0;
+  const isPdfAttached = !!item?.documentId;
 
   const buttonBar = () => {
     return (
@@ -311,122 +355,157 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   return (
     <div>
       {!!item && (
-        <div className="flex gap-2 w-full">
-          <div className="flex flex-col items-stretch gap-2 w-full">
-            <h1 className="text-3xl font-bold">Evaluation of Thesis {translateName(item.thesis)}</h1>
-            <div className="text-sm italic">Invited by {item.createdByUser.fullName}</div>
+        <div className="flex w-full gap-2">
+          <div className="flex w-full flex-col items-stretch gap-2">
+            <div className="grid grid-cols-[1fr_auto_auto__1fr] gap-2">
+              {/* title */}
+              <div className="grow">
+                <h1 className="text-3xl font-bold">
+                  {translate("evaluation.evaluation-of-x", item.thesis ? translateName(item.thesis) : item?.internship?.internshipTitle)}
+                </h1>
+                <div className="text-sm italic">{translate("evaluation.invited-by-x", item.createdByUser.fullName)}</div>
+                <div className="mt-2 flex flex-col gap-2">
+                  <FormField
+                    as={SelectField<string>}
+                    options={item.formatCandidates}
+                    value={item.format ?? undefined}
+                    label="select-template to use"
+                    onValue={v => setItem({ ...item, format: v[0] })}
+                    width="w-full"
+                  />
+                  <FormField
+                    disabled
+                    as={SelectField<EvaluationStatus>}
+                    value={item.status}
+                    options={Object.values(EvaluationStatus)}
+                    onValue={v => setItem({ ...item, status: v[0] })}
+                    getTitle={v => translateVal(EvaluationStatusAll.find(s => s.value === v))}
+                    label="Status"
+                    width="w-full"
+                  />
+                </div>
+              </div>
 
-            <div className="mt-2 flex flex-col gap-2">
-              <FormField
-                as={SelectField<string>}
-                options={item.formatCandidates}
-                value={item.format ?? undefined}
-                label="select-template to use"
-                onValue={v => setItem({ ...item, format: v[0] })}
-                width="min-w-sm"
-              />
-              <FormField
-                disabled
-                as={SelectField<EvaluationStatus>}
-                value={item.status}
-                options={Object.values(EvaluationStatus)}
-                onValue={v => setItem({ ...item, status: v[0] })}
-                getTitle={v => translateVal(EvaluationStatusAll.find(s => s.value === v))}
-                label="Status"
-                width="min-w-sm"
-              />
+              {/* dash line */}
+              <div className="w-4"></div>
+              <div className="w-4 border-l border-dashed border-gray-300"></div>
+
+              {/* manual PDF upload */}
+              <div className="flex grow flex-col gap-2">
+                <h1>
+                  <span className="text-2xl font-bold">{translate("evaluation.attach-existing-pdf")}</span>
+                </h1>
+                <FileControl
+                  file={manualFile}
+                  onClear={() => setManualFile(null)}
+                  onChange={f => setManualFile(f)}
+                  onUpload={file => uploadMutation.mutate(file)}
+                  onDownload={() => downloadMutation.mutate()}
+                  onRemove={() => deleteMutation.mutate()}
+                  uploadLoading={uploadMutation.isLoading}
+                  downloadLoading={downloadMutation.isLoading}
+                  removeLoading={deleteMutation.isLoading}
+                  pdf
+                  hasServerFile={!!item.documentId}
+                  label={"upload-manual-pdf"}
+                />
+              </div>
             </div>
-            {buttonBar()}
-            <div className="flex w-full flex-col gap-2">
-              {item.questions.map(qAnon => {
-                const q = qAnon as ReportQuestionWithType<ReportQuestion>;
 
-                switch (q.$type) {
-                  case "grade":
-                  case "choice":
-                    const options = q.$type === "grade" ? Grades.map(i => i.value) : ((q as any).choices as string[]);
-
-                    const getTitle =
-                      q.$type === "grade"
-                        ? (v: string) => translateVal(Grades.find(i => i.value === v))
-                        : (v: string) => translateVal(DefenseQuestionAnswerAll.find(i => i.value === v));
-
-                    return (
-                      <div key={q.id} className={classnames("flex items-baseline", questionStyle)}>
-                        <div className="w-full grow">
-                          <div>{q.question}</div>
-                          <div className="text-sm italic">{q.description}</div>
-                        </div>
-                        <FormField
-                          as={SelectField<string>}
-                          options={options}
-                          value={getAnswer(q.id)?.answer}
-                          onValue={v => updateQuestion(q.id, v[0])}
-                          getTitle={getTitle}
-                          size="sm"
-                          width="min-w-xs"
-                          clearable
-                          searchable
-                        />
-                      </div>
-                    );
-
-                  case "text":
-                    const qText = q as ReportQuestionWithType<TextQuestion>;
-                    return (
-                      <div key={q.id} className={classnames("flex items-baseline", qText.rows > 1 && "flex-col", questionStyle)}>
-                        <div className="w-full grow">
-                          <div>{q.question}</div>
-                          <div className="text-sm italic">{q.description}</div>
-                        </div>
-                        {qText.rows > 1 ? (
-                          <FormField
-                            as={TextArea}
-                            value={getAnswer(q.id)?.answer ?? ""}
-                            onChange={e => updateQuestion(q.id, e.target.value)}
-                            classNameField="w-full"
-                            maxRows={qText.rows}
-                            minRows={Math.ceil(qText.rows / 2)}
-                            className={classnames("resize-y rounded-lg border border-gray-300 p-2")}
-                          />
-                        ) : (
-                          <FormField
-                            as={TextField}
-                            type={q.type === "date" ? "date" : "text"}
-                            value={getAnswer(q.id)?.answer ?? ""}
-                            onValue={v => updateQuestion(q.id, v)}
-                            width="min-w-xs"
-                          />
-                        )}
-                      </div>
-                    );
-
-                  case "separator":
-                  case "section":
-                    return (
-                      <div key={q.id} className="my-4 border-b border-gray-300 text-xl font-bold">
-                        {translate(q.question as EnKeys)}
-                      </div>
-                    );
-                }
-
-                return null;
-              })}
-            </div>
-            {item.questions.length > 0 && (
+            {!isPdfAttached && (
               <>
-                <hr className="my-8 w-full" />
                 {buttonBar()}
+                <div className="flex w-full flex-col gap-2">
+                  {item.questions.map(qAnon => {
+                    const q = qAnon as ReportQuestionWithType<ReportQuestion>;
+
+                    switch (q.$type) {
+                      case "grade":
+                      case "choice":
+                        const options = q.$type === "grade" ? Grades.map(i => i.value) : ((q as any).choices as string[]);
+
+                        const getTitle =
+                          q.$type === "grade"
+                            ? (v: string) => translateVal(Grades.find(i => i.value === v))
+                            : (v: string) => translateVal(DefenseQuestionAnswerAll.find(i => i.value === v));
+
+                        return (
+                          <div key={q.id} className={classnames("flex items-baseline", questionStyle)}>
+                            <div className="w-full grow">
+                              <div>{q.question}</div>
+                              <div className="text-sm italic">{q.description}</div>
+                            </div>
+                            <FormField
+                              as={SelectField<string>}
+                              options={options}
+                              value={getAnswer(q.id)?.answer}
+                              onValue={v => updateQuestion(q.id, v[0])}
+                              getTitle={getTitle}
+                              size="sm"
+                              width="min-w-xs"
+                              clearable
+                              searchable
+                            />
+                          </div>
+                        );
+
+                      case "text":
+                        const qText = q as ReportQuestionWithType<TextQuestion>;
+                        return (
+                          <div key={q.id} className={classnames("flex items-baseline", qText.rows > 1 && "flex-col", questionStyle)}>
+                            <div className="w-full grow">
+                              <div>{q.question}</div>
+                              <div className="text-sm italic">{q.description}</div>
+                            </div>
+                            {qText.rows > 1 ? (
+                              <FormField
+                                as={TextArea}
+                                value={getAnswer(q.id)?.answer ?? ""}
+                                onChange={e => updateQuestion(q.id, e.target.value)}
+                                classNameField="w-full"
+                                maxRows={qText.rows}
+                                minRows={Math.ceil(qText.rows / 2)}
+                                className={classnames("resize-y rounded-lg border border-gray-300 p-2")}
+                              />
+                            ) : (
+                              <FormField
+                                as={TextField}
+                                type={q.type === "date" ? "date" : "text"}
+                                value={getAnswer(q.id)?.answer ?? ""}
+                                onValue={v => updateQuestion(q.id, v)}
+                                width="min-w-xs"
+                              />
+                            )}
+                          </div>
+                        );
+
+                      case "separator":
+                      case "section":
+                        return (
+                          <div key={q.id} className="my-4 border-b border-gray-300 text-xl font-bold">
+                            {translate(q.question as EnKeys)}
+                          </div>
+                        );
+                    }
+
+                    return null;
+                  })}
+                </div>
+                {item.questions.length > 0 && (
+                  <>
+                    <hr className="my-8 w-full" />
+                    {buttonBar()}
+                  </>
+                )}
               </>
             )}
-            {percentFilled >= 100 && (
+
+            {(percentFilled >= 100 || isPdfAttached) && (
               <div className="my-4 flex flex-col gap-2">
                 <div className="rounded-sm bg-warning-100/50 p-4 text-center ring ring-warning-300">
-                  <p>Evaluation appears to be complete. When you are ready, you can submit this evaluation.</p>
-                  <p className=" text-error-900">
-                    Please note that <strong>you will not</strong> be able to edit this evaluation after submission.
-                  </p>
-                  <p>Double check your answers before submitting.</p>
+                  <p>{translate("evaluation.appears-to-be-complete")}</p>
+                  <p className=" text-error-900">{translateMD("evaluation.cannot-be-edited-after-submission")}</p>
+                  <p>{translate("evaluation.double-check-your-answers")}</p>
                 </div>
                 <div className="flow">
                   <input
@@ -436,7 +515,7 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
                     onChange={() => setCanProceed(!canProceed)}
                     className="h-6 w-6 accent-warning-500"
                   />
-                  <label htmlFor="evaluation-can-proceed"> I'm ready to submit this evaluation.</label>
+                  <label htmlFor="evaluation-can-proceed">{translate("evaluation.ready-to-submit")}</label>
                 </div>
                 {canProceed && (
                   <>
@@ -445,8 +524,7 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
                     </Button>
                     {unsaved && (
                       <div className="my-2 rounded-sm bg-error-100/50 p-4 text-center ring ring-error-300">
-                        <p>There are unsaved changes.</p>
-                        <p>Make sure to save your changes before submitting.</p>
+                        {translate("common.save-first-before-contiuining")}
                       </div>
                     )}
                   </>
@@ -456,7 +534,8 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
 
             <div className="mb-40"></div>
           </div>
-          {pdfPreview && (
+
+          {pdfPreview && !isPdfAttached && (
             <div className="fixed right-0 z-10 shadow-2xl">
               <embed src={pdfUrl} type="application/pdf" width="520px" height="800px" />
             </div>

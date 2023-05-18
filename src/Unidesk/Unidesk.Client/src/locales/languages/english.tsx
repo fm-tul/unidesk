@@ -10,6 +10,7 @@ export const en = {
   "common.clear": "Clear",
   "common.approve": "Approve",
   "common.reject": "Reject",
+  "common.turn-down": "Reject",
   "common.invitation-sent": "Invitation sent",
   "common.save-first-before-contiuining": "Save first before continuing",
   "common.upload.drop-files-here": "Drop files here to upload",
@@ -217,6 +218,26 @@ export const en = {
   "evaluation.evaluator-name": "Name of evaluator",
   "evaluation.evaluator-relation": "Relation to evaluator",
   "evaluation.language": "Language of evaluation",
+  "evaluation.evaluation-of-x": (x: string) => `Evaluation of ${x}`,
+  "evaluation.invited-by-x": (x: string) => `Invited by ${x}`,
+  "evaluation.you-have-been-invited-to-perform-evaluation-on-x-under-role-y": (x: string, y: string) => `You've been invited to perform evaluation on **${x}** under role **${y}**`,
+  "evaluation.enter-passphrase-to-unlock": "Enter passphrase to unlock",
+
+  "evaluation.accept-and-unlock": "Accept & unlock",
+  "evaluation.reopen-and-unlock": "Reopen & unlock",
+  "evaluation.continue-with-evaluation": "Continue with evaluation",
+  "evaluation.provide-reason-for-rejection": "Please provide reason for rejection",
+  "evaluation.attach-existing-pdf": "Attach existing PDF",
+
+  "evaluation.appears-to-be-complete": "Evaluation appears to be complete. When you are ready, you can submit this evaluation.",
+  "evaluation.cannot-be-edited-after-submission": "Please note that you will **not** be able to edit this evaluation after submission.",
+  "evaluation.double-check-your-answers": "Double check your answers before submitting.",
+  "evaluation.ready-to-submit": "I'm ready to submit this evaluation.",
+
+  "evaluation.status.rejected": "You've rejected this evaluation, reason: ",
+  "evaluation.status.submitted": "You've submitted this evaluation, thank you!",
+  "evaluation.status.approved": "This evaluation has been approved, thank you!",
+  "evaluation.status.published": "This evaluation has been published and is available for public. Thank you!",
 
   // links
   "link.import": "Stag Import",

@@ -81,13 +81,14 @@ public static class EvaluationApi
            .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
 
         // handle file upload
-        evaluationApi.MapPost("upload-file-internship", async ([FromServices] EvaluationService service,
+        evaluationApi.MapPost("upload-author-file-internship", async ([FromServices] EvaluationService service,
                     Guid evaluationId,
                     Guid internshipId,
                     IFormFile file, CancellationToken ct)
-                => await service.UploadFileAsync(internshipId, evaluationId, file, ct))
-           .WithName("UploadFileInternship")
+                => await service.UploadAuthorFileAsync(internshipId, evaluationId, file, ct))
+           .WithName("UploadAuthorFileInternship")
            .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
+
         
         evaluationApi.MapGet("download/file-internship", async ([FromServices] EvaluationService service,
                     Guid id, CancellationToken ct)
@@ -107,6 +108,35 @@ public static class EvaluationApi
            .RequireGrant(Grants.Action_ThesisEvaluation_Manage)
            .Produces<bool>();
         
+        // handle file upload
+        evaluationApi.MapPost("upload-supervisor-file-internship", async ([FromServices] EvaluationService service,
+                    Guid evaluationId,
+                    Guid internshipId,
+                    string pass,
+                    IFormFile file, CancellationToken ct)
+                => await service.UploadSupervisorFileAsync(internshipId, evaluationId, pass, file, ct))
+           .WithName("UploadSupervisorFileInternship")
+           .AllowAnonymous();
+        
+        evaluationApi.MapGet("download/file-internship-supervisor", async ([FromServices] EvaluationService service,
+                    Guid id, string pass, CancellationToken ct)
+                =>
+            {
+                var document = await service.DownloadSupervisorEvaluationFileAsync(id, pass, ct);
+                return Results.Bytes(document.DocumentContent.Content, document.ContentType, document.Name);
+            })
+           .WithName("DownloadSupervisorFileInternship")
+           .AllowAnonymous()
+           .Produces<BlobWithName>();
+        
+        evaluationApi.MapDelete("remove/file-internship-supervisor", async ([FromServices] EvaluationService service,
+                    Guid id, string pass, CancellationToken ct)
+                => await service.RemoveSupervisorFileAsync(id, pass, ct))
+           .WithName("RemoveFileInternshipSupervisor")
+           .AllowAnonymous()
+           .Produces<bool>();
+
+
         evaluationApi.MapGet("invite-supervisor", async ([FromServices] EvaluationService service, Guid internshipId, Guid evaluationId, CancellationToken ct)
                 => await service.InviteSupervisorToInternshipAsync(internshipId, evaluationId, ct))
            .WithName("InviteSupervisorToInternship")

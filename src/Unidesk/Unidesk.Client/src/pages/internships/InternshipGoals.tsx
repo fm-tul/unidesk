@@ -46,7 +46,7 @@ export const InternshipGoals = (props: InternshipGoalsProps) => {
   const isContantPersonFilled = isAllNotNullOrEmpty(item.supervisorEmail, item.supervisorName, item.supervisorPhone);
 
   const uploadMutation = useMutation(async (file: File) => {
-    await httpClient.evaluations.uploadFileInternship({
+    await httpClient.evaluations.uploadAuthorFileInternship({
       internshipId: item.id!,
       evaluationId: finalReportEvaluation?.id ?? GUID_EMPTY,
       formData: { file },

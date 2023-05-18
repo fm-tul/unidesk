@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Net.Mime;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using QuestPDF.Fluent;
@@ -47,48 +48,62 @@ public class InternshipEvaluationTemplateSupervisorCz : IEvaluationTemplate
     public Task ValidateAndThrowAsync(ThesisEvaluationContext context)
     {
         var item = context.Evaluation;
-        if (string.IsNullOrEmpty(item.Response))
-        {
-            throw new ValidationException("Response is empty");
-        }
-
-        var model = WebJsonSerializer.Deserialize<Model>(item.Response)
-                 ?? throw new ValidationException("Response is not valid");
-
-        var missingAnswers = model.Answers.Where(x => x.Answer == null)
-           .ToList();
-        if (missingAnswers.Any())
-        {
-            var missingQuestions = Model.ReportQuestions.Where(x => missingAnswers.Any(y => y.Id == x.Id))
-               .ToList();
-            throw new ValidationException($"Missing answers: {string.Join(", ", missingQuestions.Select(x => x.Question))}");
-        }
-
-        if (model.StudentName.IsNullOrEmpty())
-        {
-            throw new ValidationException("Author name is empty");
-        }
-
-
-        var allQuestionsIds = Model.ReportQuestions.Where(i => i is not SectionQuestion)
-           .Select(i => i.Id)
-           .ToList();
-        var unknownQuestions = model.Answers.Where(x => !allQuestionsIds.Contains(x.Id))
-           .ToList();
-        if (unknownQuestions.Any())
-        {
-            throw new ValidationException($"Unknown questions: {string.Join(", ", unknownQuestions.Select(x => x.Id))}");
-        }
-
-        var missingQuestionsIds = allQuestionsIds
-           .Where(x => model.Answers.All(y => y.Id != x))
-           .ToList();
+        var pdfAttached = item.Document is not null;
+        var responseNotEmpty = item.Response.IsNotNullOrEmpty();
         
-        if (missingQuestionsIds.Any())
-        {
-            throw new ValidationException($"Missing questions: {string.Join(", ", missingQuestionsIds)}");
-        }
+        LogicValidationException.ThrowIf(!pdfAttached && !responseNotEmpty, "You must attach PDF or fill the form");
 
+                
+        if (pdfAttached)
+        {
+            var document = item.Document!;
+            LogicValidationException.ThrowIf(document.ContentType != MediaTypeNames.Application.Pdf, "Document is not PDF");
+            return Task.CompletedTask;
+        }
+        
+        if (responseNotEmpty)
+        {
+            var model = WebJsonSerializer.Deserialize<Model>(item.Response!)
+                     ?? throw new ValidationException("Response is not valid");
+
+            var missingAnswers = model.Answers
+               .Where(x => x.Answer == null)
+               .ToList();
+            
+            if (missingAnswers.Any())
+            {
+                var missingQuestions = Model.ReportQuestions
+                   .Where(x => missingAnswers.Any(y => y.Id == x.Id))
+                   .ToList();
+                
+                throw new ValidationException($"Missing answers: {string.Join(", ", missingQuestions.Select(x => x.Question))}");
+            }
+
+            LogicValidationException.ThrowIf(model.StudentName.IsNullOrEmpty(), "Author name is empty");
+
+            var allQuestionsIds = Model.ReportQuestions
+               .Where(i => i is not SectionQuestion)
+               .Select(i => i.Id)
+               .ToList();
+            
+            var unknownQuestions = model.Answers
+               .Where(x => !allQuestionsIds.Contains(x.Id))
+               .ToList();
+            
+            if (unknownQuestions.Any())
+            {
+                throw new LogicValidationException($"Unknown questions: {string.Join(", ", unknownQuestions.Select(x => x.Id))}");
+            }
+
+            var missingQuestionsIds = allQuestionsIds
+               .Where(x => model.Answers.All(y => y.Id != x))
+               .ToList();
+            
+            if (missingQuestionsIds.Any())
+            {
+                throw new ValidationException($"Missing questions: {string.Join(", ", missingQuestionsIds)}");
+            }
+        }
 
         return Task.CompletedTask;
     }

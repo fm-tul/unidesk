@@ -33,6 +33,7 @@
     "react-drag-drop-files": "^2.3.10",
     "react-icons": "^4.6.0",
     "react-latex": "^2.0.0",
+    "react-markdown": "^8.0.7",
     "react-modal-promise": "^1.0.2",
     "react-query": "^3.39.3",
     "react-router-dom": "^6.9.0",

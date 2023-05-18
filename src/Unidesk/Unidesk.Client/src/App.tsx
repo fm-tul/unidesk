@@ -117,12 +117,6 @@ export const App = () => {
         </div>
         <div className="h-[50vh]"></div>
       </div>
-
-      <div>
-        {innerWidth}x{innerHeight}
-        <br />
-        {outerWidth}x{outerHeight}
-      </div>
     </>
   );
 };
