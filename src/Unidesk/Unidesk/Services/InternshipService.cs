@@ -212,6 +212,7 @@ public class InternshipService
         if (emailsSent.Count > 0)
         {
             _logger.LogInformation("Emails about new submitted internships were sent to {EmailsCount} managers", emailsSent.Count);
+            await _db.SaveChangesAsync(ct);
         }
         else
         {

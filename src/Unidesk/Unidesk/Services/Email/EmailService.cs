@@ -147,7 +147,11 @@ public class EmailService
     public async Task SendQueuedEmailsAsync(CancellationToken stoppingToken)
     {
         var emails = _db.Emails
-           .Where(e => e.Status == EmailStatus.InQueue && e.ScheduledToBeSent <= DateTime.Now)
+           .Where(e => e.Status == EmailStatus.InQueue)
+           .ToList();
+        
+        emails = emails
+           .Where(e =>  e.ScheduledToBeSent <= DateTime.Now)
            .ToList();
 
         if (emails.Empty())
