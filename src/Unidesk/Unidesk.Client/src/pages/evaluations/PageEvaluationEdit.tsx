@@ -66,7 +66,7 @@ export const PageEvaluationEdit = () => {
 
   const onCompleted = () => {
     setUnlocked(false);
-  }
+  };
 
   return (
     <div>
@@ -197,6 +197,7 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
   const [unsaved, setUnsaved] = useState(false);
   const [manualFile, setManualFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
+  const isInternship = !!item?.internshipId;
 
   const getQuery = useQuery({
     queryKey: ["evaluation", id],
@@ -352,12 +353,13 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
     );
   };
 
+
   return (
     <div>
       {!!item && (
         <div className="flex w-full gap-2">
           <div className="flex w-full flex-col items-stretch gap-2">
-            <div className="grid grid-cols-[1fr_auto_auto__1fr] gap-2">
+            <div className={classnames(isInternship ? "grid-cols-[1fr_auto_auto__1fr]" : "flex","grid gap-2")}>
               {/* title */}
               <div className="grow">
                 <h1 className="text-3xl font-bold">
@@ -386,30 +388,34 @@ export const EvaluationDetail = (props: EvaluationDetailProps) => {
                 </div>
               </div>
 
-              {/* dash line */}
-              <div className="w-4"></div>
-              <div className="w-4 border-l border-dashed border-gray-300"></div>
+              {isInternship && (
+                <>
+                  {/* dash line */}
+                  <div className="w-4"></div>
+                  <div className="w-4 border-l border-dashed border-gray-300"></div>
 
-              {/* manual PDF upload */}
-              <div className="flex grow flex-col gap-2">
-                <h1>
-                  <span className="text-2xl font-bold">{translate("evaluation.attach-existing-pdf")}</span>
-                </h1>
-                <FileControl
-                  file={manualFile}
-                  onClear={() => setManualFile(null)}
-                  onChange={f => setManualFile(f)}
-                  onUpload={file => uploadMutation.mutate(file)}
-                  onDownload={() => downloadMutation.mutate()}
-                  onRemove={() => deleteMutation.mutate()}
-                  uploadLoading={uploadMutation.isLoading}
-                  downloadLoading={downloadMutation.isLoading}
-                  removeLoading={deleteMutation.isLoading}
-                  pdf
-                  hasServerFile={!!item.documentId}
-                  label={"upload-manual-pdf"}
-                />
-              </div>
+                  {/* manual PDF upload */}
+                  <div className="flex grow flex-col gap-2">
+                    <h1>
+                      <span className="text-2xl font-bold">{translate("evaluation.attach-existing-pdf")}</span>
+                    </h1>
+                    <FileControl
+                      file={manualFile}
+                      onClear={() => setManualFile(null)}
+                      onChange={f => setManualFile(f)}
+                      onUpload={file => uploadMutation.mutate(file)}
+                      onDownload={() => downloadMutation.mutate()}
+                      onRemove={() => deleteMutation.mutate()}
+                      uploadLoading={uploadMutation.isLoading}
+                      downloadLoading={downloadMutation.isLoading}
+                      removeLoading={deleteMutation.isLoading}
+                      pdf
+                      hasServerFile={!!item.documentId}
+                      label={"upload-manual-pdf"}
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {!isPdfAttached && (
