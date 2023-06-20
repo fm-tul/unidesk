@@ -50,7 +50,7 @@ public class EmailService
             Subject = subject,
             Body = body,
             Status = EmailStatus.InQueue,
-            ScheduledToBeSent = DateTime.Now,
+            ScheduledToBeSent = DateTime.UtcNow,
             DocumentId = documentId,
         };
 
@@ -119,7 +119,7 @@ public class EmailService
         {
             await client.SendAsync(message, ct);
             email.Status = EmailStatus.Sent;
-            email.LastAttempt = DateTime.Now;
+            email.LastAttempt = DateTime.UtcNow;
             return true;
         }
         catch (Exception e)
@@ -132,8 +132,8 @@ public class EmailService
             }
             else
             {
-                email.ScheduledToBeSent = DateTime.Now.Add(TimeSpan.FromMinutes(15));
-                email.LastAttempt = DateTime.Now;
+                email.ScheduledToBeSent = DateTime.UtcNow.Add(TimeSpan.FromMinutes(15));
+                email.LastAttempt = DateTime.UtcNow;
                 _logger.LogInformation("Rescheduling email to {To} for {Time}", email.To, email.ScheduledToBeSent);
             }
 
@@ -151,15 +151,15 @@ public class EmailService
            .ToList();
         
         emails = emails
-           .Where(e =>  e.ScheduledToBeSent <= DateTime.Now)
+           .Where(e =>  e.ScheduledToBeSent <= DateTime.UtcNow)
            .ToList();
 
         if (emails.Empty())
         {
-            if (DateTime.Now - LastLogMessage > TimeSpan.FromMinutes(30))
+            if (DateTime.UtcNow - LastLogMessage > TimeSpan.FromMinutes(30))
             {
                 _logger.LogDebug("No emails to send");
-                LastLogMessage = DateTime.Now;
+                LastLogMessage = DateTime.UtcNow;
             }
 
             return;

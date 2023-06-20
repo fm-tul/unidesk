@@ -174,6 +174,37 @@ public class InternshipTemplates
     }
     
     
+    // user probably forget to hit submit button
+    public class InternshipStillInDraftStatusMultiLang: ITemplateContext
+    {
+        public required string InternshipUrl;
+        public static string Subject => "Vaše žádost o stáž je stále v režimu návrhu";
+
+        public static string TemplateBody => """
+        Dobrý den,
+
+        Vaše žádost o stáž je stále nebyla odeslána ke schválení. Prosím, nezapomeňte ji odeslat ke schválení. Pro zobrazení podrobností klikněte na níže uvedený odkaz:
+
+        {{ InternshipUrl }}
+
+        S pozdravem,
+        Témata FM TUL
+
+        ---------------------------------------------
+
+        Greetings,
+
+        Your internship application is still in draft mode. Please don't forget to submit it for approval. To view the details, please click on the link below:
+
+        {{ InternshipUrl }}
+
+        Sincerely,
+        Témata FM TUL
+        """;
+    }
+        
+    
+    
     // sent to manager when new evaluation is submitted
     public class NewEvaluationSubmitted : ITemplateContext
     {

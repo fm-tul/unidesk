@@ -116,7 +116,7 @@ public class ImportService
 
     public async Task<SchoolYear> GetOrCreateSchoolYear(int? datumZadaniYear)
     {
-        var year = datumZadaniYear ?? DateTime.Now.Year;
+        var year = datumZadaniYear ?? DateTime.UtcNow.Year;
         return await Db.SchoolYears
                    .FirstOrDefaultAsync(s => s._start.Year == year)
                ?? Db.SchoolYears

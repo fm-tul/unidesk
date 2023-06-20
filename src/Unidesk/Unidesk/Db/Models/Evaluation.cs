@@ -54,4 +54,6 @@ public class Evaluation : TrackedEntity
     public User? Evaluator { get; set; }
     public string EvaluatorFullName { get; set; }
     public string? RejectionReason { get; set; }
+    
+    public List<Notification> Notifications { get; set; } = new();
 }

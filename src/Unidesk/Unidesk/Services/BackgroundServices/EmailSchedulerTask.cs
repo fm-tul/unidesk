@@ -1,12 +1,12 @@
 ﻿using Unidesk.Services.Email;
 
-namespace Unidesk.Tasks;
+namespace Unidesk.Services.BackgroundServices;
 
-public class EmailScheduler: BackgroundService
+public class EmailSchedulerTask: BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly PeriodicTimer _periodicTimer;
-    public EmailScheduler(IServiceProvider serviceProvider)
+    public EmailSchedulerTask(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
         _periodicTimer = new PeriodicTimer(TimeSpan.FromSeconds(15));

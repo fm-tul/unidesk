@@ -16,7 +16,7 @@ public class CryptographyUtilsTests
     [Fact]
     public void Test_Hash_Verify_Hash()
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var guid = Guid.NewGuid();
         var props1 = new List<KeyValuePair<string, string>>
         {

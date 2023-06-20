@@ -27,10 +27,8 @@ using Unidesk.Services.Enums;
 using Unidesk.Services.Reports;
 using Unidesk.Services.Stag;
 using Unidesk.Services.ThesisTransitions;
-using Unidesk.Tasks;
+using Unidesk.Services.BackgroundServices;
 using Unidesk.Utils;
-using Unidesk.Utils.Extensions;
-using OneOfExtensions = Unidesk.Utils.OneOfExtensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -104,7 +102,7 @@ services.AddSingleton<InMemoryOptions>();
 
 // hosted services
 services.AddHostedService<InternshipTask>();
-services.AddHostedService<EmailScheduler>();
+services.AddHostedService<EmailSchedulerTask>();
 
 
 // mapper

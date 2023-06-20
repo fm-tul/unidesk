@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Unidesk.Db;
 
@@ -11,9 +12,11 @@ using Unidesk.Db;
 namespace Unidesk.Migrations
 {
     [DbContext(typeof(UnideskDbContext))]
-    partial class UnideskDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230617151057_Add_Notifications")]
+    partial class AddNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -513,9 +516,6 @@ namespace Unidesk.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("EmailMessageId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("EvaluationId")
                         .HasColumnType("uniqueidentifier");
 
@@ -535,8 +535,6 @@ namespace Unidesk.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EmailMessageId");
 
                     b.HasIndex("EvaluationId");
 
@@ -1308,22 +1306,15 @@ namespace Unidesk.Migrations
 
             modelBuilder.Entity("Unidesk.Db.Models.Notification", b =>
                 {
-                    b.HasOne("Unidesk.Db.Models.EmailMessage", "EmailMessage")
-                        .WithMany("Notifications")
-                        .HasForeignKey("EmailMessageId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Unidesk.Db.Models.Evaluation", "Evaluation")
                         .WithMany("Notifications")
                         .HasForeignKey("EvaluationId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Unidesk.Db.Models.Internships.Internship", "Internship")
-                        .WithMany("Notifications")
+                        .WithMany()
                         .HasForeignKey("InternshipId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("EmailMessage");
 
                     b.Navigation("Evaluation");
 
@@ -1560,11 +1551,6 @@ namespace Unidesk.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Unidesk.Db.Models.EmailMessage", b =>
-                {
-                    b.Navigation("Notifications");
-                });
-
             modelBuilder.Entity("Unidesk.Db.Models.Evaluation", b =>
                 {
                     b.Navigation("Notifications");
@@ -1575,8 +1561,6 @@ namespace Unidesk.Migrations
                     b.Navigation("Evaluations");
 
                     b.Navigation("KeywordInternship");
-
-                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("Unidesk.Db.Models.Keyword", b =>

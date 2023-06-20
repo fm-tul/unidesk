@@ -71,7 +71,7 @@ public class StagService
     private async Task<string> GetCookieFromLoginAsync()
     {
         // cookie lasts 30 minutes
-        var cookieAge = DateTime.Now - _cookieExpires;
+        var cookieAge = DateTime.UtcNow - _cookieExpires;
         if (_cookie is not null && cookieAge.TotalMinutes < 30)
         {
             return _cookie;
@@ -82,7 +82,7 @@ public class StagService
         var data = await response.Content.ReadAsStringAsync();
         var cookies = response.Headers.GetValues("Set-Cookie").ToList();
         _cookie = cookies.First();
-        _cookieExpires = DateTime.Now.AddMinutes(30);
+        _cookieExpires = DateTime.UtcNow.AddMinutes(30);
         return _cookie;
     }
     

@@ -94,7 +94,7 @@ public class UserServiceTests
             NameIdentifier = StaticUsers.ImportUser.Id,
             Name = StaticUsers.ImportUser.Username!,
             Grants = new List<Grant>(),
-            Created = DateTime.Now,
+            Created = DateTime.UtcNow,
         });
         
         importUser.Id.Should().Be(StaticUsers.ImportUser.Id);

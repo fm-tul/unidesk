@@ -23,6 +23,7 @@ public class AppOptions
     
     public EnvironmentType Environment { get; set; }
 
+    public string ResourceDir { get; set; } = null!;
     public string LogDir { get; set; } = ".";
     public string ServerUrl { get; set; } = "https://temata.fm.tul.cz";
 }

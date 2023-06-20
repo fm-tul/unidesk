@@ -174,7 +174,7 @@ public class InternshipService
     public async Task<List<Internship>> GetInternshipsWithMissingContactPersonAsync(CancellationToken ct)
     {
         // two weeks after the start of the internship contact person should be filled in
-        var now = _clock.Now;
+        var now = _clock.UtcNow;
         return await _db.Internships
            .Query()
            .Where(i => string.IsNullOrEmpty(i.SupervisorEmail) || string.IsNullOrEmpty(i.SupervisorPhone) || string.IsNullOrEmpty(i.SupervisorName))
@@ -275,7 +275,7 @@ public class InternshipService
         foreach (var item in items)
         {
             // to not spam the student, we will check the item.Modified DateTime. This way we will send the email only once a day
-            var durationSinceLastEmail = _clock.Now - item.Modified;
+            var durationSinceLastEmail = _clock.UtcNow - item.Modified;
             if (durationSinceLastEmail.TotalDays < 1)
             {
                 _logger.LogDebug("Not sending email to {Student} about missing contact person, because it was edited {DurationSinceLastEmail} ago", item.Student.Username, durationSinceLastEmail);
@@ -293,7 +293,7 @@ public class InternshipService
                     });
 
                 await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipContactPersonMissingMultiLangTemplate.Subject, message, ct);
-                item.Modified = _clock.Now;
+                item.Modified = _clock.UtcNow;
                 notified++;
             }
             else
@@ -321,10 +321,57 @@ public class InternshipService
         var supervisorEvaluation = internship.Evaluations.FirstOrDefault(i => i.UserFunction == UserFunction.Supervisor);
 
         var canBeFinished = internship.Status == InternshipStatus.Approved
-                         && _clock.Now >= internship.EndDate
+                         && _clock.UtcNow >= internship.EndDate
                          && studentEvaluation?.Status == EvaluationStatus.Approved
                          && supervisorEvaluation?.Status == EvaluationStatus.Approved;
 
         return canBeFinished;
+    }
+
+    /// <summary>
+    /// We check all internships with status draft, if it has been more than week,
+    /// we send an email to the student
+    /// </summary>
+    /// <param name="ct"></param>
+    public async Task NotifyStudentInternshipStillDraft(CancellationToken ct)
+    {
+        var internshipsInDraft = await _db.Internships
+           .Query()
+           .Where(i => i.Status == InternshipStatus.Draft)
+           .ToListAsync(ct);
+
+        var overWeekOld = internshipsInDraft
+           .Where(_clock.IsOverWeeksOld)
+           .ToList();
+
+        foreach (var internship in overWeekOld)
+        {
+            var email = internship.Student.GetEmail();
+            if (email.IsNullOrEmpty())
+            {
+                _logger.LogWarning("Student {UserName} has no email and cannot be notified about internship still in draft", internship.Student.FullName());
+                continue;
+            }
+            
+            var lastNotification = internship.LastNotification;
+            if (lastNotification is null || _clock.IsOverWeeksOld(lastNotification))
+            {
+                var message = _templateFactory
+                   .LoadTemplate<InternshipTemplates.InternshipStillInDraftStatusMultiLang>()
+                   .Render(new InternshipTemplates.InternshipStillInDraftStatusMultiLang
+                    {
+                        InternshipUrl = $"{_serverService.UrlBase}/internships/{internship.Id}",
+                    });
+
+                await _emailService.QueueTextEmailAsync(email, InternshipTemplates.InternshipContactPersonMissingMultiLangTemplate.Subject, message, ct);
+                await _db.Notifications.AddAsync(new Notification
+                {
+                    InternshipId = internship.Id,
+                    Type = NotificationType.Email,
+                    Created = _clock.UtcNow,
+                }, ct);
+                await _db.SaveChangesAsync(ct);
+            }
+        }
     }
 }

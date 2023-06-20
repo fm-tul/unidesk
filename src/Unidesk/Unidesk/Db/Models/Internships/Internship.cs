@@ -37,10 +37,10 @@ public class Internship : TrackedEntity
     public DateTime EndDate { get; set; }
     
     [NotMapped]
-    public TimeSpan AfterStart => DateTime.Now - StartDate;
+    public TimeSpan AfterStart => DateTime.UtcNow - StartDate;
     
     [NotMapped]
-    public TimeSpan AfterEnd => DateTime.Now - EndDate;
+    public TimeSpan AfterEnd => DateTime.UtcNow - EndDate;
     
     [NotMapped]
     public long DurationDays => (EndDate - StartDate).Days;
@@ -68,6 +68,11 @@ public class Internship : TrackedEntity
     /// </summary>
     public List<KeywordInternship> KeywordInternship { get; set; } = new();
     public List<Evaluation> Evaluations { get; set; } = new();
+
+    public List<Notification> Notifications { get; set; } = new();
+
+    [NotMapped]
+    public Notification? LastNotification => Notifications.MaxBy(i => i.Created);
     
     [NotMapped]
     public List<Keyword> Keywords => KeywordInternship.Select(x => x.Keyword).ToList();

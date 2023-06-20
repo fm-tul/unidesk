@@ -8,5 +8,5 @@ public interface IDateTimeService
 
 public class DefaultDateTimeService : IDateTimeService
 {
-    public DateTime Now => DateTime.Now;
+    public DateTime Now => DateTime.UtcNow;
 }

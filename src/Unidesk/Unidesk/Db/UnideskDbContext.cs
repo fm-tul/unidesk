@@ -58,6 +58,10 @@ public class UnideskDbContext : DbContext
 
     public  DbSet<ChangeLog> ChangeLogs { get; set; }
     public  DbSet<EmailMessage> Emails { get; set; }
+    
+    // notifications
+    
+    public DbSet<Notification> Notifications { get; set; }
 
     private bool _interceptorsEnabled = true;
 

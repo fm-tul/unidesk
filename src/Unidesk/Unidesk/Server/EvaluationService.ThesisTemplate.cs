@@ -10,8 +10,21 @@ namespace Unidesk.Server;
 
 public partial class EvaluationService
 {
-    private static Document GetThesisPdf(EvaluationDetailDto detailDto, string? permalink = null)
+    private Document GetThesisPdf(EvaluationDetailDto detailDto, string? permalink = null)
     {
+        var logoImgPath = Path.Combine(_appOptions.ResourceDir, "logo-fm-txt-en.png");
+        var symbolImgPath = Path.Combine(_appOptions.ResourceDir, "symbol-fm.png");
+        
+        if (!File.Exists(logoImgPath))
+        {
+            throw new FileNotFoundException("Logo image not found", logoImgPath);
+        }
+        
+        if (!File.Exists(symbolImgPath))
+        {
+            throw new FileNotFoundException("Symbol image not found", symbolImgPath);
+        }
+        
         var pdf = QuestPDF.Fluent.Document.Create(container =>
         {
             container.Page(page =>
@@ -31,13 +44,13 @@ public partial class EvaluationService
                    .Row(x =>
                     {
                         x.ConstantItem(120, Unit.Millimetre)
-                           .Image("c:\\projects\\tul\\unidesk\\templates\\logo-fm-txt-en.png");
+                          .Image(logoImgPath);
 
                         x.RelativeItem()
                            .AlignRight();
 
                         x.ConstantItem(70)
-                           .Image("c:\\projects\\tul\\unidesk\\templates\\symbol-fm.png");
+                            .Image(symbolImgPath);
                     });
 
                 page.Content()

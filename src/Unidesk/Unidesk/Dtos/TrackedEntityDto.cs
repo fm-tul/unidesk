@@ -16,10 +16,10 @@ namespace Unidesk.Dtos;
 public class TrackedEntityDto : IdEntityDto
 {
     [Required]
-    public DateTime Created { get; set; } = DateTime.Now;
+    public DateTime Created { get; set; } = DateTime.UtcNow;
     public string? CreatedBy { get; set; }
 
     [Required]
-    public DateTime Modified { get; set; } = DateTime.Now;
+    public DateTime Modified { get; set; } = DateTime.UtcNow;
     public string? ModifiedBy { get; set; }
 }

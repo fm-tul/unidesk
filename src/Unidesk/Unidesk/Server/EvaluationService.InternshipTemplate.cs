@@ -46,7 +46,7 @@ public partial class EvaluationService
                    .Row(r =>
                     {
                         r.AutoItem()
-                           .Text($"Vygenerováno pomocí portálu Témata FM TUL, {DateTime.Now:dd.MM.yyyy HH:mm:ss}")
+                           .Text($"Vygenerováno pomocí portálu Témata FM TUL, {DateTime.UtcNow:dd.MM.yyyy HH:mm:ss}")
                            .FontColor(Colors.Grey.Darken1)
                            .FontSize(8);
                     });

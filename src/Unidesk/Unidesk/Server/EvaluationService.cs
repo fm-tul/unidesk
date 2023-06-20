@@ -4,6 +4,7 @@ using QuestPDF.Elements;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Unidesk.Configurations;
 using Unidesk.Db;
 using Unidesk.Db.Models;
 using Unidesk.Db.Models.Internships;
@@ -34,10 +35,11 @@ public partial class EvaluationService
     private readonly ServerService _serverService;
     private readonly DocumentService _documentService;
     private readonly InternshipService _internshipService;
+    private readonly AppOptions _appOptions;
 
     public EvaluationService(UnideskDbContext db, IMapper mapper, WordGeneratorService wordGeneratorService, IUserProvider userProvider,
         IEnumerable<IEvaluationTemplate> evaluationsTemplates, EmailService emailService, TemplateFactory templateFactory, ServerService serverService, DocumentService documentService,
-        InternshipService internshipService)
+        InternshipService internshipService, AppOptions appOptions)
     {
         _db = db;
         _mapper = mapper;
@@ -49,6 +51,7 @@ public partial class EvaluationService
         _serverService = serverService;
         _documentService = documentService;
         _internshipService = internshipService;
+        _appOptions = appOptions;
     }
 
     private async Task<Evaluation> GetWithPassword(Guid id, string pass, CancellationToken ct, IQueryable<Evaluation>? customQuery = null)
@@ -302,7 +305,7 @@ public partial class EvaluationService
                 StudentName = studentName,
                 ThesisTitle = title,
                 ContactEmail = "viroco@tul.cz",
-                ThesisEvaluationDeadline = DateTime.Now.AddDays(14)
+                ThesisEvaluationDeadline = DateTime.UtcNow.AddDays(14)
                    .ToLongDateString(),
                 ThesisEvaluationPassword = passphrase,
                 ThesisEvaluationUrl = $"{url}/evaluation/{item.Id}",
@@ -334,7 +337,7 @@ public partial class EvaluationService
                 StudentName = studentName,
                 InternshipTitle = title,
                 ContactEmail = _emailService.ContactEmail,
-                InternshipEvaluationDeadline = DateTime.Now.AddDays(14)
+                InternshipEvaluationDeadline = DateTime.UtcNow.AddDays(14)
                    .ToLongDateString(),
                 InternshipEvaluationPassword = passphrase,
                 InternshipEvaluationUrl = $"{_serverService.UrlBase}/evaluation/{item.Id}",

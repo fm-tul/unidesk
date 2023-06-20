@@ -1,7 +1,6 @@
-﻿using Unidesk.Services;
-using Unidesk.Utils.Extensions;
+﻿using Unidesk.Utils.Extensions;
 
-namespace Unidesk.Tasks;
+namespace Unidesk.Services.BackgroundServices;
 
 public class InternshipTask : BackgroundService
 {
@@ -18,11 +17,17 @@ public class InternshipTask : BackgroundService
         _serviceProvider = serviceProvider;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        while (!ct.IsCancellationRequested)
         {
-            var now = DateTime.Now;
+            // {
+            //     using var scope = _serviceProvider.CreateScope();
+            //     var internshipService = scope.ServiceProvider.GetRequiredService<InternshipService>();
+            //     await internshipService.NotifyStudentInternshipStillDraft(ct);
+            // }
+            
+            var now = DateTime.UtcNow;
             var nowTimeOnly = TimeOnly.FromDateTime(now);
 
             var futureTimePoints = _timePoints
@@ -38,9 +43,9 @@ public class InternshipTask : BackgroundService
                    .MinBy(i => nowTimeOnly - i);
 
             var timeToWait = closestTimePoint - nowTimeOnly;
-            await Task.Delay(timeToWait, stoppingToken);
+            await Task.Delay(timeToWait, ct);
             
-            if (stoppingToken.IsCancellationRequested)
+            if (ct.IsCancellationRequested)
             {
                 return;
             }
@@ -48,8 +53,9 @@ public class InternshipTask : BackgroundService
             using var scope = _serviceProvider.CreateScope();
             var internshipService = scope.ServiceProvider.GetRequiredService<InternshipService>();
             
-            await internshipService.NotifyManagerAboutSubmittedInternshipAsync(stoppingToken);
-            await internshipService.NotifyStudentsContactPersonMissingAsync(stoppingToken);
+            await internshipService.NotifyManagerAboutSubmittedInternshipAsync(ct);
+            await internshipService.NotifyStudentsContactPersonMissingAsync(ct);
+            await internshipService.NotifyStudentInternshipStillDraft(ct);
         }
     }
 }

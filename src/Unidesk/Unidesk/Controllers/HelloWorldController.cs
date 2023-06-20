@@ -33,7 +33,7 @@ public class HelloWorldController : ControllerBase
     [ProducesResponseType(typeof(TextQuestion), 200)]
     public async Task<string> HelloWorld()
     {
-        await _emailService.QueueTextEmailAsync("jan.hybs@tul.cz", "Database migrated", $"Database migrated at {DateTime.Now}", CancellationToken.None);
+        await _emailService.QueueTextEmailAsync("jan.hybs@tul.cz", "Database migrated", $"Database migrated at {DateTime.UtcNow}", CancellationToken.None);
         return $"Hello {_userProvider.CurrentUser?.Email}";
     }
     

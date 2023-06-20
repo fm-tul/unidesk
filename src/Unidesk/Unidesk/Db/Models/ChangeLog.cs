@@ -42,7 +42,7 @@ public class ChangeLog : IdEntity
             Entity = entry.Entity.GetType().ToString(),
             User = user,
             State = (ChangeState)entry.State,
-            DateTime = DateTime.Now,
+            DateTime = DateTime.UtcNow,
             EntityId = entry.Entity is IdEntity entity ? entity.Id : Guid.Empty,
             Details = new ChangeDetails
             {
