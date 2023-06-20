@@ -1,6 +1,5 @@
 import { User_Admin, User_SuperAdmin, Internship_Manage, Email_View } from "@api-client/constants/Grants";
 
-import { link_admin, link_adminManageEnum } from "./admin/links";
 import { PageStagImportComponent } from "./admin/links.pageStagImport";
 import { ExtraRouteProps, ExtraRoutePropsWithGoto } from "./core";
 import { PageEvaluationManageComponent, PageEvaluationEditComponent, PageEvaluationViewComponent } from "./links.pageEvaluation";
@@ -19,7 +18,7 @@ export const link_stagImport: ExtraRouteProps = {
   path: "/admin/stag-import",
   visible: false,
   element: PageStagImportComponent,
-  requiredGrants: [User_Admin.id],
+  availableToGrants: [User_Admin.id],
 };
 
 export const link_pageHome: ExtraRouteProps = {
@@ -69,7 +68,7 @@ export const link_styles: ExtraRouteProps = {
   visible: false,
   path: "/styles",
   element: PageStylesComponent,
-  requiredGrants: [], // User_SuperAdmin.id
+  availableToGrants: [], // User_SuperAdmin.id
 };
 
 // keywords
@@ -116,7 +115,7 @@ export const link_pageUserList: ExtraRouteProps = {
   path: "/users",
   visible: true,
   element: PageUserListComponent,
-  requiredGrants: [User_Admin.id, User_SuperAdmin.id],
+  availableToGrants: [User_Admin.id],
 };
 
 // teams
@@ -192,7 +191,7 @@ export const link_pageEmailList: ExtraRouteProps = {
   path: "/emails",
   visible: true,
   element: PageEmailListComponent,
-  requiredGrants: [Email_View.id],
+  availableToGrants: [Email_View.id],
 };
 
 export const links = [
@@ -219,9 +218,6 @@ export const links = [
   // link_pageTeamEdit,
 
   // link_styles,
-
-  link_admin,
-  link_adminManageEnum,
 
   link_settings,
   link_settingsManageSettings,

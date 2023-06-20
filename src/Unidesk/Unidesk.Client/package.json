@@ -28,6 +28,7 @@
     "qs": "^6.11.1",
     "rc-tooltip": "^6.0.1",
     "react": "^18.2.0",
+    "react-collapsed": "^4.0.2",
     "react-cropper": "^2.3.2",
     "react-dom": "^18.2.0",
     "react-drag-drop-files": "^2.3.10",

@@ -1,28 +1,22 @@
-import { useCollape } from "hooks/useCollapse";
-import { useState } from "react";
 import { classnames } from "ui/shared";
+import { useCollapse } from "react-collapsed";
 
 interface CollapeProps {
   children: any[] | any;
   open: boolean;
   className?: string;
-  mountIfClosed?: boolean;
   width?: string;
 }
 export const Collapse = (props: CollapeProps) => {
-  const { children, open, className, mountIfClosed = false, width="w-full" } = props;
-  const [ref, setRef] = useState<HTMLDivElement | null>(null);
-  const [extraClassNames, canBeHidden, fullyOpen] = useCollape(ref, open);
+  const { children, open, className, width = "w-full" } = props;
+  const { getCollapseProps } = useCollapse({
+    isExpanded: open,
+    hasDisabledAnimation: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  });
 
-  if (!mountIfClosed && canBeHidden && !open) {
-    return null;
-  }
-
-  // console.log("Collapse", open, extraClassNames, canBeHidden, fullyOpen);
-  // const extraClassNames = open ? "" : "hidden";
   return (
-    <div ref={setRef} className={classnames(extraClassNames, className, width)}>
-      {children}
-    </div>
+    <section {...getCollapseProps()}>
+      <div className={classnames(className, width)}>{children}</div>
+    </section>
   );
 };

@@ -56,12 +56,6 @@ public class ThesisDto : TrackedEntityDto
     public ThesisStatus Status { get; set; }
 
     /// <summary>
-    /// Selected type of the thesis (e.g. bachelor, master, PhD)
-    /// before the thesis is accepted, this can be null, and possible candidates are used instead <see cref="ThesisTypeCandidateIds"/>
-    /// </summary>
-    public Guid? ThesisTypeId { get; set; }
-
-    /// <summary>
     /// Ids of the thesis types. During the approval phase, this is list of the thesis types, which are possible candidates for the thesis type
     /// After the thesis is accepted, this can be ignored (as it should be empty), and the selected type is used instead <see cref="ThesisType"/>
     /// </summary>

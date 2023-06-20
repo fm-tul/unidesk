@@ -1,4 +1,7 @@
-﻿namespace Unidesk.Server;
+﻿using Unidesk.Security;
+using Unidesk.Server.ServiceFilters;
+
+namespace Unidesk.Server;
 
 public static class EnumsCachedEndpoint
 {
@@ -13,11 +16,18 @@ public static class EnumsCachedEndpoint
            .Produces<TResponse>();
     }
 
-    public static RouteHandlerBuilder UseEnumsEndpoint<TResponse>(this RouteHandlerBuilder builder, string operationName)
+    public static RouteHandlerBuilder UseEnumsEndpoint<TResponse>(this RouteHandlerBuilder builder, string operationName, Grants? grant = null)
     {
-        return builder
-            .WithTags(EnumsSwaggerTag)
-            .WithName(operationName)
-            .Produces<TResponse>();
+        var b = builder
+           .WithTags(EnumsSwaggerTag)
+           .WithName(operationName)
+           .Produces<TResponse>();
+
+        if (grant.HasValue)
+        {
+            b = b.RequireGrant(grant.Value);
+        }
+        
+        return b;
     }
 }

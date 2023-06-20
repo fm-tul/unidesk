@@ -17,7 +17,7 @@ import { classnames } from "ui/shared";
 import { ColumnDefinition, ItemList, ItemListProps } from "ui/Table";
 
 interface ThesisRendererProps {
-  typeFactory: (params: ThesisLookupDto | ThesisDto) => JSX.Element;
+  typeFactory: (params: ThesisLookupDto | ThesisDto) => JSX.Element | null;
   language: LanguagesId;
   translate: TranslateFunc;
 }
@@ -38,7 +38,7 @@ export const ThesisRendererFactory = (props: ThesisRendererProps) => {
         <span>{language === "cze" ? i.nameCze : i.nameEng}</span>
         <div className="col-start-3 row-span-5">
           {MetadataRenderer(i, language)}
-          <span className="pill success text-md rounded-md font-medium">{typeFactory(i)}</span>
+          {i.thesisTypeCandidateIds.length > 0 && <span className="pill success text-md rounded-md font-medium">{typeFactory(i)}</span>}
           <div className="flow flex-wrap">
             {i.keywords
               .filter(j => j.locale === language)

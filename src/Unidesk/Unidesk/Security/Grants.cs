@@ -64,4 +64,26 @@ public enum Grants
     
     [AttributeInfo("64CBBAC6-0BF7-4F47-B6CD-D87AF06BA77E", nameof(Action_Create_User), "Create User")]
     Action_Create_User = 19,
+    
+    [AttributeInfo("B65F4933-75A4-400F-8A36-C1920FA81176", nameof(Manage_Faculties), "Manage Faculties")]
+    Manage_Faculties = 20,
+    
+    [AttributeInfo("8140E778-C514-4194-9126-53E6D6C6DB32", nameof(Manage_Departments), "Manage Departments")]
+    Manage_Departments = 21,
+    
+    [AttributeInfo("B02EC44D-6C39-4B40-B3B5-720BD6E08D12", nameof(Manage_SchoolYears), "Manage SchoolYears")]
+    Manage_SchoolYears = 22,
+    
+    [AttributeInfo("179B8B51-8563-4053-A494-7449033E5501", nameof(Manage_ThesisOutcomes), "Manage ThesisOutcomes")]
+    Manage_ThesisOutcomes = 23,
+    
+    [AttributeInfo("6B3CFB26-910D-4FF7-844F-054180FC7187", nameof(Manage_ThesisTypes), "Manage ThesisTypes")]
+    Manage_ThesisTypes = 24,
+    
+    [AttributeInfo("A006BB72-E47C-4785-8B7E-B29C8A40367E", nameof(Manage_StudyProgrammes), "Manage StudyProgrammes")]
+    Manage_StudyProgrammes = 25,
+    
+    [AttributeInfo("C6BCF738-53BE-4CC7-B213-BE9AA3DCB22A", nameof(Manage_UserRoles), "Manage UserRoles")]
+    Manage_UserRoles = 26,
+    
 }

@@ -25,4 +25,15 @@ public class SchoolYear : TrackedEntity
         get => DateOnly.FromDateTime(_end);
         set => _end = value.ToDateTime(TimeOnly.MinValue);
     }
+    
+    
+    [Column("ThesisDeadline")]
+    internal DateTime? _thesisDeadline { get; set; }
+    
+    [NotMapped]
+    public DateOnly? ThesisDeadline
+    {
+        get => _thesisDeadline.HasValue ? DateOnly.FromDateTime(_thesisDeadline.Value) : null;
+        set => _thesisDeadline = value?.ToDateTime(TimeOnly.MinValue);
+    }
 }

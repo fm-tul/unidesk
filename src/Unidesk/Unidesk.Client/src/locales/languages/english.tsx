@@ -273,6 +273,14 @@ export const en = {
   //settings
   "link.settings": "Settings",
   "settings.roles-and-grants": "Roles & Grants",
+  "settings.departments": "Departments",
+  "settings.faculties": "Faculties",
+  "settings.school-years": "School Years",
+  "settings.thesis-outcomes": "Thesis Outcomes",
+  "settings.thesis-types": "Thesis Types",
+  "settings.study-programmes": "Study Programmes",
+  "settings.change-tracker": "Change Trackers",
+  "settings.in-memory-options": "In-Memory Options",
 
   // select component
   "select-component.type-to-search": "Type to search...",

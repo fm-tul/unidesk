@@ -81,7 +81,7 @@ public class SimpleEnumService
         // otherwise, update the existing entity
         else
         {
-            item = dbSet.Find(dto.Id)
+            item = await dbSet.FindAsync(dto.Id)
                    ?? throw new Exception($"Item of type {typeof(TItem)} with id {dto.Id} not found");
             _mapper.Map(dto, item);
         }

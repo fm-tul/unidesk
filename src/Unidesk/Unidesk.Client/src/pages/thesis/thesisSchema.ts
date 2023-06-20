@@ -17,7 +17,6 @@ export const thesisInitialValues: Partial<ThesisDto> = {
   status: ThesisStatus.DRAFT,
 
   thesisTypeCandidateIds: [],
-  thesisTypeId: null,
   outcomeIds: [],
 
   facultyId: "",

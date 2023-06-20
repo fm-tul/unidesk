@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
+using Unidesk.Security;
 using Unidesk.Services.Enums;
 using Unidesk.Validations;
 
@@ -65,43 +66,43 @@ public static class MinimalApiExtensions
         // Faculty
         app.MapPost("FacultyUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] FacultyDto dto, CancellationToken ct) => s.CreateOrUpdate<Faculty, FacultyDto>(dto, ct))
-            .UseEnumsEndpoint<FacultyDto>($"{nameof(Faculty)}{ApiConfig.UPSERT}");
+            .UseEnumsEndpoint<FacultyDto>($"{nameof(Faculty)}{ApiConfig.UPSERT}", Grants.Manage_Faculties);
 
         // Department
         app.MapPost("DepartmentUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] DepartmentDto dto, CancellationToken ct) =>
                     s.CreateOrUpdate<Department, DepartmentDto, DepartmentDtoValidation>(dto, ct))
-            .UseEnumsEndpoint<DepartmentDto>($"{nameof(Department)}{ApiConfig.UPSERT}");
+            .UseEnumsEndpoint<DepartmentDto>($"{nameof(Department)}{ApiConfig.UPSERT}", Grants.Manage_Departments);
 
         // SchoolYear
         app.MapPost("SchoolYearUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] SchoolYearDto dto, CancellationToken ct) =>
                     s.CreateOrUpdate<SchoolYear, SchoolYearDto, SchoolYearDtoValidation>(dto, ct))
-            .UseEnumsEndpoint<SchoolYearDto>($"{nameof(SchoolYear)}{ApiConfig.UPSERT}");
+            .UseEnumsEndpoint<SchoolYearDto>($"{nameof(SchoolYear)}{ApiConfig.UPSERT}", Grants.Manage_SchoolYears);
 
         // ThesisOutcome
         app.MapPost("ThesisOutcomeUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] ThesisOutcomeDto dto, CancellationToken ct) =>
                     s.CreateOrUpdate<ThesisOutcome, ThesisOutcomeDto, ThesisOutcomeDtoValidation>(dto, ct))
-            .UseEnumsEndpoint<ThesisOutcomeDto>($"{nameof(ThesisOutcome)}{ApiConfig.UPSERT}");
+            .UseEnumsEndpoint<ThesisOutcomeDto>($"{nameof(ThesisOutcome)}{ApiConfig.UPSERT}", Grants.Manage_ThesisOutcomes);
 
         // ThesisType
         app.MapPost("ThesisTypeUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] ThesisTypeDto dto, CancellationToken ct) =>
                     s.CreateOrUpdate<ThesisType, ThesisTypeDto, ThesisTypeDtoValidation>(dto, ct))
-            .UseEnumsEndpoint<ThesisTypeDto>($"{nameof(ThesisType)}{ApiConfig.UPSERT}");
+            .UseEnumsEndpoint<ThesisTypeDto>($"{nameof(ThesisType)}{ApiConfig.UPSERT}", Grants.Manage_ThesisTypes);
 
         // StudyProgramme
         app.MapPost("StudyProgrammeUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] StudyProgrammeDto dto, CancellationToken ct) =>
                     s.CreateOrUpdate<StudyProgramme, StudyProgrammeDto, StudyProgrammeDtoValidation>(dto, ct))
-            .UseEnumsEndpoint<StudyProgrammeDto>($"{nameof(StudyProgramme)}{ApiConfig.UPSERT}");
+            .UseEnumsEndpoint<StudyProgrammeDto>($"{nameof(StudyProgramme)}{ApiConfig.UPSERT}", Grants.Manage_StudyProgrammes);
         
         // UserRole
         app.MapPost("UserRoleUpsertOne",
                 ([FromServices] SimpleEnumService s, [FromBody] UserRoleDto dto, CancellationToken ct) =>
                     s.CreateOrUpdate<UserRole, UserRoleDto, UserRoleDtoValidation>(dto, ct))
-            .UseEnumsEndpoint<UserRoleDto>($"{nameof(UserRole)}{ApiConfig.UPSERT}");
+            .UseEnumsEndpoint<UserRoleDto>($"{nameof(UserRole)}{ApiConfig.UPSERT}", Grants.Manage_UserRoles);
 
         return app;
     }

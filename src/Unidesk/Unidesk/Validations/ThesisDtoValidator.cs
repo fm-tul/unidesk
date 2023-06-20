@@ -31,7 +31,7 @@ public class ThesisDtoValidator : AbstractValidator<ThesisDto>
                     case ThesisStatus.Finished_Unsuccessfully:
                     case ThesisStatus.Finished:
                     case ThesisStatus.Assigned:
-                        return y.Count == 0 && x.ThesisTypeId.HasValue;
+                        return y.Count == 1;
 
                     case ThesisStatus.Reserved:
                     case ThesisStatus.Abandoned:

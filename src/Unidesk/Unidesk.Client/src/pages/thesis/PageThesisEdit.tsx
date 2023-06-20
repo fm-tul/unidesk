@@ -189,35 +189,6 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
   return (
     <UnideskComponent name="ThesisEdit">
       <LoadingWrapper isLoading={isLoading} error="">
-        {/* <Menu className="absolute top-0 right-0 bg-white" link="menu">
-          <>
-            {!!persistentObject && (
-              <Button onClick={() => setDto(persistentObject.item)} sm text success justify="justify-end">
-                <div className="flex flex-col">
-                  {R("restore-work")}
-                  <span className="text-xxs normal-case italic text-neutral-600">
-                    <Moment date={persistentObject.date} />
-                  </span>
-                </div>
-              </Button>
-            )}
-          </>
-          <Button sm text onClick={open} justify="justify-end">
-            Paste from clipboard
-          </Button>
-
-          <Button
-            disabled={dto.id === GUID_EMPTY}
-            sm
-            text
-            justify="justify-end"
-            component={Link}
-            to={link_pageThesisDetail.navigate(dto.id)}
-          >
-            Go to thesis detail
-          </Button>
-        </Menu> */}
-
         {!!dto.adipidno && (
           <div className="flex items-center gap-1">
             {RR("thesis-from-stag-id", language)}
@@ -270,9 +241,7 @@ export const ThesisEdit = (props: PageThesisNewProps) => {
                   as={Select<ThesisTypeDto>}
                   optionRender={getName}
                   classNameField="col-span-1"
-                  {...(!!dto.thesisTypeId
-                    ? getPropsS(form, "thesisTypeId", thesisTypes)
-                    : { ...getPropsM(form, "thesisTypeCandidateIds", thesisTypes), clearable: true })}
+                  {...({ ...getPropsM(form, "thesisTypeCandidateIds", thesisTypes), clearable: true })}
                 />
 
                 <FormField

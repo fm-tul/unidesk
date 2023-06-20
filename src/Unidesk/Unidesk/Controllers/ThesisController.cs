@@ -30,7 +30,8 @@ public class ThesisController : Controller
     private readonly IUserProvider _userProvider;
     private readonly ThesisTransitionService _thesisTransitionService;
 
-    public ThesisController(IMapper mapper, UnideskDbContext db, ILogger<ThesisController> logger, IUserProvider userProvider, ThesisTransitionService thesisTransitionService)
+    public ThesisController(IMapper mapper, UnideskDbContext db, ILogger<ThesisController> logger,
+        IUserProvider userProvider, ThesisTransitionService thesisTransitionService)
     {
         _mapper = mapper;
         _db = db;
@@ -116,7 +117,8 @@ public class ThesisController : Controller
                 {
                     query = query.Where(i => i.KeywordThesis.Any(j => j.KeywordId == keywordId));
                 }
-            } else
+            }
+            else
             {
                 query = query.Where(i => i.KeywordThesis.Any(j => requestFilter.Keywords.Contains(j.KeywordId)));
             }
@@ -179,7 +181,11 @@ public class ThesisController : Controller
                 currentUser: _userProvider.CurrentUser))
            .MatchAsync(
                 i => item.Status = i,
-                i => throw new ValidationException(i.Message, new[] { new ValidationFailure { ErrorMessage = i.Description, PropertyName = nameof(item.Status) } })
+                i => throw new ValidationException(i.Message,
+                    new[]
+                    {
+                        new ValidationFailure { ErrorMessage = i.Description, PropertyName = nameof(item.Status) }
+                    })
             );
 
 
@@ -194,7 +200,15 @@ public class ThesisController : Controller
 
         item.Outcomes = _db.ThesisOutcomes.Where(i => dto.OutcomeIds.Contains(i.Id)).ToList();
         item.ThesisTypeCandidates = _db.ThesisTypes.Where(i => dto.ThesisTypeCandidateIds.Contains(i.Id)).ToList();
-        
+        if (item.ThesisTypeCandidates.Count == 1)
+        {
+            item.ThesisTypeId = item.ThesisTypeCandidates.Single().Id;
+        }
+        else
+        {
+            item.ThesisTypeId = null;
+        }
+
         var newKeywordThesis = dto.Keywords
            .Select(i => new KeywordThesis { ThesisId = item.Id, KeywordId = i.Id })
            .ToList();
@@ -204,14 +218,18 @@ public class ThesisController : Controller
            .Concat(dto.Opponents)
            .Select(i => new ThesisUser { UserId = i.User.Id, ThesisId = item.Id, Function = i.Function })
            .ToList();
-        
+
         var newTeams = dto.Teams
            .Select(i => new Team { Id = i.Id })
            .ToList();
-        
+
         if (newThesisUsers.GroupBy(i => i.UserId).Any(i => i.Count() > 1))
         {
-            throw new ValidationException("Duplicate users", new[] { new ValidationFailure { ErrorMessage = "Duplicate users", PropertyName = nameof(item.ThesisUsers) } });
+            throw new ValidationException("Duplicate users",
+                new[]
+                {
+                    new ValidationFailure { ErrorMessage = "Duplicate users", PropertyName = nameof(item.ThesisUsers) }
+                });
         }
 
         if (isNew)
@@ -220,13 +238,15 @@ public class ThesisController : Controller
             item.ThesisUsers = newThesisUsers;
             item.KeywordThesis = newKeywordThesis;
             item.Teams = newTeams;
-            await _db.Theses.AddAsync(item);
+            await _db.Theses.AddAsync(item, ct);
         }
         else
         {
             // handling students/authors/supervisors/opponents and keywords and teams is bit more complicated
-            var (addThesisUsers, delThesisUsers) = item.ThesisUsers.SynchronizeDbSet(newThesisUsers, _db.ThesisUsers, (i, j) => i.UserId == j.UserId && i.Function == j.Function);
-            var (addKeywordThesis, delKeywordThesis) = item.KeywordThesis.SynchronizeDbSet(newKeywordThesis, _db.KeywordThesis, (i, j) => i.KeywordId == j.KeywordId);
+            var (addThesisUsers, delThesisUsers) = item.ThesisUsers.SynchronizeDbSet(newThesisUsers, _db.ThesisUsers,
+                (i, j) => i.UserId == j.UserId && i.Function == j.Function);
+            var (addKeywordThesis, delKeywordThesis) = item.KeywordThesis.SynchronizeDbSet(newKeywordThesis,
+                _db.KeywordThesis, (i, j) => i.KeywordId == j.KeywordId);
             var (_, _, a, b) = item.Teams.Synchronize(newTeams, (i, j) => i.Id == j.Id);
             item.Teams.AddRange(_db.Teams.Where(i => a.Select(j => j.Id).Contains(i.Id)).ToList());
             item.Teams.RemoveAll(i => b.Select(j => j.Id).Contains(i.Id));
@@ -234,7 +254,7 @@ public class ThesisController : Controller
             _db.Theses.Update(item);
         }
 
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(ct);
         return Ok(_mapper.Map<ThesisDto>(await _db.Theses.Query().FirstAsync(item.Id)));
     }
 }

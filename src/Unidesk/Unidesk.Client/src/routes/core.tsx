@@ -4,7 +4,7 @@ import { PathRouteProps } from "react-router-dom";
 export interface ExtraRouteProps extends PathRouteProps {
   title: EnKeys;
   visible?: boolean;
-  requiredGrants?: string[];
+  availableToGrants?: string[];
   path: string;
   allowAnonymous?: boolean;
 }

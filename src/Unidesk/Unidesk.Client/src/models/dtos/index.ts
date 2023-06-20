@@ -1,5 +1,6 @@
 import { DepartmentDto, FacultyDto, SchoolYearDto, ThesisOutcomeDto, ThesisTypeDto, StudyProgrammeDto } from "@api-client";
 import { GUID_EMPTY } from "@core/config";
+import { EditorProperty } from "models/EditorProperty";
 import { EditorPropertiesOf } from "models/typing";
 
 export const propertiesDepartmentDto: EditorPropertiesOf<DepartmentDto> = {
@@ -34,11 +35,13 @@ export const propertiesThesisOutcomeDto: EditorPropertiesOf<ThesisOutcomeDto> = 
   descriptionEng: { value: "", required: false },
 };
 
-export const propertiesSchoolYearDto: Partial<EditorPropertiesOf<SchoolYearDto>> = {
+type scProps = { id: EditorProperty, start: EditorProperty; end: EditorProperty; thesisDeadline: EditorProperty };
+export const propertiesSchoolYearDto: scProps = {
   id: { value: GUID_EMPTY, required: true, hidden: true },
 
   start: { value: "", required: true, type: "date" },
   end: { value: "", required: true, type: "date" },
+  thesisDeadline: { value: "", required: true, type: "date" },
 };
 
 export const propertiesThesisTypeDto: EditorPropertiesOf<ThesisTypeDto> = {

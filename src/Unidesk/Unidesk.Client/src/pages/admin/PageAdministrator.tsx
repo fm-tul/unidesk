@@ -71,7 +71,7 @@ export const PageAdministrator = () => {
           key="school-years"
           schema={propertiesSchoolYearDto as EditorPropertiesOf<SchoolYearDto>}
           getAll={() => httpClient.enums.schoolYearGetAll()}
-          upsertOne={i => httpClient.enums.schoolYearUpsert({ requestBody: i as SchoolYearDto })}
+          upsertOne={i => httpClient.enums.schoolYearUpsert({ requestBody: replaceEmptyStringWithNull(i) as SchoolYearDto })}
           deleteOne={id => httpClient.enums.schoolYearDelete({ id })}
           toKV={(i, j) => toKV(i, j, false)}
         />
@@ -155,53 +155,20 @@ export const PageAdministrator = () => {
           </Button>
         </div>
       </div>
-      {inMemoryEditorOpen && (
-        <Modal open={inMemoryEditorOpen} onClose={() => setInMemoryEditorOpen(false)} width="sm" fullWidth>
-          <InMemoryOptionsEditor onClose={() => setInMemoryEditorOpen(false)} />
-        </Modal>
-      )}
       {validEnum && <h1 className="text-xl">{R("admin-manage-x", validEnum.name)}</h1>}
       {validEnum && <>{validEnum.component}</>}
     </UnideskComponent>
   );
 };
 
-interface InMemoryOptionsEditorProps {
-  onClose: () => void;
+
+const replaceEmptyStringWithNull = (obj: any) => {
+  Object.keys(obj).forEach(key => {
+    if (obj[key] === "") {
+      obj[key] = null;
+    }
+  });
+  return obj;
 }
-
-export const InMemoryOptionsEditor = (props: InMemoryOptionsEditorProps) => {
-  const { onClose } = props;
-
-  const { language } = useContext(LanguageContext);
-  const { translate } = useTranslation(language);
-  const [dto, setDto] = useState<InMemoryOptions | undefined>(undefined);
-
-  const getQUery = useQuery({
-    queryKey: "inMemoryOptions",
-    queryFn: () => httpClient.settings.getInMemoryOptions(),
-    onSuccess: setDto,
-  });
-
-  const setQuery = useMutation((dto: InMemoryOptions) => httpClient.settings.setInMemoryOptions({ requestBody: dto! }), {
-    onSuccess: setDto,
-  });
-
-  return (
-    <div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>Disable Emails: </div>
-        <input type="checkbox" checked={dto?.disableEmails} onChange={e => setDto({ ...dto!, disableEmails: e.target.checked })} />
-
-        <ButtonGroup className="col-span-2 flex w-full justify-end" variant="text" size="sm">
-          <Button onClick={onClose} warning>
-            {R("close")}
-          </Button>
-          <Button onClick={() => setQuery.mutate(dto!)}>{translate("update")}</Button>
-        </ButtonGroup>
-      </div>
-    </div>
-  );
-};
 
 export default PageAdministrator;

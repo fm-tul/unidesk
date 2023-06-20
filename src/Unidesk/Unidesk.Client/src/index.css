@@ -13,6 +13,7 @@
 @import "./styles/textfields.css";
 @import "./styles/thesis-states.css";
 @import "./styles/modal.css";
+@import "./styles/collapse.css";
 
 @layer components {
   .disabled-style {

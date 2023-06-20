@@ -129,6 +129,7 @@ public class UnideskDbContext : DbContext
         // backing fields
         modelBuilder.Entity<SchoolYear>().Property(e => e._start);
         modelBuilder.Entity<SchoolYear>().Property(e => e._end);
+        modelBuilder.Entity<SchoolYear>().Property(e => e._thesisDeadline);
         modelBuilder.Entity<UserRole>().Property(e => e._grantsRaw);
 
         // UserInTeam basically handles m-n relation and we must specify the keys here

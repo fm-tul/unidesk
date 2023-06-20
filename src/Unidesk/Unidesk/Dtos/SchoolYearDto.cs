@@ -12,6 +12,8 @@ public class SchoolYearDto : TrackedEntityDto
     [Required]
     public DateOnly End { get; set; }
     
+    public DateOnly? ThesisDeadline { get; set; }
+    
     [Required]
     public string Name => $"{Start.Year:D2}/{End.Year:D2}";
     public static void ValidateAndThrow(SchoolYearDto item) => new SchoolYearDtoValidation().ValidateAndThrow(item);

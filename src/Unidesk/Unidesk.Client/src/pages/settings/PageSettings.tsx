@@ -1,9 +1,9 @@
-import { All as GrantsAll } from "@api-client/constants/Grants";
+import { Grants, All as GrantsAll } from "@api-client/constants/Grants";
 import { GUID_EMPTY } from "@core/config";
 import { httpClient } from "@core/init";
 import { EnKeys } from "@locales/all";
 import { LanguageContext } from "@locales/LanguageContext";
-import { RR } from "@locales/R";
+import { R, RR } from "@locales/R";
 import { UserRoleDto } from "@models/UserRoleDto";
 import { useContext, useState } from "react";
 import { MdAdd, MdCalendarToday } from "react-icons/md";
@@ -23,43 +23,68 @@ import { UnideskComponent } from "components/UnideskComponent";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { SelectField } from "ui/SelectField";
 import { ButtonGroup } from "components/FilterBar";
+import { SimpleEntityEditor } from "pages/admin/SimpleEntityEditor";
+import { DepartmentDto } from "@models/DepartmentDto";
+import {
+  propertiesDepartmentDto,
+  propertiesFacultyDto,
+  propertiesSchoolYearDto,
+  propertiesStudyProgrammeDto,
+  propertiesThesisOutcomeDto,
+  propertiesThesisTypeDto,
+} from "models/dtos";
+import { toKV, toKVWithCode } from "utils/transformUtils";
+import { FacultyDto } from "@models/FacultyDto";
+import { SchoolYearDto } from "@models/SchoolYearDto";
+import { EditorPropertiesOf } from "models/typing";
+import { ThesisOutcomeDto } from "@models/ThesisOutcomeDto";
+import { InMemoryOptions, StudyProgrammeDto, ThesisTypeDto } from "@api-client/index";
+import { ChangeTracker } from "pages/admin/ChangeTracker";
+import { UserContext } from "user/UserContext";
+import PageStagImport from "pages/stag-import/PageStagImport";
+import { useTranslation } from "@locales/translationHooks";
+import { InMemoryOptionsEditor } from "./InMemoryOptionsEditor";
 
 interface SettingsRoute {
   name: EnKeys;
   path: string;
-  component: React.FC;
+  component: React.FC | JSX.Element;
+  grant?: string;
 }
 
 export const PageSettings = () => {
   const { language } = useContext(LanguageContext);
   const translate = (value: EnKeys) => RR(value, language);
+  const { user: me } = useContext(UserContext);
 
   const { settingName: settingPath } = useParams();
-  const activeSetting = settingsRoutes.find(i => i.path === settingPath);
+  const activeSetting = settingPath !== undefined ? settingsRoutes.find(i => i.path.startsWith(settingPath)) : undefined;
 
   return (
     <UnideskComponent name="PageSettings">
-      <h1>Settings</h1>
-
-      <div className="flow">
+      <div className="flex flex-wrap items-stretch gap-1">
         {/* links */}
-        {settingsRoutes.map(i => (
-          <div key={i.name}>
-            <Button
-              className={classnames(settingPath === i.path && "selected")}
-              component={Link}
-              size={activeSetting ? "sm" : "md"}
-              outlined
-              to={link_settingsManageSettings.navigate(i.path)}
-            >
-              {translate(i.name)}
-            </Button>
-          </div>
-        ))}
+        {settingsRoutes
+          .filter(i => i.grant === undefined || me?.grantIds.some(j => j === i.grant))
+          .map(i => (
+            <div key={i.name}>
+              <Button
+                className={classnames(settingPath === i.path && "selected")}
+                component={Link}
+                size={activeSetting ? "sm" : "md"}
+                outlined
+                to={link_settingsManageSettings.navigate(i.path)}
+              >
+                {translate(i.name)}
+              </Button>
+            </div>
+          ))}
       </div>
 
       {/* active setting, if any */}
-      {activeSetting && <activeSetting.component />}
+      {activeSetting && (
+        <div className="m-4">{typeof activeSetting.component === "function" ? activeSetting.component({}) : activeSetting.component}</div>
+      )}
     </UnideskComponent>
   );
 };
@@ -105,7 +130,6 @@ const RolesAndGrants = () => {
       </div>
     );
   };
-
 
   return (
     <UnideskComponent name="RolesAndGrants">
@@ -178,7 +202,7 @@ const RolesAndGrants = () => {
             onValue={(description: string) => setItem({ ...item, description })}
           />
           <FormField
-            classNameField="min-w-[200px] max-w-md"
+            classNameField="min-w-[200px] grow mr-8"
             as={SelectField<string>}
             value={item.grants.map(i => i.id)}
             options={GrantsAll.map(i => i.id)}
@@ -207,7 +231,126 @@ const settingsRoutes: SettingsRoute[] = [
   {
     name: "settings.roles-and-grants",
     path: "roles-and-grants",
+    grant: Grants.Manage_UserRoles.id,
     component: RolesAndGrants,
   },
+  {
+    name: "settings.departments",
+    path: "departments",
+    grant: Grants.Manage_Departments.id,
+    component: (
+      <SimpleEntityEditor
+        key="departments"
+        schema={propertiesDepartmentDto}
+        getAll={() => httpClient.enums.departmentGetAll()}
+        upsertOne={i => httpClient.enums.departmentUpsert({ requestBody: i as DepartmentDto })}
+        deleteOne={id => httpClient.enums.departmentDelete({ id })}
+        toKV={toKVWithCode}
+      />
+    ),
+  },
+  {
+    name: "settings.faculties",
+    path: "faculties",
+    grant: Grants.Manage_Faculties.id,
+    component: (
+      <SimpleEntityEditor
+        key="faculties"
+        schema={propertiesFacultyDto}
+        getAll={() => httpClient.enums.facultyGetAll()}
+        upsertOne={i => httpClient.enums.facultyUpsert({ requestBody: i as FacultyDto })}
+        deleteOne={id => httpClient.enums.facultyDelete({ id })}
+        toKV={toKVWithCode}
+      />
+    ),
+  },
+  {
+    name: "settings.school-years",
+    path: "school-years",
+    grant: Grants.Manage_SchoolYears.id,
+    component: (
+      <SimpleEntityEditor
+        key="school-years"
+        schema={propertiesSchoolYearDto as EditorPropertiesOf<SchoolYearDto>}
+        getAll={() => httpClient.enums.schoolYearGetAll()}
+        upsertOne={i => httpClient.enums.schoolYearUpsert({ requestBody: replaceEmptyStringWithNull(i) as SchoolYearDto })}
+        deleteOne={id => httpClient.enums.schoolYearDelete({ id })}
+        toKV={(i, j) => toKV(i, j, false)}
+      />
+    ),
+  },
+  {
+    name: "settings.thesis-outcomes",
+    path: "thesis-outcomes",
+    grant: Grants.Manage_ThesisOutcomes.id,
+    component: (
+      <SimpleEntityEditor
+        key="thesis-outcomes"
+        schema={propertiesThesisOutcomeDto}
+        getAll={() => httpClient.enums.thesisOutcomeGetAll()}
+        upsertOne={i => httpClient.enums.thesisOutcomeUpsert({ requestBody: i as ThesisOutcomeDto })}
+        deleteOne={id => httpClient.enums.thesisOutcomeDelete({ id })}
+        toKV={toKV}
+      />
+    ),
+  },
+  {
+    name: "settings.thesis-types",
+    path: "thesis-types",
+    grant: Grants.Manage_ThesisTypes.id,
+    component: (
+      <SimpleEntityEditor
+        key="thesis-types"
+        schema={propertiesThesisTypeDto}
+        getAll={() => httpClient.enums.thesisTypeGetAll()}
+        upsertOne={i => httpClient.enums.thesisTypeUpsert({ requestBody: i as ThesisTypeDto })}
+        deleteOne={id => httpClient.enums.thesisTypeDelete({ id })}
+        toKV={toKV}
+      />
+    ),
+  },
+  {
+    name: "settings.study-programmes",
+    path: "study-programmes",
+    grant: Grants.Manage_StudyProgrammes.id,
+    component: (
+      <SimpleEntityEditor
+        key="study-programmes"
+        schema={propertiesStudyProgrammeDto}
+        getAll={() => httpClient.enums.studyProgrammeGetAll()}
+        upsertOne={i => httpClient.enums.studyProgrammeUpsert({ requestBody: i as StudyProgrammeDto })}
+        deleteOne={id => httpClient.enums.studyProgrammeDelete({ id })}
+        toKV={toKV}
+      />
+    ),
+  },
+  {
+    name: "settings.change-tracker",
+    path: "change-tracker",
+    grant: Grants.User_SuperAdmin.id,
+    component: <ChangeTracker />,
+  },
+  {
+    name: "stag-sync",
+    path: "stag-sync",
+    grant: Grants.User_SuperAdmin.id,
+    component: PageStagImport,
+  },
+  {
+    name: "settings.in-memory-options",
+    path: "in-memory-options",
+    grant: Grants.User_SuperAdmin.id,
+    component: <InMemoryOptionsEditor />,
+  },
 ];
+
+const replaceEmptyStringWithNull = (obj: any) => {
+  Object.keys(obj).forEach(key => {
+    if (obj[key] === "") {
+      obj[key] = null;
+    }
+  });
+  return obj;
+};
+
 export default PageSettings;

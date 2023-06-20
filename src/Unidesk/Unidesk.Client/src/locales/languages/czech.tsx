@@ -273,6 +273,15 @@ export const cs: ILocale = {
   //settings
   "link.settings": "Nastavení",
   "settings.roles-and-grants": "Role & Oprávnění",
+  "settings.departments": "Katedry",
+  "settings.faculties": "Fakulty",
+  "settings.school-years": "Semestrální období",
+  "settings.thesis-outcomes": "Výstupy práce",
+  "settings.thesis-types": "Typy prací",
+  "settings.study-programmes": "Studijní programy",
+  "settings.change-tracker": "Change Trackers",
+  "settings.in-memory-options": "In-Memory Options",
+
   "select-component.no-results-found": "Nebyly nalezeny žádné výsledky",
 
   // form

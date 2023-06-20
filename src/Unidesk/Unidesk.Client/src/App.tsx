@@ -125,9 +125,9 @@ export default App;
 
 function hasAccess(i: ExtraRouteProps, user: UserDto): boolean {
   const availToAll = i.allowAnonymous === true || user.id !== GUID_EMPTY;
-  if (!i.requiredGrants || i.requiredGrants.length == 0) {
+  if (!i.availableToGrants || i.availableToGrants.length == 0) {
     return availToAll;
   }
   const { grantIds } = user;
-  return i.requiredGrants.every(grant => grantIds?.includes(grant)) && availToAll;
+  return i.availableToGrants.some(grant => grantIds?.includes(grant)) && availToAll;
 }

@@ -1,0 +1,19 @@
+
+
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  transition: grid-template-rows 250ms;
+}
+.collapse-content {
+  min-height: 0;
+  transition: visibility 250ms;
+  visibility: hidden;
+}
+.collapse.expanded {
+  grid-template-rows: 1fr;
+}
+.collapse.expanded .collapse-content {
+  visibility: visible;
+}
