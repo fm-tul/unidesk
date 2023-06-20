@@ -69,7 +69,7 @@ export const PageAdministrator = () => {
       component: (
         <SimpleEntityEditor
           key="school-years"
-          schema={propertiesSchoolYearDto as EditorPropertiesOf<SchoolYearDto>}
+          schema={propertiesSchoolYearDto as any}
           getAll={() => httpClient.enums.schoolYearGetAll()}
           upsertOne={i => httpClient.enums.schoolYearUpsert({ requestBody: replaceEmptyStringWithNull(i) as SchoolYearDto })}
           deleteOne={id => httpClient.enums.schoolYearDelete({ id })}
