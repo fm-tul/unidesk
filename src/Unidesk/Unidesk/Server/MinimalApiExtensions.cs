@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Unidesk.Db.Models;
 using Unidesk.Dtos;
 using Unidesk.Security;

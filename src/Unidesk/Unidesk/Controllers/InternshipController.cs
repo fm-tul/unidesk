@@ -102,19 +102,21 @@ public class InternshipController : Controller
                 
                 // if you are not the owner
                 NotAllowedException.ThrowIf(existing.StudentId != _userProvider.CurrentUser.Id, "You are not allowed to create or edit internships for other students");
-                
-                // if the internship is not in draft or reopened
-                NotAllowedException.ThrowIf(existing.Status.NotIn(InternshipStatus.Draft, InternshipStatus.Reopened, InternshipStatus.Submitted), "You are not allowed to edit internships that are not in draft or reopened");
             }
         }
 
+        // at this point we are either a manager or the owner of the internship
         var item = await _internshipService.UpsertAsync(dto, ct, (item, modifiedProps) =>
         {
-            if (item.Status == InternshipStatus.Submitted)
+            if (isManager)
             {
-                var notAllowedPropsChanged = modifiedProps.Any(p => !InternshipDtoValidator.CanBeChangedWhenSubmittedProps.Contains(p));
-                NotAllowedException.ThrowIf(notAllowedPropsChanged, "You are not allowed to change some of the properties of this internship because it is already submitted");
+                return;
             }
+            
+            // until the internship is finished, you can only change some of the properties
+            var containsProtectedProps = modifiedProps.Any(p => !InternshipDtoValidator.CanBeChangedWhenSubmittedProps.Contains(p));
+            var isFinished = item.Status.In(InternshipStatus.Finished, InternshipStatus.Defended);
+            NotAllowedException.ThrowIf(containsProtectedProps && isFinished, "You are not allowed to change some of the properties of this internship because it is finished");
         });
         var result = _mapper.Map<InternshipDto>(item);
         return Ok(result);

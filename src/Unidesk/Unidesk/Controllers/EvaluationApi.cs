@@ -86,14 +86,11 @@ public static class EvaluationApi
                     Guid internshipId,
                     IFormFile file, CancellationToken ct)
                 => await service.UploadAuthorFileAsync(internshipId, evaluationId, file, ct))
-           .WithName("UploadAuthorFileInternship")
-           .RequireGrant(Grants.Action_ThesisEvaluation_Manage);
+           .WithName("UploadAuthorFileInternship");
 
         
         evaluationApi.MapGet("download/file-internship", async ([FromServices] EvaluationService service,
-                    Guid id, CancellationToken ct)
-                =>
-            {
+                    Guid id, CancellationToken ct) => {
                 var document = await service.DownloadEvaluationFileAsync(id, ct);
                 return Results.Bytes(document.DocumentContent.Content, document.ContentType, document.Name);
             })
@@ -105,7 +102,6 @@ public static class EvaluationApi
                     Guid id, CancellationToken ct)
                 => await service.RemoveFileAsync(id, ct))
            .WithName("RemoveFileInternship")
-           .RequireGrant(Grants.Action_ThesisEvaluation_Manage)
            .Produces<bool>();
         
         // handle file upload
@@ -140,7 +136,6 @@ public static class EvaluationApi
         evaluationApi.MapGet("invite-supervisor", async ([FromServices] EvaluationService service, Guid internshipId, Guid evaluationId, CancellationToken ct)
                 => await service.InviteSupervisorToInternshipAsync(internshipId, evaluationId, ct))
            .WithName("InviteSupervisorToInternship")
-           .RequireGrant(Grants.Action_ThesisEvaluation_Manage)
            .Produces<bool>();
 
         return evaluationApi;

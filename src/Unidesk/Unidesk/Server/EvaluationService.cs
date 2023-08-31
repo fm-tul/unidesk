@@ -54,7 +54,7 @@ public partial class EvaluationService
         _appOptions = appOptions;
     }
 
-    private async Task<Evaluation> GetWithPassword(Guid id, string pass, CancellationToken ct, IQueryable<Evaluation>? customQuery = null)
+    private async Task<Evaluation> GetWithPasswordOrThrow(Guid id, string pass, CancellationToken ct, IQueryable<Evaluation>? customQuery = null)
     {
         var item = await (customQuery ?? _db.Evaluations.Query().Include(i => i.Document.DocumentContent))
                       .FirstOrDefaultAsync(i => i.Id == id, ct)
@@ -96,7 +96,7 @@ public partial class EvaluationService
     {
         var item = string.IsNullOrEmpty(pass)
             ? await GetWithGrant(id, ct)
-            : await GetWithPassword(id, pass, ct);
+            : await GetWithPasswordOrThrow(id, pass, ct);
 
         return await GetOneAsync(item, ct);
     }
@@ -251,7 +251,7 @@ public partial class EvaluationService
         if (status == EvaluationStatus.Submitted)
         {
             var password = pass ?? throw new NotAllowedException("Passphrase is required");
-            var item = await GetWithPassword(id, password, ct);
+            var item = await GetWithPasswordOrThrow(id, password, ct);
 
             if (item.Status.In(EvaluationStatus.Accepted, EvaluationStatus.Draft, EvaluationStatus.Invited, EvaluationStatus.Reopened, EvaluationStatus.Submitted) && item.Format.IsNotNullOrEmpty())
             {
@@ -525,7 +525,7 @@ public partial class EvaluationService
 
     public async Task<OneOf<EvaluationDetailDto, Exception>> UpdateOne(EvaluationDetailDto dto, string pass, CancellationToken ct)
     {
-        var item = await GetWithPassword(dto.Id, pass, ct);
+        var item = await GetWithPasswordOrThrow(dto.Id, pass, ct);
 
         _mapper.Map(dto, item);
         if (!_db.ModifiedPropertiesFor(item)
@@ -552,7 +552,7 @@ public partial class EvaluationService
 
     public async Task RejectAsync(Guid id, string pass, string? reason, CancellationToken ct)
     {
-        var item = await GetWithPassword(id, pass, ct);
+        var item = await GetWithPasswordOrThrow(id, pass, ct);
         if (item.Status != EvaluationStatus.Invited)
         {
             throw new NotAllowedException("Cannot reject evaluation that is not in invited state");
@@ -566,14 +566,24 @@ public partial class EvaluationService
 
     public async Task UploadAuthorFileAsync(Guid internshipId, Guid evaluationId, IFormFile file, CancellationToken ct)
     {
-        var (isNew, evaluation) = await _db.Evaluations
-           .Include(i => i.Document.DocumentContent)
-           .GetOrCreateById(evaluationId, ct);
-
         var internship = await _db.Internships
                             .Query()
                             .FirstOrDefaultAsync(i => i.Id == internshipId, ct)
                       ?? throw new NotFoundException("Internship not found");
+        
+        var (isNew, evaluation) = await _db.Evaluations
+           .Include(i => i.Document.DocumentContent)
+           .GetOrCreateById(evaluationId, ct);
+
+        if (isNew)
+        {
+            var existing = internship.Evaluations.FirstOrDefault(i => i.UserFunction == UserFunction.Author);
+            if (existing != null)
+            {
+                evaluation = existing;
+                isNew = false;
+            }
+        }
 
         NotFoundException.ThrowIfNullOrEmpty(evaluation);
         NotAllowedException.ThrowIf(!CasAccess(internship), "You are not allowed to access this internship");
@@ -616,7 +626,7 @@ public partial class EvaluationService
     public async Task UploadSupervisorFileAsync(Guid internshipId, Guid evaluationId, string pass, IFormFile file, CancellationToken ct)
     {
         var query = _db.Evaluations.Query().Include(i => i.Document.DocumentContent);
-        var evaluation = await GetWithPassword(evaluationId, pass, ct, query);
+        var evaluation = await GetWithPasswordOrThrow(evaluationId, pass, ct, query);
 
         var internship = await _db.Internships
                             .Query()
@@ -624,7 +634,7 @@ public partial class EvaluationService
                       ?? throw new NotFoundException("Internship not found");
 
         NotFoundException.ThrowIfNullOrEmpty(evaluation);
-        NotAllowedException.ThrowIf(!CasAccess(internship), "You are not allowed to access this internship");
+        NotFoundException.ThrowIfNullOrEmpty(internship);
 
         if (evaluation.Document != null)
         {
@@ -659,7 +669,7 @@ public partial class EvaluationService
 
     public async Task<Document> DownloadSupervisorEvaluationFileAsync(Guid id, string pass, CancellationToken ct)
     {
-        var evaluation = await GetWithPassword(id, pass, ct);
+        var evaluation = await GetWithPasswordOrThrow(id, pass, ct);
         return evaluation.Document
             ?? throw new NotFoundException("Thesis evaluation document not found");
     }
@@ -667,6 +677,8 @@ public partial class EvaluationService
     public async Task<bool> RemoveFileAsync(Guid id, CancellationToken ct)
     {
         var evaluation = await GetOneOrThrowAsync(id, ct);
+        NotFoundException.ThrowIfNullOrEmpty(evaluation);
+        NotAllowedException.ThrowIf(!CasAccess(evaluation), "You are not allowed to access this evaluation");
 
         if (evaluation.Document != null)
         {
@@ -681,7 +693,7 @@ public partial class EvaluationService
 
     public async Task<bool> RemoveSupervisorFileAsync(Guid id, string pass, CancellationToken ct)
     {
-        var evaluation = await GetWithPassword(id, pass, ct);
+        var evaluation = await GetWithPasswordOrThrow(id, pass, ct);
 
         if (evaluation.Document != null)
         {
@@ -757,6 +769,7 @@ public partial class EvaluationService
         var currentUserId = _userProvider.CurrentUserId;
         return currentUserId == evaluation.CreatedByUserId
             || evaluation.EvaluatorId == currentUserId
+            || evaluation.Internship?.StudentId == currentUserId
             || _userProvider.HasSomeOfGrants(Grants.User_Admin, Grants.User_SuperAdmin, Grants.Internship_Manage);
     }
 
