@@ -397,6 +397,10 @@ export const cs: ILocale = {
   "internship.next-steps.wait-for-manager-to-approve": "Počkat, až správce schválí hodnocení stáže",
   "internship.next-steps.supervisor-contact-info-not-filled": "Kontaktní informace vedoucího nejsou vyplněny, prosím doplňte je.",
   "internship.next-steps.supervisor-invited": "Vedoucí byl pozván k vyhodnocení stáže. Až bude stáž vyhodnocena, budete informováni.",
+  "internship.next-steps.upload-supervisor-evaluation": "Ruční nahrání hodnocení vedoucího",
+
+  "internship.action.invite-supervisor": "Pozvat vedoucího",
+  "internship.action.upload.supervisor-evaluation": "Nahrát hodnocení vedoucího",
   
   "internship.supervisor-name": "Jméno vedoucího",
   "internship.supervisor-phone": "Telefon vedoucího",

@@ -21,13 +21,14 @@ interface ButtonProps extends ComplexComponentProps {
 
   withConfirmDialog?: boolean;
   confirmDialogOptions?: ConfirmDialogOptions;
+  type?: "button" | "submit" | "reset";
 }
 export const Button = (props: PropsWithChildren<ButtonProps> & HtmlHTMLAttributes<HTMLButtonElement>) => {
   if (props.if === false) {
     return null;
   }
 
-  const { loading, disabled, disableClass = "disabled", fullWidth = false, component, to, tabIndex, title, target } = props;
+  const { loading, disabled, disableClass = "disabled", fullWidth = false, component, to, tabIndex, title, target, type } = props;
   const { children, onClick, className: classNameOverride = "", style, justify = "justify-center" } = props;
   const { withConfirmDialog, confirmDialogOptions, onConfirmedClick } = props;
 
@@ -61,7 +62,7 @@ export const Button = (props: PropsWithChildren<ButtonProps> & HtmlHTMLAttribute
   }
 
   return (
-    <button className={className} onClick={handleClick} tabIndex={tabIndex} disabled={disabled} title={title} style={style}>
+    <button className={className} onClick={handleClick} tabIndex={tabIndex} disabled={disabled} title={title} style={style} type={type}>
       <div role={"button"} className={`relative inline-flex w-full items-center gap-1 ${justify}`}>
         {children}
         {loading && <span className="spinner2"></span>}

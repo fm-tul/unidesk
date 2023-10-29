@@ -1,8 +1,5 @@
-import { GUID_EMPTY } from "@core/config";
-import { httpClient } from "@core/init";
 import { LanguageContext } from "@locales/LanguageContext";
 import { useTranslation } from "@locales/translationHooks";
-import { UserFunction } from "@models/UserFunction";
 import { useContext, useEffect, useState } from "react";
 import { FileUploader } from "react-drag-drop-files";
 import { FaFileExcel, FaFilePdf, FaFileWord, FaTimes } from "react-icons/fa";
@@ -124,6 +121,7 @@ const maxSizeWithUnit = (maxSizeMb: number) => {
 export default FileInput;
 
 interface FileControlProps {
+  className?: string;
   hideUpload?: boolean;
   hideDownload?: boolean;
   hideRemove?: boolean;
@@ -148,7 +146,7 @@ interface FileControlProps {
   maxSize?: number;
 }
 export const FileControl = (props: FileControlProps) => {
-  const { hideUpload, hideDownload, hideRemove, hideClear, file, hasServerFile=false, label } = props;
+  const { hideUpload, hideDownload, hideRemove, hideClear, file, hasServerFile=false, label, className } = props;
   const { onDownload, onUpload, onRemove, onChange, onClear } = props;
   const { pdf, types, maxSize } = props;
   const { uploadLoading, removeLoading, downloadLoading } = props;
@@ -158,7 +156,7 @@ export const FileControl = (props: FileControlProps) => {
   const somethingLoading = uploadLoading || removeLoading || downloadLoading;
 
   return (
-    <div>
+    <div className={className}>
       <FileInput label={label} onChange={onChange} file={file} pdf={pdf} types={types} maxSize={maxSize} />
       <ButtonGroup variant="text" size="sm">
         {/* download file from server */}

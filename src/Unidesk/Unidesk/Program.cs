@@ -280,5 +280,5 @@ app.MapControllerRoute(
     pattern: "{controller}/{action=Index}/{id?}");
 
 app.MapFallbackToFile("index.html");
-
+// app.GenerateShibbo("username@tul.cz");
 app.Run();

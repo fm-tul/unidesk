@@ -114,6 +114,14 @@ public static class EvaluationApi
            .WithName("UploadSupervisorFileInternship")
            .AllowAnonymous();
         
+        evaluationApi.MapPost("upload-supervisor-file-internship-grant", async ([FromServices] EvaluationService service,
+                    Guid evaluationId,
+                    Guid internshipId,
+                    IFormFile file, CancellationToken ct)
+                => await service.UploadSupervisorFileAsyncWithGrant(internshipId, evaluationId, file, ct))
+           .WithName("UploadSupervisorFileInternshipUsingGrant")
+           .RequireGrant(Grants.Internship_Manage);
+        
         evaluationApi.MapGet("download/file-internship-supervisor", async ([FromServices] EvaluationService service,
                     Guid id, string pass, CancellationToken ct)
                 =>

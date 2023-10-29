@@ -400,6 +400,10 @@ export const en = {
   "internship.next-steps.wait-for-manager-to-approve": "Wait for manager to approve evaluation of internship",
   "internship.next-steps.supervisor-contact-info-not-filled": "Supervisor contact information is not filled. Please fill it in the form below.",
   "internship.next-steps.supervisor-invited": "Supervisor was invited to evaluate internship. You will be notified when it is done.",
+  "internship.next-steps.upload-supervisor-evaluation": "Manually upload supervisor evaluation",
+
+  "internship.action.invite-supervisor": "Invite supervisor",
+  "internship.action.upload.supervisor-evaluation": "Upload supervisor evaluation",
 
   "internship.supervisor-name": "Supervisor Name",
   "internship.supervisor-phone": "Supervisor Phone",

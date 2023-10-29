@@ -388,7 +388,7 @@ public partial class EvaluationService
     private async Task ChangeStatusToSubmittedAsync(Evaluation item, string pass, CancellationToken ct)
     {
         item.Status = EvaluationStatus.Submitted;
-        
+
         // we have already attached the pdf, so no need generate it
         if (item.Document == null)
         {
@@ -570,7 +570,7 @@ public partial class EvaluationService
                             .Query()
                             .FirstOrDefaultAsync(i => i.Id == internshipId, ct)
                       ?? throw new NotFoundException("Internship not found");
-        
+
         var (isNew, evaluation) = await _db.Evaluations
            .Include(i => i.Document.DocumentContent)
            .GetOrCreateById(evaluationId, ct);
@@ -623,9 +623,51 @@ public partial class EvaluationService
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task UploadSupervisorFileAsyncWithGrant(Guid internshipId, Guid evaluationId, IFormFile file, CancellationToken ct)
+    {
+        var (isNew, evaluation) = await _db.Evaluations
+           .Include(i => i.Document!.DocumentContent)
+           .GetOrCreateById(evaluationId, ct);
+
+        var internship = await _db.Internships
+                            .Query()
+                            .FirstOrDefaultAsync(i => i.Id == internshipId, ct)
+                      ?? throw new NotFoundException("Internship not found");
+
+        NotFoundException.ThrowIfNullOrEmpty(evaluation);
+
+        if (isNew)
+        {
+            evaluation.CreatedByUserId = _userProvider.CurrentUserId;
+            evaluation.UserFunction = UserFunction.Supervisor;
+            evaluation.Status = EvaluationStatus.Submitted;
+            evaluation.InternshipId = internshipId;
+            evaluation.Email = internship.SupervisorEmail.ValidEmailOrDefault()
+                            ?? throw new NotAllowedException("Please set supervisor email address in internship first");
+            evaluation.EvaluatorFullName = internship.SupervisorName.Value()
+                                        ?? throw new NotAllowedException("Please set supervisor name in internship first");
+            await _db.Evaluations.AddAsync(evaluation, ct);
+        }
+
+        if (evaluation.Document != null)
+        {
+            // replace Content
+            _documentService.UpdateDocument(evaluation.Document, file);
+        }
+        else
+        {
+            // create new document
+            evaluation.Document = _documentService.CreateDocument(file);
+            evaluation.DocumentId = evaluation.Document.Id;
+            await _db.Documents.AddAsync(evaluation.Document, ct);
+        }
+
+        await _db.SaveChangesAsync(ct);
+    }
+
     public async Task UploadSupervisorFileAsync(Guid internshipId, Guid evaluationId, string pass, IFormFile file, CancellationToken ct)
     {
-        var query = _db.Evaluations.Query().Include(i => i.Document.DocumentContent);
+        var query = _db.Evaluations.Query().Include(i => i.Document!.DocumentContent);
         var evaluation = await GetWithPasswordOrThrow(evaluationId, pass, ct, query);
 
         var internship = await _db.Internships
@@ -752,12 +794,12 @@ public partial class EvaluationService
     }
 
 
-    private async Task<Evaluation> GetOneOrThrowAsync(Guid id, CancellationToken ct)
+    private async Task<Evaluation> GetOneOrThrowAsync(Guid evaluationId, CancellationToken ct)
     {
         var evaluation = await _db.Evaluations
                             .Query()
                             .Include(i => i.Document.DocumentContent)
-                            .FirstOrDefaultAsync(i => i.Id == id, ct)
+                            .FirstOrDefaultAsync(i => i.Id == evaluationId, ct)
                       ?? throw new NotFoundException("Thesis evaluation not found");
 
         NotAllowedException.ThrowIf(!CasAccess(evaluation), "You are not allowed to access this evaluation");
