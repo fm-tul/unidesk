@@ -7,6 +7,7 @@ export const cs: ILocale = {
   language: "Čeština",
 
   // common
+  "common.unchanged": "Nezměněno",
   "common.upload": "Upload",
   "common.download": "Download",
   "common.clear": "Smazat",
@@ -198,6 +199,11 @@ export const cs: ILocale = {
   "admin-manage-x": ((x: string) => `Spravovat ${x}`) as any,
   proceed: "Pokračovat",
 
+  "bulk-edit": "Hromadná úprava",
+  "bulk-edit.turn-on": "Zapnout hromadnou úpravu",
+  "bulk-edit.turn-off": "Vypnout hromadnou úpravu",
+  "bulk-edit.select-all": "Vybrat vše",
+
   // paging
   "page-of": "z",
 
@@ -387,6 +393,10 @@ export const cs: ILocale = {
   "internship.section.contact": "Kontaktní informace",
   "internship.section.job-description": "Popis práce",
   "internship.section.files-to-download": "Soubory ke stažení",
+
+  "internship.filter.show-archived": "Zobrazit archivované",
+  "internship.is-archived": "Archivováno",
+
   "internship.download-evaluation-author": "Stáhnout závěrečnou zprávu",
   "internship.download-evaluation-supervisor": "Stáhnout hodnocení od vedoucího stáže",
 

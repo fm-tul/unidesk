@@ -12,10 +12,9 @@ import { SelectField } from "ui/SelectField";
 
 export interface InternshipFilterBarProps {
   filterModel: [InternshipFilter, React.Dispatch<React.SetStateAction<InternshipFilter>>];
-  pageModel: PagingModel;
 }
 export const InternshipFilterBar = (props: InternshipFilterBarProps) => {
-  const { filterModel, pageModel } = props;
+  const { filterModel } = props;
   const [filter, setFilter] = filterModel;
   const {language} = useContext(LanguageContext);
   const { translateVal, translate } = useTranslation(language);
@@ -23,6 +22,7 @@ export const InternshipFilterBar = (props: InternshipFilterBarProps) => {
 
   return (
     <FilterBar>
+      {/* school year */}
       <FormField
         as={SelectField<string|undefined>}
         size="sm"
@@ -35,6 +35,7 @@ export const InternshipFilterBar = (props: InternshipFilterBarProps) => {
         searchable
       />
 
+      {/* status */}
       <FormField
         as={SelectField<InternshipStatus>}
         size="sm"
@@ -46,6 +47,21 @@ export const InternshipFilterBar = (props: InternshipFilterBarProps) => {
         clearable
         searchable
       />
+
+      {/* show archived */}
+      <FormField
+        as={SelectField<boolean|undefined>}
+        size="sm"
+        label={translate("internship.filter.show-archived")}
+        options={[true, false]}
+        value={filter.showArchived ?? undefined}
+        getTitle={i => translate(i ? "yes" : "no")}
+        onValue={i => setFilter({ ...filter, showArchived: i[0] })}
+        clearable
+        searchable
+        width="w-full min-w-[220px]"
+      />
+
     </FilterBar>
   );
 };

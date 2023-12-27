@@ -59,6 +59,7 @@ public static class EntityQueryExtensions
     public static IQueryable<Internship> Query(this DbSet<Internship> dbSet)
     {
         return dbSet
+           .Include(i => i.SchoolYear)
            .Include(i => i.Notifications)
            .Include(i => i.Student)
            .Include(i => i.KeywordInternship)

@@ -17,18 +17,24 @@ public class Internship : TrackedEntity
     [Required]
     public User Student  { get; set; }
     
+    [Required]
+    public bool IsArchived { get; set; }
+    
+    public Guid? SchoolYearId { get; set; }
+    public SchoolYear? SchoolYear { get; set; }
+    
 
     // where
     [Required]
-    public string InternshipTitle { get; set; }
+    public string InternshipTitle { get; set; } = null!;
 
     [Required]
-    public string CompanyName { get; set; }
+    public string CompanyName { get; set; } = null!;
 
     public string Department { get; set; } = string.Empty;
 
     [Required]
-    public string Location { get; set; }
+    public string Location { get; set; } = null!;
     
     
     // when
@@ -47,21 +53,21 @@ public class Internship : TrackedEntity
     
     // under who
     [Required]
-    public string SupervisorName { get; set; }
+    public string SupervisorName { get; set; } = null!;
 
     [Required]
-    public string SupervisorPhone { get; set; }
+    public string SupervisorPhone { get; set; } = null!;
 
     [Required]
     [DataType(DataType.EmailAddress)]
-    public string SupervisorEmail { get; set; }
+    public string SupervisorEmail { get; set; } = null!;
 
     
     // what should be done
-    public string Requirements { get; set; }
-    public string Abstract { get; set; }
-    public string Comments { get; set; } 
-    public string Note { get; set; }
+    public string Requirements { get; set; } = null!;
+    public string Abstract { get; set; } = null!;
+    public string Comments { get; set; }  = null!;
+    public string Note { get; set; } = null!;
 
     /// <summary>
     /// List of keywords for the internship (both English and Czech)

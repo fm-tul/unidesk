@@ -1,6 +1,7 @@
 ﻿using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using Unidesk.Db;
 using Unidesk.Db.Models.Internships;
@@ -163,5 +164,18 @@ public class InternshipController : Controller
         return Ok(result);
     }
     
+    [HttpPut, Route("bulk-edit")]
+    [SwaggerOperation(OperationId = nameof(BulkEdit))]
+    [ProducesResponseType(typeof(SimpleJsonResponse), 200)]
+    [RequireGrant(Grants.Internship_Manage)]
+    public async Task<IActionResult> BulkEdit([FromBody] BulkEditInternshipsDto dto, CancellationToken ct)
+    {
+        await _internshipService.BulkEditAsync(dto, ct);
+        return Ok(new SimpleJsonResponse
+        {
+            Success = true,
+            Message = "Internships updated",
+        });
+    }
 
 }

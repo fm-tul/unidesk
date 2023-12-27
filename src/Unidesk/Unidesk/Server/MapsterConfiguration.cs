@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Mapster;
+﻿using Mapster;
 using Unidesk.Db.Models;
 using Unidesk.Db.Models.Internships;
 using Unidesk.Dtos;
@@ -30,7 +29,7 @@ public static class MapsterConfiguration
            .MapWith(src => new DateTime(1, 1, 1, src.Hour, src.Minute, src.Second));
 
         config.ForType<Document, DocumentDto>()
-          .Map(dto => dto.DocumentContent, src => src.DocumentContent.Content);
+           .Map(dto => dto.DocumentContent, src => src.DocumentContent.Content);
 
         // map only these 4 properties
         // config.ForType<UserInTeamDto, UserInTeam>()
@@ -54,8 +53,8 @@ public static class MapsterConfiguration
            .Map(i => i.Teams, i => i.UserInTeams);
 
         config.ForType<Thesis, ThesisDto>()
-          .Map(dto => dto.Literature, type => StringListParser.Parse(type.Literature))
-          .Map(dto => dto.Guidelines, type => StringListParser.Parse(type.Guidelines));
+           .Map(dto => dto.Literature, type => StringListParser.Parse(type.Literature))
+           .Map(dto => dto.Guidelines, type => StringListParser.Parse(type.Guidelines));
 
         config.ForType<Thesis, ThesisLookupDto>()
             // ReSharper disable once InvokeAsExtensionMethod
@@ -89,21 +88,24 @@ public static class MapsterConfiguration
         config.ForType<EvaluationDetailDto, Evaluation>()
            .Ignore(i => i.Evaluator)
            .Ignore(i => i.Thesis);
-        
+
         config.ForType<Team, TeamDto>()
-          .Map(i => i.Users, i => i.UserInTeams);
+           .Map(i => i.Users, i => i.UserInTeams);
 
         config.ForType<TeamDto, Team>()
-          .Ignore(i => i.Users)
-          .Ignore(i => i.UserInTeams)
-          .Ignore(i => i.ProfileImage)
-          .Ignore(i => i.ProfileImageId);
+           .Ignore(i => i.Users)
+           .Ignore(i => i.UserInTeams)
+           .Ignore(i => i.ProfileImage)
+           .Ignore(i => i.ProfileImageId);
 
 
         config.ForType<InternshipDto, Internship>()
-          .Ignore(i => i.KeywordInternship)
-          .Ignore(i => i.Evaluations)
-          .Ignore(i => i.Student);
+           .Ignore(i => i.KeywordInternship)
+           .Ignore(i => i.Evaluations)
+           .Ignore(i => i.Student);
+
+        config.ForType<Internship, InternshipDto>()
+           .AfterMapping((src, dest) => dest.SchoolYear = src.SchoolYear?.Name);
 
         return config;
     }

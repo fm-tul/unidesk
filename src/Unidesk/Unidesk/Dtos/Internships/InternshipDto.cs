@@ -20,6 +20,12 @@ public class InternshipDto : TrackedEntityDto
     public string CompanyName { get; set; }
 
     public string? Department { get; set; } = string.Empty;
+    
+    [Required]
+    public bool IsArchived { get; set; }
+    public Guid? SchoolYearId { get; set; }
+    public string? SchoolYear { get; set; }
+    
 
     [Required]
     public string Location { get; set; }

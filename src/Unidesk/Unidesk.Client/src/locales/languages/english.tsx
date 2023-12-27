@@ -5,6 +5,7 @@ export const en = {
   language: "English",
 
   // common
+  "common.unchanged": "Unchanged",
   "common.upload": "Upload",
   "common.download": "Download",
   "common.clear": "Clear",
@@ -199,6 +200,11 @@ export const en = {
   "admin-manage-x": (x: string) => `Manage ${x}`,
   proceed: "Proceed",
 
+  "bulk-edit": "Bulk edit",
+  "bulk-edit.turn-on": "Turn on bulk edit",
+  "bulk-edit.turn-off": "Turn off bulk edit",
+  "bulk-edit.select-all": "Select all",
+
   // paging
   "page-of": "of",
 
@@ -392,6 +398,9 @@ export const en = {
   "internship.section.job-description": "Job Description",
   "internship.section.next-steps": "What needs to be done next?",
   "internship.section.files-to-download": "Files to download",
+
+  "internship.filter.show-archived": "Show archived",
+  "internship.is-archived": "Is archived",
 
   "internship.next-steps.wait-until-internship-ends": "Wait until internship ends",
   "internship.next-steps.upload-final-report": "Upload final report of internship in PDF format",

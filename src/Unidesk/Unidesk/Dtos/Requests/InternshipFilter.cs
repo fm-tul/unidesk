@@ -8,6 +8,7 @@ public class InternshipFilter : IFilter
     public Guid? StudentId { get; set; }
     public List<Guid> Keywords { get; set; } = new();
     public Operator Operator { get; set; }
+    public bool? ShowArchived { get; set; }
     
     public InternshipStatus? Status { get; set; }
     public Guid? SchoolYearId { get; set; }

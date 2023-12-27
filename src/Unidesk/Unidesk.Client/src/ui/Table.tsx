@@ -19,6 +19,7 @@ export interface ColumnDefinition<TValue> {
   sortFunc?: (a: TValue, b: TValue) => number;
   sortable?: boolean;
   visible?: boolean;
+  onHeaderClick?: () => void;
 }
 
 export type TableProps<TValue> = HTMLAttributes<HTMLDivElement> & {
@@ -84,6 +85,10 @@ export const Table = <TValue,>(props: TableProps<TValue>) => {
 
   const [sortColumn, setSortColumn] = useState<SortBy<TValue>>();
   const handleHeaderClick = (column: ColumnDefinition<TValue>) => {
+    if (column.onHeaderClick) {
+      column.onHeaderClick();
+    }
+    
     if (clientSort) {
       if (column.sortable === false) {
         return;

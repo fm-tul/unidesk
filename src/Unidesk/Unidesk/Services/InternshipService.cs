@@ -55,14 +55,13 @@ public class InternshipService
         
         query = query.WhereIf(filter.StudentId.HasValue, i => i.StudentId == filter.StudentId);
         query = query.WhereIf(filter.Status.HasValue, i => i.Status == filter.Status!.Value);
-        if (filter.SchoolYearId.HasValue)
+        if (filter.ShowArchived.HasValue)
         {
-            var schoolYear = _db.SchoolYears.FirstOrDefault(i => i.Id == filter.SchoolYearId);
-            if (schoolYear != null)
-            {
-                query = query.Where(i => i.StartDate >= schoolYear._start && i.StartDate <= schoolYear._end);
-            }
+            query = query.WhereIf(filter.ShowArchived == true, i => i.IsArchived);
+            query = query.WhereIf(filter.ShowArchived == false, i => !i.IsArchived);
         }
+        
+        query = query.WhereIf(filter.SchoolYearId.HasValue, i => i.SchoolYearId == filter.SchoolYearId);
         
         return query;
     }
@@ -76,6 +75,10 @@ public class InternshipService
 
         if (isNew)
         {
+            // find school year
+            var schoolYear = await _db.SchoolYears
+               .FirstOrDefaultAsync(i => i._start <= item.StartDate && i._end >= item.EndDate, ct);
+            item.SchoolYearId = schoolYear?.Id;
             _db.Internships.Add(item);
         }
 
@@ -373,5 +376,28 @@ public class InternshipService
                 await _db.SaveChangesAsync(ct);
             }
         }
+    }
+
+    public async Task BulkEditAsync(BulkEditInternshipsDto dto, CancellationToken ct)
+    {
+        var internships = await _db.Internships
+           .Query()
+           .Where(i => dto.InternshipIds.Contains(i.Id))
+           .ToListAsync(ct);
+
+        foreach (var internship in internships)
+        {
+            if (dto.IsArchived.HasValue)
+            {
+                internship.IsArchived = dto.IsArchived.Value;
+            }
+
+            if (dto.SchoolYearId.HasValue)
+            {
+                internship.SchoolYearId = dto.SchoolYearId.Value;
+            }
+        }
+
+        await _db.SaveChangesAsync(ct);
     }
 }
